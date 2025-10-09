@@ -1,0 +1,3 @@
+*.w3x !text !filter !merge !diff
+*.w3m !text !filter !merge !diff
+*.SC2Map !text !filter !merge !diff
