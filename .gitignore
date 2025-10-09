@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Production
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Assets (copyrighted content)
+temp-assets/
+extracted-assets/
+*.mpq
+*.w3x
+*.w3m
+*.SC2Map
+*.scm
+*.scx
+
+# Build artifacts
+*.map
+*.d.ts.map
+
+# OS files
+Thumbs.db
+
+# Test files
+test-maps/
+test-output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Local configuration
+*.local.md
+.claude/settings.local.json

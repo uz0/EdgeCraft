@@ -1,0 +1,218 @@
+{
+  "format": "edgecraft",
+  "version": "1.0.0",
+  "metadata": {
+    "name": "Edge Craft Launcher (Development Mock)",
+    "description": "Simplified launcher for local development. Production uses https://github.com/uz0/index.edgecraft",
+    "author": "Edge Craft Team",
+    "type": "launcher",
+    "autoLoad": true,
+    "repository": "https://github.com/uz0/index.edgecraft",
+    "created": "2024-01-01T00:00:00Z",
+    "modified": "2024-01-01T00:00:00Z"
+  },
+  "settings": {
+    "renderMode": "2d",
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "theme": "dark",
+    "music": true,
+    "sound": true
+  },
+  "scenes": [
+    {
+      "id": "main-menu",
+      "type": "ui",
+      "default": true,
+      "components": [
+        {
+          "type": "background",
+          "asset": "assets/backgrounds/main-menu.jpg"
+        },
+        {
+          "type": "logo",
+          "position": { "x": 0.5, "y": 0.2 },
+          "scale": 2.0,
+          "asset": "assets/logo/edgecraft.png"
+        },
+        {
+          "type": "menu",
+          "position": { "x": 0.5, "y": 0.6 },
+          "items": [
+            {
+              "id": "singleplayer",
+              "label": "Single Player",
+              "action": "loadScene:map-browser",
+              "enabled": true
+            },
+            {
+              "id": "multiplayer",
+              "label": "Multiplayer",
+              "action": "connectServer:core-edge",
+              "enabled": true,
+              "note": "Requires core-edge server"
+            },
+            {
+              "id": "map-editor",
+              "label": "Map Editor",
+              "action": "loadScene:editor",
+              "enabled": true
+            },
+            {
+              "id": "settings",
+              "label": "Settings",
+              "action": "loadScene:settings",
+              "enabled": true
+            },
+            {
+              "id": "about",
+              "label": "About",
+              "action": "showModal:about",
+              "enabled": true
+            },
+            {
+              "id": "exit",
+              "label": "Exit",
+              "action": "quit",
+              "enabled": true
+            }
+          ]
+        },
+        {
+          "type": "footer",
+          "position": { "x": 0.5, "y": 0.95 },
+          "content": "Mock Launcher v1.0.0 | Full launcher: github.com/uz0/index.edgecraft"
+        }
+      ]
+    },
+    {
+      "id": "map-browser",
+      "type": "ui",
+      "components": [
+        {
+          "type": "title",
+          "text": "Select Map"
+        },
+        {
+          "type": "map-list",
+          "maps": [
+            {
+              "name": "Tutorial Island",
+              "description": "Learn the basics",
+              "thumbnail": "assets/maps/tutorial.jpg",
+              "path": "maps/tutorial.edgemap"
+            },
+            {
+              "name": "Lost Temple",
+              "description": "Classic 4-player map",
+              "thumbnail": "assets/maps/lost-temple.jpg",
+              "path": "maps/lost-temple.edgemap"
+            },
+            {
+              "name": "Divide & Conquer",
+              "description": "2v2 team battle",
+              "thumbnail": "assets/maps/divide-conquer.jpg",
+              "path": "maps/divide-conquer.edgemap"
+            }
+          ]
+        },
+        {
+          "type": "button",
+          "label": "Back",
+          "action": "loadScene:main-menu"
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "type": "ui",
+      "components": [
+        {
+          "type": "title",
+          "text": "Settings"
+        },
+        {
+          "type": "settings-panel",
+          "categories": [
+            {
+              "name": "Graphics",
+              "options": [
+                {
+                  "type": "dropdown",
+                  "label": "Quality",
+                  "options": ["Low", "Medium", "High", "Ultra"],
+                  "default": "High"
+                },
+                {
+                  "type": "slider",
+                  "label": "Render Scale",
+                  "min": 50,
+                  "max": 200,
+                  "default": 100
+                }
+              ]
+            },
+            {
+              "name": "Audio",
+              "options": [
+                {
+                  "type": "slider",
+                  "label": "Master Volume",
+                  "min": 0,
+                  "max": 100,
+                  "default": 80
+                },
+                {
+                  "type": "slider",
+                  "label": "Music Volume",
+                  "min": 0,
+                  "max": 100,
+                  "default": 60
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "button",
+          "label": "Apply",
+          "action": "applySettings"
+        },
+        {
+          "type": "button",
+          "label": "Back",
+          "action": "loadScene:main-menu"
+        }
+      ]
+    }
+  ],
+  "scripts": [
+    {
+      "path": "scripts/launcher.ts",
+      "type": "module"
+    }
+  ],
+  "assets": {
+    "preload": [
+      "assets/logo/edgecraft.png",
+      "assets/backgrounds/main-menu.jpg"
+    ],
+    "lazy": [
+      "assets/maps/*.jpg",
+      "assets/sounds/*.ogg"
+    ]
+  },
+  "networking": {
+    "server": {
+      "development": "http://localhost:2567",
+      "production": "wss://core-edge.edgecraft.game"
+    },
+    "repository": "https://github.com/uz0/core-edge"
+  },
+  "external": {
+    "fullLauncher": "https://github.com/uz0/index.edgecraft",
+    "server": "https://github.com/uz0/core-edge"
+  }
+}
