@@ -139,7 +139,7 @@ export class EdgeStoryConverter {
     // Convert doodads with asset replacement
     const doodads: EdgeDoodad[] = rawMap.doodads.map((doodad) => {
       const sourceFormat =
-        rawMap.format === 'w3m' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
+        rawMap.format === 'w3m' || rawMap.format === 'w3n' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
       const mapping = this.assetMapper.mapDoodadType(doodad.typeId, sourceFormat);
 
       return {
@@ -182,7 +182,7 @@ export class EdgeStoryConverter {
    */
   private convertGameplay(rawMap: RawMapData): EdgeGameplay {
     const sourceFormat =
-      rawMap.format === 'w3m' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
+      rawMap.format === 'w3m' || rawMap.format === 'w3n' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
     const units: EdgeUnit[] = rawMap.units.map((unit) => {
       // Map unit type to legal alternative
       const mapping = this.assetMapper.mapUnitType(unit.typeId, sourceFormat);
