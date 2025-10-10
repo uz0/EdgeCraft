@@ -69,7 +69,9 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .content section:hover {
@@ -83,13 +85,15 @@
   font-size: 1.3rem;
 }
 
-.content ul, .content ol {
+.content ul,
+.content ol {
   list-style-position: inside;
   line-height: 1.8;
   color: var(--text-secondary);
 }
 
-.content ul li, .content ol li {
+.content ul li,
+.content ol li {
   margin-bottom: 0.5rem;
 }
 

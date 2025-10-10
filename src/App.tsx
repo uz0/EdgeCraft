@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { logExternalStatus, getLauncherPath, getMultiplayerEndpoint, LAUNCHER_CONFIG } from './config/external';
+import {
+  logExternalStatus,
+  getLauncherPath,
+  getMultiplayerEndpoint,
+  LAUNCHER_CONFIG,
+} from './config/external';
 import './App.css';
 
 const App: React.FC = () => {
@@ -7,7 +12,7 @@ const App: React.FC = () => {
   const [launcherStatus, setLauncherStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [externalDeps, setExternalDeps] = useState({
     launcher: '',
-    multiplayer: ''
+    multiplayer: '',
   });
 
   useEffect(() => {
@@ -18,7 +23,7 @@ const App: React.FC = () => {
     logExternalStatus();
 
     // Load launcher (REQUIREMENT: Always loads /maps/index.edgecraft)
-    const initializeLauncher = async () => {
+    const initializeLauncher = async (): Promise<void> => {
       try {
         console.log(`🚀 Loading default launcher: ${LAUNCHER_CONFIG.DEFAULT_MAP}`);
 
@@ -27,11 +32,11 @@ const App: React.FC = () => {
 
         setExternalDeps({
           launcher: launcherPath,
-          multiplayer: multiplayerEndpoint
+          multiplayer: multiplayerEndpoint,
         });
 
         // Simulate launcher loading
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
 
         console.log(`✅ Launcher loaded from: ${launcherPath}`);
         setLauncherStatus('loaded');
@@ -43,7 +48,7 @@ const App: React.FC = () => {
       }
     };
 
-    initializeLauncher();
+    void initializeLauncher();
 
     return () => {
       console.log('Edge Craft cleanup');
@@ -74,17 +79,29 @@ const App: React.FC = () => {
                     {launcherStatus === 'loaded' ? '✅ Loaded' : '⚠️ Mock'}
                   </p>
                   <code>{externalDeps.launcher || 'Loading...'}</code>
-                  <a href="https://github.com/uz0/index.edgecraft" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://github.com/uz0/index.edgecraft"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     → Full Launcher Repo
                   </a>
                 </div>
                 <div className="dep-item">
                   <h3>Multiplayer Server</h3>
-                  <p className={externalDeps.multiplayer.includes('localhost') ? 'status-warn' : 'status-ok'}>
+                  <p
+                    className={
+                      externalDeps.multiplayer.includes('localhost') ? 'status-warn' : 'status-ok'
+                    }
+                  >
                     {externalDeps.multiplayer.includes('localhost') ? '⚠️ Mock' : '✅ Production'}
                   </p>
                   <code>{externalDeps.multiplayer || 'Loading...'}</code>
-                  <a href="https://github.com/uz0/core-edge" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://github.com/uz0/core-edge"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     → Core-Edge Server
                   </a>
                 </div>
@@ -104,7 +121,9 @@ const App: React.FC = () => {
 
             <section className="phase-info">
               <h2>Current Phase</h2>
-              <p><strong>Phase 0:</strong> Project Bootstrap</p>
+              <p>
+                <strong>Phase 0:</strong> Project Bootstrap
+              </p>
               <p>Setting up development environment and tooling</p>
             </section>
 
@@ -124,7 +143,11 @@ const App: React.FC = () => {
       <footer className="app-footer">
         <p>Edge Craft © 2024 - Clean-room implementation</p>
         <p>
-          <a href="https://github.com/your-org/edge-craft" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://github.com/your-org/edge-craft"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             GitHub
           </a>
           {' | '}
