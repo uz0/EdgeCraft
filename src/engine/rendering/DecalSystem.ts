@@ -278,7 +278,7 @@ export class DecalSystem {
   public update(): void {
     const now = Date.now();
 
-    for (const [_decalId, decal] of this.decals.entries()) {
+    for (const decal of this.decals.values()) {
       // Check if decal has expired
       if (decal.lifetime > 0 && now - decal.createdAt > decal.lifetime) {
         if (!decal.isFading) {
