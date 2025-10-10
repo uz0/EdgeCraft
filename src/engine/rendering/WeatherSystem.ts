@@ -103,7 +103,7 @@ export class WeatherSystem {
   /**
    * Set weather immediately
    */
-  public async setWeather(config: WeatherConfig): Promise<void> {
+  public setWeather(config: WeatherConfig): void {
     console.log(`Setting weather to: ${config.type} (intensity: ${config.intensity ?? 1.0})`);
 
     // Clear current weather
@@ -153,7 +153,7 @@ export class WeatherSystem {
     await this.fadeOutCurrentWeather(durationMs / 2);
 
     // Set new weather
-    await this.setWeather(config);
+    this.setWeather(config);
 
     // Fade in new weather
     await this.fadeInWeather(durationMs / 2);
@@ -281,7 +281,7 @@ export class WeatherSystem {
   /**
    * Apply storm weather (rain + fog)
    */
-  private async applyStormWeather(config: WeatherConfig): Promise<void> {
+  private applyStormWeather(config: WeatherConfig): void {
     const intensity = config.intensity ?? 1.0;
 
     // Heavy rain
