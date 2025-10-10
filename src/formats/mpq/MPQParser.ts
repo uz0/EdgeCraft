@@ -37,8 +37,9 @@ export class MPQParser {
   private archive?: MPQArchive;
   private lzmaDecompressor: LZMADecompressor;
 
-  // MPQ Magic number
-  private static readonly MPQ_MAGIC = 0x1a51504d; // 'MPQ\x1A' in little-endian
+  // MPQ Magic numbers
+  private static readonly MPQ_MAGIC_V1 = 0x1a51504d; // 'MPQ\x1A' in little-endian
+  private static readonly MPQ_MAGIC_V2 = 0x1b51504d; // 'MPQ\x1B' in little-endian (SC2)
 
   constructor(buffer: ArrayBuffer) {
     this.buffer = buffer;
@@ -90,9 +91,9 @@ export class MPQParser {
    * Read MPQ header
    */
   private readHeader(): MPQHeader | null {
-    // Check magic number
+    // Check magic number (support both v1 and v2)
     const magic = this.view.getUint32(0, true);
-    if (magic !== MPQParser.MPQ_MAGIC) {
+    if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
       return null;
     }
 
