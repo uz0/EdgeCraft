@@ -158,11 +158,14 @@ export class UnitInstanceManager {
    */
   private updateInstanceBuffer(index: number, instance: UnitInstance): void {
     // Build transform matrix
-    const scale = instance.scale ?? 1;
+    const scale = typeof instance.scale === 'number' ? instance.scale : 1;
+    const scaleVec = new BABYLON.Vector3(scale, scale, scale);
+    const rotation = instance.rotation ?? 0;
+    const position = instance.position ?? BABYLON.Vector3.Zero();
     const matrix = BABYLON.Matrix.Compose(
-      new BABYLON.Vector3(scale, scale, scale),
-      BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Up(), instance.rotation),
-      instance.position
+      scaleVec,
+      BABYLON.Quaternion.RotationAxis(BABYLON.Vector3.Up(), rotation),
+      position
     );
 
     // Write matrix to buffer (16 floats)
@@ -171,16 +174,17 @@ export class UnitInstanceManager {
 
     // Write team color to buffer (4 floats: RGBA)
     const colorOffset = index * 4;
-    this.colorBuffer[colorOffset] = instance.teamColor.r;
-    this.colorBuffer[colorOffset + 1] = instance.teamColor.g;
-    this.colorBuffer[colorOffset + 2] = instance.teamColor.b;
+    const teamColor = instance.teamColor ?? BABYLON.Color3.White();
+    this.colorBuffer[colorOffset] = teamColor.r;
+    this.colorBuffer[colorOffset + 1] = teamColor.g;
+    this.colorBuffer[colorOffset + 2] = teamColor.b;
     this.colorBuffer[colorOffset + 3] = 1.0; // alpha
 
     // Write animation data
     const animOffset = index * 4;
-    const animIndex = this.getAnimationIndex(instance.animationState);
+    const animIndex = this.getAnimationIndex(instance.animationState ?? 'idle');
     this.animBuffer[animOffset] = animIndex;
-    this.animBuffer[animOffset + 1] = instance.animationTime;
+    this.animBuffer[animOffset + 1] = instance.animationTime ?? 0;
     this.animBuffer[animOffset + 2] = 0.0; // blend weight (for future use)
     this.animBuffer[animOffset + 3] = 0.0; // reserved
   }
@@ -341,7 +345,7 @@ export class UnitInstanceManager {
 
     for (let i = 0; i < this.instances.length; i++) {
       const instance = this.instances[i];
-      if (!instance) {
+      if (!instance || !instance.position) {
         continue;
       }
 

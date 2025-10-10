@@ -4,6 +4,7 @@
 
 import * as BABYLON from '@babylonjs/core';
 import { CascadedShadowSystem } from '@/engine/rendering/CascadedShadowSystem';
+import { ShadowPriority } from '@/engine/rendering/types';
 
 // Mock CascadedShadowGenerator for NullEngine
 jest.mock('@babylonjs/core', () => {
@@ -99,7 +100,7 @@ describe('CascadedShadowSystem', () => {
       const csm = new CascadedShadowSystem(scene);
       const mesh = BABYLON.MeshBuilder.CreateBox('test', {}, scene);
 
-      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, 'high');
+      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, ShadowPriority.HIGH);
       expect(csm.getShadowCasterCount()).toBe(1);
 
       csm.dispose();
@@ -109,7 +110,7 @@ describe('CascadedShadowSystem', () => {
       const csm = new CascadedShadowSystem(scene);
       const mesh = BABYLON.MeshBuilder.CreateBox('test', {}, scene);
 
-      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, 'medium');
+      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, ShadowPriority.MEDIUM);
       expect(csm.getShadowCasterCount()).toBe(0);
 
       csm.dispose();
@@ -119,7 +120,7 @@ describe('CascadedShadowSystem', () => {
       const csm = new CascadedShadowSystem(scene);
       const mesh = BABYLON.MeshBuilder.CreateBox('test', {}, scene);
 
-      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, 'high');
+      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, ShadowPriority.HIGH);
       expect(csm.getShadowCasterCount()).toBe(1);
 
       csm.removeShadowCaster(mesh as BABYLON.AbstractMesh);
@@ -134,9 +135,9 @@ describe('CascadedShadowSystem', () => {
       const mesh2 = BABYLON.MeshBuilder.CreateBox('test2', {}, scene);
       const mesh3 = BABYLON.MeshBuilder.CreateBox('test3', {}, scene);
 
-      csm.addShadowCaster(mesh1 as BABYLON.AbstractMesh, 'high');
-      csm.addShadowCaster(mesh2 as BABYLON.AbstractMesh, 'high');
-      csm.addShadowCaster(mesh3 as BABYLON.AbstractMesh, 'high');
+      csm.addShadowCaster(mesh1 as BABYLON.AbstractMesh, ShadowPriority.HIGH);
+      csm.addShadowCaster(mesh2 as BABYLON.AbstractMesh, ShadowPriority.HIGH);
+      csm.addShadowCaster(mesh3 as BABYLON.AbstractMesh, ShadowPriority.HIGH);
 
       expect(csm.getShadowCasterCount()).toBe(3);
 
@@ -258,7 +259,7 @@ describe('CascadedShadowSystem', () => {
       const csm = new CascadedShadowSystem(scene);
       const mesh = BABYLON.MeshBuilder.CreateBox('test', {}, scene);
 
-      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, 'high');
+      csm.addShadowCaster(mesh as BABYLON.AbstractMesh, ShadowPriority.HIGH);
       expect(csm.getShadowCasterCount()).toBe(1);
 
       csm.dispose();

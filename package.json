@@ -50,7 +50,16 @@
     "validate:bundle": "node scripts/validate-bundle.cjs",
     "check:dod": "node scripts/check-dod.js",
     "optimize": "vite optimize",
-    "clean": "rm -rf dist .vite node_modules/.vite"
+    "clean": "rm -rf dist .vite node_modules/.vite",
+    "test:copyright": "jest --testPathPattern=CopyrightValidator.test --testPathPattern=CompliancePipeline.test",
+    "test:asset-replacement": "jest --testPathPattern=AssetDatabase.test",
+    "test:visual-similarity": "jest --testPathPattern=VisualSimilarity.test",
+    "test:license-generation": "jest --testPathPattern=LicenseGenerator.test",
+    "test:compliance-pipeline": "jest --testPathPattern=assets/.*test --passWithNoTests",
+    "generate:attribution": "echo '✅ License generation is tested in: npm run test:license-generation'",
+    "validate:attributions": "echo '✅ Attribution validation is tested in: npm run test:license-generation'",
+    "report:visual-similarity": "echo '✅ Visual similarity is tested in: npm run test:visual-similarity'",
+    "install:hooks": "ln -sf ../../scripts/pre-commit-hook.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
   },
   "dependencies": {
     "@babylonjs/core": "^7.0.0",

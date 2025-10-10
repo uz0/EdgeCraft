@@ -28,6 +28,8 @@ export class UnitPool {
       initialSize: config.initialSize ?? 100,
       maxSize: config.maxSize ?? 0, // 0 = unlimited
       autoGrow: config.autoGrow ?? true,
+      autoExpand: config.autoExpand ?? true,
+      shrinkInterval: config.shrinkInterval ?? 60000,
     };
 
     // Pre-allocate initial pool
