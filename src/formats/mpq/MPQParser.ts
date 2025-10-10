@@ -20,6 +20,7 @@ import type {
   MPQStreamOptions,
 } from './types';
 import { StreamingFileReader } from '../../utils/StreamingFileReader';
+import { LZMADecompressor, CompressionAlgorithm } from '../compression';
 
 /**
  * MPQ Archive parser
@@ -37,6 +38,7 @@ export class MPQParser {
   private buffer: ArrayBuffer;
   private view: DataView;
   private archive?: MPQArchive;
+  private lzmaDecompressor: LZMADecompressor;
 
   // MPQ Magic numbers
   private static readonly MPQ_MAGIC_V1 = 0x1a51504d; // 'MPQ\x1A' in little-endian
@@ -45,6 +47,7 @@ export class MPQParser {
   constructor(buffer: ArrayBuffer) {
     this.buffer = buffer;
     this.view = new DataView(buffer);
+    this.lzmaDecompressor = new LZMADecompressor();
   }
 
   /**
@@ -265,9 +268,10 @@ export class MPQParser {
   /**
    * Extract file from archive
    *
-   * Note: Basic implementation - only supports uncompressed files for now
+   * Supports both compressed (LZMA) and uncompressed files.
+   * Note: Encrypted files are not yet supported.
    */
-  public extractFile(filename: string): MPQFile | null {
+  public async extractFile(filename: string): Promise<MPQFile | null> {
     if (!this.archive) {
       throw new Error('Archive not parsed. Call parse() first.');
     }
@@ -294,16 +298,42 @@ export class MPQParser {
     const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
     const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
 
-    // For now, only support uncompressed, unencrypted files
-    if (isCompressed || isEncrypted) {
-      throw new Error('Compressed and encrypted files not yet supported. Coming in Phase 2.');
+    // Encryption not yet supported
+    if (isEncrypted) {
+      throw new Error('Encrypted files not yet supported.');
     }
 
-    // Read file data
-    const fileData = this.buffer.slice(
+    // Read compressed or uncompressed file data
+    const rawData = this.buffer.slice(
       blockEntry.filePos,
-      blockEntry.filePos + blockEntry.uncompressedSize
+      blockEntry.filePos + blockEntry.compressedSize
     );
+
+    let fileData: ArrayBuffer;
+
+    if (isCompressed) {
+      // Detect compression algorithm from first byte
+      const compressionAlgorithm = this.detectCompressionAlgorithm(rawData);
+
+      if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
+        // Skip first byte (compression type indicator) and decompress
+        const compressedData = rawData.slice(1);
+        fileData = await this.lzmaDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+      } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
+        // No compression indicator, use raw data
+        fileData = rawData;
+      } else {
+        throw new Error(
+          `Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`
+        );
+      }
+    } else {
+      // Uncompressed file
+      fileData = rawData;
+    }
 
     const file: MPQFile = {
       name: filename,
@@ -318,6 +348,35 @@ export class MPQParser {
     this.archive.files.set(filename, file);
 
     return file;
+  }
+
+  /**
+   * Detect compression algorithm from compressed data
+   *
+   * In MPQ archives, the first byte of compressed data indicates
+   * the compression algorithm used.
+   */
+  private detectCompressionAlgorithm(data: ArrayBuffer): CompressionAlgorithm {
+    if (data.byteLength === 0) {
+      return CompressionAlgorithm.NONE;
+    }
+
+    const view = new DataView(data);
+    const firstByte = view.getUint8(0) as CompressionAlgorithm;
+
+    // Check for known compression algorithms
+    if (firstByte === CompressionAlgorithm.LZMA) {
+      return CompressionAlgorithm.LZMA;
+    } else if (firstByte === CompressionAlgorithm.PKZIP) {
+      return CompressionAlgorithm.PKZIP;
+    } else if (firstByte === CompressionAlgorithm.ZLIB) {
+      return CompressionAlgorithm.ZLIB;
+    } else if (firstByte === CompressionAlgorithm.BZIP2) {
+      return CompressionAlgorithm.BZIP2;
+    }
+
+    // Unknown or no compression indicator
+    return CompressionAlgorithm.NONE;
   }
 
   /**

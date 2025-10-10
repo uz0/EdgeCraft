@@ -43,10 +43,10 @@ export class W3XMapLoader implements IMapLoader {
     }
 
     // Extract war3map files
-    const w3iData = mpqParser.extractFile('war3map.w3i');
-    const w3eData = mpqParser.extractFile('war3map.w3e');
-    const dooData = mpqParser.extractFile('war3map.doo');
-    const unitsData = mpqParser.extractFile('war3mapUnits.doo');
+    const w3iData = await mpqParser.extractFile('war3map.w3i');
+    const w3eData = await mpqParser.extractFile('war3map.w3e');
+    const dooData = await mpqParser.extractFile('war3map.doo');
+    const unitsData = await mpqParser.extractFile('war3mapUnits.doo');
 
     if (!w3iData) {
       throw new Error('war3map.w3i not found in archive');
