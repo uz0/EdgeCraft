@@ -108,6 +108,11 @@ export class CopyrightValidator {
    * Compute SHA-256 hash of buffer
    */
   private async computeHash(buffer: ArrayBuffer): Promise<string> {
+    // Handle empty buffers - return empty hash
+    if (buffer.byteLength === 0) {
+      return 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'; // SHA-256 of empty string
+    }
+
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
