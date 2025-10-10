@@ -71,3 +71,61 @@ export interface TerrainLoadResult {
   };
   error?: string;
 }
+
+/**
+ * Terrain texture layer for multi-texture splatting
+ */
+export interface TerrainTextureLayer {
+  /** Diffuse texture URL */
+  diffuseTexture: string;
+  /** Normal map URL (optional) */
+  normalTexture?: string;
+  /** Tiling/scale factor for texture */
+  scale: number;
+}
+
+/**
+ * Advanced terrain options for multi-texture rendering
+ */
+export interface AdvancedTerrainOptions {
+  /** Width of terrain in world units */
+  width: number;
+  /** Height of terrain in world units */
+  height: number;
+  /** Size of each terrain chunk (default: 64) */
+  chunkSize?: number;
+  /** Array of texture layers (up to 4) */
+  textureLayers: TerrainTextureLayer[];
+  /** Splatmap URL for texture blending */
+  splatmap: string;
+  /** Heightmap URL */
+  heightmap: string;
+  /** Minimum terrain height */
+  minHeight?: number;
+  /** Maximum terrain height */
+  maxHeight?: number;
+}
+
+/**
+ * LOD configuration for terrain chunks
+ */
+export interface TerrainLODConfig {
+  /** LOD levels with subdivision counts */
+  levels: number[];
+  /** Distance thresholds for LOD switching */
+  distances: number[];
+}
+
+/**
+ * Terrain chunk bounds
+ */
+export interface ChunkBounds {
+  /** Minimum X coordinate */
+  minX: number;
+  /** Maximum X coordinate */
+  maxX: number;
+  /** Minimum Z coordinate */
+  minZ: number;
+  /** Maximum Z coordinate */
+  maxZ: number;
+}
