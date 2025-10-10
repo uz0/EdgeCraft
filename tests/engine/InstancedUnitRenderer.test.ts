@@ -4,6 +4,8 @@
  * Tests for GPU instancing and animation system
  */
 
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+
 import * as BABYLON from '@babylonjs/core';
 import { InstancedUnitRenderer } from '@/engine/rendering/InstancedUnitRenderer';
 

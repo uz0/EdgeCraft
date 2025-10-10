@@ -54,7 +54,11 @@ export class UnitAnimationController {
     const adjustedDeltaTime = deltaTime * this.state.speed;
 
     // Handle animation blending
-    if (this.state.targetAnimation) {
+    if (
+      this.state.targetAnimation !== undefined &&
+      this.state.targetAnimation !== null &&
+      this.state.targetAnimation !== ''
+    ) {
       this.updateBlending(adjustedDeltaTime);
       return;
     }
@@ -64,7 +68,7 @@ export class UnitAnimationController {
 
     // Apply animation-specific speed multiplier
     const clip = this.animationSystem.getAnimationClip(this.state.currentAnimation);
-    if (clip?.speed) {
+    if (clip !== undefined && clip.speed !== undefined && clip.speed !== null && clip.speed !== 0) {
       this.state.currentTime = this.animationSystem.applyAnimationSpeed(
         this.state.currentAnimation,
         this.state.currentTime
@@ -98,7 +102,12 @@ export class UnitAnimationController {
    * @param deltaTime - Time elapsed since last update
    */
   private updateBlending(deltaTime: number): void {
-    if (!this.state.targetAnimation || this.state.blendProgress === undefined) {
+    if (
+      this.state.targetAnimation === undefined ||
+      this.state.targetAnimation === null ||
+      this.state.targetAnimation === '' ||
+      this.state.blendProgress === undefined
+    ) {
       return;
     }
 
@@ -301,7 +310,12 @@ export class UnitAnimationController {
    * @param animation - Animation to reset to (default: current)
    */
   reset(animation?: string): void {
-    if (animation && this.animationSystem.hasAnimation(animation)) {
+    if (
+      animation !== undefined &&
+      animation !== null &&
+      animation !== '' &&
+      this.animationSystem.hasAnimation(animation)
+    ) {
       this.state.currentAnimation = animation;
     }
     this.state.currentTime = 0;

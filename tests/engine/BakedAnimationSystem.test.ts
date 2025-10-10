@@ -4,6 +4,8 @@
  * Tests for GPU-based baked animation system
  */
 
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+
 import * as BABYLON from '@babylonjs/core';
 import { BakedAnimationSystem } from '@/engine/rendering/BakedAnimationSystem';
 import { AnimationClip } from '@/engine/rendering/types';

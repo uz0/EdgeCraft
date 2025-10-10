@@ -77,7 +77,7 @@ export class InstancedUnitRenderer {
     // Load mesh
     const result = await BABYLON.SceneLoader.ImportMeshAsync('', meshUrl, '', this.scene);
 
-    if (!result.meshes || result.meshes.length === 0) {
+    if (result.meshes === undefined || result.meshes === null || result.meshes.length === 0) {
       throw new Error(`Failed to load mesh from ${meshUrl}`);
     }
 
@@ -251,7 +251,11 @@ export class InstancedUnitRenderer {
     }
 
     const animSystem = this.animationSystems.get(ref.unitType);
-    if (!animSystem?.hasAnimation(animationName)) {
+    if (
+      animSystem === undefined ||
+      animSystem === null ||
+      !animSystem.hasAnimation(animationName)
+    ) {
       console.warn(`Animation not found: ${animationName} for ${ref.unitType}`);
       return;
     }
@@ -311,7 +315,12 @@ export class InstancedUnitRenderer {
     const radiusSquared = radius * radius;
 
     for (const [unitId, ref] of this.unitReferences) {
-      if (unitType && ref.unitType !== unitType) {
+      if (
+        unitType !== undefined &&
+        unitType !== null &&
+        unitType !== '' &&
+        ref.unitType !== unitType
+      ) {
         continue;
       }
 
@@ -337,7 +346,7 @@ export class InstancedUnitRenderer {
       // Update all unit animations
       for (const [unitType, manager] of this.unitManagers) {
         const animSystem = this.animationSystems.get(unitType);
-        if (!animSystem) {
+        if (animSystem === undefined || animSystem === null) {
           continue;
         }
 

@@ -229,7 +229,7 @@ export class BakedAnimationSystem {
    */
   applyAnimationSpeed(animationName: string, time: number): number {
     const clip = this.animationClips.get(animationName);
-    if (!clip || !clip.speed) {
+    if (clip === undefined || clip.speed === undefined || clip.speed === null || clip.speed === 0) {
       return time;
     }
     return time * clip.speed;

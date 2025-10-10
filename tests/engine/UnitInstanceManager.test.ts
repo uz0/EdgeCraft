@@ -4,6 +4,8 @@
  * Tests for thin instance management system
  */
 
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+
 import * as BABYLON from '@babylonjs/core';
 import { UnitInstanceManager } from '@/engine/rendering/UnitInstanceManager';
 import { UnitInstance } from '@/engine/rendering/types';
