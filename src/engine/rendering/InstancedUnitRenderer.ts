@@ -51,6 +51,10 @@ export class InstancedUnitRenderer {
       enablePicking: config.enablePicking ?? false,
       lodDistances: config.lodDistances ?? [50, 100, 200],
       freezeActiveMeshes: config.freezeActiveMeshes ?? false,
+      enableInstancing: config.enableInstancing ?? true,
+      maxInstancesPerBuffer: config.maxInstancesPerBuffer ?? 1000,
+      enableFrustumCulling: config.enableFrustumCulling ?? true,
+      enableOcclusionCulling: config.enableOcclusionCulling ?? false,
     };
 
     this.setupRenderLoop();
