@@ -38,10 +38,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Assets (copyrighted content)
+# Assets (copyrighted content - temporary extraction only)
 temp-assets/
 extracted-assets/
-maps/
+# Maps are verified legal files - committed to repo
 # *.mpq
 # *.w3x
 # *.w3m

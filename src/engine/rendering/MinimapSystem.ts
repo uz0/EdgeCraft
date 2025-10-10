@@ -78,6 +78,7 @@ export class MinimapSystem {
   private updateFPS: number;
   private renderTarget: BABYLON.RenderTargetTexture | null = null;
   private minimapCamera: BABYLON.FreeCamera | null = null;
+  private isEnabled: boolean = false;
   private mapBounds: {
     minX: number;
     maxX: number;

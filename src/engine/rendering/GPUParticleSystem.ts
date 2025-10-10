@@ -186,8 +186,8 @@ export class AdvancedParticleSystem {
 
     // Create particle system
     const system = this.useGPU
-      ? await this.createGPUSystem(config)
-      : await this.createCPUSystem(config);
+      ? this.createGPUSystem(config)
+      : this.createCPUSystem(config);
 
     if (system == null) {
       return '';
@@ -213,9 +213,9 @@ export class AdvancedParticleSystem {
   /**
    * Create GPU particle system
    */
-  private async createGPUSystem(
+  private createGPUSystem(
     config: ParticleEffectConfig
-  ): Promise<BABYLON.GPUParticleSystem | null> {
+  ): BABYLON.GPUParticleSystem | null {
     const capacity = Math.min(config.capacity ?? 1000, this.maxParticles);
 
     const system = new BABYLON.GPUParticleSystem(`gpu_${config.type}`, { capacity }, this.scene);
@@ -229,15 +229,15 @@ export class AdvancedParticleSystem {
   /**
    * Create CPU particle system (fallback)
    */
-  private async createCPUSystem(
+  private createCPUSystem(
     config: ParticleEffectConfig
-  ): Promise<BABYLON.ParticleSystem | null> {
+  ): BABYLON.ParticleSystem | null {
     const capacity = Math.min(config.capacity ?? 1000, this.maxParticles);
 
     const system = new BABYLON.ParticleSystem(`cpu_${config.type}`, capacity, this.scene);
 
     // Apply configuration
-    await this.configureSystem(system, config);
+    this.configureSystem(system, config);
 
     return system;
   }
