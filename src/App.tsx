@@ -82,6 +82,9 @@ const App: React.FC = () => {
             <li>✅ Babylon.js 7.0 rendering engine</li>
             <li>✅ RTS-style camera with WASD + edge scrolling</li>
             <li>✅ Heightmap terrain rendering (flat terrain demo)</li>
+            <li>✅ Cascaded Shadow Maps (CSM) for professional shadows</li>
+            <li>✅ Blob shadows for performance-efficient units</li>
+            <li>✅ Shadow quality presets (LOW/MEDIUM/HIGH/ULTRA)</li>
             <li>✅ MPQ archive parser (basic implementation)</li>
             <li>✅ Asset management and caching</li>
             <li>✅ glTF model loader</li>
@@ -95,7 +98,16 @@ const App: React.FC = () => {
           <p>
             <strong>Phase 1:</strong> Babylon.js Foundation
           </p>
-          <p>Core rendering engine, terrain system, and RTS camera controls</p>
+          <p>Core rendering engine, terrain system, RTS camera controls, and professional shadow system</p>
+          <h3 style={{ marginTop: '1rem' }}>Shadow Demo</h3>
+          <ul>
+            <li>🔴 Red boxes = Heroes (4) - CSM shadows</li>
+            <li>⚫ Gray boxes = Buildings (3) - CSM shadows</li>
+            <li>🔵 Blue boxes = Units (20) - Blob shadows</li>
+          </ul>
+          <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
+            Check console for shadow system statistics
+          </p>
         </section>
       </main>
 
