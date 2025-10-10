@@ -140,8 +140,7 @@ export class QualityPresetManager {
   private decals: DecalSystem | null = null;
   private minimap: MinimapSystem | null = null;
 
-  // Auto-adjustment
-  private enableAutoAdjust: boolean = false;
+  // Auto-adjustment (reserved for future implementation)
   private targetFPS: number = 60;
   private fpsSamples: number[] = [];
   private lastAdjustmentTime: number = 0;
@@ -173,7 +172,9 @@ export class QualityPresetManager {
       this.currentQuality = this.determineInitialQuality();
     }
 
-    console.log(`Initial quality: ${this.currentQuality} (${this.hardwareTier} hardware, ${this.browser} browser)`);
+    console.log(
+      `Initial quality: ${this.currentQuality} (${this.hardwareTier} hardware, ${this.browser} browser)`
+    );
 
     // Initialize all systems
     await this.initializeSystems();
@@ -192,7 +193,9 @@ export class QualityPresetManager {
    * Detect hardware tier
    */
   private detectHardware(): void {
-    const gl = this.engine.getRenderingCanvas()?.getContext('webgl2') as WebGL2RenderingContext | null;
+    const gl = this.engine
+      .getRenderingCanvas()
+      ?.getContext('webgl2') as WebGL2RenderingContext | null;
 
     if (gl == null) {
       this.hardwareTier = HardwareTier.LOW;
@@ -433,12 +436,45 @@ export class QualityPresetManager {
    * Get comprehensive statistics
    */
   public getStats(): SystemStats {
-    const postProcessingStats = this.postProcessing?.getStats() ?? { estimatedFrameTimeMs: 0, activeEffects: 0, memoryUsageMB: 0 };
-    const lightingStats = this.lighting?.getStats() ?? { estimatedFrameTimeMs: 0, activeLights: 0, pointLightsActive: 0, spotLightsActive: 0, shadowCasters: 0, totalLights: 0 };
-    const particleStats = this.particles?.getStats() ?? { estimatedFrameTimeMs: 0, activeEffects: 0, totalParticles: 0, gpuEffects: 0, cpuEffects: 0 };
-    const weatherStats = this.weather?.getStats() ?? { estimatedFrameTimeMs: 0, currentWeather: 'clear' as const, intensity: 0, particleEffectId: null, fogEnabled: false };
-    const decalStats = this.decals?.getStats() ?? { estimatedFrameTimeMs: 0, totalDecals: 0, activeDecals: 0, fadingDecals: 0 };
-    const minimapStats = this.minimap?.getStats() ?? { estimatedFrameTimeMs: 0, rttSize: 0, updateFPS: 0, memoryUsageMB: 0 };
+    const postProcessingStats = this.postProcessing?.getStats() ?? {
+      estimatedFrameTimeMs: 0,
+      activeEffects: 0,
+      memoryUsageMB: 0,
+    };
+    const lightingStats = this.lighting?.getStats() ?? {
+      estimatedFrameTimeMs: 0,
+      activeLights: 0,
+      pointLightsActive: 0,
+      spotLightsActive: 0,
+      shadowCasters: 0,
+      totalLights: 0,
+    };
+    const particleStats = this.particles?.getStats() ?? {
+      estimatedFrameTimeMs: 0,
+      activeEffects: 0,
+      totalParticles: 0,
+      gpuEffects: 0,
+      cpuEffects: 0,
+    };
+    const weatherStats = this.weather?.getStats() ?? {
+      estimatedFrameTimeMs: 0,
+      currentWeather: 'clear' as const,
+      intensity: 0,
+      particleEffectId: null,
+      fogEnabled: false,
+    };
+    const decalStats = this.decals?.getStats() ?? {
+      estimatedFrameTimeMs: 0,
+      totalDecals: 0,
+      activeDecals: 0,
+      fadingDecals: 0,
+    };
+    const minimapStats = this.minimap?.getStats() ?? {
+      estimatedFrameTimeMs: 0,
+      rttSize: 0,
+      updateFPS: 0,
+      memoryUsageMB: 0,
+    };
 
     const totalFrameTimeMs =
       postProcessingStats.estimatedFrameTimeMs +
