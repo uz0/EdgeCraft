@@ -175,19 +175,7 @@ export class VisualSimilarity {
    * Create ImageData object (polyfill for Node.js environment)
    */
   private createImageData(width: number, height: number): ImageData {
-    // Try to use native ImageData if available (browser)
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const ImageDataConstructor = (globalThis as any).ImageData;
-      if (ImageDataConstructor !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-        return new ImageDataConstructor(width, height);
-      }
-    } catch {
-      // Fall through to polyfill
-    }
-
-    // Polyfill for Node.js environment
+    // Create data buffer first
     const size = width * height * 4;
     const data = new Uint8ClampedArray(size);
 
@@ -199,6 +187,20 @@ export class VisualSimilarity {
       data[i + 3] = 255; // A (opaque)
     }
 
+    // Try to use native ImageData if available (browser)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const ImageDataConstructor = (globalThis as any).ImageData;
+      if (ImageDataConstructor !== undefined) {
+        // In Node.js environment, ImageData requires data buffer first
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+        return new ImageDataConstructor(data, width, height);
+      }
+    } catch {
+      // Fall through to polyfill
+    }
+
+    // Polyfill for Node.js environment
     return {
       width,
       height,
