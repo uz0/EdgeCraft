@@ -172,7 +172,7 @@ export interface EdgeWater {
   color: RGBA;
   shader?: {
     type: 'standard' | 'realistic';
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
   };
 }
 
@@ -185,7 +185,7 @@ export interface EdgeDoodad {
   position: Vector3;
   rotation: number;
   scale: Vector3;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 /**
@@ -216,7 +216,7 @@ export interface EdgeUnit {
 
   // Properties
   customName?: string;
-  customProperties?: Record<string, any>;
+  customProperties?: Record<string, unknown>;
 }
 
 /**
@@ -257,7 +257,7 @@ export interface EdgeTrigger {
  */
 export interface EdgeTriggerCondition {
   type: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   negate?: boolean;
 }
 
@@ -266,6 +266,6 @@ export interface EdgeTriggerCondition {
  */
 export interface EdgeTriggerAction {
   type: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   delay?: number;
 }

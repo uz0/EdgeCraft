@@ -277,7 +277,17 @@ export class AssetMapper {
     url?: string;
     notes?: string;
   }> {
-    const sources = new Map<string, any>();
+    const sources = new Map<
+      string,
+      {
+        assetId: string;
+        source: string;
+        license: string;
+        author?: string;
+        url?: string;
+        notes?: string;
+      }
+    >();
 
     for (const [, mapping] of this.mappings.entries()) {
       if (!sources.has(mapping.modelId)) {

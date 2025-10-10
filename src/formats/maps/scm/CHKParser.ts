@@ -3,7 +3,16 @@
  * Parses chunk-based CHK files from SCM/SCX maps
  */
 
-import type { CHKMap, CHKVersion, CHKDimensions, CHKTileset, CHKTileMap, CHKUnits, CHKUnit, CHKScenario } from './types';
+import type {
+  CHKMap,
+  CHKVersion,
+  CHKDimensions,
+  CHKTileset,
+  CHKTileMap,
+  CHKUnits,
+  CHKUnit,
+  CHKScenario,
+} from './types';
 
 /**
  * Parse CHK file (scenario.chk from StarCraft maps)
@@ -115,8 +124,9 @@ export class CHKParser {
       'Twilight',
     ];
 
+    const tileset = tilesets[tilesetId];
     return {
-      tileset: tilesets[tilesetId] || 'Unknown',
+      tileset: tileset !== undefined && tileset.length > 0 ? tileset : 'Unknown',
     };
   }
 

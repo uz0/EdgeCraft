@@ -143,7 +143,7 @@ export interface UnitPlacement {
   health?: number;
   mana?: number;
   customName?: string;
-  customProperties?: Record<string, any>;
+  customProperties?: Record<string, unknown>;
 }
 
 /**
@@ -176,7 +176,7 @@ export interface TriggerData {
  */
 export interface TriggerCondition {
   type: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   negate?: boolean;
 }
 
@@ -185,7 +185,7 @@ export interface TriggerCondition {
  */
 export interface TriggerAction {
   type: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   delay?: number;
 }
 

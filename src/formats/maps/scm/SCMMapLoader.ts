@@ -5,7 +5,14 @@
 
 import { MPQParser } from '../../mpq/MPQParser';
 import { CHKParser } from './CHKParser';
-import type { IMapLoader, RawMapData, MapInfo, TerrainData, UnitPlacement, PlayerInfo } from '../types';
+import type {
+  IMapLoader,
+  RawMapData,
+  MapInfo,
+  TerrainData,
+  UnitPlacement,
+  PlayerInfo,
+} from '../types';
 
 /**
  * SCM/SCX Map Loader
@@ -70,10 +77,10 @@ export class SCMMapLoader implements IMapLoader {
       });
     }
 
-    const dimensions = chk.DIM || { width: 128, height: 128 };
-    const tileset = chk.ERA?.tileset || 'Unknown';
-    const scenarioName = chk.SPRP?.scenarioName || 'Untitled';
-    const description = chk.SPRP?.description || '';
+    const dimensions = chk.DIM ?? { width: 128, height: 128 };
+    const tileset = chk.ERA?.tileset ?? 'Unknown';
+    const scenarioName = chk.SPRP?.scenarioName ?? 'Untitled';
+    const description = chk.SPRP?.description ?? '';
 
     return {
       name: scenarioName,
@@ -100,9 +107,10 @@ export class SCMMapLoader implements IMapLoader {
     const tileMap = chk.MTXM || { tiles: new Uint16Array(0) };
 
     // Convert tile map to heightmap (StarCraft is 2D, so flat)
-    const heightmap = tileMap
-      ? CHKParser.toHeightmap(tileMap, dimensions)
-      : new Float32Array(dimensions.width * dimensions.height);
+    const heightmap =
+      tileMap.tiles.length > 0
+        ? CHKParser.toHeightmap(tileMap, dimensions)
+        : new Float32Array(dimensions.width * dimensions.height);
 
     // Extract tile texture indices
     const textureIndices = new Uint8Array(tileMap.tiles.length);
@@ -119,7 +127,7 @@ export class SCMMapLoader implements IMapLoader {
       heightmap,
       textures: [
         {
-          id: chk.ERA?.tileset || 'default',
+          id: chk.ERA?.tileset ?? 'default',
           blendMap: textureIndices,
         },
       ],
@@ -130,7 +138,7 @@ export class SCMMapLoader implements IMapLoader {
    * Convert CHK units to generic UnitPlacement
    */
   private convertUnits(chk: ReturnType<CHKParser['parse']>): UnitPlacement[] {
-    if (!chk.UNIT) {
+    if (chk.UNIT === undefined || chk.UNIT.units.length === 0) {
       return [];
     }
 
@@ -141,7 +149,7 @@ export class SCMMapLoader implements IMapLoader {
       const tileY = unit.y / 32;
 
       return {
-        id: `unit_${unit.classInstance || index}`,
+        id: `unit_${unit.classInstance !== 0 ? unit.classInstance : index}`,
         typeId: this.getUnitTypeName(unit.unitId),
         owner: unit.owner,
         position: {
@@ -211,6 +219,6 @@ export class SCMMapLoader implements IMapLoader {
       86: 'Zerg Lurker',
     };
 
-    return unitNames[unitId] || `Unknown Unit (${unitId})`;
+    return unitNames[unitId] ?? `Unknown Unit (${unitId})`;
   }
 }

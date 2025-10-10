@@ -110,7 +110,7 @@ export class MapLoaderRegistry {
     const opts: Required<MapLoadOptions> = {
       convertToEdgeStory: options.convertToEdgeStory ?? true,
       validateAssets: options.validateAssets ?? true,
-      onProgress: options.onProgress || (() => {}),
+      onProgress: options.onProgress || ((): void => {}),
     };
 
     // Get file extension
@@ -130,7 +130,7 @@ export class MapLoaderRegistry {
     let edgeStoryMap: EdgeStoryMap | undefined;
     if (opts.convertToEdgeStory) {
       opts.onProgress('Converting to EdgeStory format', 50);
-      edgeStoryMap = await this.converter.convert(rawMap);
+      edgeStoryMap = this.converter.convert(rawMap);
       opts.onProgress('Converting to EdgeStory format', 100);
     }
 
@@ -173,7 +173,7 @@ export class MapLoaderRegistry {
     const opts: Required<MapLoadOptions> = {
       convertToEdgeStory: options.convertToEdgeStory ?? true,
       validateAssets: options.validateAssets ?? true,
-      onProgress: options.onProgress || (() => {}),
+      onProgress: options.onProgress || ((): void => {}),
     };
 
     // Get loader
@@ -193,7 +193,7 @@ export class MapLoaderRegistry {
     let edgeStoryMap: EdgeStoryMap | undefined;
     if (opts.convertToEdgeStory) {
       opts.onProgress('Converting to EdgeStory format', 50);
-      edgeStoryMap = await this.converter.convert(rawMap);
+      edgeStoryMap = this.converter.convert(rawMap);
       opts.onProgress('Converting to EdgeStory format', 100);
     }
 

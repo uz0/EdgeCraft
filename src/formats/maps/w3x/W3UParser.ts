@@ -11,7 +11,6 @@ import type { Vector3 } from '../types';
  * Parse war3mapUnits.doo file
  */
 export class W3UParser {
-  
   private view: DataView;
   private offset: number = 0;
 
@@ -19,7 +18,6 @@ export class W3UParser {
   private static readonly W3DO_MAGIC = 'W3do';
 
   constructor(buffer: ArrayBuffer) {
-    
     this.view = new DataView(buffer);
   }
 

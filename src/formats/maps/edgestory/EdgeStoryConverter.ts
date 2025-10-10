@@ -5,7 +5,15 @@
 
 import { AssetMapper } from '../AssetMapper';
 import type { RawMapData } from '../types';
-import type { EdgeStoryMap, EdgeMapInfo, EdgeTerrain, EdgeGameplay, EdgeUnit, EdgeDoodad, EdgeAssetSource } from './EdgeStoryFormat';
+import type {
+  EdgeStoryMap,
+  EdgeMapInfo,
+  EdgeTerrain,
+  EdgeGameplay,
+  EdgeUnit,
+  EdgeDoodad,
+  EdgeAssetSource,
+} from './EdgeStoryFormat';
 
 /**
  * EdgeStory Converter
@@ -23,7 +31,7 @@ export class EdgeStoryConverter {
    * @param rawMap - Raw map data from any format
    * @returns EdgeStory map with legal assets
    */
-  public async convert(rawMap: RawMapData): Promise<EdgeStoryMap> {
+  public convert(rawMap: RawMapData): EdgeStoryMap {
     const now = new Date().toISOString();
 
     // Convert map info
@@ -33,7 +41,7 @@ export class EdgeStoryConverter {
     const terrain = this.convertTerrain(rawMap);
 
     // Convert gameplay with asset replacement
-    const gameplay = await this.convertGameplay(rawMap);
+    const gameplay = this.convertGameplay(rawMap);
 
     // Validate copyright compliance
     const assetValidation = this.validateAssets(gameplay);
@@ -66,15 +74,15 @@ export class EdgeStoryConverter {
       name: rawMap.info.name,
       author: rawMap.info.author,
       description: rawMap.info.description,
-      version: rawMap.info.version || '1.0.0',
+      version: rawMap.info.version ?? '1.0.0',
       created: now,
       modified: now,
       sourceFormat: rawMap.format,
       dimensions: {
         width: rawMap.info.dimensions.width,
         height: rawMap.info.dimensions.height,
-        playableWidth: rawMap.info.dimensions.playableWidth || rawMap.info.dimensions.width,
-        playableHeight: rawMap.info.dimensions.playableHeight || rawMap.info.dimensions.height,
+        playableWidth: rawMap.info.dimensions.playableWidth ?? rawMap.info.dimensions.width,
+        playableHeight: rawMap.info.dimensions.playableHeight ?? rawMap.info.dimensions.height,
       },
       maxPlayers: rawMap.info.players.length,
       players: rawMap.info.players.map((p) => ({
@@ -82,7 +90,7 @@ export class EdgeStoryConverter {
         name: p.name,
         type: p.type,
         race: p.race,
-        team: p.team || 0,
+        team: p.team ?? 0,
         color: p.color,
         startLocation: p.startLocation,
         resources: p.resources,
@@ -130,7 +138,8 @@ export class EdgeStoryConverter {
 
     // Convert doodads with asset replacement
     const doodads: EdgeDoodad[] = rawMap.doodads.map((doodad) => {
-      const sourceFormat = rawMap.format === 'w3m' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
+      const sourceFormat =
+        rawMap.format === 'w3m' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
       const mapping = this.assetMapper.mapDoodadType(doodad.typeId, sourceFormat);
 
       return {
@@ -171,8 +180,9 @@ export class EdgeStoryConverter {
   /**
    * Convert gameplay elements with asset replacement
    */
-  private async convertGameplay(rawMap: RawMapData): Promise<EdgeGameplay> {
-    const sourceFormat = rawMap.format === 'w3m' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
+  private convertGameplay(rawMap: RawMapData): EdgeGameplay {
+    const sourceFormat =
+      rawMap.format === 'w3m' ? 'w3x' : rawMap.format === 'scx' ? 'scm' : rawMap.format;
     const units: EdgeUnit[] = rawMap.units.map((unit) => {
       // Map unit type to legal alternative
       const mapping = this.assetMapper.mapUnitType(unit.typeId, sourceFormat);
@@ -256,11 +266,16 @@ export class EdgeStoryConverter {
    * Extract resource amount from unit properties
    */
   private extractResourceAmount(unit: EdgeUnit): number {
-    if (unit.customProperties?.['goldAmount']) {
-      return unit.customProperties['goldAmount'];
-    }
-    if (unit.customProperties?.['resourceAmount']) {
-      return unit.customProperties['resourceAmount'];
+    const customProps = unit.customProperties;
+    if (customProps !== undefined) {
+      const goldAmount = customProps['goldAmount'];
+      if (typeof goldAmount === 'number') {
+        return goldAmount;
+      }
+      const resourceAmount = customProps['resourceAmount'];
+      if (typeof resourceAmount === 'number') {
+        return resourceAmount;
+      }
     }
     return 2500; // Default amount
   }

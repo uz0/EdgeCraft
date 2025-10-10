@@ -8,7 +8,17 @@ import { W3IParser } from './W3IParser';
 import { W3EParser } from './W3EParser';
 import { W3DParser } from './W3DParser';
 import { W3UParser } from './W3UParser';
-import type { IMapLoader, RawMapData, MapInfo, TerrainData, UnitPlacement, DoodadPlacement, PlayerInfo } from '../types';
+import type { W3ODoodad } from './types';
+import type { W3UUnit } from './types';
+import type {
+  IMapLoader,
+  RawMapData,
+  MapInfo,
+  TerrainData,
+  UnitPlacement,
+  DoodadPlacement,
+  PlayerInfo,
+} from '../types';
 
 /**
  * W3X/W3M Map Loader
@@ -165,7 +175,7 @@ export class W3XMapLoader implements IMapLoader {
   /**
    * Convert W3O doodads to generic DoodadPlacement
    */
-  private convertDoodads(w3oDoodads: any[]): DoodadPlacement[] {
+  private convertDoodads(w3oDoodads: W3ODoodad[]): DoodadPlacement[] {
     return w3oDoodads.map((doodad) => ({
       id: `doodad_${doodad.editorId}`,
       typeId: doodad.typeId,
@@ -181,7 +191,7 @@ export class W3XMapLoader implements IMapLoader {
   /**
    * Convert W3U units to generic UnitPlacement
    */
-  private convertUnits(w3uUnits: any[]): UnitPlacement[] {
+  private convertUnits(w3uUnits: W3UUnit[]): UnitPlacement[] {
     return w3uUnits.map((unit) => ({
       id: `unit_${unit.editorId}`,
       typeId: unit.typeId,

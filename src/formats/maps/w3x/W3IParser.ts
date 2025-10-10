@@ -3,7 +3,17 @@
  * Parses map metadata, players, forces, and configuration
  */
 
-import type { W3IMapInfo, W3IPlayer, W3IForce } from './types';
+import type {
+  W3IMapInfo,
+  W3IPlayer,
+  W3IForce,
+  W3IUpgrade,
+  W3ITech,
+  W3IRandomUnitTable,
+  W3IRandomItemTable,
+  W3IRandomUnitGroup,
+  W3IRandomItemGroup,
+} from './types';
 import type { RGBA } from '../types';
 
 /**
@@ -118,7 +128,7 @@ export class W3IParser {
 
     // Upgrade availability
     const upgradeCount = this.readUint32();
-    const upgradeAvailability = [];
+    const upgradeAvailability: W3IUpgrade[] = [];
     for (let i = 0; i < upgradeCount; i++) {
       upgradeAvailability.push({
         playerFlags: this.readUint32(),
@@ -130,7 +140,7 @@ export class W3IParser {
 
     // Tech availability
     const techCount = this.readUint32();
-    const techAvailability = [];
+    const techAvailability: W3ITech[] = [];
     for (let i = 0; i < techCount; i++) {
       techAvailability.push({
         playerFlags: this.readUint32(),
@@ -219,9 +229,9 @@ export class W3IParser {
   /**
    * Read random unit table
    */
-  private readRandomUnitTable() {
+  private readRandomUnitTable(): W3IRandomUnitTable {
     const tableCount = this.readUint32();
-    const tables = [];
+    const tables: W3IRandomUnitGroup[] = [];
 
     for (let i = 0; i < tableCount; i++) {
       const groupNumber = this.readUint32();
@@ -254,9 +264,9 @@ export class W3IParser {
   /**
    * Read random item table
    */
-  private readRandomItemTable() {
+  private readRandomItemTable(): W3IRandomItemTable {
     const tableCount = this.readUint32();
-    const tables = [];
+    const tables: W3IRandomItemGroup[] = [];
 
     for (let i = 0; i < tableCount; i++) {
       const groupNumber = this.readUint32();
