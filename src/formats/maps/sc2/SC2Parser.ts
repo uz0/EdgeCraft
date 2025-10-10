@@ -31,7 +31,7 @@ export class SC2Parser {
    */
   public getTextContent(doc: Document, tagName: string): string | null {
     const element = doc.getElementsByTagName(tagName)[0];
-    return element?.textContent || null;
+    return element?.textContent ?? null;
   }
 
   /**
@@ -56,7 +56,7 @@ export class SC2Parser {
    */
   public getNumericContent(doc: Document, tagName: string, defaultValue: number): number {
     const text = this.getTextContent(doc, tagName);
-    if (!text) return defaultValue;
+    if (text === null || text === '') return defaultValue;
 
     const value = parseInt(text, 10);
     return isNaN(value) ? defaultValue : value;

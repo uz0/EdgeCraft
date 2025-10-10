@@ -80,7 +80,7 @@ export class SC2TerrainParser {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const row = sc2Terrain.heightmap[y];
-        heightmap[y * width + x] = row ? row[x] ?? 0 : 0;
+        heightmap[y * width + x] = row ? (row[x] ?? 0) : 0;
       }
     }
 
@@ -130,7 +130,7 @@ export class SC2TerrainParser {
   private createFlatHeightmap(width: number, height: number): number[][] {
     return Array(height)
       .fill(0)
-      .map(() => Array(width).fill(0));
+      .map(() => Array(width).fill(0) as number[]);
   }
 
   /**
@@ -159,7 +159,7 @@ export class SC2TerrainParser {
   private parseWater(doc: Document): SC2TerrainData['water'] | undefined {
     const waterLevel = this.parser.getNumericContent(doc, 'WaterLevel', -1);
 
-    if (waterLevel >= 0) {
+    if (waterLevel !== -1 && waterLevel >= 0) {
       return {
         level: waterLevel,
         type: this.parser.getTextContentWithDefault(doc, 'WaterType', 'default'),
@@ -178,7 +178,7 @@ export class SC2TerrainParser {
   private getDimensions(heightmap: number[][]): { width: number; height: number } {
     return {
       height: heightmap.length,
-      width: heightmap[0]?.length || 0,
+      width: heightmap[0]?.length ?? 0,
     };
   }
 }

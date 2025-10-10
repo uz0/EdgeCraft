@@ -21,8 +21,10 @@ describe('SC2MapLoader', () => {
     });
 
     it('should have a parse method', () => {
-      expect(loader.parse).toBeDefined();
-      expect(typeof loader.parse).toBe('function');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const parseMethod = loader.parse;
+      expect(parseMethod).toBeDefined();
+      expect(typeof parseMethod).toBe('function');
     });
 
     it('should handle invalid MPQ archive', async () => {
