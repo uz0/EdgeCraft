@@ -92,11 +92,11 @@ export class CustomShaderSystem {
   private scene: BABYLON.Scene;
   private shaderCache: Map<string, ShaderMaterialWrapper> = new Map();
   private time: number = 0;
-  private isDevMode: boolean = false;
 
   constructor(scene: BABYLON.Scene, config?: { devMode?: boolean }) {
     this.scene = scene;
-    this.isDevMode = config?.devMode ?? false;
+    // Dev mode for future hot reload implementation
+    void config?.devMode;
 
     // Precompile shader presets
     this.precompileShaders();
@@ -368,8 +368,10 @@ export class CustomShaderSystem {
       case 'custom':
         material = this.createCustomShader(config);
         break;
-      default:
-        throw new Error(`Unknown shader preset: ${config.preset}`);
+      default: {
+        const exhaustive: never = config.preset;
+        throw new Error(`Unknown shader preset: ${exhaustive}`);
+      }
     }
 
     // Cache shader
@@ -503,7 +505,11 @@ export class CustomShaderSystem {
       },
       {
         attributes: ['position', 'normal', 'uv'],
-        uniforms: ['worldViewProjection', 'world', ...(config.uniforms ? Object.keys(config.uniforms) : [])],
+        uniforms: [
+          'worldViewProjection',
+          'world',
+          ...(config.uniforms ? Object.keys(config.uniforms) : []),
+        ],
       }
     );
 

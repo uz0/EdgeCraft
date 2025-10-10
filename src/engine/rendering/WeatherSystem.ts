@@ -191,8 +191,9 @@ export class WeatherSystem {
    */
   private async applyRainWeather(config: WeatherConfig): Promise<void> {
     const particleCount = config.particleCount ?? 2000;
-    const areaSize = config.areaSize ?? new BABYLON.Vector3(100, 0, 100);
     const intensity = config.intensity ?? 1.0;
+    // Area size reserved for future directional weather implementation
+    void config.areaSize;
 
     // Create rain particle effect above camera
     const emitterPos = this.cameraPosition.clone();

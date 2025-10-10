@@ -41,12 +41,13 @@ lerna-debug.log*
 # Assets (copyrighted content)
 temp-assets/
 extracted-assets/
-*.mpq
-*.w3x
-*.w3m
-*.SC2Map
-*.scm
-*.scx
+maps/
+# *.mpq
+# *.w3x
+# *.w3m
+# *.SC2Map
+# *.scm
+# *.scx
 
 # Build artifacts
 *.map
