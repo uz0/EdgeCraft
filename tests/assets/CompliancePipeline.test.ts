@@ -71,13 +71,13 @@ describe('LegalCompliancePipeline', () => {
 
     it('should handle visual similarity check', async () => {
       // Create pipeline with visual similarity disabled for this test
-      // (testing with invalid image data would cause decoding errors)
+      // Use valid text-based test data to avoid decoding errors
       const testPipeline = new LegalCompliancePipeline({
         enableVisualSimilarity: false,
         autoReplace: false,
       });
 
-      const buffer = new ArrayBuffer(1000);
+      const buffer = new TextEncoder().encode('Test image data').buffer;
       const metadata: AssetMetadata = {
         name: 'texture.png',
         type: 'texture',
