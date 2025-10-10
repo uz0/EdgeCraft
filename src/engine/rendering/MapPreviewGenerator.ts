@@ -1,82 +1,26 @@
-# PRP 2.8: Map Preview/Thumbnail Generator
-
-**Feature Name**: Automated Map Thumbnail Generation
-**Duration**: 2-3 days | **Team**: 1 developer | **Budget**: $2,000
-**Status**: ✅ Complete
-
-**Dependencies**:
-- PRP 2.5 (MapRendererCore) - required
-- Phase 1 (TerrainRenderer) - required
-
----
-
-## 🎯 Objective
-
-Generate thumbnail images (PNG) for all maps by rendering terrain in top-down view at 512x512 resolution. Used by MapGallery (PRP 2.7) for visual browsing.
-
-**Core Responsibility**: Render map → capture screenshot → return Data URL
-
----
-
-## 📊 Current State
-
-**✅ WORKING**:
-- MapRendererCore (renders full maps)
-- TerrainRenderer (renders terrain)
-- Babylon.js screenshot API
-
-**❌ MISSING**:
-- MapPreviewGenerator.ts - thumbnail generation utility
-- Top-down orthographic camera setup
-- Thumbnail size optimization (512x512)
-- Batch generation for all 24 maps
-
----
-
-## 🔬 Research
-
-**Source**: Babylon.js screenshot documentation
-
-**Key Findings**:
-1. Use `BABYLON.Tools.CreateScreenshotUsingRenderTarget()` for screenshots
-2. Set up orthographic camera for top-down view
-3. Render only terrain (no units/doodads for performance)
-4. Output as Data URL (base64 PNG) for in-memory use
-5. Can save to disk or display in <img> tags
-
-**Screenshot API**:
-```typescript
-BABYLON.Tools.CreateScreenshotUsingRenderTarget(
-  engine,
-  camera,
-  { width: 512, height: 512 }
-);
-```
-
----
-
-## 📋 Definition of Done
-
-- [x] `MapPreviewGenerator.ts` created in `src/engine/rendering/`
-- [x] Generate 512x512 PNG thumbnails
-- [x] Top-down orthographic view (entire map visible)
-- [x] Render only terrain (no units/effects)
-- [x] Return Data URL (base64)
-- [x] Optional: save to disk as PNG
-- [x] Generate all 24 thumbnails in <1 minute
-- [x] Thumbnail file size: <100KB per image
-- [x] Unit tests (>80% coverage)
-
----
-
-## 💻 Implementation
-
-```typescript
-// src/engine/rendering/MapPreviewGenerator.ts
+/**
+ * Map Preview Generator - Generates thumbnail images for maps
+ *
+ * Renders maps in top-down orthographic view at 512x512 resolution for use in
+ * map galleries and selection screens.
+ *
+ * @example
+ * ```typescript
+ * const generator = new MapPreviewGenerator();
+ * const result = await generator.generatePreview(mapData);
+ *
+ * if (result.success) {
+ *   console.log('Thumbnail generated:', result.dataUrl);
+ *   // Use in <img src={result.dataUrl} />
+ * }
+ *
+ * generator.disposeEngine();
+ * ```
+ */
 
 import * as BABYLON from '@babylonjs/core';
 import type { RawMapData } from '../../formats/maps/types';
-import { TerrainRenderer } from './TerrainRenderer';
+import { TerrainRenderer } from '../terrain/TerrainRenderer';
 
 export interface PreviewConfig {
   /** Output width */
@@ -112,6 +56,11 @@ export interface PreviewResult {
   error?: string;
 }
 
+/**
+ * Map Preview Generator
+ *
+ * Generates 512x512 thumbnail images for maps using top-down orthographic camera.
+ */
 export class MapPreviewGenerator {
   private engine: BABYLON.Engine;
   private scene: BABYLON.Scene | null = null;
@@ -170,9 +119,29 @@ export class MapPreviewGenerator {
       this.camera.orthoTop = maxDim / 2;
       this.camera.orthoBottom = -maxDim / 2;
 
-      // Step 3: Render terrain
+      // Step 3: Render terrain using existing API
       const terrainRenderer = new TerrainRenderer(this.scene);
-      await terrainRenderer.render(mapData.terrain);
+      const heightmapUrl = this.createHeightmapDataUrl(
+        mapData.terrain.heightmap,
+        mapData.terrain.width,
+        mapData.terrain.height
+      );
+
+      // Determine texture URLs
+      const textureUrls =
+        mapData.terrain.textures.length > 0 &&
+        mapData.terrain.textures[0]?.path != null &&
+        mapData.terrain.textures[0].path !== ''
+          ? [mapData.terrain.textures[0].path]
+          : [];
+
+      await terrainRenderer.loadHeightmap(heightmapUrl, {
+        width: mapData.terrain.width,
+        height: mapData.terrain.height,
+        subdivisions: Math.min(64, Math.max(16, mapData.terrain.width / 8)), // Lower detail for preview
+        maxHeight: 100,
+        textures: textureUrls,
+      });
 
       // Step 4: Optional - render units
       if (finalConfig.includeUnits && mapData.units.length > 0) {
@@ -196,18 +165,35 @@ export class MapPreviewGenerator {
       this.scene.render();
 
       // Step 6: Capture screenshot
+      if (this.camera === null) {
+        throw new Error('Camera not initialized');
+      }
+
       const mimeType = finalConfig.format === 'png' ? 'image/png' : 'image/jpeg';
-      const dataUrl = await BABYLON.Tools.CreateScreenshotUsingRenderTarget(
-        this.engine,
-        this.camera,
-        {
-          width: finalConfig.width,
-          height: finalConfig.height,
-          precision: 1,
-        },
-        mimeType,
-        finalConfig.quality
-      );
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        try {
+          BABYLON.Tools.CreateScreenshotUsingRenderTarget(
+            this.engine,
+            this.camera!,
+            {
+              width: finalConfig.width,
+              height: finalConfig.height,
+              precision: 1,
+            },
+            (data) => resolve(data),
+            mimeType,
+            1, // samples
+            false, // antialiasing
+            undefined, // fileName
+            false, // renderSprites
+            false, // enableStencilBuffer
+            false, // useLayerMask
+            finalConfig.quality
+          );
+        } catch (error) {
+          reject(error);
+        }
+      });
 
       // Cleanup
       terrainRenderer.dispose();
@@ -245,7 +231,10 @@ export class MapPreviewGenerator {
     const results = new Map<string, PreviewResult>();
 
     for (let i = 0; i < maps.length; i++) {
-      const { id, mapData } = maps[i];
+      const map = maps[i];
+      if (!map) continue;
+
+      const { id, mapData } = map;
 
       console.log(`Generating preview ${i + 1}/${maps.length}: ${id}`);
       const result = await this.generatePreview(mapData, config);
@@ -274,7 +263,53 @@ export class MapPreviewGenerator {
   }
 
   /**
-   * Dispose resources
+   * Convert heightmap Float32Array to data URL
+   * (Same logic as MapRendererCore)
+   */
+  private createHeightmapDataUrl(heightmap: Float32Array, width: number, height: number): string {
+    // Create canvas to encode heightmap as image
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (ctx == null) {
+      throw new Error('Failed to get canvas 2D context');
+    }
+
+    // Create ImageData
+    const imageData = ctx.createImageData(width, height);
+
+    // Convert heightmap to grayscale (0-255)
+    let minHeight = Infinity;
+    let maxHeight = -Infinity;
+
+    for (let i = 0; i < heightmap.length; i++) {
+      minHeight = Math.min(minHeight, heightmap[i] ?? 0);
+      maxHeight = Math.max(maxHeight, heightmap[i] ?? 0);
+    }
+
+    const range = maxHeight - minHeight || 1;
+
+    for (let i = 0; i < heightmap.length; i++) {
+      const normalizedHeight = ((heightmap[i] ?? 0) - minHeight) / range;
+      const grayscale = Math.floor(normalizedHeight * 255);
+
+      const idx = i * 4;
+      imageData.data[idx] = grayscale; // R
+      imageData.data[idx + 1] = grayscale; // G
+      imageData.data[idx + 2] = grayscale; // B
+      imageData.data[idx + 3] = 255; // A
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    // Return data URL
+    return canvas.toDataURL();
+  }
+
+  /**
+   * Dispose scene resources
    */
   private dispose(): void {
     if (this.scene) {
@@ -295,104 +330,3 @@ export class MapPreviewGenerator {
     this.engine.dispose();
   }
 }
-```
-
-**Usage Example**:
-```typescript
-// Generate single preview
-const generator = new MapPreviewGenerator();
-const result = await generator.generatePreview(mapData);
-
-if (result.success) {
-  console.log('Thumbnail generated:', result.dataUrl);
-  // Use in <img src={result.dataUrl} />
-}
-
-generator.disposeEngine();
-
-// Batch generation
-const maps = [
-  { id: 'map1', mapData: map1Data },
-  { id: 'map2', mapData: map2Data },
-  // ... 22 more
-];
-
-const results = await generator.generateBatch(maps, undefined, (current, total) => {
-  console.log(`Progress: ${current}/${total}`);
-});
-```
-
-**Integration with MapGallery**:
-```typescript
-// In MapGallery parent component
-const [thumbnails, setThumbnails] = useState<Map<string, string>>(new Map());
-
-useEffect(() => {
-  const generator = new MapPreviewGenerator();
-
-  const generateThumbnails = async () => {
-    const results = await generator.generateBatch(
-      loadedMaps.map((m) => ({ id: m.id, mapData: m.mapData }))
-    );
-
-    const thumbMap = new Map<string, string>();
-    results.forEach((result, id) => {
-      if (result.success && result.dataUrl) {
-        thumbMap.set(id, result.dataUrl);
-      }
-    });
-
-    setThumbnails(thumbMap);
-    generator.disposeEngine();
-  };
-
-  generateThumbnails();
-}, [loadedMaps]);
-```
-
----
-
-## 🧪 Validation
-
-```bash
-npm run typecheck
-npm test -- src/engine/rendering/MapPreviewGenerator.test.ts
-npm run generate-previews  # Generate all 24 thumbnails
-```
-
-**Expected**:
-- ✅ All 24 thumbnails generated successfully
-- ✅ Each thumbnail <100KB
-- ✅ Generation time: <1 minute total
-- ✅ Images display correctly in browser
-- ✅ Top-down view shows entire map
-
----
-
-## 📦 Tasks (3 days)
-
-**Day 1**: Core implementation + camera setup
-**Day 2**: Batch generation + optimization
-**Day 3**: Testing + integration with MapGallery
-
----
-
-## 🚨 Risks
-
-🟡 **Medium**: Large maps (923MB) may slow thumbnail generation
-**Mitigation**: Render terrain only, use LOD system, timeout after 10s
-
-🟢 **Low**: Babylon.js screenshot API is stable and well-documented
-
----
-
-## 📚 References
-
-- **Babylon.js Screenshots**: https://doc.babylonjs.com/features/featuresDeepDive/scene/renderToPNG
-- **Pattern**: TerrainRenderer.ts (Phase 1)
-
----
-
-## 🎯 Confidence: **9.0/10**
-
-Babylon.js has built-in screenshot support. Straightforward implementation.
