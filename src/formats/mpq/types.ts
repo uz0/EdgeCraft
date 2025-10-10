@@ -122,4 +122,27 @@ export interface MPQParseResult {
   success: boolean;
   archive?: MPQArchive;
   error?: string;
+  parseTimeMs?: number;
+}
+
+/**
+ * Streaming parse result (for large files)
+ */
+export interface MPQStreamParseResult {
+  success: boolean;
+  header?: MPQHeader;
+  files: MPQFile[];
+  fileList: string[];
+  error?: string;
+  parseTimeMs?: number;
+}
+
+/**
+ * Streaming parse options
+ */
+export interface MPQStreamOptions {
+  /** Only extract specific files (optional - for performance) */
+  extractFiles?: string[];
+  /** Progress callback (stage name, progress 0-100) */
+  onProgress?: (stage: string, progress: number) => void;
 }

@@ -16,7 +16,10 @@ import type {
   MPQBlockEntry,
   MPQParseResult,
   MPQFile,
+  MPQStreamParseResult,
+  MPQStreamOptions,
 } from './types';
+import { StreamingFileReader } from '../../utils/StreamingFileReader';
 import { LZMADecompressor, CompressionAlgorithm } from '../compression';
 
 /**
@@ -51,6 +54,7 @@ export class MPQParser {
    * Parse MPQ archive
    */
   public parse(): MPQParseResult {
+    const startTime = performance.now();
     try {
       // Read and validate header
       const header = this.readHeader();
@@ -58,6 +62,7 @@ export class MPQParser {
         return {
           success: false,
           error: 'Invalid MPQ header',
+          parseTimeMs: performance.now() - startTime,
         };
       }
 
@@ -78,11 +83,125 @@ export class MPQParser {
       return {
         success: true,
         archive: this.archive,
+        parseTimeMs: performance.now() - startTime,
       };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
+        parseTimeMs: performance.now() - startTime,
+      };
+    }
+  }
+
+  /**
+   * Parse MPQ archive from stream (for large files >100MB)
+   *
+   * This method reads the MPQ archive in chunks, only loading the parts
+   * needed (header, hash table, block table, and specific files).
+   * This prevents memory crashes with large files like 923MB campaigns.
+   *
+   * @param reader - StreamingFileReader instance
+   * @param options - Streaming options (extractFiles, onProgress)
+   * @returns MPQStreamParseResult with extracted files
+   *
+   * @example
+   * ```typescript
+   * const reader = new StreamingFileReader(file);
+   * const parser = new MPQParser(new ArrayBuffer(0)); // Empty buffer
+   * const result = await parser.parseStream(reader, {
+   *   extractFiles: ['war3campaign.w3f', '*.w3x'],
+   *   onProgress: (stage, progress) => console.log(`${stage}: ${progress}%`)
+   * });
+   * ```
+   */
+  public async parseStream(
+    reader: StreamingFileReader,
+    options?: MPQStreamOptions
+  ): Promise<MPQStreamParseResult> {
+    const startTime = performance.now();
+
+    try {
+      // Step 1: Read header (512 bytes)
+      options?.onProgress?.('Reading header', 0);
+      const headerData = await reader.readRange(0, 512);
+      const header = this.parseHeaderFromBytes(headerData);
+
+      if (!header) {
+        return {
+          success: false,
+          files: [],
+          fileList: [],
+          error: 'Invalid MPQ header',
+          parseTimeMs: performance.now() - startTime,
+        };
+      }
+
+      // Step 2: Read hash table
+      options?.onProgress?.('Reading hash table', 20);
+      const hashTableSize = header.hashTableSize * 16; // 16 bytes per entry
+      const hashTableData = await reader.readRange(header.hashTablePos, hashTableSize);
+      const hashTable = this.parseHashTableFromBytes(hashTableData, header.hashTableSize);
+
+      // Step 3: Read block table
+      options?.onProgress?.('Reading block table', 40);
+      const blockTableSize = header.blockTableSize * 16; // 16 bytes per entry
+      const blockTableData = await reader.readRange(header.blockTablePos, blockTableSize);
+      const blockTable = this.parseBlockTableFromBytes(blockTableData, header.blockTableSize);
+
+      // Step 4: Build file list
+      options?.onProgress?.('Building file list', 60);
+      const fileList = await this.buildFileListStream(reader, hashTable, blockTable);
+
+      // Step 5: Extract specific files (if requested)
+      const files: MPQFile[] = [];
+      if (options?.extractFiles && options.extractFiles.length > 0) {
+        for (let i = 0; i < options.extractFiles.length; i++) {
+          const filePattern = options.extractFiles[i];
+          options?.onProgress?.(
+            `Extracting ${filePattern}`,
+            60 + (i / options.extractFiles.length) * 40
+          );
+
+          // Handle wildcards
+          if (filePattern !== undefined && filePattern.includes('*')) {
+            const matchingFiles = fileList.filter((f) => this.matchesPattern(f, filePattern));
+            for (const fileName of matchingFiles) {
+              const file = await this.extractFileStream(fileName, reader, hashTable, blockTable);
+              if (file) {
+                files.push(file);
+              }
+            }
+          } else {
+            const file = await this.extractFileStream(
+              filePattern ?? '',
+              reader,
+              hashTable,
+              blockTable
+            );
+            if (file) {
+              files.push(file);
+            }
+          }
+        }
+      }
+
+      options?.onProgress?.('Complete', 100);
+
+      return {
+        success: true,
+        header,
+        files,
+        fileList,
+        parseTimeMs: performance.now() - startTime,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        files: [],
+        fileList: [],
+        error: error instanceof Error ? error.message : String(error),
+        parseTimeMs: performance.now() - startTime,
       };
     }
   }
@@ -319,6 +438,177 @@ export class MPQParser {
     return {
       fileCount: this.archive.blockTable.filter((b) => (b.flags & 0x80000000) !== 0).length,
       archiveSize: this.archive.header.archiveSize,
+    };
+  }
+
+  // ============ STREAMING HELPER METHODS ============
+
+  /**
+   * Parse header from byte array (for streaming)
+   */
+  private parseHeaderFromBytes(data: Uint8Array): MPQHeader | null {
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+
+    // Check magic number
+    const magic = view.getUint32(0, true);
+    if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
+      return null;
+    }
+
+    return {
+      archiveSize: view.getUint32(8, true),
+      formatVersion: view.getUint16(12, true),
+      blockSize: 512 * Math.pow(2, view.getUint16(14, true)),
+      hashTablePos: view.getUint32(16, true),
+      blockTablePos: view.getUint32(20, true),
+      hashTableSize: view.getUint32(24, true),
+      blockTableSize: view.getUint32(28, true),
+    };
+  }
+
+  /**
+   * Parse hash table from byte array (for streaming)
+   */
+  private parseHashTableFromBytes(data: Uint8Array, entryCount: number): MPQHashEntry[] {
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    const hashTable: MPQHashEntry[] = [];
+    let offset = 0;
+
+    for (let i = 0; i < entryCount; i++) {
+      hashTable.push({
+        hashA: view.getUint32(offset, true),
+        hashB: view.getUint32(offset + 4, true),
+        locale: view.getUint16(offset + 8, true),
+        platform: view.getUint16(offset + 10, true),
+        blockIndex: view.getUint32(offset + 12, true),
+      });
+      offset += 16;
+    }
+
+    return hashTable;
+  }
+
+  /**
+   * Parse block table from byte array (for streaming)
+   */
+  private parseBlockTableFromBytes(data: Uint8Array, entryCount: number): MPQBlockEntry[] {
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    const blockTable: MPQBlockEntry[] = [];
+    let offset = 0;
+
+    for (let i = 0; i < entryCount; i++) {
+      blockTable.push({
+        filePos: view.getUint32(offset, true),
+        compressedSize: view.getUint32(offset + 4, true),
+        uncompressedSize: view.getUint32(offset + 8, true),
+        flags: view.getUint32(offset + 12, true),
+      });
+      offset += 16;
+    }
+
+    return blockTable;
+  }
+
+  /**
+   * Build file list from (listfile) in archive
+   */
+  private async buildFileListStream(
+    reader: StreamingFileReader,
+    hashTable: MPQHashEntry[],
+    blockTable: MPQBlockEntry[]
+  ): Promise<string[]> {
+    try {
+      // Try to extract (listfile)
+      const listFile = await this.extractFileStream('(listfile)', reader, hashTable, blockTable);
+      if (!listFile) {
+        return [];
+      }
+
+      // Parse listfile (text file with one filename per line)
+      const decoder = new TextDecoder('utf-8');
+      const listContent = decoder.decode(listFile.data);
+      const fileList = listContent
+        .split(/[\r\n]+/)
+        .map((f) => f.trim())
+        .filter((f) => f.length > 0);
+
+      return fileList;
+    } catch (error) {
+      // Listfile not found or error - return empty list
+      return [];
+    }
+  }
+
+  /**
+   * Check if filename matches pattern (simple wildcard support)
+   */
+  private matchesPattern(filename: string, pattern: string): boolean {
+    // Convert wildcard pattern to regex
+    const regexPattern = pattern
+      .replace(/\./g, '\\.') // Escape dots
+      .replace(/\*/g, '.*'); // Convert * to .*
+
+    const regex = new RegExp(`^${regexPattern}$`, 'i');
+    return regex.test(filename);
+  }
+
+  /**
+   * Extract single file from stream
+   */
+  private async extractFileStream(
+    fileName: string,
+    reader: StreamingFileReader,
+    hashTable: MPQHashEntry[],
+    blockTable: MPQBlockEntry[]
+  ): Promise<MPQFile | null> {
+    // Find file in hash table
+    const hashA = this.hashString(fileName, 0);
+    const hashB = this.hashString(fileName, 1);
+
+    let hashEntry: MPQHashEntry | null = null;
+    for (const entry of hashTable) {
+      if (entry.hashA === hashA && entry.hashB === hashB) {
+        hashEntry = entry;
+        break;
+      }
+    }
+
+    if (!hashEntry || hashEntry.blockIndex >= blockTable.length) {
+      return null;
+    }
+
+    const blockEntry = blockTable[hashEntry.blockIndex];
+
+    // Check if file exists
+    const exists = (blockEntry?.flags ?? 0 & 0x80000000) !== 0;
+    if (!exists || !blockEntry) {
+      return null;
+    }
+
+    // Read file data from archive
+    const fileData = await reader.readRange(blockEntry.filePos, blockEntry.uncompressedSize);
+
+    // For now, only support uncompressed, unencrypted files
+    const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
+    const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
+
+    if (isCompressed || isEncrypted) {
+      console.warn(
+        `File ${fileName} is compressed/encrypted - not yet supported in streaming mode`
+      );
+      return null;
+    }
+
+    return {
+      name: fileName,
+      data: fileData.buffer.slice(
+        fileData.byteOffset,
+        fileData.byteOffset + fileData.byteLength
+      ) as ArrayBuffer,
+      compressedSize: blockEntry.compressedSize,
+      uncompressedSize: blockEntry.uncompressedSize,
+      isCompressed,
+      isEncrypted,
     };
   }
 }
