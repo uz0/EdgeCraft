@@ -1,83 +1,48 @@
-# PRP 2.9: Doodad Rendering System
-
-**Feature Name**: Doodad Rendering with Instancing
-**Duration**: 4 days | **Team**: 1 developer | **Budget**: $3,500
-**Status**: ✅ Complete
-
-**Dependencies**:
-- Phase 1 (UnitRenderer instancing patterns) - required
-- PRP 2.5 (MapRendererCore) - integration target
-
----
-
-## 🎯 Objective
-
-Implement DoodadRenderer that renders map decorations (trees, rocks, grass, buildings) using instancing for performance. Doodads are static objects that populate maps.
-
-**Core Responsibility**: Render 1,000+ doodads efficiently with instancing
-
----
-
-## 📊 Current State
-
-**✅ WORKING**:
-- UnitRenderer.ts (instancing pattern for units)
-- RawMapData interface includes `doodads: DoodadPlacement[]`
-- Babylon.js thin instances for static objects
-
-**❌ MISSING**:
-- DoodadRenderer.ts - doodad rendering system
-- Doodad model loading (MDX/M3 formats)
-- Instancing per doodad type
-- LOD support for distant doodads
-
----
-
-## 🔬 Research
-
-**Source**: Warcraft 3 and StarCraft 2 doodad systems
-
-**Key Findings**:
-1. Doodads are static decorations (non-interactive)
-2. Maps can have 500-2,000 doodads
-3. Multiple variations per type (tree1, tree2, tree3)
-4. Properties: position, rotation, scale, variation
-5. Use thin instances (same as units but no animation)
-6. LOD: render detailed mesh <100 units, billboards >100 units
-
-**Doodad Types**:
-- Trees (multiple species)
-- Rocks (various sizes)
-- Grass tufts
-- Shrubs
-- Ruins/destroyed buildings
-- Fences, crates, barrels
-
----
-
-## 📋 Definition of Done
-
-- [x] `DoodadRenderer.ts` created in `src/engine/rendering/`
-- [x] Loads doodad models (use placeholder meshes initially)
-- [x] Instancing per doodad type (thin instances)
-- [x] Supports variations (different models for same type)
-- [x] LOD system (detailed <100 units, billboard >100 units)
-- [x] Integrates with MapRendererCore
-- [x] Renders 1,000 doodads @ 60 FPS
-- [x] Frustum culling enabled
-- [x] Statistics tracking (total, visible, draw calls)
-- [x] Unit tests (>80% coverage)
-
----
-
-## 💻 Implementation
-
-```typescript
-// src/engine/rendering/DoodadRenderer.ts
+/**
+ * DoodadRenderer - Efficient rendering of map decorations using instancing
+ *
+ * Renders static map decorations (trees, rocks, grass, buildings) using GPU instancing.
+ * Doodads are grouped by type and rendered with a single draw call per type.
+ *
+ * Features:
+ * - GPU instancing for 1,000+ doodads @ 60 FPS
+ * - Variation support (multiple models per type)
+ * - Frustum culling (automatic via Babylon.js)
+ * - LOD system (detailed <100 units, billboard >100 units)
+ * - Statistics tracking
+ *
+ * @example
+ * ```typescript
+ * const renderer = new DoodadRenderer(scene, {
+ *   enableInstancing: true,
+ *   enableLOD: true,
+ *   lodDistance: 100,
+ *   maxDoodads: 2000,
+ * });
+ *
+ * // Load doodad types
+ * await renderer.loadDoodadType('Tree_Ashenvale', 'models/trees/ashenvale.mdx');
+ *
+ * // Add instances
+ * for (const doodad of mapData.doodads) {
+ *   renderer.addDoodad(doodad);
+ * }
+ *
+ * // Build instance buffers (call once after all doodads added)
+ * renderer.buildInstanceBuffers();
+ *
+ * // Get stats
+ * const stats = renderer.getStats();
+ * console.log(`Rendering ${stats.visibleDoodads}/${stats.totalDoodads} doodads`);
+ * ```
+ */
 
 import * as BABYLON from '@babylonjs/core';
 import type { DoodadPlacement } from '../../formats/maps/types';
 
+/**
+ * Doodad renderer configuration
+ */
 export interface DoodadRendererConfig {
   /** Enable instancing */
   enableInstancing?: boolean;
@@ -92,6 +57,9 @@ export interface DoodadRendererConfig {
   maxDoodads?: number;
 }
 
+/**
+ * Doodad type definition
+ */
 export interface DoodadType {
   /** Type ID (e.g., "Tree_Ashenvale") */
   typeId: string;
@@ -106,6 +74,9 @@ export interface DoodadType {
   boundingRadius: number;
 }
 
+/**
+ * Doodad instance data
+ */
 export interface DoodadInstance {
   /** Instance ID */
   id: string;
@@ -126,6 +97,9 @@ export interface DoodadInstance {
   scale: BABYLON.Vector3;
 }
 
+/**
+ * Doodad rendering statistics
+ */
 export interface DoodadRenderStats {
   /** Total doodads */
   totalDoodads: number;
@@ -140,6 +114,9 @@ export interface DoodadRenderStats {
   typesLoaded: number;
 }
 
+/**
+ * DoodadRenderer - Renders map decorations efficiently with GPU instancing
+ */
 export class DoodadRenderer {
   private scene: BABYLON.Scene;
   private config: Required<DoodadRendererConfig>;
@@ -160,12 +137,11 @@ export class DoodadRenderer {
 
   /**
    * Load doodad type (model)
+   * @param typeId - Doodad type identifier
+   * @param _modelPath - Path to model file (MDX/M3) - unused until format parsers ready
+   * @param variations - Optional variation model paths
    */
-  public async loadDoodadType(
-    typeId: string,
-    modelPath: string,
-    variations?: string[]
-  ): Promise<void> {
+  public loadDoodadType(typeId: string, _modelPath: string, variations?: string[]): void {
     // For now, use placeholder meshes
     // TODO: Load actual MDX/M3 models when format parsers ready
 
@@ -193,6 +169,7 @@ export class DoodadRenderer {
 
   /**
    * Add doodad instance
+   * @param placement - Doodad placement data from map
    */
   public addDoodad(placement: DoodadPlacement): void {
     if (this.instances.size >= this.config.maxDoodads) {
@@ -203,7 +180,7 @@ export class DoodadRenderer {
     // Load type if not loaded
     if (!this.doodadTypes.has(placement.typeId)) {
       // Auto-load with placeholder
-      this.loadDoodadType(placement.typeId, '');
+      void this.loadDoodadType(placement.typeId, '');
     }
 
     const instance: DoodadInstance = {
@@ -299,7 +276,7 @@ export class DoodadRenderer {
   public getStats(): DoodadRenderStats {
     const visibleDoodads = Array.from(this.doodadTypes.values()).reduce((sum, type) => {
       const mesh = type.mesh;
-      return sum + (mesh.isEnabled() && mesh.isVisible ? mesh.thinInstanceCount ?? 0 : 0);
+      return sum + (mesh.isEnabled() && mesh.isVisible ? (mesh.thinInstanceCount ?? 0) : 0);
     }, 0);
 
     return {
@@ -360,74 +337,3 @@ export class DoodadRenderer {
     this.instanceBuffers.clear();
   }
 }
-```
-
-**Integration with MapRendererCore**:
-```typescript
-// In MapRendererCore.renderMap()
-private async renderMap(mapData: RawMapData): Promise<void> {
-  // ... existing terrain + units code ...
-
-  // Step 4: Render doodads
-  if (mapData.doodads.length > 0) {
-    this.doodadRenderer = new DoodadRenderer(this.scene, {
-      enableInstancing: true,
-      enableLOD: true,
-    });
-
-    for (const doodad of mapData.doodads) {
-      this.doodadRenderer.addDoodad(doodad);
-    }
-
-    this.doodadRenderer.buildInstanceBuffers();
-  }
-}
-```
-
----
-
-## 🧪 Validation
-
-```bash
-npm run typecheck
-npm test -- src/engine/rendering/DoodadRenderer.test.ts
-npm run benchmark -- doodad-rendering  # 1,000 doodads @ 60 FPS
-```
-
-**Expected**:
-- ✅ 1,000 doodads render @ 60 FPS
-- ✅ Instancing reduces draw calls (1 per type)
-- ✅ Frustum culling works correctly
-- ✅ No memory leaks
-
----
-
-## 📦 Tasks (4 days)
-
-**Day 1**: Core structure + placeholder meshes
-**Day 2**: Instancing implementation
-**Day 3**: LOD system + culling
-**Day 4**: Integration with MapRendererCore + tests
-
----
-
-## 🚨 Risks
-
-🟡 **Medium**: Need MDX/M3 model parsers for real doodad models
-**Mitigation**: Use placeholder meshes (shapes) initially, integrate real models later
-
-🟢 **Low**: Follows same pattern as UnitRenderer (proven approach)
-
----
-
-## 📚 References
-
-- **Pattern**: UnitRenderer.ts (instancing with thin instances)
-- **Types**: src/formats/maps/types.ts (DoodadPlacement interface)
-- **Babylon.js Instancing**: https://doc.babylonjs.com/features/featuresDeepDive/mesh/copies/thinInstances
-
----
-
-## 🎯 Confidence: **8.5/10**
-
-Clear pattern to follow (UnitRenderer). Main unknown is real model loading.
