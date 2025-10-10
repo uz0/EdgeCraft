@@ -1,0 +1,185 @@
+name: Asset Copyright Validation
+
+on:
+  push:
+    branches: [ main, develop, 'feat/**', 'fix/**' ]
+    paths:
+      - 'assets/**'
+      - 'src/assets/**'
+      - 'tests/assets/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'assets/**'
+      - 'src/assets/**'
+      - 'tests/assets/**'
+  workflow_dispatch:
+
+jobs:
+  copyright-check:
+    name: Copyright Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run copyright validation tests
+        id: copyright_test
+        run: |
+          npm run test:copyright
+          echo "VIOLATIONS=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Check for violations
+        if: steps.copyright_test.outputs.VIOLATIONS != '0'
+        run: |
+          echo "❌ Copyright violations detected!"
+          echo "Please review the test output above for details."
+          exit 1
+
+      - name: Run asset replacement tests
+        run: npm run test:asset-replacement
+
+      - name: Generate license attribution
+        run: npm run generate:attribution
+
+      - name: Validate license attributions
+        run: npm run validate:attributions
+
+      - name: Upload attribution file
+        uses: actions/upload-artifact@v3
+        with:
+          name: LICENSES.md
+          path: assets/LICENSES.md
+          retention-days: 30
+
+      - name: Check for changes in LICENSES.md
+        id: license_changes
+        run: |
+          if [ -f assets/LICENSES.md ]; then
+            git diff --exit-code assets/LICENSES.md || echo "CHANGES=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify if licenses changed
+        if: steps.license_changes.outputs.CHANGES == 'true'
+        run: |
+          echo "⚠️  License attributions have changed!"
+          echo "Please commit the updated assets/LICENSES.md file."
+
+  visual-similarity-check:
+    name: Visual Similarity Detection
+    runs-on: ubuntu-latest
+    needs: copyright-check
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run visual similarity tests
+        run: npm run test:visual-similarity
+
+      - name: Generate similarity report
+        run: npm run report:visual-similarity
+        continue-on-error: true
+
+      - name: Upload similarity report
+        uses: actions/upload-artifact@v3
+        with:
+          name: visual-similarity-report
+          path: reports/visual-similarity.json
+          retention-days: 30
+        if: always()
+
+  integration-validation:
+    name: Full Integration Validation
+    runs-on: ubuntu-latest
+    needs: [copyright-check, visual-similarity-check]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full compliance pipeline
+        run: npm run test:compliance-pipeline
+
+      - name: Validate all success criteria
+        run: |
+          echo "✅ Validating PRP 1.7 success criteria..."
+
+          # Check copyright detection
+          npm run test:copyright || exit 1
+
+          # Check asset replacement
+          npm run test:asset-replacement || exit 1
+
+          # Check visual similarity
+          npm run test:visual-similarity || exit 1
+
+          # Check license generation
+          npm run test:license-generation || exit 1
+
+          echo "✅ All validation criteria passed!"
+
+      - name: Generate final report
+        run: |
+          echo "# Legal Compliance Validation Report" > compliance-report.md
+          echo "" >> compliance-report.md
+          echo "**Date**: $(date)" >> compliance-report.md
+          echo "**Commit**: ${{ github.sha }}" >> compliance-report.md
+          echo "**Branch**: ${{ github.ref_name }}" >> compliance-report.md
+          echo "" >> compliance-report.md
+          echo "## Results" >> compliance-report.md
+          echo "- ✅ Copyright validation passed" >> compliance-report.md
+          echo "- ✅ Asset replacement tests passed" >> compliance-report.md
+          echo "- ✅ Visual similarity detection passed" >> compliance-report.md
+          echo "- ✅ License attribution validated" >> compliance-report.md
+          echo "" >> compliance-report.md
+          echo "## Conclusion" >> compliance-report.md
+          echo "All legal compliance checks passed. No copyrighted assets detected." >> compliance-report.md
+
+      - name: Upload compliance report
+        uses: actions/upload-artifact@v3
+        with:
+          name: compliance-report
+          path: compliance-report.md
+          retention-days: 90
+
+      - name: Post summary
+        run: |
+          echo "## ✅ Legal Compliance Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All copyright validation checks completed successfully:" >> $GITHUB_STEP_SUMMARY
+          echo "- Copyright detection: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Asset replacement: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- Visual similarity: ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- License attribution: ✅" >> $GITHUB_STEP_SUMMARY
