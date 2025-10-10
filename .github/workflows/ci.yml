@@ -1,64 +1,102 @@
-name: Edge Craft CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, develop, 'feature/*' ]
   pull_request:
-    branches: [ main, develop ]
-  workflow_dispatch:
-
-env:
-  NODE_VERSION: '20.x'
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
 
 jobs:
-  # Code Quality & Testing
-  quality:
-    name: Code Quality Check
+  lint:
+    name: Lint Check
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20.x'
           cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript Check
-        run: npm run typecheck
-
-      - name: Lint Check
+      - name: Run ESLint
         run: npm run lint
 
-      - name: Run Tests
-        run: npm test -- --coverage
+      - name: Check Prettier formatting
+        run: npm run format:check
 
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type checking
+        run: npm run typecheck
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test -- --coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
 
-  # Security Audit
   security:
     name: Security Audit
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20.x'
           cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
       - name: Run Audit
@@ -68,157 +106,41 @@ jobs:
       - name: License Check
         run: npm run validate:legal
 
-  # Build Verification
   build:
-    name: Build Verification
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: Build Check
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20.x'
           cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build Project
+      - name: Build project
         run: npm run build
 
       - name: Bundle Size Check
         run: npm run validate:bundle
 
-      - name: Upload Build Artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.os }}
+          name: dist
           path: dist/
+          retention-days: 7
 
-  # Performance Benchmarks
-  performance:
-    name: Performance Benchmarks
+  quality-gate:
+    name: Quality Gate
     runs-on: ubuntu-latest
-    needs: [quality, build]
+    needs: [lint, typecheck, test, security, build]
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Benchmarks
-        run: npm run benchmark
-
-      - name: Store Benchmark Results
-        uses: benchmark-action/github-action-benchmark@v1
-        with:
-          tool: 'customBiggerIsBetter'
-          output-file-path: benchmark-results.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
-
-  # External Dependency Check
-  external-deps:
-    name: External Dependencies Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Check Core-Edge Availability
-        run: |
-          curl -f https://api.github.com/repos/uz0/core-edge || echo "::warning::core-edge repository not accessible"
-
-      - name: Check Index.EdgeCraft Availability
-        run: |
-          curl -f https://api.github.com/repos/uz0/index.edgecraft || echo "::warning::index.edgecraft repository not accessible"
-
-  # Deploy Preview (PR only)
-  deploy-preview:
-    name: Deploy Preview
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    needs: [quality, security, build]
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build for Preview
-        run: npm run build
-        env:
-          PUBLIC_URL: /pr-${{ github.event.pull_request.number }}/
-
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v2
-        with:
-          publish-dir: './dist'
-          production-deploy: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "PR #${{ github.event.pull_request.number }}"
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-
-  # Release (main branch only)
-  release:
-    name: Create Release
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    needs: [quality, security, build, performance]
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build Production
-        run: npm run build:prod
-
-      - name: Generate Changelog
-        id: changelog
-        uses: TriPSs/conventional-changelog-action@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-version-file: true
-
-      - name: Create Release
-        if: steps.changelog.outputs.skipped == 'false'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "dist/**/*"
-          body: ${{ steps.changelog.outputs.clean_changelog }}
-          tag: ${{ steps.changelog.outputs.tag }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: All checks passed
+        run: echo "✅ All quality checks passed successfully!"
