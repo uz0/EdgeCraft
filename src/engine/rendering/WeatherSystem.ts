@@ -145,9 +145,7 @@ export class WeatherSystem {
       return;
     }
 
-    console.log(
-      `Transitioning from ${this.currentWeather} to ${config.type} over ${durationMs}ms`
-    );
+    console.log(`Transitioning from ${this.currentWeather} to ${config.type} over ${durationMs}ms`);
 
     this.isTransitioning = true;
 

@@ -173,7 +173,7 @@ export class AdvancedParticleSystem {
   /**
    * Create a new particle effect
    */
-  public async createEffect(config: ParticleEffectConfig): Promise<string> {
+  public createEffect(config: ParticleEffectConfig): string {
     // Check concurrent effect limit
     if (this.effects.size >= this.maxConcurrentEffects) {
       console.warn(
@@ -185,9 +185,7 @@ export class AdvancedParticleSystem {
     const effectId = `particle_${this.nextEffectId++}`;
 
     // Create particle system
-    const system = this.useGPU
-      ? this.createGPUSystem(config)
-      : this.createCPUSystem(config);
+    const system = this.useGPU ? this.createGPUSystem(config) : this.createCPUSystem(config);
 
     if (system == null) {
       return '';
@@ -213,9 +211,7 @@ export class AdvancedParticleSystem {
   /**
    * Create GPU particle system
    */
-  private createGPUSystem(
-    config: ParticleEffectConfig
-  ): BABYLON.GPUParticleSystem | null {
+  private createGPUSystem(config: ParticleEffectConfig): BABYLON.GPUParticleSystem | null {
     const capacity = Math.min(config.capacity ?? 1000, this.maxParticles);
 
     const system = new BABYLON.GPUParticleSystem(`gpu_${config.type}`, { capacity }, this.scene);
@@ -229,9 +225,7 @@ export class AdvancedParticleSystem {
   /**
    * Create CPU particle system (fallback)
    */
-  private createCPUSystem(
-    config: ParticleEffectConfig
-  ): BABYLON.ParticleSystem | null {
+  private createCPUSystem(config: ParticleEffectConfig): BABYLON.ParticleSystem | null {
     const capacity = Math.min(config.capacity ?? 1000, this.maxParticles);
 
     const system = new BABYLON.ParticleSystem(`cpu_${config.type}`, capacity, this.scene);

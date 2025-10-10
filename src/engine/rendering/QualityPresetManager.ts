@@ -141,7 +141,7 @@ export class QualityPresetManager {
   private minimap: MinimapSystem | null = null;
 
   // Auto-adjustment
-  private enableAutoAdjust: boolean = false;
+  private _enableAutoAdjust: boolean = false;
   private targetFPS: number = 60;
   private fpsSamples: number[] = [];
   private lastAdjustmentTime: number = 0;

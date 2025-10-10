@@ -78,7 +78,7 @@ export class MinimapSystem {
   private updateFPS: number;
   private renderTarget: BABYLON.RenderTargetTexture | null = null;
   private minimapCamera: BABYLON.FreeCamera | null = null;
-  private isEnabled: boolean = false;
+  private _isEnabled: boolean = false;
   private mapBounds: {
     minX: number;
     maxX: number;
@@ -192,7 +192,7 @@ export class MinimapSystem {
     const framesBetweenUpdates = Math.round(60 / this.updateFPS);
     this.renderTarget.refreshRate = framesBetweenUpdates;
 
-    this.isEnabled = true;
+    this._isEnabled = true;
 
     console.log(
       `Minimap initialized (${this.rttSize}x${this.rttSize}, refresh every ${framesBetweenUpdates} frames)`
@@ -323,7 +323,7 @@ export class MinimapSystem {
         this.renderTarget.refreshRate = 0; // Don't update
       }
     }
-    this.isEnabled = enabled;
+    this._isEnabled = enabled;
   }
 
   /**
@@ -340,7 +340,7 @@ export class MinimapSystem {
       this.minimapCamera = null;
     }
 
-    this.isEnabled = false;
+    this._isEnabled = false;
     console.log('Minimap system disposed');
   }
 }
