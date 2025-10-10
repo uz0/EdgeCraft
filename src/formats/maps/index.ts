@@ -6,6 +6,14 @@
 export { MapLoaderRegistry } from './MapLoaderRegistry';
 export type { MapLoadOptions, MapLoadResult } from './MapLoaderRegistry';
 
+export { BatchMapLoader } from './BatchMapLoader';
+export type {
+  MapLoadTask,
+  MapLoadProgress,
+  BatchLoadResult,
+  BatchMapLoaderConfig,
+} from './BatchMapLoader';
+
 export { W3XMapLoader } from './w3x/W3XMapLoader';
 export { SCMMapLoader } from './scm/SCMMapLoader';
 
