@@ -64,7 +64,7 @@ export class UnitAnimationController {
     }
 
     // Update current animation time
-    this.state.currentTime += adjustedDeltaTime;
+    this.state.currentTime = (this.state.currentTime ?? 0) + adjustedDeltaTime;
 
     // Apply animation-specific speed multiplier
     const clip = this.animationSystem.getAnimationClip(this.state.currentAnimation);

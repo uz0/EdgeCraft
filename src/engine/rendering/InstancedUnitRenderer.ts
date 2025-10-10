@@ -358,7 +358,7 @@ export class InstancedUnitRenderer {
           }
 
           // Advance animation time
-          instance.animationTime += deltaTime;
+          instance.animationTime = (instance.animationTime ?? 0) + deltaTime;
 
           // Normalize time for looping
           instance.animationTime = animSystem.normalizeAnimationTime(

@@ -171,9 +171,10 @@ export class UnitInstanceManager {
 
     // Write team color to buffer (4 floats: RGBA)
     const colorOffset = index * 4;
-    this.colorBuffer[colorOffset] = instance.teamColor.r;
-    this.colorBuffer[colorOffset + 1] = instance.teamColor.g;
-    this.colorBuffer[colorOffset + 2] = instance.teamColor.b;
+    const teamColor = instance.teamColor ?? BABYLON.Color3.White();
+    this.colorBuffer[colorOffset] = teamColor.r;
+    this.colorBuffer[colorOffset + 1] = teamColor.g;
+    this.colorBuffer[colorOffset + 2] = teamColor.b;
     this.colorBuffer[colorOffset + 3] = 1.0; // alpha
 
     // Write animation data
