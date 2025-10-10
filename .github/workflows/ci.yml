@@ -52,8 +52,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
       - name: Run Audit
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=high
+        continue-on-error: false
 
       - name: License Check
         run: npm run validate:legal
@@ -86,7 +96,7 @@ jobs:
         run: npm run validate:bundle
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}
           path: dist/
