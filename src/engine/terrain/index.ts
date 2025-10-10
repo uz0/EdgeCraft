@@ -10,7 +10,12 @@ export { AdvancedTerrainRenderer } from './AdvancedTerrainRenderer';
 export { TerrainMaterial } from './TerrainMaterial';
 export { TerrainChunk } from './TerrainChunk';
 export { TerrainQuadtree } from './TerrainQuadtree';
-export { DEFAULT_LOD_CONFIG, getLODLevel, getSubdivisions, calculateOptimalChunkSize } from './TerrainLOD';
+export {
+  DEFAULT_LOD_CONFIG,
+  getLODLevel,
+  getSubdivisions,
+  calculateOptimalChunkSize,
+} from './TerrainLOD';
 
 // Types
 export * from './types';

@@ -42,7 +42,7 @@ export class TerrainQuadtree {
     this.lodConfig = lodConfig;
 
     // Calculate optimal chunk size if not provided
-    this.chunkSize = chunkSize || calculateOptimalChunkSize(terrainWidth, terrainHeight);
+    this.chunkSize = chunkSize ?? calculateOptimalChunkSize(terrainWidth, terrainHeight);
 
     // Calculate number of chunks
     this.chunksX = Math.ceil(terrainWidth / this.chunkSize);

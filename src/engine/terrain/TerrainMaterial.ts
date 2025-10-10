@@ -80,7 +80,11 @@ export class TerrainMaterial extends BABYLON.ShaderMaterial {
     this.setTexture(`diffuse${index + 1}`, diffuse);
 
     // Load normal map if provided
-    if (layer.normalTexture) {
+    if (
+      layer.normalTexture !== undefined &&
+      layer.normalTexture !== null &&
+      layer.normalTexture !== ''
+    ) {
       const normal = new BABYLON.Texture(layer.normalTexture, scene);
       normal.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
       normal.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
@@ -119,10 +123,10 @@ export class TerrainMaterial extends BABYLON.ShaderMaterial {
    */
   private updateTextureScales(): void {
     const scales = [
-      this.layers[0]?.scale || 1.0,
-      this.layers[1]?.scale || 1.0,
-      this.layers[2]?.scale || 1.0,
-      this.layers[3]?.scale || 1.0,
+      this.layers[0]?.scale ?? 1.0,
+      this.layers[1]?.scale ?? 1.0,
+      this.layers[2]?.scale ?? 1.0,
+      this.layers[3]?.scale ?? 1.0,
     ];
     this.setVector4('textureScales', new BABYLON.Vector4(...scales));
   }
@@ -133,7 +137,7 @@ export class TerrainMaterial extends BABYLON.ShaderMaterial {
    * @param camera - Active camera
    */
   updateCameraPosition(camera: BABYLON.Camera): void {
-    if (camera.globalPosition) {
+    if (camera.globalPosition !== null && camera.globalPosition !== undefined) {
       this.setVector3('cameraPosition', camera.globalPosition);
     }
   }

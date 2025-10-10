@@ -108,13 +108,13 @@ export class TerrainChunk {
    */
   private onAllLODsReady(): void {
     // Dispose placeholder mesh
-    if (this.mesh && !this.lodMeshes.includes(this.mesh)) {
+    if (this.mesh !== null && this.mesh !== undefined && !this.lodMeshes.includes(this.mesh)) {
       this.mesh.dispose();
     }
 
     // Set LOD 0 as active mesh
     const lod0 = this.lodMeshes[0];
-    if (lod0) {
+    if (lod0 !== null && lod0 !== undefined) {
       this.mesh = lod0;
       this.mesh.isVisible = this.isVisible;
       this.bounds = this.mesh.getBoundingInfo().boundingBox;
@@ -167,7 +167,7 @@ export class TerrainChunk {
    */
   setVisible(visible: boolean): void {
     this.isVisible = visible;
-    if (this.mesh) {
+    if (this.mesh !== null && this.mesh !== undefined) {
       this.mesh.isVisible = visible;
     }
   }
@@ -181,7 +181,7 @@ export class TerrainChunk {
     for (const mesh of this.lodMeshes) {
       mesh.material = material;
     }
-    if (this.mesh && !this.lodMeshes.includes(this.mesh)) {
+    if (this.mesh !== null && this.mesh !== undefined && !this.lodMeshes.includes(this.mesh)) {
       this.mesh.material = material;
     }
   }
@@ -194,7 +194,7 @@ export class TerrainChunk {
    * @returns Height at position
    */
   getHeightAtPosition(x: number, z: number): number {
-    if (!this.mesh) return 0;
+    if (this.mesh === null || this.mesh === undefined) return 0;
 
     const worldX = this.chunkX * this.chunkSize + x;
     const worldZ = this.chunkZ * this.chunkSize + z;
@@ -218,7 +218,7 @@ export class TerrainChunk {
     }
     this.lodMeshes = [];
 
-    if (this.mesh && !this.lodMeshes.includes(this.mesh)) {
+    if (this.mesh !== null && this.mesh !== undefined && !this.lodMeshes.includes(this.mesh)) {
       this.mesh.dispose();
     }
   }

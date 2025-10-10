@@ -114,10 +114,18 @@ export class AdvancedTerrainRenderer {
     if (!options.heightmap || options.heightmap.trim() === '') {
       throw new Error('Heightmap URL is required');
     }
-    if (!options.splatmap || options.splatmap.trim() === '') {
+    if (
+      options.splatmap === null ||
+      options.splatmap === undefined ||
+      options.splatmap.trim() === ''
+    ) {
       throw new Error('Splatmap URL is required');
     }
-    if (!options.textureLayers || options.textureLayers.length === 0) {
+    if (
+      options.textureLayers === null ||
+      options.textureLayers === undefined ||
+      options.textureLayers.length === 0
+    ) {
       throw new Error('At least one texture layer is required');
     }
     if (options.textureLayers.length > 4) {

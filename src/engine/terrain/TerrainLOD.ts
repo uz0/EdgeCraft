@@ -28,7 +28,7 @@ export function getLODLevel(
   config: TerrainLODConfig = DEFAULT_LOD_CONFIG
 ): number {
   const distances = config.distances;
-  if (!distances || distances.length === 0) {
+  if (distances === undefined || distances === null || distances.length === 0) {
     return 0;
   }
 
@@ -67,10 +67,7 @@ export function getSubdivisions(
  * @param terrainHeight - Total terrain height
  * @returns Optimal chunk size
  */
-export function calculateOptimalChunkSize(
-  terrainWidth: number,
-  terrainHeight: number
-): number {
+export function calculateOptimalChunkSize(terrainWidth: number, terrainHeight: number): number {
   // Aim for 4-16 chunks per dimension
   const minChunks = 4;
   const maxChunks = 16;

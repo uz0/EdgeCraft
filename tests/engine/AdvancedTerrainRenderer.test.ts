@@ -35,51 +35,51 @@ describe.skip('AdvancedTerrainRenderer', () => {
     });
 
     it('should validate required options', async () => {
-      const invalidOptions: any = {
+      const invalidOptions = {
         width: 0,
         height: 0,
         textureLayers: [],
-      };
+      } as unknown as AdvancedTerrainOptions;
 
       await expect(renderer.initialize(scene, invalidOptions)).rejects.toThrow();
     });
 
     it('should reject missing heightmap', async () => {
-      const options: any = {
+      const options = {
         width: 256,
         height: 256,
         splatmap: '/test.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
-      };
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
+      } as unknown as AdvancedTerrainOptions;
 
-      await expect(renderer.initialize(scene, options)).rejects.toThrow('Heightmap URL is required');
+      await expect(renderer.initialize(scene, options)).rejects.toThrow(
+        'Heightmap URL is required'
+      );
     });
 
     it('should reject missing splatmap', async () => {
-      const options: any = {
+      const options = {
         width: 256,
         height: 256,
         heightmap: '/test.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
-      };
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
+      } as unknown as AdvancedTerrainOptions;
 
       await expect(renderer.initialize(scene, options)).rejects.toThrow('Splatmap URL is required');
     });
 
     it('should reject empty texture layers', async () => {
-      const options: any = {
+      const options = {
         width: 256,
         height: 256,
         heightmap: '/test.png',
         splatmap: '/test.png',
         textureLayers: [],
-      };
+      } as unknown as AdvancedTerrainOptions;
 
-      await expect(renderer.initialize(scene, options)).rejects.toThrow('At least one texture layer is required');
+      await expect(renderer.initialize(scene, options)).rejects.toThrow(
+        'At least one texture layer is required'
+      );
     });
   });
 
@@ -151,9 +151,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         height: 256,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       await renderer.initialize(scene, options);
@@ -170,9 +168,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         height: 256,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       await renderer.initialize(scene, options);
@@ -188,9 +184,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         chunkSize: 64,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       await renderer.initialize(scene, options);
@@ -207,9 +201,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         height: 256,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       await renderer.initialize(scene, options);
@@ -231,9 +223,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         height: 256,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       expect(renderer.isReady()).toBe(false);
@@ -249,9 +239,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         height: 256,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       await renderer.initialize(scene, options);
@@ -271,9 +259,7 @@ describe.skip('AdvancedTerrainRenderer', () => {
         height: 256,
         heightmap: '/test-heightmap.png',
         splatmap: '/test-splatmap.png',
-        textureLayers: [
-          { diffuseTexture: '/grass.png', scale: 10 },
-        ],
+        textureLayers: [{ diffuseTexture: '/grass.png', scale: 10 }],
       };
 
       await renderer.initialize(scene, options);

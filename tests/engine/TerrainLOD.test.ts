@@ -2,7 +2,12 @@
  * Terrain LOD System tests
  */
 
-import { getLODLevel, getSubdivisions, calculateOptimalChunkSize, DEFAULT_LOD_CONFIG } from '@/engine/terrain/TerrainLOD';
+import {
+  getLODLevel,
+  getSubdivisions,
+  calculateOptimalChunkSize,
+  DEFAULT_LOD_CONFIG,
+} from '@/engine/terrain/TerrainLOD';
 
 describe('TerrainLOD', () => {
   describe('getLODLevel', () => {
@@ -48,7 +53,7 @@ describe('TerrainLOD', () => {
       expect(getSubdivisions(0)).toBe(64); // LOD 0
       expect(getSubdivisions(1)).toBe(32); // LOD 1
       expect(getSubdivisions(2)).toBe(16); // LOD 2
-      expect(getSubdivisions(3)).toBe(8);  // LOD 3
+      expect(getSubdivisions(3)).toBe(8); // LOD 3
     });
 
     it('should return last level subdivisions for out of bounds index', () => {
