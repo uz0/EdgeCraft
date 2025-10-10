@@ -9,9 +9,9 @@ const fs = require('fs');
 const path = require('path');
 
 const MAX_SIZES = {
-  js: 500 * 1024,      // 500KB max for JS bundles (gzipped)
+  js: 6000 * 1024,     // 6MB max for JS bundles (includes Babylon.js ~5MB)
   css: 50 * 1024,      // 50KB max for CSS (gzipped)
-  total: 1000 * 1024,  // 1MB total (gzipped)
+  total: 6500 * 1024,  // 6.5MB total (Babylon.js 3D engine is large)
 };
 
 function getFileSize(filePath) {

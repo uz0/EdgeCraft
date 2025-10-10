@@ -2,7 +2,13 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  roots: ['<rootDir>/src'],
+  setupFiles: ['<rootDir>/jest.setup.js'],
+
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
+
+  transformIgnorePatterns: [
+    'node_modules/(?!@babylonjs)',
+  ],
 
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',
@@ -12,6 +18,12 @@ export default {
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: {
+        jsx: 'react-jsx',
+      },
+    }],
+    '^.+\\.js$': ['ts-jest', {
+      tsconfig: {
+        allowJs: true,
         jsx: 'react-jsx',
       },
     }],
