@@ -6,7 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { GameCanvas } from '@/ui/GameCanvas';
 
 // Skip these tests in CI environment (no WebGL support)
-const describeIfNotCI = process.env.CI ? describe.skip : describe;
+const describeIfNotCI = process.env['CI'] === 'true' ? describe.skip : describe;
 
 describeIfNotCI('GameCanvas', () => {
   it('should render canvas element', () => {

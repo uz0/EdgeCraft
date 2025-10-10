@@ -270,8 +270,11 @@ export class LegalCompliancePipeline {
     _metadata: AssetMetadata
   ): Promise<{ isMatch: boolean; similarity: number }> {
     try {
-      await this.visualSimilarity.computePerceptualHash(asset);
+      // Only proceed if database has entries to compare against
       const database = Array.from(this.visualHashDB.values());
+      if (database.length === 0) {
+        return { isMatch: false, similarity: 0 };
+      }
 
       const result = await this.visualSimilarity.findSimilarInDatabase(
         asset,
@@ -284,7 +287,10 @@ export class LegalCompliancePipeline {
         similarity: result.similarity ?? 0,
       };
     } catch (error) {
-      // If visual similarity check fails, log warning but don't block
+      // If visual similarity check fails (e.g., invalid image format), log warning but don't block
+      console.debug(
+        `Visual similarity check skipped: ${error instanceof Error ? error.message : String(error)}`
+      );
       return { isMatch: false, similarity: 0 };
     }
   }
