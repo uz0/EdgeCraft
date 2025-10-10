@@ -42,7 +42,7 @@ export default {
     '!src/vite-env.d.ts',
   ],
 
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
@@ -54,10 +54,4 @@ export default {
   coverageDirectory: '<rootDir>/coverage',
 
   testTimeout: 10000,
-
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
-  },
 };

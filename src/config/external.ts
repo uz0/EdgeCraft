@@ -27,7 +27,7 @@ export const EXTERNAL_REPOS: ExternalConfig = {
     dev: 'http://localhost:2567',
     prod: 'wss://core-edge.edgecraft.game',
     repo: 'https://github.com/uz0/core-edge',
-    docs: 'https://github.com/uz0/core-edge/wiki'
+    docs: 'https://github.com/uz0/core-edge/wiki',
   },
 
   // Launcher map configuration
@@ -35,20 +35,20 @@ export const EXTERNAL_REPOS: ExternalConfig = {
     dev: './mocks/launcher-map/index.edgecraft',
     prod: 'https://cdn.edgecraft.game/maps/index.edgecraft',
     repo: 'https://github.com/uz0/index.edgecraft',
-    autoLoad: true // ALWAYS loads on startup
-  }
+    autoLoad: true, // ALWAYS loads on startup
+  },
 };
 
 /**
  * Get the appropriate endpoint based on environment
  */
 export function getMultiplayerEndpoint(): string {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env['NODE_ENV'] === 'development';
 
   // Check if core-edge is running locally
   if (isDevelopment) {
     // Try to detect if real core-edge server is running
-    return process.env.CORE_EDGE_URL || EXTERNAL_REPOS.multiplayer.dev;
+    return process.env['CORE_EDGE_URL'] || EXTERNAL_REPOS.multiplayer.dev;
   }
 
   return EXTERNAL_REPOS.multiplayer.prod;
@@ -58,12 +58,12 @@ export function getMultiplayerEndpoint(): string {
  * Get the launcher map path based on environment
  */
 export function getLauncherPath(): string {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env['NODE_ENV'] === 'development';
 
   // Check if full index.edgecraft is available
   if (isDevelopment) {
     // Try to use full launcher if linked
-    return process.env.LAUNCHER_PATH || EXTERNAL_REPOS.launcher.dev;
+    return process.env['LAUNCHER_PATH'] || EXTERNAL_REPOS.launcher.dev;
   }
 
   return EXTERNAL_REPOS.launcher.prod;
@@ -95,18 +95,18 @@ export function validateExternalDependencies(): {
   }
 
   // Warnings for development
-  if (process.env.NODE_ENV === 'development') {
-    if (!process.env.CORE_EDGE_URL) {
+  if (process.env['NODE_ENV'] === 'development') {
+    if (!process.env['CORE_EDGE_URL']) {
       warnings.push(
         'Using mock multiplayer server. For full functionality, clone and run: ' +
-        EXTERNAL_REPOS.multiplayer.repo
+          EXTERNAL_REPOS.multiplayer.repo
       );
     }
 
-    if (!process.env.LAUNCHER_PATH) {
+    if (!process.env['LAUNCHER_PATH']) {
       warnings.push(
         'Using mock launcher map. For full functionality, clone and build: ' +
-        EXTERNAL_REPOS.launcher.repo
+          EXTERNAL_REPOS.launcher.repo
       );
     }
   }
@@ -114,7 +114,7 @@ export function validateExternalDependencies(): {
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
@@ -130,7 +130,9 @@ export function logExternalStatus(): void {
   const isUsingMockServer = multiplayerEndpoint.includes('localhost');
 
   console.log('║ Multiplayer Server:                                    ║');
-  console.log(`║   ${isUsingMockServer ? '⚠️  MOCK' : '✅ PRODUCTION'}: ${multiplayerEndpoint.padEnd(44)} ║`);
+  console.log(
+    `║   ${isUsingMockServer ? '⚠️  MOCK' : '✅ PRODUCTION'}: ${multiplayerEndpoint.padEnd(44)} ║`
+  );
 
   if (isUsingMockServer) {
     console.log('║   📦 Full server: https://github.com/uz0/core-edge    ║');
@@ -142,7 +144,9 @@ export function logExternalStatus(): void {
   const isUsingMockLauncher = launcherPath.includes('mocks');
 
   console.log('║ Launcher Map:                                          ║');
-  console.log(`║   ${isUsingMockLauncher ? '⚠️  MOCK' : '✅ PRODUCTION'}: ${launcherPath.substring(0, 44).padEnd(44)} ║`);
+  console.log(
+    `║   ${isUsingMockLauncher ? '⚠️  MOCK' : '✅ PRODUCTION'}: ${launcherPath.substring(0, 44).padEnd(44)} ║`
+  );
 
   if (isUsingMockLauncher) {
     console.log('║   📦 Full launcher: https://github.com/uz0/index.edgecraft ║');
@@ -154,14 +158,14 @@ export function logExternalStatus(): void {
 
   if (validation.warnings.length > 0) {
     console.log('\\n⚠️  Warnings:');
-    validation.warnings.forEach(warning => {
+    validation.warnings.forEach((warning) => {
       console.log(`   - ${warning}`);
     });
   }
 
   if (!validation.valid) {
     console.error('\\n❌ Errors:');
-    validation.errors.forEach(error => {
+    validation.errors.forEach((error) => {
       console.error(`   - ${error}`);
     });
     throw new Error('External dependency configuration invalid');
@@ -181,5 +185,5 @@ export const LAUNCHER_CONFIG = {
   RETRY_DELAY: 1000, // ms
 
   // Validation
-  REQUIRED_SCENES: ['main-menu', 'map-browser', 'settings']
+  REQUIRED_SCENES: ['main-menu', 'map-browser', 'settings'],
 };
