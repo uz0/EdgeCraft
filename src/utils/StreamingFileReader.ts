@@ -64,7 +64,7 @@ export class StreamingFileReader {
     this.file = file;
     this.config = {
       chunkSize: config?.chunkSize ?? 4 * 1024 * 1024, // 4MB default
-      onProgress: config?.onProgress ?? (() => {}),
+      onProgress: config?.onProgress ?? ((): void => {}),
       signal: config?.signal,
     };
   }
@@ -80,7 +80,7 @@ export class StreamingFileReader {
 
     while (this.position < totalBytes) {
       // Check for cancellation
-      if (this.config.signal?.aborted) {
+      if (this.config.signal?.aborted === true) {
         throw new Error('Stream aborted');
       }
 
@@ -123,7 +123,7 @@ export class StreamingFileReader {
     }
 
     // Check for cancellation
-    if (this.config.signal?.aborted) {
+    if (this.config.signal?.aborted === true) {
       throw new Error('Stream aborted');
     }
 

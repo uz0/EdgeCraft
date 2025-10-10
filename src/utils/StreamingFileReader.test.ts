@@ -75,6 +75,7 @@ describe('StreamingFileReader', () => {
 
       // Read chunks until position is updated
       let chunkCount = 0;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _chunk of reader.readChunks()) {
         chunkCount++;
         if (chunkCount === 2) {
@@ -206,6 +207,7 @@ describe('StreamingFileReader', () => {
         onProgress,
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _chunk of reader.readChunks()) {
         // Consume chunks
       }
@@ -262,12 +264,11 @@ describe('StreamingFileReader', () => {
         signal: controller.signal,
       });
 
-      const chunks: Uint8Array[] = [];
       const iterator = reader.readChunks();
 
       // Read first chunk
       const first = await iterator.next();
-      chunks.push(first.value?.data);
+      expect(first.value).toBeDefined();
 
       // Abort before second chunk
       controller.abort();

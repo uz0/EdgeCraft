@@ -41,7 +41,9 @@ export class W3NCampaignLoader implements IMapLoader {
 
     if (fileSize > STREAMING_THRESHOLD && file instanceof File) {
       // Large file (>100MB) - use streaming to prevent memory crashes
-      console.log(`Large campaign detected (${(fileSize / 1024 / 1024).toFixed(1)} MB), using streaming mode`);
+      console.log(
+        `Large campaign detected (${(fileSize / 1024 / 1024).toFixed(1)} MB), using streaming mode`
+      );
       return this.parseStreaming(file);
     } else {
       // Small file (<100MB) - use traditional in-memory parsing
@@ -113,7 +115,7 @@ export class W3NCampaignLoader implements IMapLoader {
     // Create streaming reader
     const reader = new StreamingFileReader(file, {
       chunkSize: 4 * 1024 * 1024, // 4MB chunks
-      onProgress: (bytesRead, totalBytes) => {
+      onProgress: (bytesRead, totalBytes): void => {
         const percent = ((bytesRead / totalBytes) * 100).toFixed(1);
         console.log(`Loading campaign: ${percent}%`);
       },

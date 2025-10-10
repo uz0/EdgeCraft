@@ -164,10 +164,8 @@ export class MPQParser {
           );
 
           // Handle wildcards
-          if (filePattern?.includes('*')) {
-            const matchingFiles = fileList.filter((f) =>
-              this.matchesPattern(f, filePattern)
-            );
+          if (filePattern !== undefined && filePattern.includes('*')) {
+            const matchingFiles = fileList.filter((f) => this.matchesPattern(f, filePattern));
             for (const fileName of matchingFiles) {
               const file = await this.extractFileStream(fileName, reader, hashTable, blockTable);
               if (file) {
@@ -175,7 +173,12 @@ export class MPQParser {
               }
             }
           } else {
-            const file = await this.extractFileStream(filePattern ?? '', reader, hashTable, blockTable);
+            const file = await this.extractFileStream(
+              filePattern ?? '',
+              reader,
+              hashTable,
+              blockTable
+            );
             if (file) {
               files.push(file);
             }
@@ -598,7 +601,10 @@ export class MPQParser {
 
     return {
       name: fileName,
-      data: fileData.buffer.slice(fileData.byteOffset, fileData.byteOffset + fileData.byteLength) as ArrayBuffer,
+      data: fileData.buffer.slice(
+        fileData.byteOffset,
+        fileData.byteOffset + fileData.byteLength
+      ) as ArrayBuffer,
       compressedSize: blockEntry.compressedSize,
       uncompressedSize: blockEntry.uncompressedSize,
       isCompressed,
