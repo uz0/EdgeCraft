@@ -167,7 +167,8 @@ export class LegalCompliancePipeline {
           : typeof error === 'string'
             ? error
             : JSON.stringify(error);
-      console.error(`Validation error for ${metadata.name}:`, error);
+      // Only log the error message string to avoid serialization issues in CI
+      console.error(`Validation error for ${metadata.name}: ${errorMsg}`);
       throw new Error(`Validation failed for ${metadata.name}: ${errorMsg}`);
     }
   }
