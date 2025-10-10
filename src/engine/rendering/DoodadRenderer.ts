@@ -141,11 +141,7 @@ export class DoodadRenderer {
    * @param _modelPath - Path to model file (MDX/M3) - unused until format parsers ready
    * @param variations - Optional variation model paths
    */
-  public async loadDoodadType(
-    typeId: string,
-    _modelPath: string,
-    variations?: string[]
-  ): Promise<void> {
+  public loadDoodadType(typeId: string, _modelPath: string, variations?: string[]): void {
     // For now, use placeholder meshes
     // TODO: Load actual MDX/M3 models when format parsers ready
 
@@ -280,7 +276,7 @@ export class DoodadRenderer {
   public getStats(): DoodadRenderStats {
     const visibleDoodads = Array.from(this.doodadTypes.values()).reduce((sum, type) => {
       const mesh = type.mesh;
-      return sum + (mesh.isEnabled() && mesh.isVisible ? mesh.thinInstanceCount ?? 0 : 0);
+      return sum + (mesh.isEnabled() && mesh.isVisible ? (mesh.thinInstanceCount ?? 0) : 0);
     }, 0);
 
     return {

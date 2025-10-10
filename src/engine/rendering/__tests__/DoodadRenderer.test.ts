@@ -58,24 +58,24 @@ describeIfWebGL('DoodadRenderer', () => {
   });
 
   describe('loadDoodadType', () => {
-    it('should load doodad type with placeholder mesh', async () => {
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+    it('should load doodad type with placeholder mesh', () => {
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
 
       const stats = renderer.getStats();
       expect(stats.typesLoaded).toBe(1);
     });
 
-    it('should load multiple doodad types', async () => {
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
-      await renderer.loadDoodadType('Rock_Large', 'models/rocks/large.mdx');
-      await renderer.loadDoodadType('Grass_Tuft', 'models/grass/tuft.mdx');
+    it('should load multiple doodad types', () => {
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+      renderer.loadDoodadType('Rock_Large', 'models/rocks/large.mdx');
+      renderer.loadDoodadType('Grass_Tuft', 'models/grass/tuft.mdx');
 
       const stats = renderer.getStats();
       expect(stats.typesLoaded).toBe(3);
     });
 
-    it('should handle variations', async () => {
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx', [
+    it('should handle variations', () => {
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx', [
         'models/trees/oak_var1.mdx',
         'models/trees/oak_var2.mdx',
       ]);
@@ -84,11 +84,11 @@ describeIfWebGL('DoodadRenderer', () => {
       expect(stats.typesLoaded).toBe(1);
     });
 
-    it('should log warning when loading duplicate type', async () => {
+    it('should log warning when loading duplicate type', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
 
       // First call logs "Loaded doodad type", second call would too
       expect(consoleSpy).toHaveBeenCalled();
@@ -189,10 +189,10 @@ describeIfWebGL('DoodadRenderer', () => {
   });
 
   describe('buildInstanceBuffers', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       // Load doodad types
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
-      await renderer.loadDoodadType('Rock_Large', 'models/rocks/large.mdx');
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+      renderer.loadDoodadType('Rock_Large', 'models/rocks/large.mdx');
     });
 
     it('should build instance buffers with instancing enabled', () => {
@@ -286,8 +286,8 @@ describeIfWebGL('DoodadRenderer', () => {
   });
 
   describe('getStats', () => {
-    it('should return correct statistics', async () => {
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+    it('should return correct statistics', () => {
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
 
       for (let i = 0; i < 100; i++) {
         const doodad: DoodadPlacement = {
@@ -327,8 +327,8 @@ describeIfWebGL('DoodadRenderer', () => {
   });
 
   describe('dispose', () => {
-    it('should dispose all resources', async () => {
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+    it('should dispose all resources', () => {
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
 
       for (let i = 0; i < 10; i++) {
         const doodad: DoodadPlacement = {
@@ -359,14 +359,14 @@ describeIfWebGL('DoodadRenderer', () => {
   });
 
   describe('performance', () => {
-    it('should handle 1,000 doodads efficiently', async () => {
+    it('should handle 1,000 doodads efficiently', () => {
       const perfRenderer = new DoodadRenderer(scene, {
         enableInstancing: true,
         maxDoodads: 2000,
       });
 
-      await perfRenderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
-      await perfRenderer.loadDoodadType('Rock_Large', 'models/rocks/large.mdx');
+      perfRenderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+      perfRenderer.loadDoodadType('Rock_Large', 'models/rocks/large.mdx');
 
       const startTime = performance.now();
 
@@ -400,8 +400,8 @@ describeIfWebGL('DoodadRenderer', () => {
       perfRenderer.dispose();
     });
 
-    it('should use instancing to minimize draw calls', async () => {
-      await renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
+    it('should use instancing to minimize draw calls', () => {
+      renderer.loadDoodadType('Tree_Oak', 'models/trees/oak.mdx');
 
       // Add 100 doodads of the same type
       for (let i = 0; i < 100; i++) {
