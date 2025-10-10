@@ -496,7 +496,7 @@ export interface ShadowCasterConfig {
   quality?: ShadowQuality;
 
   /** Shadow type */
-  type?: 'csm' | 'blob' | 'standard';
+  type?: 'csm' | 'blob' | 'standard' | 'hero' | 'building' | 'unit' | 'none';
 
   /** Shadow cast method */
   castMethod?: 'csm' | 'blob';
@@ -532,6 +532,9 @@ export interface ShadowCasterStats {
 
   /** Blob shadows count */
   blobShadows?: number;
+
+  /** Total objects (all shadow casters) */
+  totalObjects?: number;
 }
 
 /**
