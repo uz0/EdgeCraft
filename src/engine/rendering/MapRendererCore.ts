@@ -25,6 +25,7 @@ import type { RawMapData } from '../../formats/maps/types';
 import { MapLoaderRegistry } from '../../formats/maps/MapLoaderRegistry';
 import { TerrainRenderer } from '../terrain/TerrainRenderer';
 import { InstancedUnitRenderer } from './InstancedUnitRenderer';
+import { DoodadRenderer } from './DoodadRenderer';
 import { QualityPresetManager } from './QualityPresetManager';
 
 /**
@@ -68,6 +69,7 @@ export class MapRendererCore {
 
   private terrainRenderer: TerrainRenderer | null = null;
   private unitRenderer: InstancedUnitRenderer | null = null;
+  private doodadRenderer: DoodadRenderer | null = null;
   private camera: BABYLON.Camera | null = null;
 
   private currentMap: RawMapData | null = null;
@@ -160,13 +162,16 @@ export class MapRendererCore {
     // Step 2: Initialize units
     this.renderUnits(mapData.units);
 
-    // Step 3: Apply environment settings
+    // Step 3: Initialize doodads
+    this.renderDoodads(mapData.doodads);
+
+    // Step 4: Apply environment settings
     this.applyEnvironment(mapData.info.environment);
 
-    // Step 4: Setup camera
+    // Step 5: Setup camera
     this.setupCamera(mapData.info.dimensions);
 
-    // Step 5: Integrate Phase 2 systems (if enabled)
+    // Step 6: Integrate Phase 2 systems (if enabled)
     if (this.config.enableEffects) {
       this.integratePhase2Systems(mapData);
     }
@@ -287,6 +292,39 @@ export class MapRendererCore {
     //     );
     //   }
     // }
+  }
+
+  /**
+   * Render doodads
+   */
+  private renderDoodads(doodads: RawMapData['doodads']): void {
+    if (doodads.length === 0) {
+      console.log('No doodads to render');
+      return;
+    }
+
+    this.doodadRenderer = new DoodadRenderer(this.scene, {
+      enableInstancing: true,
+      enableLOD: true,
+      lodDistance: 100,
+      maxDoodads: 2000,
+    });
+
+    console.log(`Rendering ${doodads.length} doodads...`);
+
+    // Add all doodads
+    for (const doodad of doodads) {
+      this.doodadRenderer.addDoodad(doodad);
+    }
+
+    // Build instance buffers
+    this.doodadRenderer.buildInstanceBuffers();
+
+    // Log stats
+    const stats = this.doodadRenderer.getStats();
+    console.log(
+      `Doodads rendered: ${stats.totalDoodads} instances, ${stats.typesLoaded} types, ${stats.drawCalls} draw calls`
+    );
   }
 
   /**
@@ -419,11 +457,13 @@ export class MapRendererCore {
   public getStats(): {
     terrain: unknown;
     units: unknown;
+    doodads: unknown;
     phase2: unknown;
   } {
     return {
       terrain: this.terrainRenderer?.getLoadStatus() ?? null,
       units: this.unitRenderer?.getStats() ?? null,
+      doodads: this.doodadRenderer?.getStats() ?? null,
       phase2: this.qualityManager.getStats(),
     };
   }
@@ -440,6 +480,11 @@ export class MapRendererCore {
     if (this.unitRenderer != null) {
       this.unitRenderer.dispose();
       this.unitRenderer = null;
+    }
+
+    if (this.doodadRenderer != null) {
+      this.doodadRenderer.dispose();
+      this.doodadRenderer = null;
     }
 
     if (this.camera != null) {

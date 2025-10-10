@@ -41,6 +41,13 @@ export { MinimapSystem } from './MinimapSystem';
 // Map Rendering
 export { MapRendererCore } from './MapRendererCore';
 export type { MapRendererConfig, MapRenderResult } from './MapRendererCore';
+export { DoodadRenderer } from './DoodadRenderer';
+export type {
+  DoodadRendererConfig,
+  DoodadType,
+  DoodadInstance,
+  DoodadRenderStats,
+} from './DoodadRenderer';
 
 // Enums
 export { QualityPreset } from './types';
