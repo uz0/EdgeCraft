@@ -101,7 +101,7 @@ export class ShadowCasterManager {
 
     // Apply shadow method
     if (castMethod === 'csm') {
-      this.csmSystem.addShadowCaster(mesh, 'high');
+      this.csmSystem.addShadowCaster(mesh, ShadowPriority.HIGH);
     } else if (castMethod === 'blob') {
       this.blobSystem.createBlobShadow(id, mesh.position);
     }
