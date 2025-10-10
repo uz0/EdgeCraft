@@ -27,7 +27,7 @@
     "typecheck:build": "tsc --noEmit --pretty",
     "typecheck:strict": "tsc --noEmit --strict --noUnusedLocals --noUnusedParameters",
     "validate-assets": "node scripts/validate-assets.js",
-    "benchmark": "node scripts/benchmark.js",
+    "benchmark": "node scripts/benchmark.cjs",
     "bench:dev": "echo 'Testing Rolldown-Vite dev server startup...' && time npm run dev -- --help > /dev/null 2>&1",
     "bench:build": "echo 'Testing Rolldown-Vite build performance...' && time npm run build",
     "test:stress": "node scripts/stress-test.js",

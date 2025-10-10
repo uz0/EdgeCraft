@@ -3,9 +3,11 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import * as BABYLON from '@babylonjs/core';
 import { EdgeCraftEngine } from '@/engine/core/Engine';
 import { RTSCamera } from '@/engine/camera/RTSCamera';
 import { TerrainRenderer } from '@/engine/terrain/TerrainRenderer';
+import { ShadowCasterManager } from '@/engine/rendering/ShadowCasterManager';
 
 /**
  * Game Canvas props
@@ -56,7 +58,92 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       // Create terrain
       const terrain = new TerrainRenderer(engine.scene);
-      terrain.createFlatTerrain(200, 200, 32);
+      const terrainMesh = terrain.createFlatTerrain(200, 200, 32);
+
+      // Initialize shadow system
+      const shadowManager = new ShadowCasterManager(engine.scene, 50);
+
+      // Enable terrain to receive shadows
+      if (terrainMesh !== null && terrainMesh !== undefined) {
+        shadowManager.enableShadowsForMesh(terrainMesh as BABYLON.AbstractMesh);
+      }
+
+      // Create demo objects with shadows
+      // Heroes (CSM shadows)
+      const heroPositions = [
+        { x: 20, y: 2, z: 20 },
+        { x: 40, y: 2, z: 20 },
+        { x: 60, y: 2, z: 20 },
+        { x: 80, y: 2, z: 20 },
+      ];
+
+      heroPositions.forEach((pos, i) => {
+        const hero = BABYLON.MeshBuilder.CreateBox(
+          `hero${i}`,
+          { width: 3, height: 4, depth: 3 },
+          engine.scene
+        );
+        hero.position = new BABYLON.Vector3(pos.x, pos.y, pos.z);
+
+        // Create simple material
+        const mat = new BABYLON.StandardMaterial(`heroMat${i}`, engine.scene);
+        mat.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2); // Red for heroes
+        hero.material = mat;
+
+        // Register as hero (uses CSM)
+        shadowManager.registerObject(`hero${i}`, hero as BABYLON.AbstractMesh, 'hero');
+      });
+
+      // Buildings (CSM shadows)
+      const buildingPositions = [
+        { x: 30, y: 5, z: 50 },
+        { x: 60, y: 5, z: 50 },
+        { x: 90, y: 5, z: 50 },
+      ];
+
+      buildingPositions.forEach((pos, i) => {
+        const building = BABYLON.MeshBuilder.CreateBox(
+          `building${i}`,
+          { width: 8, height: 10, depth: 8 },
+          engine.scene
+        );
+        building.position = new BABYLON.Vector3(pos.x, pos.y, pos.z);
+
+        const mat = new BABYLON.StandardMaterial(`buildingMat${i}`, engine.scene);
+        mat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6); // Gray for buildings
+        building.material = mat;
+
+        // Register as building (uses CSM)
+        shadowManager.registerObject(`building${i}`, building as BABYLON.AbstractMesh, 'building');
+      });
+
+      // Regular units (blob shadows)
+      const unitCount = 20; // Demo with 20 units (production would be 460+)
+      for (let i = 0; i < unitCount; i++) {
+        const x = 20 + (i % 10) * 8;
+        const z = 80 + Math.floor(i / 10) * 8;
+
+        const unit = BABYLON.MeshBuilder.CreateBox(
+          `unit${i}`,
+          { width: 2, height: 3, depth: 2 },
+          engine.scene
+        );
+        unit.position = new BABYLON.Vector3(x, 1.5, z);
+
+        const mat = new BABYLON.StandardMaterial(`unitMat${i}`, engine.scene);
+        mat.diffuseColor = new BABYLON.Color3(0.2, 0.5, 0.8); // Blue for units
+        unit.material = mat;
+
+        // Register as unit (uses blob shadow)
+        shadowManager.registerObject(`unit${i}`, unit as BABYLON.AbstractMesh, 'unit');
+      }
+
+      // Log shadow stats
+      const shadowStats = shadowManager.getStats();
+      console.log('🌑 Shadow System Initialized:');
+      console.log(`   - CSM shadow casters: ${shadowStats.csmCasters}`);
+      console.log(`   - Blob shadows: ${shadowStats.blobShadows}`);
+      console.log(`   - Total objects: ${shadowStats.totalObjects}`);
 
       // Start rendering
       engine.startRenderLoop();
@@ -66,6 +153,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       // Cleanup
       return () => {
+        shadowManager.dispose();
         camera.dispose();
         terrain.dispose();
         engine.dispose();
