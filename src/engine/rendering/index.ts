@@ -41,6 +41,8 @@ export { MinimapSystem } from './MinimapSystem';
 // Map Rendering
 export { MapRendererCore } from './MapRendererCore';
 export type { MapRendererConfig, MapRenderResult } from './MapRendererCore';
+export { MapPreviewGenerator } from './MapPreviewGenerator';
+export type { PreviewConfig, PreviewResult } from './MapPreviewGenerator';
 
 // Enums
 export { QualityPreset } from './types';
