@@ -4,6 +4,7 @@
  */
 
 import { W3XMapLoader } from './w3x/W3XMapLoader';
+import { W3NCampaignLoader } from './w3n/W3NCampaignLoader';
 import { SCMMapLoader } from './scm/SCMMapLoader';
 import { SC2MapLoader } from './sc2/SC2MapLoader';
 import { EdgeStoryConverter } from './edgestory/EdgeStoryConverter';
@@ -78,10 +79,14 @@ export class MapLoaderRegistry {
    * Register default map loaders
    */
   private registerDefaultLoaders(): void {
-    // Warcraft 3 formats
+    // Warcraft 3 map formats
     const w3xLoader = new W3XMapLoader();
     this.loaders.set('.w3x', w3xLoader);
     this.loaders.set('.w3m', w3xLoader);
+
+    // Warcraft 3 campaign format
+    const w3nLoader = new W3NCampaignLoader();
+    this.loaders.set('.w3n', w3nLoader);
 
     // StarCraft 1 formats
     const scmLoader = new SCMMapLoader();

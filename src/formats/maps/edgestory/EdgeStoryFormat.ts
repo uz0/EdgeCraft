@@ -39,7 +39,7 @@ export interface EdgeMapInfo {
   modified: string; // ISO 8601
 
   // Source info
-  sourceFormat?: 'w3x' | 'w3m' | 'scm' | 'scx' | 'sc2map' | 'native';
+  sourceFormat?: 'w3x' | 'w3m' | 'w3n' | 'scm' | 'scx' | 'sc2map' | 'native';
   sourceVersion?: string;
 
   // Map properties
