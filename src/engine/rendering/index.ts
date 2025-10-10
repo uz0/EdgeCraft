@@ -38,6 +38,10 @@ export { CustomShaderSystem } from './CustomShaderSystem';
 export { DecalSystem } from './DecalSystem';
 export { MinimapSystem } from './MinimapSystem';
 
+// Map Rendering
+export { MapRendererCore } from './MapRendererCore';
+export type { MapRendererConfig, MapRenderResult } from './MapRendererCore';
+
 // Enums
 export { QualityPreset } from './types';
 
