@@ -64,8 +64,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       const shadowManager = new ShadowCasterManager(engine.scene, 50);
 
       // Enable terrain to receive shadows
-      if (terrainMesh) {
-        shadowManager.enableShadowsForMesh(terrainMesh);
+      if (terrainMesh !== null && terrainMesh !== undefined) {
+        shadowManager.enableShadowsForMesh(terrainMesh as BABYLON.AbstractMesh);
       }
 
       // Create demo objects with shadows

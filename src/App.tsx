@@ -98,7 +98,10 @@ const App: React.FC = () => {
           <p>
             <strong>Phase 1:</strong> Babylon.js Foundation
           </p>
-          <p>Core rendering engine, terrain system, RTS camera controls, and professional shadow system</p>
+          <p>
+            Core rendering engine, terrain system, RTS camera controls, and professional shadow
+            system
+          </p>
           <h3 style={{ marginTop: '1rem' }}>Shadow Demo</h3>
           <ul>
             <li>🔴 Red boxes = Heroes (4) - CSM shadows</li>

@@ -7,7 +7,7 @@ import {
   ShadowQuality,
   getQualityPreset,
   autoDetectQuality,
-  SHADOW_QUALITY_PRESETS
+  SHADOW_QUALITY_PRESETS,
 } from '@/engine/rendering/ShadowQualitySettings';
 
 describe('ShadowQualitySettings', () => {
@@ -133,7 +133,7 @@ describe('ShadowQualitySettings', () => {
         ShadowQuality.LOW,
         ShadowQuality.MEDIUM,
         ShadowQuality.HIGH,
-        ShadowQuality.ULTRA
+        ShadowQuality.ULTRA,
       ]).toContain(quality);
     });
 

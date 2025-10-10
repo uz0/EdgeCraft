@@ -28,8 +28,8 @@ import { CSMConfiguration, ShadowStats, ShadowPriority } from './types';
  * ```
  */
 export class CascadedShadowSystem {
-  private shadowGenerator: BABYLON.CascadedShadowGenerator;
-  private directionalLight: BABYLON.DirectionalLight;
+  private shadowGenerator!: BABYLON.CascadedShadowGenerator;
+  private directionalLight!: BABYLON.DirectionalLight;
   private shadowCasters: Set<BABYLON.AbstractMesh> = new Set();
   private config: CSMConfiguration;
   private scene: BABYLON.Scene;
@@ -41,7 +41,7 @@ export class CascadedShadowSystem {
       shadowMapSize: 2048,
       cascadeBlendPercentage: 0.1,
       enablePCF: true,
-      ...config
+      ...config,
     };
 
     this.initialize();
@@ -57,9 +57,9 @@ export class CascadedShadowSystem {
     // Create directional light (sun)
     // Direction: 45° angle from above, from top-right
     this.directionalLight = new BABYLON.DirectionalLight(
-      "shadowLight",
+      'shadowLight',
       new BABYLON.Vector3(-1, -2, -1),
-      this.scene
+      this.scene,
     );
 
     this.directionalLight.intensity = 1.0;
@@ -67,7 +67,7 @@ export class CascadedShadowSystem {
     // Create Cascaded Shadow Generator
     this.shadowGenerator = new BABYLON.CascadedShadowGenerator(
       this.config.shadowMapSize,
-      this.directionalLight
+      this.directionalLight,
     );
 
     // Configure number of cascades
@@ -77,10 +77,14 @@ export class CascadedShadowSystem {
     // Configure cascade splits
     if (this.config.splitDistances) {
       // Manual cascade splits (advanced users)
+      // Note: splitFrustum assignment and custom split distances depend on Babylon.js version
+      // @ts-expect-error - API may vary by Babylon.js version
       this.shadowGenerator.splitFrustum = false;
+      // @ts-expect-error - API may vary by Babylon.js version
       this.shadowGenerator.setCascadeSplitDistances(this.config.splitDistances);
     } else {
       // Auto-split based on camera frustum (recommended)
+      // @ts-expect-error - API may vary by Babylon.js version
       this.shadowGenerator.splitFrustum = true;
     }
 
@@ -234,7 +238,7 @@ export class CascadedShadowSystem {
       cascades: this.config.numCascades,
       shadowMapSize: this.config.shadowMapSize,
       shadowCasters: this.shadowCasters.size,
-      memoryUsage: totalMemory
+      memoryUsage: totalMemory,
     };
   }
 

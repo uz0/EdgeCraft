@@ -21,7 +21,7 @@ import * as BABYLON from '@babylonjs/core';
  * ```
  */
 export class BlobShadowSystem {
-  private blobTexture: BABYLON.Texture;
+  private blobTexture!: BABYLON.Texture;
   private blobMeshes: Map<string, BABYLON.Mesh> = new Map();
   private scene: BABYLON.Scene;
 
@@ -44,10 +44,7 @@ export class BlobShadowSystem {
     const ctx = canvas.getContext('2d')!;
 
     // Create radial gradient from center to edge
-    const gradient = ctx.createRadialGradient(
-      size / 2, size / 2, 0,
-      size / 2, size / 2, size / 2
-    );
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
 
     // Dark center fading to transparent edge
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
@@ -73,15 +70,13 @@ export class BlobShadowSystem {
    * blobSystem.createBlobShadow('warrior1', new Vector3(10, 0, 10), 2.5);
    * ```
    */
-  public createBlobShadow(
-    unitId: string,
-    position: BABYLON.Vector3,
-    size: number = 2
-  ): void {
+  public createBlobShadow(unitId: string, position: BABYLON.Vector3, size: number = 2): void {
     // Create a simple plane mesh for the blob
-    const blob = BABYLON.MeshBuilder.CreatePlane(`blob_${unitId}`, {
-      size: size
-    }, this.scene);
+    const blob = BABYLON.MeshBuilder.CreatePlane(
+      `blob_${unitId}`,
+      { size: size },
+      this.scene,
+    );
 
     // Position slightly above ground to avoid z-fighting
     blob.position = position.clone();

@@ -2,8 +2,6 @@
  * Type definitions for rendering systems
  */
 
-import * as BABYLON from '@babylonjs/core';
-
 /**
  * Configuration for Cascaded Shadow Map system
  */
@@ -84,5 +82,5 @@ export enum ShadowQuality {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  ULTRA = 'ultra'
+  ULTRA = 'ultra',
 }

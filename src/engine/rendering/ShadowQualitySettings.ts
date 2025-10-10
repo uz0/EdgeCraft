@@ -5,6 +5,9 @@
 import * as BABYLON from '@babylonjs/core';
 import { ShadowQuality, QualityPreset } from './types';
 
+// Re-export ShadowQuality for convenience
+export { ShadowQuality };
+
 /**
  * Predefined quality presets for shadow rendering
  *
@@ -20,29 +23,29 @@ export const SHADOW_QUALITY_PRESETS: Record<ShadowQuality, QualityPreset> = {
     numCascades: 2,
     enablePCF: false,
     cascadeBlendPercentage: 0.05,
-    maxShadowCasters: 20
+    maxShadowCasters: 20,
   },
   [ShadowQuality.MEDIUM]: {
     shadowMapSize: 2048,
     numCascades: 3,
     enablePCF: true,
     cascadeBlendPercentage: 0.1,
-    maxShadowCasters: 50
+    maxShadowCasters: 50,
   },
   [ShadowQuality.HIGH]: {
     shadowMapSize: 2048,
     numCascades: 4,
     enablePCF: true,
     cascadeBlendPercentage: 0.15,
-    maxShadowCasters: 100
+    maxShadowCasters: 100,
   },
   [ShadowQuality.ULTRA]: {
     shadowMapSize: 4096,
     numCascades: 4,
     enablePCF: true,
     cascadeBlendPercentage: 0.2,
-    maxShadowCasters: 200
-  }
+    maxShadowCasters: 200,
+  },
 };
 
 /**

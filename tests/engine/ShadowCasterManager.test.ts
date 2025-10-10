@@ -51,7 +51,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const heroMesh = BABYLON.MeshBuilder.CreateBox('hero', {}, scene);
 
-      manager.registerObject('hero1', heroMesh, 'hero');
+      manager.registerObject('hero1', heroMesh as BABYLON.AbstractMesh, 'hero');
 
       const stats = manager.getStats();
       expect(stats.csmCasters).toBe(1);
@@ -65,7 +65,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const buildingMesh = BABYLON.MeshBuilder.CreateBox('building', {}, scene);
 
-      manager.registerObject('building1', buildingMesh, 'building');
+      manager.registerObject('building1', buildingMesh as BABYLON.AbstractMesh, 'building');
 
       const stats = manager.getStats();
       expect(stats.csmCasters).toBe(1);
@@ -78,7 +78,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const unitMesh = BABYLON.MeshBuilder.CreateBox('unit', {}, scene);
 
-      manager.registerObject('unit1', unitMesh, 'unit');
+      manager.registerObject('unit1', unitMesh as BABYLON.AbstractMesh, 'unit');
 
       const stats = manager.getStats();
       expect(stats.csmCasters).toBe(0);
@@ -92,7 +92,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const doodadMesh = BABYLON.MeshBuilder.CreateBox('doodad', {}, scene);
 
-      manager.registerObject('doodad1', doodadMesh, 'doodad');
+      manager.registerObject('doodad1', doodadMesh as BABYLON.AbstractMesh, 'doodad');
 
       const stats = manager.getStats();
       expect(stats.csmCasters).toBe(0);
@@ -109,9 +109,9 @@ describe('ShadowCasterManager', () => {
       const hero2 = BABYLON.MeshBuilder.CreateBox('hero2', {}, scene);
       const hero3 = BABYLON.MeshBuilder.CreateBox('hero3', {}, scene);
 
-      manager.registerObject('hero1', hero1, 'hero');
-      manager.registerObject('hero2', hero2, 'hero');
-      manager.registerObject('hero3', hero3, 'hero'); // Should use blob
+      manager.registerObject('hero1', hero1 as BABYLON.AbstractMesh, 'hero');
+      manager.registerObject('hero2', hero2 as BABYLON.AbstractMesh, 'hero');
+      manager.registerObject('hero3', hero3 as BABYLON.AbstractMesh, 'hero'); // Should use blob
 
       const stats = manager.getStats();
       expect(stats.csmCasters).toBe(2); // Only 2 CSM
@@ -127,7 +127,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const unitMesh = BABYLON.MeshBuilder.CreateBox('unit', {}, scene);
 
-      manager.registerObject('unit1', unitMesh, 'unit');
+      manager.registerObject('unit1', unitMesh as BABYLON.AbstractMesh, 'unit');
 
       const newPosition = new BABYLON.Vector3(10, 0, 10);
       expect(() => {
@@ -141,7 +141,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const heroMesh = BABYLON.MeshBuilder.CreateBox('hero', {}, scene);
 
-      manager.registerObject('hero1', heroMesh, 'hero');
+      manager.registerObject('hero1', heroMesh as BABYLON.AbstractMesh, 'hero');
 
       const newPosition = new BABYLON.Vector3(10, 0, 10);
       expect(() => {
@@ -167,13 +167,13 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const heroMesh = BABYLON.MeshBuilder.CreateBox('hero', {}, scene);
 
-      manager.registerObject('hero1', heroMesh, 'hero');
+      manager.registerObject('hero1', heroMesh as BABYLON.AbstractMesh, 'hero');
 
       let stats = manager.getStats();
       expect(stats.csmCasters).toBe(1);
       expect(stats.totalObjects).toBe(1);
 
-      manager.removeObject('hero1', heroMesh);
+      manager.removeObject('hero1', heroMesh as BABYLON.AbstractMesh);
 
       stats = manager.getStats();
       expect(stats.csmCasters).toBe(0);
@@ -186,7 +186,7 @@ describe('ShadowCasterManager', () => {
       const manager = new ShadowCasterManager(scene);
       const unitMesh = BABYLON.MeshBuilder.CreateBox('unit', {}, scene);
 
-      manager.registerObject('unit1', unitMesh, 'unit');
+      manager.registerObject('unit1', unitMesh as BABYLON.AbstractMesh, 'unit');
 
       let stats = manager.getStats();
       expect(stats.blobShadows).toBe(1);
@@ -215,11 +215,15 @@ describe('ShadowCasterManager', () => {
   describe('Shadow Receivers', () => {
     it('should enable shadows for mesh', () => {
       const manager = new ShadowCasterManager(scene);
-      const terrainMesh = BABYLON.MeshBuilder.CreateGround('terrain', { width: 100, height: 100 }, scene);
+      const terrainMesh = BABYLON.MeshBuilder.CreateGround(
+        'terrain',
+        { width: 100, height: 100 },
+        scene,
+      );
 
       expect(terrainMesh.receiveShadows).toBe(false);
 
-      manager.enableShadowsForMesh(terrainMesh);
+      manager.enableShadowsForMesh(terrainMesh as BABYLON.AbstractMesh);
       expect(terrainMesh.receiveShadows).toBe(true);
 
       manager.dispose();
@@ -253,20 +257,20 @@ describe('ShadowCasterManager', () => {
       // Add 2 heroes (CSM)
       const hero1 = BABYLON.MeshBuilder.CreateBox('hero1', {}, scene);
       const hero2 = BABYLON.MeshBuilder.CreateBox('hero2', {}, scene);
-      manager.registerObject('hero1', hero1, 'hero');
-      manager.registerObject('hero2', hero2, 'hero');
+      manager.registerObject('hero1', hero1 as BABYLON.AbstractMesh, 'hero');
+      manager.registerObject('hero2', hero2 as BABYLON.AbstractMesh, 'hero');
 
       // Add 3 units (blob)
       const unit1 = BABYLON.MeshBuilder.CreateBox('unit1', {}, scene);
       const unit2 = BABYLON.MeshBuilder.CreateBox('unit2', {}, scene);
       const unit3 = BABYLON.MeshBuilder.CreateBox('unit3', {}, scene);
-      manager.registerObject('unit1', unit1, 'unit');
-      manager.registerObject('unit2', unit2, 'unit');
-      manager.registerObject('unit3', unit3, 'unit');
+      manager.registerObject('unit1', unit1 as BABYLON.AbstractMesh, 'unit');
+      manager.registerObject('unit2', unit2 as BABYLON.AbstractMesh, 'unit');
+      manager.registerObject('unit3', unit3 as BABYLON.AbstractMesh, 'unit');
 
       // Add 1 doodad (none)
       const doodad = BABYLON.MeshBuilder.CreateBox('doodad', {}, scene);
-      manager.registerObject('doodad1', doodad, 'doodad');
+      manager.registerObject('doodad1', doodad as BABYLON.AbstractMesh, 'doodad');
 
       const stats = manager.getStats();
       expect(stats.csmCasters).toBe(2);
@@ -284,8 +288,8 @@ describe('ShadowCasterManager', () => {
       const hero = BABYLON.MeshBuilder.CreateBox('hero', {}, scene);
       const unit = BABYLON.MeshBuilder.CreateBox('unit', {}, scene);
 
-      manager.registerObject('hero1', hero, 'hero');
-      manager.registerObject('unit1', unit, 'unit');
+      manager.registerObject('hero1', hero as BABYLON.AbstractMesh, 'hero');
+      manager.registerObject('unit1', unit as BABYLON.AbstractMesh, 'unit');
 
       manager.dispose();
 

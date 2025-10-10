@@ -36,20 +36,17 @@ export class ShadowCasterManager {
   private blobSystem: BlobShadowSystem;
   private config: Map<string, ShadowCasterConfig> = new Map();
   private maxCSMCasters: number;
-  private scene: BABYLON.Scene;
+  
 
-  constructor(
-    scene: BABYLON.Scene,
-    maxCSMCasters: number = 50
-  ) {
-    this.scene = scene;
+  constructor(scene: BABYLON.Scene, maxCSMCasters: number = 50) {
+    
     this.maxCSMCasters = maxCSMCasters;
 
     // Initialize CSM system with default settings
     this.csmSystem = new CascadedShadowSystem(scene, {
       numCascades: 3,
       shadowMapSize: 2048,
-      enablePCF: true
+      enablePCF: true,
     });
 
     // Initialize blob shadow system
@@ -188,7 +185,7 @@ export class ShadowCasterManager {
     return {
       csmCasters: this.csmSystem.getShadowCasterCount(),
       blobShadows: this.blobSystem.getBlobCount(),
-      totalObjects: this.config.size
+      totalObjects: this.config.size,
     };
   }
 
