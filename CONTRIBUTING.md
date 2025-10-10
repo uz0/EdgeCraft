@@ -72,24 +72,62 @@ Follow these guidelines:
 
 ### 5. Validate Your Work
 
-Run all validation checks:
+**MANDATORY**: All PRs must pass these checks (no exceptions):
 
 ```bash
-# Type checking
+# 1. Format code
+npm run format
+
+# 2. Fix linting issues
+npm run lint:fix
+
+# 3. Type checking (MUST pass - zero errors)
 npm run typecheck
 
-# Linting
+# 4. Linting (MUST pass - zero warnings)
 npm run lint
 
-# Tests
-npm test
+# 5. Format validation (MUST pass - 100% compliance)
+npm run format:check
 
-# Asset validation (IMPORTANT!)
-npm run validate-assets
+# 6. Tests (MUST pass - all tests + coverage)
+npm run test -- --coverage
 
-# Performance benchmarks (for engine changes)
-npm run benchmark
+# 7. Build (MUST pass - production build)
+npm run build
+
+# 8. Run complete validation suite
+npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build
+
+# Additional validations
+npm run validate-assets  # Asset legal compliance
+npm run benchmark        # Performance (for engine changes)
 ```
+
+#### Required Status Checks (Enforced by CI/CD)
+Every PR must have these checks passing:
+- ✅ **Lint Check** - Zero ESLint warnings/errors
+- ✅ **TypeScript Type Check** - Zero type errors
+- ✅ **Format Check** - 100% Prettier compliance
+- ✅ **Unit Tests** - All tests passing
+- ✅ **Coverage Check** - Meets phase thresholds
+- ✅ **Build Check** - Production build succeeds
+
+#### Test Coverage Requirements
+
+| Phase | Statements | Branches | Functions | Lines |
+|-------|-----------|----------|-----------|-------|
+| **Phase 0** (Current) | 0% | 0% | 0% | 0% |
+| **Phase 1** | 40% | 35% | 40% | 40% |
+| **Phase 2** | 60% | 55% | 60% | 60% |
+| **Phase 3+** | 75% | 70% | 75% | 75% |
+
+**Critical Paths** (Phase 1+): 90% coverage required for:
+- Authentication
+- Game State Management
+- Networking/Multiplayer
+- Asset Loading
+- Error Handling
 
 ### 6. Submit Pull Request
 
