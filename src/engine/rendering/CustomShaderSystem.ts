@@ -370,7 +370,7 @@ export class CustomShaderSystem {
         break;
       default: {
         const exhaustive: never = config.preset;
-        throw new Error(`Unknown shader preset: ${exhaustive}`);
+        throw new Error(`Unknown shader preset: ${String(exhaustive)}`);
       }
     }
 

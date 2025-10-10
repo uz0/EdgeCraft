@@ -140,7 +140,8 @@ export class QualityPresetManager {
   private decals: DecalSystem | null = null;
   private minimap: MinimapSystem | null = null;
 
-  // Auto-adjustment (reserved for future implementation)
+  // Auto-adjustment
+  private enableAutoAdjust: boolean = false;
   private targetFPS: number = 60;
   private fpsSamples: number[] = [];
   private lastAdjustmentTime: number = 0;
@@ -304,7 +305,7 @@ export class QualityPresetManager {
 
     // PBR material system
     this.pbrMaterials = new PBRMaterialSystem(this.scene);
-    await this.pbrMaterials.preloadCommonMaterials();
+    this.pbrMaterials.preloadCommonMaterials();
 
     // Custom shader system
     this.shaders = new CustomShaderSystem(this.scene);
@@ -318,7 +319,7 @@ export class QualityPresetManager {
     this.minimap = new MinimapSystem(this.scene, {
       quality: this.currentQuality,
     });
-    await this.minimap.initialize();
+    this.minimap.initialize();
 
     console.log('All Phase 2 systems initialized');
   }
