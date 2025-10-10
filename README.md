@@ -54,6 +54,24 @@ npm install
 
 # Start development server (uses mock server & launcher)
 npm run dev
+
+# Open browser to http://localhost:3000
+```
+
+#### Verify Your Setup
+```bash
+# 1. Verify Node version (should be 20+)
+node --version
+
+# 2. Run TypeScript type checking
+npm run typecheck
+
+# 3. Test production build
+npm run build
+
+# 4. Test hot reload
+# Start dev server with: npm run dev
+# Edit src/App.tsx - changes should auto-refresh in browser
 ```
 
 #### Option 2: Full Setup (with external repositories)
