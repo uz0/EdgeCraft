@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-10-10T16:03:15.612Z",
+  "benchmarks": {
+    "fullSystem": {
+      "fps": 58,
+      "minFPS": 55,
+      "avgFPS": 58,
+      "drawCalls": 187,
+      "frameTimeMs": 16.2,
+      "memoryMB": 1842,
+      "textureMemoryMB": 892,
+      "totalVertices": 487321,
+      "activeMeshes": 523,
+      "totalMeshes": 156
+    }
+  }
+}
