@@ -383,10 +383,10 @@ export interface UnitInstance {
   id: string;
 
   /** Unit type */
-  type: string;
+  type?: string;
 
   /** World matrix */
-  matrix: BABYLON.Matrix;
+  matrix?: BABYLON.Matrix;
 
   /** Position */
   position?: BABYLON.Vector3;
@@ -511,7 +511,7 @@ export interface ShadowCasterConfig {
   type?: 'csm' | 'blob' | 'standard' | 'hero' | 'building' | 'unit' | 'doodad' | 'none';
 
   /** Shadow cast method */
-  castMethod?: 'csm' | 'blob';
+  castMethod?: 'csm' | 'blob' | 'none';
 
   /** Enable dynamic updates */
   dynamicUpdates?: boolean;

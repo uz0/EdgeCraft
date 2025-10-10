@@ -9,7 +9,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { CascadedShadowSystem } from './CascadedShadowSystem';
 import { BlobShadowSystem } from './BlobShadowSystem';
-import { ShadowCasterConfig, ShadowCasterStats } from './types';
+import { ShadowCasterConfig, ShadowCasterStats, ShadowPriority } from './types';
 
 /**
  * Manager for shadow casting across different object types
