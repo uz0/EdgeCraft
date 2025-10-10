@@ -53,7 +53,7 @@ export class LicenseGenerator {
   /**
    * Generate complete LICENSES.md file
    */
-  public async generateLicensesFile(): Promise<string> {
+  public generateLicensesFile(): string {
     const entries = this.collectAttributionEntries();
     const groupedByLicense = this.groupByLicense(entries);
 
@@ -125,7 +125,7 @@ export class LicenseGenerator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -144,7 +144,7 @@ export class LicenseGenerator {
         author: mapping.replacement.author,
         source: mapping.replacement.source,
         originalName: mapping.original.name,
-        notes: mapping.replacement.notes
+        notes: mapping.replacement.notes,
       });
     }
 
@@ -310,7 +310,7 @@ We take legal compliance seriously and will promptly address any concerns.
       shortName: 'CC0',
       url: 'https://creativecommons.org/publicdomain/zero/1.0/',
       requiresAttribution: false,
-      allowsCommercial: true
+      allowsCommercial: true,
     });
 
     templates.set('MIT', {
@@ -318,7 +318,7 @@ We take legal compliance seriously and will promptly address any concerns.
       shortName: 'MIT',
       url: 'https://opensource.org/licenses/MIT',
       requiresAttribution: true,
-      allowsCommercial: true
+      allowsCommercial: true,
     });
 
     templates.set('Apache-2.0', {
@@ -326,7 +326,7 @@ We take legal compliance seriously and will promptly address any concerns.
       shortName: 'Apache-2.0',
       url: 'https://www.apache.org/licenses/LICENSE-2.0',
       requiresAttribution: true,
-      allowsCommercial: true
+      allowsCommercial: true,
     });
 
     templates.set('BSD-3-Clause', {
@@ -334,7 +334,7 @@ We take legal compliance seriously and will promptly address any concerns.
       shortName: 'BSD-3-Clause',
       url: 'https://opensource.org/licenses/BSD-3-Clause',
       requiresAttribution: true,
-      allowsCommercial: true
+      allowsCommercial: true,
     });
 
     return templates;

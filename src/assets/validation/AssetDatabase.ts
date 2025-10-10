@@ -87,9 +87,7 @@ export class AssetDatabase {
    * Find replacement by original asset hash
    */
   public findReplacementByHash(hash: string): AssetMapping | undefined {
-    return Array.from(this.mappings.values()).find(
-      mapping => mapping.original.hash === hash
-    );
+    return Array.from(this.mappings.values()).find((mapping) => mapping.original.hash === hash);
   }
 
   /**
@@ -97,14 +95,14 @@ export class AssetDatabase {
    */
   public findReplacementByName(name: string): AssetMapping | undefined {
     return Array.from(this.mappings.values()).find(
-      mapping => mapping.original.name.toLowerCase() === name.toLowerCase()
+      (mapping) => mapping.original.name.toLowerCase() === name.toLowerCase()
     );
   }
 
   /**
    * Search for replacement using criteria
    */
-  public async findReplacement(criteria: SearchCriteria): Promise<ReplacementAsset | null> {
+  public findReplacement(criteria: SearchCriteria): ReplacementAsset | null {
     const candidates = this.searchMappings(criteria);
 
     if (candidates.length === 0) {
@@ -130,37 +128,34 @@ export class AssetDatabase {
 
     // Filter by type
     if (criteria.type !== undefined) {
-      candidates = candidates.filter(m => m.type === criteria.type);
+      candidates = candidates.filter((m) => m.type === criteria.type);
     }
 
     // Filter by category
     if (criteria.category !== undefined) {
       candidates = candidates.filter(
-        m => m.original.category?.toLowerCase() === criteria.category?.toLowerCase()
+        (m) => m.original.category?.toLowerCase() === criteria.category?.toLowerCase()
       );
     }
 
     // Filter by game
     if (criteria.game !== undefined) {
-      candidates = candidates.filter(m => m.original.game === criteria.game);
+      candidates = candidates.filter((m) => m.original.game === criteria.game);
     }
 
     // Filter by tags (any tag matches)
     if (criteria.tags !== undefined && criteria.tags.length > 0) {
-      candidates = candidates.filter(m =>
-        m.original.tags?.some(tag =>
-          criteria.tags?.some(searchTag =>
-            tag.toLowerCase().includes(searchTag.toLowerCase())
-          )
+      candidates = candidates.filter((m) =>
+        m.original.tags?.some((tag) =>
+          criteria.tags?.some((searchTag) => tag.toLowerCase().includes(searchTag.toLowerCase()))
         )
       );
     }
 
     // Filter by minimum similarity
     if (criteria.minSimilarity !== undefined) {
-      candidates = candidates.filter(
-        m => (m.replacement.visualSimilarity ?? 0) >= criteria.minSimilarity
-      );
+      const minSim = criteria.minSimilarity;
+      candidates = candidates.filter((m) => (m.replacement.visualSimilarity ?? 0) >= minSim);
     }
 
     return candidates;
@@ -227,7 +222,7 @@ export class AssetDatabase {
       totalMappings: mappings.length,
       byType,
       byGame,
-      verified
+      verified,
     };
   }
 
@@ -287,7 +282,7 @@ export class AssetDatabase {
           name: 'Footman',
           game: 'wc3',
           category: 'unit',
-          tags: ['infantry', 'human', 'melee']
+          tags: ['infantry', 'human', 'melee'],
         },
         replacement: {
           path: 'assets/models/units/knight_basic.gltf',
@@ -295,10 +290,10 @@ export class AssetDatabase {
           source: 'https://opengameart.org',
           author: 'Community',
           visualSimilarity: 0.65,
-          notes: 'Generic medieval infantry'
+          notes: 'Generic medieval infantry',
         },
         verified: true,
-        dateAdded: '2025-01-01'
+        dateAdded: '2025-01-01',
       },
       {
         id: 'wc3-peasant-001',
@@ -308,18 +303,18 @@ export class AssetDatabase {
           name: 'Peasant',
           game: 'wc3',
           category: 'unit',
-          tags: ['worker', 'human', 'civilian']
+          tags: ['worker', 'human', 'civilian'],
         },
         replacement: {
           path: 'assets/models/units/worker_basic.gltf',
           license: 'CC0',
           source: 'https://opengameart.org',
           author: 'Community',
-          visualSimilarity: 0.70,
-          notes: 'Generic worker unit'
+          visualSimilarity: 0.7,
+          notes: 'Generic worker unit',
         },
         verified: true,
-        dateAdded: '2025-01-01'
+        dateAdded: '2025-01-01',
       },
       // Warcraft 3 Buildings
       {
@@ -330,18 +325,18 @@ export class AssetDatabase {
           name: 'Town Hall',
           game: 'wc3',
           category: 'building',
-          tags: ['structure', 'human', 'main']
+          tags: ['structure', 'human', 'main'],
         },
         replacement: {
           path: 'assets/models/buildings/base_main.gltf',
           license: 'CC0',
           source: 'https://opengameart.org',
           author: 'Community',
-          visualSimilarity: 0.60,
-          notes: 'Generic main base structure'
+          visualSimilarity: 0.6,
+          notes: 'Generic main base structure',
         },
         verified: true,
-        dateAdded: '2025-01-01'
+        dateAdded: '2025-01-01',
       },
       // Textures
       {
@@ -352,7 +347,7 @@ export class AssetDatabase {
           name: 'Grass Texture',
           game: 'wc3',
           category: 'terrain',
-          tags: ['ground', 'grass', 'natural']
+          tags: ['ground', 'grass', 'natural'],
         },
         replacement: {
           path: 'assets/textures/terrain/grass_01.png',
@@ -360,10 +355,10 @@ export class AssetDatabase {
           source: 'https://polyhaven.com',
           author: 'Poly Haven',
           visualSimilarity: 0.85,
-          notes: 'CC0 grass texture'
+          notes: 'CC0 grass texture',
         },
         verified: true,
-        dateAdded: '2025-01-01'
+        dateAdded: '2025-01-01',
       },
       // StarCraft Units
       {
@@ -374,7 +369,7 @@ export class AssetDatabase {
           name: 'Marine',
           game: 'sc1',
           category: 'unit',
-          tags: ['infantry', 'terran', 'ranged']
+          tags: ['infantry', 'terran', 'ranged'],
         },
         replacement: {
           path: 'assets/models/units/trooper_basic.gltf',
@@ -382,11 +377,11 @@ export class AssetDatabase {
           source: 'https://opengameart.org',
           author: 'Community',
           visualSimilarity: 0.55,
-          notes: 'Generic sci-fi trooper'
+          notes: 'Generic sci-fi trooper',
         },
         verified: true,
-        dateAdded: '2025-01-01'
-      }
+        dateAdded: '2025-01-01',
+      },
     ];
 
     for (const mapping of defaultMappings) {

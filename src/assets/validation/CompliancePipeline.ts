@@ -90,7 +90,7 @@ export class LegalCompliancePipeline {
       enableVisualSimilarity: config?.enableVisualSimilarity ?? true,
       visualSimilarityThreshold: config?.visualSimilarityThreshold ?? 0.95,
       autoReplace: config?.autoReplace ?? true,
-      strictMode: config?.strictMode ?? true
+      strictMode: config?.strictMode ?? true,
     };
 
     this.visualHashDB = new Map();
@@ -158,7 +158,7 @@ export class LegalCompliancePipeline {
         metadata,
         validated: true,
         replaced: false,
-        warnings: warnings.length > 0 ? warnings : undefined
+        warnings: warnings.length > 0 ? warnings : undefined,
       };
     } catch (error) {
       throw new Error(
@@ -179,7 +179,7 @@ export class LegalCompliancePipeline {
       replaced: 0,
       rejected: 0,
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     for (const { buffer, metadata } of assets) {
@@ -211,8 +211,8 @@ export class LegalCompliancePipeline {
   /**
    * Generate license attribution file
    */
-  public async generateLicenseFile(): Promise<string> {
-    return await this.licenseGenerator.generateLicensesFile();
+  public generateLicenseFile(): string {
+    return this.licenseGenerator.generateLicensesFile();
   }
 
   /**
@@ -226,14 +226,14 @@ export class LegalCompliancePipeline {
    * Get pipeline statistics
    */
   public getStats(): {
-    database: ReturnType<typeof this.assetDB.getStats>;
-    blacklist: ReturnType<typeof this.validator.getBlacklistStats>;
+    database: ReturnType<AssetDatabase['getStats']>;
+    blacklist: ReturnType<CopyrightValidator['getBlacklistStats']>;
     visualHashes: number;
   } {
     return {
       database: this.assetDB.getStats(),
       blacklist: this.validator.getBlacklistStats(),
-      visualHashes: this.visualHashDB.size
+      visualHashes: this.visualHashDB.size,
     };
   }
 
@@ -244,7 +244,7 @@ export class LegalCompliancePipeline {
     const result = await this.validator.validateAsset(asset);
     return {
       valid: result.valid,
-      reason: result.reason
+      reason: result.reason,
     };
   }
 
@@ -258,7 +258,7 @@ export class LegalCompliancePipeline {
     const result = await this.validator.validateAsset(asset);
     return {
       valid: result.valid,
-      reason: result.reason
+      reason: result.reason,
     };
   }
 
@@ -267,10 +267,10 @@ export class LegalCompliancePipeline {
    */
   private async checkVisualSimilarity(
     asset: ArrayBuffer,
-    metadata: AssetMetadata
+    _metadata: AssetMetadata
   ): Promise<{ isMatch: boolean; similarity: number }> {
     try {
-      const queryHash = await this.visualSimilarity.computePerceptualHash(asset);
+      await this.visualSimilarity.computePerceptualHash(asset);
       const database = Array.from(this.visualHashDB.values());
 
       const result = await this.visualSimilarity.findSimilarInDatabase(
@@ -281,13 +281,10 @@ export class LegalCompliancePipeline {
 
       return {
         isMatch: result.matches.length > 0,
-        similarity: result.similarity ?? 0
+        similarity: result.similarity ?? 0,
       };
     } catch (error) {
       // If visual similarity check fails, log warning but don't block
-      console.warn(
-        `Visual similarity check failed for ${metadata.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
       return { isMatch: false, similarity: 0 };
     }
   }
@@ -303,11 +300,11 @@ export class LegalCompliancePipeline {
     const criteria: SearchCriteria = {
       type: metadata.type,
       category: metadata.category,
-      tags: metadata.tags
+      tags: metadata.tags,
     };
 
     // Search database for replacement
-    const replacement = await this.assetDB.findReplacement(criteria);
+    const replacement = this.assetDB.findReplacement(criteria);
 
     if (replacement === null) {
       throw new Error(
@@ -317,7 +314,7 @@ export class LegalCompliancePipeline {
 
     // Load replacement asset
     // In production, this would actually load the file from the path
-    const replacementBuffer = await this.loadReplacementAsset(replacement.path);
+    const replacementBuffer = this.loadReplacementAsset(replacement.path);
 
     warnings.push(
       `Asset replaced with legal alternative: ${replacement.path} (${replacement.license})`
@@ -326,15 +323,16 @@ export class LegalCompliancePipeline {
     return {
       asset: replacementBuffer,
       metadata: {
-        ...metadata,
-        originalName: metadata.name,
         name: replacement.path,
-        source: replacement.source
+        type: metadata.type,
+        category: metadata.category,
+        tags: metadata.tags,
+        source: replacement.source,
       },
       validated: true,
       replaced: true,
       replacedDueToCopyright: true,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
@@ -342,7 +340,7 @@ export class LegalCompliancePipeline {
    * Load replacement asset from path
    * In production, this would read from filesystem or CDN
    */
-  private async loadReplacementAsset(path: string): Promise<ArrayBuffer> {
+  private loadReplacementAsset(path: string): ArrayBuffer {
     // Mock implementation - returns empty buffer
     // In production, would use fetch() or fs.readFile()
     console.log(`Loading replacement asset: ${path}`);

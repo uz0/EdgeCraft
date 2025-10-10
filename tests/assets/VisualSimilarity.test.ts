@@ -102,7 +102,7 @@ describe('VisualSimilarity', () => {
       const database = [
         { hash: 'a'.repeat(hashLength), width: 256, height: 256 },
         queryHash, // Include the actual hash
-        { hash: 'b'.repeat(hashLength), width: 256, height: 256 }
+        { hash: 'b'.repeat(hashLength), width: 256, height: 256 },
       ];
 
       const result = await detector.findSimilarInDatabase(buffer, database, 0.5);
@@ -119,7 +119,7 @@ describe('VisualSimilarity', () => {
 
       const database = [
         { hash: consistentHash, width: 256, height: 256 },
-        { hash: 'b'.repeat(14), width: 256, height: 256 }
+        { hash: 'b'.repeat(14), width: 256, height: 256 },
       ];
 
       const buffer = new ArrayBuffer(100);
@@ -165,22 +165,22 @@ describe('VisualSimilarity', () => {
 
   describe('Custom threshold', () => {
     it('should use custom threshold in constructor', () => {
-      const customDetector = new VisualSimilarity(0.80);
+      const customDetector = new VisualSimilarity(0.8);
       const hash1 = { hash: 'abc123', width: 256, height: 256 };
       const hash2 = { hash: 'abc123', width: 256, height: 256 };
 
       const result = customDetector.compareSimilarity(hash1, hash2);
 
-      expect(result.threshold).toBe(0.80);
+      expect(result.threshold).toBe(0.8);
     });
 
     it('should override default threshold in compare', () => {
       const hash1 = { hash: 'abc123', width: 256, height: 256 };
       const hash2 = { hash: 'abc123', width: 256, height: 256 };
 
-      const result = detector.compareSimilarity(hash1, hash2, 0.70);
+      const result = detector.compareSimilarity(hash1, hash2, 0.7);
 
-      expect(result.threshold).toBe(0.70);
+      expect(result.threshold).toBe(0.7);
     });
   });
 });

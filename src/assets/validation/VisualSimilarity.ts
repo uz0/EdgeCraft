@@ -56,7 +56,7 @@ export class VisualSimilarity {
   public async computePerceptualHash(buffer: ArrayBuffer): Promise<PerceptualHash> {
     try {
       // Decode image data
-      const imageData = await this.decodeImage(buffer);
+      const imageData = this.decodeImage(buffer);
 
       // Resize to hash size
       const resized = this.resizeImage(imageData, this.hashSize, this.hashSize);
@@ -70,10 +70,12 @@ export class VisualSimilarity {
       return {
         hash,
         width: imageData.width,
-        height: imageData.height
+        height: imageData.height,
       };
     } catch (error) {
-      throw new Error(`Failed to compute perceptual hash: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to compute perceptual hash: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -92,12 +94,12 @@ export class VisualSimilarity {
     const maxDistance = hash1.hash.length * 4; // Each hex char = 4 bits
 
     // Convert to similarity score (1.0 = identical, 0.0 = completely different)
-    const similarity = 1 - (distance / maxDistance);
+    const similarity = 1 - distance / maxDistance;
 
     return {
       similarity,
       isMatch: similarity >= compareThreshold,
-      threshold: compareThreshold
+      threshold: compareThreshold,
     };
   }
 
@@ -115,7 +117,10 @@ export class VisualSimilarity {
     let bestIndex: number | undefined;
 
     for (let i = 0; i < database.length; i++) {
-      const result = this.compareSimilarity(queryHash, database[i], threshold);
+      const dbHash = database[i];
+      if (dbHash === undefined) continue;
+
+      const result = this.compareSimilarity(queryHash, dbHash, threshold);
 
       if (result.isMatch) {
         matches.push(i);
@@ -130,7 +135,7 @@ export class VisualSimilarity {
     return {
       matches,
       bestMatch: bestIndex,
-      similarity: bestSimilarity
+      similarity: bestSimilarity,
     };
   }
 
@@ -138,7 +143,7 @@ export class VisualSimilarity {
    * Decode image buffer to ImageData
    * Simplified implementation - in production would use canvas or image library
    */
-  private async decodeImage(buffer: ArrayBuffer): Promise<ImageData> {
+  private decodeImage(buffer: ArrayBuffer): ImageData {
     // For now, return mock ImageData
     // In production, this would use canvas.getContext('2d').createImageData()
     // or a library like sharp/jimp for Node.js
@@ -154,7 +159,8 @@ export class VisualSimilarity {
 
     // Try to detect BMP signature
     const signature = view.getUint16(0, true);
-    if (signature === 0x4D42) { // 'BM' in little-endian
+    if (signature === 0x4d42) {
+      // 'BM' in little-endian
       const width = view.getUint32(18, true);
       const height = view.getUint32(22, true);
       // Return mock with correct dimensions
@@ -171,9 +177,10 @@ export class VisualSimilarity {
   private createImageData(width: number, height: number): ImageData {
     // Try to use native ImageData if available (browser)
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const ImageDataConstructor = (globalThis as any).ImageData;
       if (ImageDataConstructor !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
         return new ImageDataConstructor(width, height);
       }
     } catch {
@@ -186,7 +193,7 @@ export class VisualSimilarity {
 
     // Initialize to transparent black
     for (let i = 0; i < size; i += 4) {
-      data[i] = 0;     // R
+      data[i] = 0; // R
       data[i + 1] = 0; // G
       data[i + 2] = 0; // B
       data[i + 3] = 255; // A (opaque)
@@ -196,7 +203,7 @@ export class VisualSimilarity {
       width,
       height,
       data,
-      colorSpace: 'srgb' as PredefinedColorSpace
+      colorSpace: 'srgb' as PredefinedColorSpace,
     } as ImageData;
   }
 
@@ -268,7 +275,7 @@ export class VisualSimilarity {
 
         // Set bit if current pixel is brighter than next
         if (current > next) {
-          byte |= (1 << bitCount);
+          byte |= 1 << bitCount;
         }
 
         bitCount++;

@@ -67,39 +67,39 @@ describe('AssetDatabase', () => {
 
   describe('findReplacement', () => {
     it('should find replacement by type', async () => {
-      const result = await database.findReplacement({ type: 'model' });
+      const result = database.findReplacement({ type: 'model' });
       expect(result).toBeDefined();
       expect(result?.license).toBeDefined();
     });
 
     it('should find replacement by category', async () => {
-      const result = await database.findReplacement({
+      const result = database.findReplacement({
         type: 'model',
-        category: 'unit'
+        category: 'unit',
       });
       expect(result).toBeDefined();
     });
 
     it('should find replacement by tags', async () => {
-      const result = await database.findReplacement({
+      const result = database.findReplacement({
         type: 'model',
-        tags: ['human']
+        tags: ['human'],
       });
       expect(result).toBeDefined();
     });
 
     it('should return null when no match found', async () => {
-      const result = await database.findReplacement({
+      const result = database.findReplacement({
         type: 'model',
-        category: 'nonexistent'
+        category: 'nonexistent',
       });
       expect(result).toBeNull();
     });
 
     it('should sort by visual similarity', async () => {
-      const result = await database.findReplacement({
+      const result = database.findReplacement({
         type: 'texture',
-        minSimilarity: 0.5
+        minSimilarity: 0.5,
       });
       expect(result).toBeDefined();
     });
@@ -109,20 +109,20 @@ describe('AssetDatabase', () => {
     it('should search by type', () => {
       const results = database.searchMappings({ type: 'model' });
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every(r => r.type === 'model')).toBe(true);
+      expect(results.every((r) => r.type === 'model')).toBe(true);
     });
 
     it('should search by game', () => {
       const results = database.searchMappings({ game: 'wc3' });
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every(r => r.original.game === 'wc3')).toBe(true);
+      expect(results.every((r) => r.original.game === 'wc3')).toBe(true);
     });
 
     it('should search by multiple criteria', () => {
       const results = database.searchMappings({
         type: 'model',
         game: 'wc3',
-        category: 'unit'
+        category: 'unit',
       });
       expect(results.length).toBeGreaterThan(0);
     });
@@ -130,15 +130,15 @@ describe('AssetDatabase', () => {
     it('should filter by minimum similarity', () => {
       const results = database.searchMappings({
         type: 'texture',
-        minSimilarity: 0.8
+        minSimilarity: 0.8,
       });
-      expect(results.every(r => (r.replacement.visualSimilarity ?? 0) >= 0.8)).toBe(true);
+      expect(results.every((r) => (r.replacement.visualSimilarity ?? 0) >= 0.8)).toBe(true);
     });
 
     it('should return empty array when no matches', () => {
       const results = database.searchMappings({
         type: 'model',
-        category: 'impossible-category-xyz'
+        category: 'impossible-category-xyz',
       });
       expect(results).toHaveLength(0);
     });
@@ -154,16 +154,16 @@ describe('AssetDatabase', () => {
           name: 'TestUnit',
           game: 'wc3',
           category: 'unit',
-          tags: ['test']
+          tags: ['test'],
         },
         replacement: {
           path: 'assets/test/unit.gltf',
           license: 'CC0',
           source: 'https://test.com',
-          visualSimilarity: 0.75
+          visualSimilarity: 0.75,
         },
         verified: true,
-        dateAdded: '2025-01-01'
+        dateAdded: '2025-01-01',
       };
 
       database.addMapping(newMapping);
@@ -182,15 +182,15 @@ describe('AssetDatabase', () => {
         original: {
           hash: 'textureHash456',
           name: 'TestTexture',
-          game: 'sc1'
+          game: 'sc1',
         },
         replacement: {
           path: 'assets/test/texture.png',
           license: 'MIT',
-          source: 'https://test.com'
+          source: 'https://test.com',
         },
         verified: false,
-        dateAdded: '2025-01-01'
+        dateAdded: '2025-01-01',
       };
 
       database.addMapping(newMapping);
@@ -249,7 +249,7 @@ describe('AssetDatabase', () => {
     it('should count verified mappings correctly', () => {
       const stats = database.getStats();
       const allMappings = database.getAllMappings();
-      const verifiedCount = allMappings.filter(m => m.verified).length;
+      const verifiedCount = allMappings.filter((m) => m.verified).length;
 
       expect(stats.verified).toBe(verifiedCount);
     });
