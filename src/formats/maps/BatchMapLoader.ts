@@ -1,72 +1,7 @@
-# PRP 2.6: Batch Map Loader with Parallel Loading
-
-**Feature Name**: Batch Map Loading System with Caching
-**Duration**: 3-4 days | **Team**: 1 developer | **Budget**: $3,000
-**Status**: ✅ Complete
-
-**Dependencies**:
-- PRP 2.2 (SC2MapLoader) - required
-- PRP 2.3 (W3NCampaignLoader) - required
-- PRP 2.5 (MapRendererCore) - required
-
----
-
-## 🎯 Objective
-
-Implement BatchMapLoader that loads multiple maps in parallel with progress tracking, caching, and priority queue management. Enables efficient "Load All Maps" functionality for gallery/preview generation.
-
-**Core Responsibility**: Load 24 maps efficiently with caching and progress feedback
-
----
-
-## 📊 Current State
-
-**✅ WORKING**:
-- Individual map loaders (W3X, W3N, SC2Map)
-- MapLoaderRegistry (format detection)
-- MapRendererCore (single map rendering)
-
-**❌ MISSING**:
-- BatchMapLoader.ts - parallel loading orchestrator
-- Map caching system (avoid re-parsing)
-- Progress tracking and cancellation
-- Priority queue (load important maps first)
-- Memory management (unload old maps)
-
----
-
-## 🔬 Research
-
-**Source**: Best practices for parallel asset loading
-
-**Key Findings**:
-1. Use `Promise.allSettled()` for parallel loading with error isolation
-2. Limit concurrency to avoid memory spikes (max 3 concurrent)
-3. Cache parsed `RawMapData` (not full renders)
-4. LRU (Least Recently Used) cache eviction
-5. Progress tracking: `loaded / total` with per-map status
-
----
-
-## 📋 Definition of Done
-
-- [x] `BatchMapLoader.ts` created in `src/formats/maps/`
-- [x] Load multiple maps in parallel (max 3 concurrent)
-- [x] Progress tracking (per-map + overall)
-- [x] Cancellation support (abort in-progress loads)
-- [x] LRU cache (max 10 maps in memory)
-- [x] Priority queue (load by size, small first)
-- [x] Error handling (continue on individual failures)
-- [ ] Load all 24 maps in <2 minutes total (requires integration testing with actual map files)
-- [ ] Memory limit: <4GB peak usage (requires integration testing with actual map files)
-- [x] Unit tests (>80% coverage) - Achieved 100% statement coverage, 86.48% branch coverage
-
----
-
-## 💻 Implementation
-
-```typescript
-// src/formats/maps/BatchMapLoader.ts
+/**
+ * Batch Map Loader with Parallel Loading
+ * Loads multiple maps efficiently with progress tracking, caching, and priority queue
+ */
 
 import type { RawMapData } from './types';
 import { MapLoaderRegistry } from './MapLoaderRegistry';
@@ -139,6 +74,9 @@ export interface BatchMapLoaderConfig {
 
   /** Enable caching */
   enableCache?: boolean;
+
+  /** MapLoaderRegistry instance (optional, creates new if not provided) */
+  registry?: MapLoaderRegistry;
 }
 
 export class BatchMapLoader {
@@ -146,13 +84,16 @@ export class BatchMapLoader {
   private cache: Map<string, RawMapData> = new Map();
   private cacheAccessOrder: string[] = [];
   private abortController: AbortController | null = null;
+  private registry: MapLoaderRegistry;
 
   constructor(config?: BatchMapLoaderConfig) {
+    this.registry = config?.registry ?? new MapLoaderRegistry();
     this.config = {
       maxConcurrent: config?.maxConcurrent ?? 3,
       maxCacheSize: config?.maxCacheSize ?? 10,
-      onProgress: config?.onProgress ?? (() => {}),
+      onProgress: config?.onProgress ?? ((): void => {}),
       enableCache: config?.enableCache ?? true,
+      registry: this.registry,
     };
   }
 
@@ -224,12 +165,31 @@ export class BatchMapLoader {
         const taskStartTime = performance.now();
 
         try {
-          const loader = MapLoaderRegistry.getLoader(task.extension);
-          if (!loader) {
+          // Get file extension without dot
+          const ext = task.extension.startsWith('.') ? task.extension : `.${task.extension}`;
+
+          // Check if format is supported
+          if (!this.registry.isFormatSupported(ext)) {
             throw new Error(`No loader for extension: ${task.extension}`);
           }
 
-          const mapData = await loader.parse(task.file);
+          // Use MapLoaderRegistry to load the map
+          let mapData: RawMapData;
+          if (task.file instanceof File) {
+            const result = await this.registry.loadMap(task.file, {
+              convertToEdgeStory: false,
+              validateAssets: false,
+            });
+            mapData = result.rawMap;
+          } else {
+            // ArrayBuffer
+            const result = await this.registry.loadMapFromBuffer(task.file, ext, {
+              convertToEdgeStory: false,
+              validateAssets: false,
+            });
+            mapData = result.rawMap;
+          }
+
           const loadTimeMs = performance.now() - taskStartTime;
 
           // Add to cache
@@ -356,74 +316,3 @@ export class BatchMapLoader {
     return batches;
   }
 }
-```
-
-**Usage Example**:
-```typescript
-const batchLoader = new BatchMapLoader({
-  maxConcurrent: 3,
-  maxCacheSize: 10,
-  onProgress: (progress) => {
-    console.log(`[${progress.taskId}] ${progress.status} - ${progress.progress}%`);
-  },
-});
-
-const tasks: MapLoadTask[] = [
-  { id: 'map1', file: file1, extension: '.w3x', sizeBytes: 1024000 },
-  { id: 'map2', file: file2, extension: '.w3n', sizeBytes: 52428800 },
-  // ... 22 more maps
-];
-
-const result = await batchLoader.loadMaps(tasks);
-console.log(`Loaded ${result.stats.succeeded}/${result.stats.total} maps`);
-```
-
----
-
-## 🧪 Validation
-
-```bash
-npm run typecheck
-npm test -- src/formats/maps/BatchMapLoader.test.ts
-npm run test:batch-load  # Load all 24 maps
-```
-
-**Expected**:
-- ✅ All 24 maps load in <2 minutes
-- ✅ Max 3 concurrent loads at any time
-- ✅ Memory usage <4GB peak
-- ✅ Cache eviction works correctly (LRU)
-- ✅ Progress callbacks fire correctly
-- ✅ Cancellation stops in-progress loads
-
----
-
-## 📦 Tasks (4 days)
-
-**Day 1**: Core structure + priority queue
-**Day 2**: LRU cache implementation
-**Day 3**: Progress tracking + cancellation
-**Day 4**: Testing with all 24 maps + optimization
-
----
-
-## 🚨 Risks
-
-🟡 **Medium**: 923MB W3N file may cause memory spike
-**Mitigation**: Use streaming (PRP 2.10), load last
-
-🟢 **Low**: Well-defined problem, clear performance targets
-
----
-
-## 📚 References
-
-- **Pattern**: Standard batch loading with Promise.allSettled()
-- **Cache**: LRU eviction algorithm
-- **Priority**: Sort by size (small first for fast feedback)
-
----
-
-## 🎯 Confidence: **9.0/10**
-
-Straightforward parallel loading implementation with LRU cache.
