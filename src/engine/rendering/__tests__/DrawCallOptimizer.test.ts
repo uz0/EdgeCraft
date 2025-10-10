@@ -5,7 +5,11 @@
 import * as BABYLON from '@babylonjs/core';
 import { DrawCallOptimizer } from '../DrawCallOptimizer';
 
-describe('DrawCallOptimizer', () => {
+// Skip in CI environment (no WebGL context available)
+const describeIfWebGL =
+  typeof window !== 'undefined' && window.WebGLRenderingContext != null ? describe : describe.skip;
+
+describeIfWebGL('DrawCallOptimizer', () => {
   let engine: BABYLON.Engine;
   let scene: BABYLON.Scene;
   let canvas: HTMLCanvasElement;
@@ -29,7 +33,7 @@ describe('DrawCallOptimizer', () => {
       // Create 15 static meshes (above default minimum of 10)
       for (let i = 0; i < 15; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        (mesh.metadata as any) = { isStatic: true };
+        mesh.metadata = { isStatic: true };
         mesh.position = new BABYLON.Vector3(i, 0, 0);
       }
 
@@ -43,7 +47,7 @@ describe('DrawCallOptimizer', () => {
       // Create only 5 static meshes (below default minimum of 10)
       for (let i = 0; i < 5; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        (mesh.metadata as any) = { isStatic: true };
+        mesh.metadata = { isStatic: true };
       }
 
       const result = optimizer.mergeStaticMeshes();
@@ -58,14 +62,14 @@ describe('DrawCallOptimizer', () => {
       // Create 10 meshes with mat1
       for (let i = 0; i < 10; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box1_${i}`, { size: 1 }, scene);
-        (mesh.metadata as any) = { isStatic: true };
+        mesh.metadata = { isStatic: true };
         mesh.material = mat1;
       }
 
       // Create 10 meshes with mat2
       for (let i = 0; i < 10; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box2_${i}`, { size: 1 }, scene);
-        (mesh.metadata as any) = { isStatic: true };
+        mesh.metadata = { isStatic: true };
         mesh.material = mat2;
       }
 
@@ -80,7 +84,7 @@ describe('DrawCallOptimizer', () => {
     it('should track mesh reduction', () => {
       for (let i = 0; i < 15; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        (mesh.metadata as any) = { isStatic: true };
+        mesh.metadata = { isStatic: true };
       }
 
       optimizer.mergeStaticMeshes();

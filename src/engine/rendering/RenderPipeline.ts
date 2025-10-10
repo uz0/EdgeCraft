@@ -91,14 +91,14 @@ export class OptimizedRenderPipeline {
   /**
    * Initialize the rendering pipeline with optimizations
    */
-  public async initialize(options?: RenderPipelineOptions): Promise<void> {
+  public initialize(options?: RenderPipelineOptions): void {
     // Merge options
-    if (options) {
+    if (options != null) {
       this.options = { ...this.options, ...options };
-      if (options.initialQuality) {
+      if (options.initialQuality != null) {
         this.state.lodState.currentQuality = options.initialQuality;
       }
-      if (options.targetFPS) {
+      if (options.targetFPS != null && options.targetFPS > 0) {
         this.state.lodState.targetFPS = options.targetFPS;
       }
     }
@@ -181,7 +181,13 @@ export class OptimizedRenderPipeline {
   private freezeActiveMeshes(): void {
     // Mark static meshes
     for (const mesh of this.scene.meshes) {
-      if (mesh.metadata?.isStatic) {
+      const metadata = mesh.metadata as Record<string, unknown> | null | undefined;
+      if (
+        metadata != null &&
+        typeof metadata === 'object' &&
+        'isStatic' in metadata &&
+        metadata.isStatic === true
+      ) {
         mesh.freezeWorldMatrix();
       }
     }
@@ -391,14 +397,14 @@ export class OptimizedRenderPipeline {
    * Get optimization statistics
    */
   public getStats(): Readonly<OptimizationStats> {
-    return JSON.parse(JSON.stringify(this.state.stats));
+    return JSON.parse(JSON.stringify(this.state.stats)) as OptimizationStats;
   }
 
   /**
    * Get current state
    */
   public getState(): Readonly<RenderPipelineState> {
-    return JSON.parse(JSON.stringify(this.state));
+    return JSON.parse(JSON.stringify(this.state)) as RenderPipelineState;
   }
 
   /**

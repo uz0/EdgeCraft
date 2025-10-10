@@ -47,9 +47,14 @@ export class DrawCallOptimizer {
     this.originalMeshCount = this.scene.meshes.length;
 
     // Find static meshes (marked by metadata)
-    const staticMeshes = this.scene.meshes.filter(
-      (mesh) => mesh.metadata?.isStatic && mesh.isVisible && mesh.isEnabled()
-    );
+    const staticMeshes = this.scene.meshes.filter((mesh) => {
+      const metadata = mesh.metadata as Record<string, unknown> | null | undefined;
+      const isStatic =
+        metadata != null && typeof metadata === 'object' && 'isStatic' in metadata
+          ? metadata.isStatic
+          : false;
+      return isStatic === true && mesh.isVisible && mesh.isEnabled();
+    });
 
     if (staticMeshes.length < this.config.minMeshesForMerge) {
       console.log(
@@ -85,9 +90,7 @@ export class DrawCallOptimizer {
   /**
    * Group meshes by material for better batching
    */
-  private groupByMaterial(
-    meshes: BABYLON.AbstractMesh[]
-  ): Map<string, BABYLON.Mesh[]> {
+  private groupByMaterial(meshes: BABYLON.AbstractMesh[]): Map<string, BABYLON.Mesh[]> {
     const groups = new Map<string, BABYLON.Mesh[]>();
 
     for (const mesh of meshes) {
@@ -118,10 +121,7 @@ export class DrawCallOptimizer {
   /**
    * Merge a group of meshes with the same material
    */
-  private mergeMeshGroup(
-    meshes: BABYLON.Mesh[],
-    materialKey: string
-  ): BABYLON.Mesh | null {
+  private mergeMeshGroup(meshes: BABYLON.Mesh[], materialKey: string): BABYLON.Mesh | null {
     // Calculate total vertices
     let totalVertices = 0;
     for (const mesh of meshes) {
@@ -147,9 +147,10 @@ export class DrawCallOptimizer {
         true // merge multi-materials
       );
 
-      if (mergedMesh) {
+      if (mergedMesh != null) {
         mergedMesh.name = `merged-${materialKey}`;
-        const metadata: any = mergedMesh.metadata || {};
+        const metadata: Record<string, unknown> =
+          (mergedMesh.metadata as Record<string, unknown>) ?? {};
         metadata.isMerged = true;
         metadata.sourceCount = meshes.length;
         mergedMesh.metadata = metadata;
