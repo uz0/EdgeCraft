@@ -19,7 +19,7 @@ class MockMapLoader implements IMapLoader {
     // Simulate parsing time based on file size
     const size = buffer instanceof File ? buffer.size : buffer.byteLength;
     const parseTime = Math.min(size / 1024 / 10, 100); // Max 100ms
-    await new Promise(resolve => setTimeout(resolve, parseTime));
+    await new Promise((resolve) => setTimeout(resolve, parseTime));
 
     return {
       format: 'w3x',
@@ -51,9 +51,30 @@ function createMockMapBuffer(sizeKB: number): ArrayBuffer {
 // Mock tasks simulating 24 maps with varying sizes
 const createMockTasks = (): MapLoadTask[] => {
   const mapSizes = [
-    100, 200, 150, 300, 250, 400, 350, 500,  // Small to medium maps
-    600, 700, 800, 900, 1000, 1100, 1200,    // Large maps
-    50, 75, 125, 175, 225, 275, 325, 375, 425 // Various sizes
+    100,
+    200,
+    150,
+    300,
+    250,
+    400,
+    350,
+    500, // Small to medium maps
+    600,
+    700,
+    800,
+    900,
+    1000,
+    1100,
+    1200, // Large maps
+    50,
+    75,
+    125,
+    175,
+    225,
+    275,
+    325,
+    375,
+    425, // Various sizes
   ];
 
   return mapSizes.map((sizeKB, index) => ({
@@ -65,9 +86,9 @@ const createMockTasks = (): MapLoadTask[] => {
   }));
 };
 
-async function runBatchLoadTest() {
+async function runBatchLoadTest(): Promise<void> {
   console.log('🧪 BatchMapLoader Integration Test\n');
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
 
   // Create mock registry with mock loaders
   const mockRegistry = new MapLoaderRegistry();
@@ -82,11 +103,10 @@ async function runBatchLoadTest() {
     maxCacheSize: 10,
     enableCache: true,
     registry: mockRegistry,
-    onProgress: (progress) => {
+    onProgress: (progress): void => {
       const status = progress.status.toUpperCase().padEnd(8);
-      const timeStr = progress.loadTimeMs
-        ? `(${progress.loadTimeMs.toFixed(0)}ms)`
-        : '';
+      const timeStr =
+        progress.loadTimeMs !== undefined ? `(${progress.loadTimeMs.toFixed(0)}ms)` : '';
       console.log(`  [${progress.taskId}] ${status} ${timeStr}`);
     },
   });
@@ -141,7 +161,9 @@ async function runBatchLoadTest() {
 
     console.log(`Time Limit:     ${targetTime}s`);
     console.log(`Actual Time:    ${totalLoadTime.toFixed(2)}s`);
-    console.log(`Performance:    ${passesTimeTest ? '✅ PASS' : '⚠️  Would need actual maps to test'}`);
+    console.log(
+      `Performance:    ${passesTimeTest ? '✅ PASS' : '⚠️  Would need actual maps to test'}`
+    );
 
     // Note about memory test
     console.log(`Memory Limit:   <4GB (requires profiling with actual maps)`);
