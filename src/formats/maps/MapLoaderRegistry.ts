@@ -5,6 +5,7 @@
 
 import { W3XMapLoader } from './w3x/W3XMapLoader';
 import { SCMMapLoader } from './scm/SCMMapLoader';
+import { SC2MapLoader } from './sc2/SC2MapLoader';
 import { EdgeStoryConverter } from './edgestory/EdgeStoryConverter';
 import type { IMapLoader, RawMapData } from './types';
 import type { EdgeStoryMap } from './edgestory/EdgeStoryFormat';
@@ -86,6 +87,11 @@ export class MapLoaderRegistry {
     const scmLoader = new SCMMapLoader();
     this.loaders.set('.scm', scmLoader);
     this.loaders.set('.scx', scmLoader);
+
+    // StarCraft 2 formats
+    const sc2Loader = new SC2MapLoader();
+    this.loaders.set('.sc2map', sc2Loader);
+    this.loaders.set('.sc2mod', sc2Loader); // SC2 mods use same format
   }
 
   /**

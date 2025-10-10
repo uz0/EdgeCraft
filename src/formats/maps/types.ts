@@ -19,7 +19,7 @@ export interface IMapLoader {
  * Raw map data from any source format
  */
 export interface RawMapData {
-  format: 'w3x' | 'w3m' | 'scm' | 'scx';
+  format: 'w3x' | 'w3m' | 'scm' | 'scx' | 'sc2map';
   info: MapInfo;
   terrain: TerrainData;
   units: UnitPlacement[];
