@@ -1,6 +1,6 @@
 /**
  * Common types for map loading system
- * Supports W3X/W3M (Warcraft 3) and SCM/SCX (StarCraft 1) formats
+ * Supports W3X/W3M (Warcraft 3), SCM/SCX (StarCraft 1), and SC2Map (StarCraft 2) formats
  */
 
 /**

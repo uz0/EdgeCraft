@@ -65,10 +65,10 @@ export class SC2MapLoader implements IMapLoader {
 
     // Extract SC2-specific files
     // SC2 maps contain various files, we'll try common ones
-    const docInfoData = mpqParser.extractFile('DocumentInfo');
-    const mapInfoData = mpqParser.extractFile('MapInfo');
-    const terrainData = mpqParser.extractFile('TerrainData.xml');
-    const unitsData = mpqParser.extractFile('Units');
+    const docInfoData = await mpqParser.extractFile('DocumentInfo');
+    const mapInfoData = await mpqParser.extractFile('MapInfo');
+    const terrainData = await mpqParser.extractFile('TerrainData.xml');
+    const unitsData = await mpqParser.extractFile('Units');
 
     // Parse map info (DocumentInfo is primary, MapInfo is fallback)
     let mapInfo: MapInfo;

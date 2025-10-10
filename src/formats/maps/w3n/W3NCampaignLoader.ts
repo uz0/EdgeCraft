@@ -48,7 +48,7 @@ export class W3NCampaignLoader implements IMapLoader {
     // Extract campaign info (optional - for metadata)
     let campaignInfo: W3FCampaignInfo | undefined;
     try {
-      const w3fData = mpqParser.extractFile('war3campaign.w3f');
+      const w3fData = await mpqParser.extractFile('war3campaign.w3f');
       if (w3fData) {
         const w3fParser = new W3FCampaignInfoParser(w3fData.data);
         campaignInfo = w3fParser.parse();
@@ -59,7 +59,7 @@ export class W3NCampaignLoader implements IMapLoader {
     }
 
     // Extract embedded maps
-    const embeddedMaps = this.extractEmbeddedMaps(mpqParser);
+    const embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
 
     if (embeddedMaps.length === 0) {
       throw new Error('No maps found in campaign archive');
@@ -90,11 +90,13 @@ export class W3NCampaignLoader implements IMapLoader {
    * Extract embedded maps from campaign archive
    * Maps are stored as separate MPQ files within the campaign MPQ
    */
-  private extractEmbeddedMaps(mpqParser: MPQParser): Array<{ data: ArrayBuffer; index: number }> {
+  private async extractEmbeddedMaps(
+    mpqParser: MPQParser
+  ): Promise<Array<{ data: ArrayBuffer; index: number }>> {
     const maps: Array<{ data: ArrayBuffer; index: number }> = [];
 
     // Try to extract (listfile) to get list of all files
-    const listFile = mpqParser.extractFile('(listfile)');
+    const listFile = await mpqParser.extractFile('(listfile)');
     let fileList: string[] = [];
 
     if (listFile) {
@@ -120,7 +122,7 @@ export class W3NCampaignLoader implements IMapLoader {
     let index = 0;
     for (const mapFile of mapFiles) {
       try {
-        const mapData = mpqParser.extractFile(mapFile);
+        const mapData = await mpqParser.extractFile(mapFile);
         if (mapData && mapData.data.byteLength > 0) {
           maps.push({
             data: mapData.data,
@@ -216,7 +218,7 @@ export class W3NCampaignLoader implements IMapLoader {
     }
 
     try {
-      const w3fData = mpqParser.extractFile('war3campaign.w3f');
+      const w3fData = await mpqParser.extractFile('war3campaign.w3f');
       if (!w3fData) {
         return null;
       }
@@ -243,7 +245,7 @@ export class W3NCampaignLoader implements IMapLoader {
       return [];
     }
 
-    const embeddedMaps = this.extractEmbeddedMaps(mpqParser);
+    const embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
 
     return embeddedMaps.map((map, index) => ({
       filename: `Map ${index + 1}`, // Actual filename not available without listfile
