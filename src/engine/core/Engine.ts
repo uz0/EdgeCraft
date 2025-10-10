@@ -7,6 +7,7 @@
 
 import * as BABYLON from '@babylonjs/core';
 import type { EngineOptions, EngineState, IEngineCore } from './types';
+import { OptimizedRenderPipeline, QualityPreset } from '../rendering';
 
 /**
  * Main Edge Craft engine class
@@ -26,6 +27,7 @@ export class EdgeCraftEngine implements IEngineCore {
   private _canvas: HTMLCanvasElement;
   private _state: EngineState;
   private _isRunning: boolean = false;
+  private _renderPipeline?: OptimizedRenderPipeline;
 
   constructor(canvas: HTMLCanvasElement, options?: EngineOptions) {
     this._canvas = canvas;
@@ -69,6 +71,35 @@ export class EdgeCraftEngine implements IEngineCore {
 
     // Ambient light for better visibility
     this._scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+  }
+
+  /**
+   * Initialize optimized rendering pipeline
+   */
+  public async initializeRenderPipeline(): Promise<void> {
+    if (this._renderPipeline) {
+      console.warn('Render pipeline already initialized');
+      return;
+    }
+
+    this._renderPipeline = new OptimizedRenderPipeline(this._scene);
+    await this._renderPipeline.initialize({
+      enableMaterialSharing: true,
+      enableMeshMerging: true,
+      enableCulling: true,
+      enableDynamicLOD: true,
+      targetFPS: 60,
+      initialQuality: QualityPreset.HIGH,
+    });
+
+    console.log('Optimized render pipeline initialized');
+  }
+
+  /**
+   * Get render pipeline instance
+   */
+  public get renderPipeline(): OptimizedRenderPipeline | undefined {
+    return this._renderPipeline;
   }
 
   /**
@@ -165,6 +196,11 @@ export class EdgeCraftEngine implements IEngineCore {
    */
   public dispose(): void {
     this.stopRenderLoop();
+
+    // Dispose render pipeline
+    if (this._renderPipeline) {
+      this._renderPipeline.dispose();
+    }
 
     // Dispose scene and all its resources
     this._scene.dispose();
