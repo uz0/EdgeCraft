@@ -77,8 +77,7 @@ export class MinimapSystem {
   private rttSize: number;
   private updateFPS: number;
   private renderTarget: BABYLON.RenderTargetTexture | null = null;
-  private minimapCamera: BABYLON.Camera | null = null;
-  private isEnabled: boolean = false;
+  private minimapCamera: BABYLON.FreeCamera | null = null;
   private mapBounds: {
     minX: number;
     maxX: number;
@@ -103,7 +102,9 @@ export class MinimapSystem {
       maxZ: 100,
     };
 
-    console.log(`Minimap system initialized (${this.rttSize}x${this.rttSize} @ ${this.updateFPS}fps)`);
+    console.log(
+      `Minimap system initialized (${this.rttSize}x${this.rttSize} @ ${this.updateFPS}fps)`
+    );
   }
 
   /**
@@ -130,7 +131,7 @@ export class MinimapSystem {
   /**
    * Initialize minimap
    */
-  public async initialize(): Promise<void> {
+  public initialize(): void {
     if (this.rttSize === 0) {
       console.log('Minimap disabled (LOW quality)');
       return;
@@ -275,7 +276,7 @@ export class MinimapSystem {
       this.dispose();
       this.rttSize = params.size;
       this.updateFPS = params.updateFPS;
-      this.initialize();
+      void Promise.resolve(this.initialize());
       return;
     }
 
@@ -285,7 +286,7 @@ export class MinimapSystem {
       this.dispose();
       this.rttSize = params.size;
       this.updateFPS = params.updateFPS;
-      this.initialize();
+      void Promise.resolve(this.initialize());
     }
   }
 

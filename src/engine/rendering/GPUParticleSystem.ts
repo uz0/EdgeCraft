@@ -218,14 +218,10 @@ export class AdvancedParticleSystem {
   ): Promise<BABYLON.GPUParticleSystem | null> {
     const capacity = Math.min(config.capacity ?? 1000, this.maxParticles);
 
-    const system = new BABYLON.GPUParticleSystem(
-      `gpu_${config.type}`,
-      { capacity },
-      this.scene
-    );
+    const system = new BABYLON.GPUParticleSystem(`gpu_${config.type}`, { capacity }, this.scene);
 
     // Apply configuration
-    await this.configureSystem(system, config);
+    this.configureSystem(system, config);
 
     return system;
   }
@@ -249,10 +245,10 @@ export class AdvancedParticleSystem {
   /**
    * Configure particle system based on effect type
    */
-  private async configureSystem(
+  private configureSystem(
     system: BABYLON.GPUParticleSystem | BABYLON.ParticleSystem,
     config: ParticleEffectConfig
-  ): Promise<void> {
+  ): void {
     // Emitter
     system.emitter = config.position;
 
@@ -453,8 +449,8 @@ export class AdvancedParticleSystem {
       if (effect.system instanceof BABYLON.GPUParticleSystem) {
         totalParticles += effect.system.activeParticleCount;
         gpuEffects++;
-      } else {
-        totalParticles += (effect.system as BABYLON.ParticleSystem).getActiveCount();
+      } else if (effect.system instanceof BABYLON.ParticleSystem) {
+        totalParticles += effect.system.getActiveCount();
         cpuEffects++;
       }
     }

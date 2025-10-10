@@ -272,7 +272,7 @@ export class PBRMaterialSystem {
   /**
    * Pre-load common materials
    */
-  public async preloadCommonMaterials(): Promise<void> {
+  public preloadCommonMaterials(): void {
     console.log('Pre-loading common materials...');
 
     const commonMaterials = [
