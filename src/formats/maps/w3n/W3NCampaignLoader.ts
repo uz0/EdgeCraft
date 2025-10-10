@@ -14,6 +14,7 @@
 import { MPQParser } from '../../mpq/MPQParser';
 import { W3XMapLoader } from '../w3x/W3XMapLoader';
 import { W3FCampaignInfoParser } from './W3FCampaignInfoParser';
+import { StreamingFileReader } from '../../../utils/StreamingFileReader';
 import type { IMapLoader, RawMapData } from '../types';
 import type { W3FCampaignInfo, EmbeddedMapInfo } from './types';
 
@@ -34,6 +35,24 @@ export class W3NCampaignLoader implements IMapLoader {
    * @returns Raw map data from first map in campaign
    */
   public async parse(file: File | ArrayBuffer): Promise<RawMapData> {
+    // Detect file size to determine parsing strategy
+    const fileSize = file instanceof ArrayBuffer ? file.byteLength : file.size;
+    const STREAMING_THRESHOLD = 100 * 1024 * 1024; // 100MB
+
+    if (fileSize > STREAMING_THRESHOLD && file instanceof File) {
+      // Large file (>100MB) - use streaming to prevent memory crashes
+      console.log(`Large campaign detected (${(fileSize / 1024 / 1024).toFixed(1)} MB), using streaming mode`);
+      return this.parseStreaming(file);
+    } else {
+      // Small file (<100MB) - use traditional in-memory parsing
+      return this.parseInMemory(file);
+    }
+  }
+
+  /**
+   * Parse campaign using traditional in-memory method (for files <100MB)
+   */
+  private async parseInMemory(file: File | ArrayBuffer): Promise<RawMapData> {
     // Convert File to ArrayBuffer if needed
     const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
 
@@ -80,6 +99,80 @@ export class W3NCampaignLoader implements IMapLoader {
       result.info = {
         ...result.info,
         description: this.buildDescription(campaignInfo, result.info.description, firstMap.index),
+      };
+    }
+
+    return result;
+  }
+
+  /**
+   * Parse campaign using streaming method (for large files >100MB)
+   * This prevents browser memory crashes with files like the 923MB campaign
+   */
+  private async parseStreaming(file: File): Promise<RawMapData> {
+    // Create streaming reader
+    const reader = new StreamingFileReader(file, {
+      chunkSize: 4 * 1024 * 1024, // 4MB chunks
+      onProgress: (bytesRead, totalBytes) => {
+        const percent = ((bytesRead / totalBytes) * 100).toFixed(1);
+        console.log(`Loading campaign: ${percent}%`);
+      },
+    });
+
+    // Create MPQ parser (with empty buffer since we're streaming)
+    const mpqParser = new MPQParser(new ArrayBuffer(0));
+
+    // Parse MPQ archive using streaming
+    const mpqResult = await mpqParser.parseStream(reader, {
+      extractFiles: ['war3campaign.w3f', '*.w3x', '*.w3m'], // Only extract what we need
+      onProgress: (stage, progress) => {
+        console.log(`${stage}: ${progress.toFixed(1)}%`);
+      },
+    });
+
+    if (!mpqResult.success) {
+      throw new Error(`Failed to parse campaign MPQ archive: ${mpqResult.error}`);
+    }
+
+    console.log(`Campaign parsed in ${mpqResult.parseTimeMs?.toFixed(0)}ms`);
+
+    // Extract campaign info (optional - for metadata)
+    let campaignInfo: W3FCampaignInfo | undefined;
+    try {
+      const w3fData = mpqResult.files.find((f) => f.name === 'war3campaign.w3f');
+      if (w3fData) {
+        const w3fParser = new W3FCampaignInfoParser(w3fData.data);
+        campaignInfo = w3fParser.parse();
+      }
+    } catch (error) {
+      // Campaign info is optional, continue without it
+      console.warn('Failed to parse campaign info:', error);
+    }
+
+    // Find first map file (w3x or w3m)
+    const firstMapFile = mpqResult.files.find((f) => {
+      const lower = f.name.toLowerCase();
+      return lower.endsWith('.w3x') || lower.endsWith('.w3m');
+    });
+
+    if (!firstMapFile) {
+      throw new Error('No maps found in campaign archive');
+    }
+
+    // Parse first map using W3XMapLoader
+    const mapData = await this.w3xLoader.parse(firstMapFile.data);
+
+    // Override format to 'w3n' and add campaign info to description
+    const result: RawMapData = {
+      ...mapData,
+      format: 'w3n',
+    };
+
+    // Add campaign info to map metadata if available
+    if (campaignInfo) {
+      result.info = {
+        ...result.info,
+        description: this.buildDescription(campaignInfo, result.info.description, 0),
       };
     }
 
