@@ -1,5 +1,24 @@
 import '@testing-library/jest-dom';
 
+// Mock browser APIs
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
+// Mock WebGL context for Babylon.js
+HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
+  if (contextType === 'webgl' || contextType === 'webgl2') {
+    return {
+      canvas: document.createElement('canvas'),
+      drawingBufferWidth: 800,
+      drawingBufferHeight: 600,
+    };
+  }
+  return null;
+}) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
 // Mock window globals for Edge Craft
 if (typeof window !== 'undefined') {
   window.__EDGE_CRAFT_VERSION__ = '0.1.0';
@@ -7,7 +26,25 @@ if (typeof window !== 'undefined') {
 }
 
 // Mock console extensions
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-(console as any).engine = jest.fn();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-(console as any).gameplay = jest.fn();
+interface ConsoleExtensions {
+  engine: jest.Mock;
+  gameplay: jest.Mock;
+}
+
+(console as Console & ConsoleExtensions).engine = jest.fn();
+(console as Console & ConsoleExtensions).gameplay = jest.fn();
+
+// Suppress console errors in tests
+const originalError = console.error;
+beforeAll((): void => {
+  console.error = (...args: unknown[]): void => {
+    if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render')) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
