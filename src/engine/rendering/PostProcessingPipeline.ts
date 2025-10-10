@@ -217,7 +217,7 @@ export class PostProcessingPipeline {
    * Load LUT texture for color grading
    */
   private async loadLUTTexture(url: string): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.lutTexture = new BABYLON.Texture(
         url,
         this.scene,

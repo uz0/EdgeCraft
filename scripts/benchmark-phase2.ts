@@ -12,10 +12,7 @@
  */
 
 import * as BABYLON from '@babylonjs/core';
-import {
-  QualityPresetManager,
-  QualityPreset,
-} from '../src/engine/rendering';
+import { QualityPresetManager, QualityPreset } from '../src/engine/rendering';
 
 interface BenchmarkResult {
   name: string;
@@ -54,8 +51,8 @@ async function runBenchmarks(): Promise<void> {
     enableAutoAdjust: false,
   });
 
-  // Get systems
-  const systems = manager.getSystems();
+  // Get systems for validation
+  void manager.getSystems();
 
   const results: BenchmarkResult[] = [];
 
