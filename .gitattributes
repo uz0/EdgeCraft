@@ -1,6 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 *.w3n filter=lfs diff=lfs merge=lfs -text
+*.w3x filter=lfs diff=lfs merge=lfs -text
+*.SC2Map filter=lfs diff=lfs merge=lfs -text
 *.w3x !text !filter !merge !diff
 *.w3m !text !filter !merge !diff
 *.SC2Map !text !filter !merge !diff
