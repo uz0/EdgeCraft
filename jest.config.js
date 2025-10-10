@@ -2,7 +2,7 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/src'],
 
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',
@@ -30,10 +30,8 @@ export default {
 
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/tests/__mocks__/fileMock.js',
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/mocks/__mocks__/fileMock.js',
   },
-
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
 
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
