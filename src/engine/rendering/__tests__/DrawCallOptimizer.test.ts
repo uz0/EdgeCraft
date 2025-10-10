@@ -33,7 +33,7 @@ describeIfWebGL('DrawCallOptimizer', () => {
       // Create 15 static meshes (above default minimum of 10)
       for (let i = 0; i < 15; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
         mesh.position = new BABYLON.Vector3(i, 0, 0);
       }
 
@@ -47,7 +47,7 @@ describeIfWebGL('DrawCallOptimizer', () => {
       // Create only 5 static meshes (below default minimum of 10)
       for (let i = 0; i < 5; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
       }
 
       const result = optimizer.mergeStaticMeshes();
@@ -62,14 +62,14 @@ describeIfWebGL('DrawCallOptimizer', () => {
       // Create 10 meshes with mat1
       for (let i = 0; i < 10; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box1_${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
         mesh.material = mat1;
       }
 
       // Create 10 meshes with mat2
       for (let i = 0; i < 10; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box2_${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
         mesh.material = mat2;
       }
 
@@ -84,7 +84,7 @@ describeIfWebGL('DrawCallOptimizer', () => {
     it('should track mesh reduction', () => {
       for (let i = 0; i < 15; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
       }
 
       optimizer.mergeStaticMeshes();

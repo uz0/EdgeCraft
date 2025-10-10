@@ -55,7 +55,7 @@ describeIfWebGL('OptimizedRenderPipeline', () => {
     it('should freeze active meshes when enabled', () => {
       // Create static mesh
       const mesh = BABYLON.MeshBuilder.CreateBox('box', { size: 1 }, scene);
-      mesh.metadata = { isStatic: true };
+      mesh.metadata = { isStatic: true } as Record<string, unknown>;
 
       pipeline.initialize();
 
@@ -98,7 +98,7 @@ describeIfWebGL('OptimizedRenderPipeline', () => {
       // Create static meshes
       for (let i = 0; i < 15; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
         mesh.position = new BABYLON.Vector3(i, 0, 0);
       }
 
@@ -112,7 +112,7 @@ describeIfWebGL('OptimizedRenderPipeline', () => {
       // Create only 3 static meshes (below default minimum of 10)
       for (let i = 0; i < 3; i++) {
         const mesh = BABYLON.MeshBuilder.CreateBox(`box${i}`, { size: 1 }, scene);
-        mesh.metadata = { isStatic: true };
+        mesh.metadata = { isStatic: true } as Record<string, unknown>;
       }
 
       pipeline.initialize({ enableMeshMerging: true });
