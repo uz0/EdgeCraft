@@ -51,7 +51,7 @@ export class DrawCallOptimizer {
       const metadata = mesh.metadata as Record<string, unknown> | null | undefined;
       const isStatic =
         metadata != null && typeof metadata === 'object' && 'isStatic' in metadata
-          ? metadata.isStatic
+          ? metadata['isStatic']
           : false;
       return isStatic === true && mesh.isVisible && mesh.isEnabled();
     });
@@ -151,8 +151,8 @@ export class DrawCallOptimizer {
         mergedMesh.name = `merged-${materialKey}`;
         const metadata: Record<string, unknown> =
           (mergedMesh.metadata as Record<string, unknown>) ?? {};
-        metadata.isMerged = true;
-        metadata.sourceCount = meshes.length;
+        metadata['isMerged'] = true;
+        metadata['sourceCount'] = meshes.length;
         mergedMesh.metadata = metadata;
 
         // Optimize merged mesh

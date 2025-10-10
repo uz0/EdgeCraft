@@ -186,7 +186,7 @@ export class OptimizedRenderPipeline {
         metadata != null &&
         typeof metadata === 'object' &&
         'isStatic' in metadata &&
-        metadata.isStatic === true
+        metadata['isStatic'] === true
       ) {
         mesh.freezeWorldMatrix();
       }
