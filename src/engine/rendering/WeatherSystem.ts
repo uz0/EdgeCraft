@@ -103,7 +103,7 @@ export class WeatherSystem {
   /**
    * Set weather immediately
    */
-  public async setWeather(config: WeatherConfig)) {
+  public async setWeather(config: WeatherConfig): Promise<void> {
     console.log(`Setting weather to: ${config.type} (intensity: ${config.intensity ?? 1.0})`);
 
     // Clear current weather
@@ -119,11 +119,11 @@ export class WeatherSystem {
         break;
 
       case 'rain':
-        await this.applyRainWeather(config);
+        this.applyRainWeather(config);
         break;
 
       case 'snow':
-        await this.applySnowWeather(config);
+        this.applySnowWeather(config);
         break;
 
       case 'fog':
@@ -131,7 +131,7 @@ export class WeatherSystem {
         break;
 
       case 'storm':
-        await this.applyStormWeather(config);
+        this.applyStormWeather(config);
         break;
     }
   }
@@ -139,7 +139,7 @@ export class WeatherSystem {
   /**
    * Transition to new weather over time
    */
-  public async transitionTo(config: WeatherConfig, durationMs: number = 5000)) {
+  public async transitionTo(config: WeatherConfig, durationMs: number = 5000): Promise<void> {
     if (this.isTransitioning) {
       console.warn('Weather transition already in progress');
       return;
@@ -281,11 +281,11 @@ export class WeatherSystem {
   /**
    * Apply storm weather (rain + fog)
    */
-  private async applyStormWeather(config: WeatherConfig)) {
+  private async applyStormWeather(config: WeatherConfig): Promise<void> {
     const intensity = config.intensity ?? 1.0;
 
     // Heavy rain
-    await this.applyRainWeather({
+    this.applyRainWeather({
       ...config,
       particleCount: 3000,
       intensity: intensity * 1.5,
@@ -304,7 +304,7 @@ export class WeatherSystem {
   /**
    * Fade out current weather
    */
-  private async fadeOutCurrentWeather(durationMs: number)) {
+  private async fadeOutCurrentWeather(durationMs: number): Promise<void> {
     const startIntensity = this.currentIntensity;
     const startTime = Date.now();
 
@@ -332,7 +332,7 @@ export class WeatherSystem {
   /**
    * Fade in weather
    */
-  private async fadeInWeather(durationMs: number)) {
+  private async fadeInWeather(durationMs: number): Promise<void> {
     const targetIntensity = this.currentIntensity;
     const startTime = Date.now();
 
