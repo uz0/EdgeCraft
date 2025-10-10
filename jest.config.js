@@ -42,7 +42,7 @@ export default {
     '!src/vite-env.d.ts',
   ],
 
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
