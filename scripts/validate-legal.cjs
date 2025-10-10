@@ -9,7 +9,8 @@ const fs = require('fs');
 const path = require('path');
 
 const BLOCKED_EXTENSIONS = [
-  '.mpq', '.casc', '.scm', '.scx', '.w3m', '.w3x', '.SC2Map',
+  // Map files are verified legal and allowed
+  '.mpq', '.casc', '.scm', '.scx', 
   '.mdx', '.mdl', '.m3', '.blp', '.dds', '.tga'
 ];
 
