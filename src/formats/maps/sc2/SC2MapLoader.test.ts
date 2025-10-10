@@ -36,9 +36,9 @@ describe('SC2MapLoader', () => {
     it('should parse Ruined Citadel.SC2Map', async () => {
       const mapPath = path.join(__dirname, '../../../../maps/Ruined Citadel.SC2Map');
 
-      // Check if file exists
-      if (!fs.existsSync(mapPath)) {
-        console.warn(`Skipping test: ${mapPath} not found`);
+      // Check if file exists and is valid (not a placeholder)
+      if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
+        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -59,9 +59,9 @@ describe('SC2MapLoader', () => {
     it('should parse TheUnitTester7.SC2Map', async () => {
       const mapPath = path.join(__dirname, '../../../../maps/TheUnitTester7.SC2Map');
 
-      // Check if file exists
-      if (!fs.existsSync(mapPath)) {
-        console.warn(`Skipping test: ${mapPath} not found`);
+      // Check if file exists and is valid (not a placeholder)
+      if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
+        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -79,9 +79,9 @@ describe('SC2MapLoader', () => {
     it('should parse Aliens Binary Mothership.SC2Map', async () => {
       const mapPath = path.join(__dirname, '../../../../maps/Aliens Binary Mothership.SC2Map');
 
-      // Check if file exists
-      if (!fs.existsSync(mapPath)) {
-        console.warn(`Skipping test: ${mapPath} not found`);
+      // Check if file exists and is valid (not a placeholder)
+      if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
+        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -99,9 +99,9 @@ describe('SC2MapLoader', () => {
     it('should complete loading within 2 seconds for large file', async () => {
       const mapPath = path.join(__dirname, '../../../../maps/Aliens Binary Mothership.SC2Map');
 
-      // Check if file exists
-      if (!fs.existsSync(mapPath)) {
-        console.warn(`Skipping test: ${mapPath} not found`);
+      // Check if file exists and is valid (not a placeholder)
+      if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
+        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -121,9 +121,9 @@ describe('SC2MapLoader', () => {
     it('should return RawMapData with required fields', async () => {
       const mapPath = path.join(__dirname, '../../../../maps/Ruined Citadel.SC2Map');
 
-      // Check if file exists
-      if (!fs.existsSync(mapPath)) {
-        console.warn(`Skipping test: ${mapPath} not found`);
+      // Check if file exists and is valid (not a placeholder)
+      if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
+        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
