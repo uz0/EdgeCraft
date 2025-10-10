@@ -37,7 +37,7 @@ export class SCMMapLoader implements IMapLoader {
     }
 
     // Extract scenario.chk (inside staredit folder)
-    const chkData = mpqParser.extractFile('staredit\\scenario.chk');
+    const chkData = await mpqParser.extractFile('staredit\\scenario.chk');
 
     if (!chkData) {
       throw new Error('staredit\\scenario.chk not found in archive');
