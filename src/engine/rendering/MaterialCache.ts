@@ -122,7 +122,7 @@ export class MaterialCache {
       }
     }
 
-    if (oldestKey) {
+    if (oldestKey != null && oldestKey.length > 0) {
       this.cache.delete(oldestKey);
     }
   }
