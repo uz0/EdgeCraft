@@ -239,3 +239,361 @@ export interface RenderPipelineState {
   /** Optimization statistics */
   stats: OptimizationStats;
 }
+
+/**
+ * Animation clip definition
+ */
+export interface AnimationClip {
+  /** Animation name */
+  name: string;
+
+  /** Start frame */
+  startFrame: number;
+
+  /** End frame */
+  endFrame: number;
+
+  /** Loop animation */
+  loop?: boolean;
+
+  /** Animation speed multiplier */
+  speed?: number;
+}
+
+/**
+ * Baked animation data
+ */
+export interface BakedAnimationData {
+  /** Animation texture */
+  texture: BABYLON.RawTexture;
+
+  /** Texture width */
+  width: number;
+
+  /** Texture height */
+  height: number;
+
+  /** Animation clips */
+  clips: Map<string, AnimationClip>;
+}
+
+/**
+ * Shadow quality levels
+ */
+export enum ShadowQuality {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  ULTRA = 'ultra',
+}
+
+/**
+ * Shadow quality configuration
+ */
+export interface QualityPresetConfig {
+  /** Shadow map size */
+  shadowMapSize: number;
+
+  /** Number of cascades */
+  numCascades: number;
+
+  /** Enable PCF filtering */
+  enablePCF: boolean;
+
+  /** Cascade blend percentage */
+  cascadeBlendPercentage: number;
+
+  /** Maximum shadow casters */
+  maxShadowCasters: number;
+}
+
+/**
+ * CSM (Cascaded Shadow Maps) configuration
+ */
+export interface CSMConfiguration {
+  /** Shadow map resolution */
+  shadowMapSize: number;
+
+  /** Number of cascades */
+  numCascades: number;
+
+  /** Lambda split factor */
+  lambda?: number;
+
+  /** Stabilize cascades */
+  stabilizeCascades?: boolean;
+
+  /** Enable depth clamping */
+  depthClamp?: boolean;
+
+  /** Filter quality */
+  filterQuality?: 'low' | 'medium' | 'high';
+
+  /** Cascade blend percentage */
+  cascadeBlendPercentage?: number;
+
+  /** Split distances for cascades */
+  splitDistances?: number[];
+
+  /** Enable PCF filtering */
+  enablePCF?: boolean;
+}
+
+/**
+ * Shadow statistics
+ */
+export interface ShadowStats {
+  /** Total shadow casters */
+  totalCasters: number;
+
+  /** Active shadow casters */
+  activeCasters: number;
+
+  /** Shadow map updates per frame */
+  updatesPerFrame: number;
+
+  /** Memory usage in bytes */
+  memoryUsage: number;
+
+  /** Number of cascades */
+  cascades?: number;
+
+  /** Shadow map size */
+  shadowMapSize?: number;
+
+  /** Shadow casters count (alias for totalCasters) */
+  shadowCasters?: number;
+}
+
+/**
+ * Shadow priority levels
+ */
+export enum ShadowPriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
+ * Unit instance data
+ */
+export interface UnitInstance {
+  /** Instance ID */
+  id: string;
+
+  /** Unit type */
+  type?: string;
+
+  /** World matrix */
+  matrix?: BABYLON.Matrix;
+
+  /** Position */
+  position?: BABYLON.Vector3;
+
+  /** Rotation in radians (Y-axis) */
+  rotation?: number;
+
+  /** Scale */
+  scale?: BABYLON.Vector3 | number;
+
+  /** Team color */
+  teamColor?: BABYLON.Color3;
+
+  /** Animation state */
+  animationState?: string;
+
+  /** Animation frame */
+  animationFrame?: number;
+
+  /** Animation time */
+  animationTime?: number;
+
+  /** Is visible */
+  visible?: boolean;
+}
+
+/**
+ * Rendering statistics
+ */
+export interface RenderingStats {
+  /** Total instances */
+  totalInstances: number;
+
+  /** Visible instances */
+  visibleInstances: number;
+
+  /** Draw calls */
+  drawCalls: number;
+
+  /** Triangles rendered */
+  triangles: number;
+
+  /** Memory usage */
+  memoryUsage: number;
+
+  /** Unit types count */
+  unitTypes?: number;
+
+  /** Total units */
+  totalUnits?: number;
+
+  /** CPU time in milliseconds */
+  cpuTime?: number;
+}
+
+/**
+ * Renderer configuration
+ */
+export interface RendererConfig {
+  /** Enable instancing */
+  enableInstancing?: boolean;
+
+  /** Maximum instances per buffer */
+  maxInstancesPerBuffer?: number;
+
+  /** Initial capacity */
+  initialCapacity?: number;
+
+  /** Enable picking */
+  enablePicking?: boolean;
+
+  /** Freeze active meshes */
+  freezeActiveMeshes?: boolean;
+
+  /** Enable frustum culling */
+  enableFrustumCulling?: boolean;
+
+  /** Enable occlusion culling */
+  enableOcclusionCulling?: boolean;
+
+  /** LOD distances */
+  lodDistances?: number[];
+}
+
+/**
+ * Unit type data
+ */
+export interface UnitTypeData {
+  /** Unit type identifier */
+  type: string;
+
+  /** Model path */
+  modelPath: string;
+
+  /** Mesh instance */
+  mesh?: BABYLON.Mesh;
+
+  /** Animation clips */
+  animations: AnimationClip[];
+
+  /** Baked animation data */
+  bakedAnimationData?: BakedAnimationData;
+
+  /** Bounding radius */
+  boundingRadius?: number;
+
+  /** Shadow enabled */
+  castShadow?: boolean;
+}
+
+/**
+ * Shadow caster configuration
+ */
+export interface ShadowCasterConfig {
+  /** Maximum shadow casters */
+  maxCasters?: number;
+
+  /** Shadow quality */
+  quality?: ShadowQuality;
+
+  /** Shadow type */
+  type?: 'csm' | 'blob' | 'standard' | 'hero' | 'building' | 'unit' | 'doodad' | 'none';
+
+  /** Shadow cast method */
+  castMethod?: 'csm' | 'blob' | 'none';
+
+  /** Enable dynamic updates */
+  dynamicUpdates?: boolean;
+
+  /** Update frequency (ms) */
+  updateFrequency?: number;
+}
+
+/**
+ * Shadow caster statistics
+ */
+export interface ShadowCasterStats {
+  /** Total registered casters */
+  totalCasters: number;
+
+  /** Currently rendering casters */
+  renderingCasters: number;
+
+  /** Casters culled this frame */
+  culledCasters: number;
+
+  /** Shadow map updates this frame */
+  updates: number;
+
+  /** CSM casters count */
+  csmCasters?: number;
+
+  /** Blob casters count */
+  blobCasters?: number;
+
+  /** Blob shadows count */
+  blobShadows?: number;
+
+  /** Total objects (all shadow casters) */
+  totalObjects?: number;
+}
+
+/**
+ * Animation controller state
+ */
+export interface AnimationControllerState {
+  /** Current animation name */
+  currentAnimation: string;
+
+  /** Target animation for blending */
+  targetAnimation?: string;
+
+  /** Blend progress (0-1) */
+  blendProgress?: number;
+
+  /** Current time in animation */
+  currentTime?: number;
+
+  /** Animation progress (0-1) */
+  progress: number;
+
+  /** Is playing */
+  isPlaying: boolean;
+
+  /** Is looping */
+  isLooping: boolean;
+
+  /** Playback speed */
+  speed: number;
+}
+
+/**
+ * Object pool configuration
+ */
+export interface PoolConfig {
+  /** Initial pool size */
+  initialSize?: number;
+
+  /** Maximum pool size */
+  maxSize?: number;
+
+  /** Enable automatic expansion */
+  autoExpand?: boolean;
+
+  /** Auto grow pool */
+  autoGrow?: boolean;
+
+  /** Shrink interval (ms) */
+  shrinkInterval?: number;
+}

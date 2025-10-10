@@ -37,6 +37,8 @@ export class UnitAnimationController {
       currentAnimation: initialAnimation,
       currentTime: 0,
       isPlaying: true,
+      isLooping: true,
+      progress: 0,
       speed: 1.0,
     };
   }
@@ -64,7 +66,7 @@ export class UnitAnimationController {
     }
 
     // Update current animation time
-    this.state.currentTime += adjustedDeltaTime;
+    this.state.currentTime = (this.state.currentTime ?? 0) + adjustedDeltaTime;
 
     // Apply animation-specific speed multiplier
     const clip = this.animationSystem.getAnimationClip(this.state.currentAnimation);
@@ -217,7 +219,7 @@ export class UnitAnimationController {
    * @returns Time in seconds
    */
   getCurrentTime(): number {
-    return this.state.currentTime;
+    return this.state.currentTime ?? 0;
   }
 
   /**
@@ -227,7 +229,7 @@ export class UnitAnimationController {
   getProgress(): number {
     return this.animationSystem.getAnimationProgress(
       this.state.currentAnimation,
-      this.state.currentTime
+      this.state.currentTime ?? 0
     );
   }
 

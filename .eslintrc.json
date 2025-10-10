@@ -64,6 +64,20 @@
       "rules": {
         "@typescript-eslint/strict-boolean-expressions": "off"
       }
+    },
+    {
+      "files": ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
+      "rules": {
+        "@typescript-eslint/require-await": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off"
+      }
+    },
+    {
+      "files": ["src/assets/validation/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/require-await": "off"
+      }
     }
   ],
   "ignorePatterns": [

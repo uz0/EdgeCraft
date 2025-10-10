@@ -3,7 +3,7 @@
  */
 
 import * as BABYLON from '@babylonjs/core';
-import { ShadowQuality, QualityPreset } from './types';
+import { ShadowQuality, QualityPresetConfig } from './types';
 
 // Re-export ShadowQuality for convenience
 export { ShadowQuality };
@@ -17,7 +17,7 @@ export { ShadowQuality };
  * - HIGH: High quality with good performance
  * - ULTRA: Maximum quality for high-end hardware
  */
-export const SHADOW_QUALITY_PRESETS: Record<ShadowQuality, QualityPreset> = {
+export const SHADOW_QUALITY_PRESETS: Record<ShadowQuality, QualityPresetConfig> = {
   [ShadowQuality.LOW]: {
     shadowMapSize: 1024,
     numCascades: 2,
@@ -60,7 +60,7 @@ export const SHADOW_QUALITY_PRESETS: Record<ShadowQuality, QualityPreset> = {
  * console.log(preset.shadowMapSize); // 2048
  * ```
  */
-export function getQualityPreset(quality: ShadowQuality): QualityPreset {
+export function getQualityPreset(quality: ShadowQuality): QualityPresetConfig {
   return SHADOW_QUALITY_PRESETS[quality];
 }
 

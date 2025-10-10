@@ -9,7 +9,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { CascadedShadowSystem } from './CascadedShadowSystem';
 import { BlobShadowSystem } from './BlobShadowSystem';
-import { ShadowCasterConfig, ShadowCasterStats } from './types';
+import { ShadowCasterConfig, ShadowCasterStats, ShadowPriority } from './types';
 
 /**
  * Manager for shadow casting across different object types
@@ -101,7 +101,7 @@ export class ShadowCasterManager {
 
     // Apply shadow method
     if (castMethod === 'csm') {
-      this.csmSystem.addShadowCaster(mesh, 'high');
+      this.csmSystem.addShadowCaster(mesh, ShadowPriority.HIGH);
     } else if (castMethod === 'blob') {
       this.blobSystem.createBlobShadow(id, mesh.position);
     }
@@ -180,10 +180,16 @@ export class ShadowCasterManager {
    * ```
    */
   public getStats(): ShadowCasterStats {
+    const csmCount = this.csmSystem.getShadowCasterCount();
+    const blobCount = this.blobSystem.getBlobCount();
     return {
-      csmCasters: this.csmSystem.getShadowCasterCount(),
-      blobShadows: this.blobSystem.getBlobCount(),
+      csmCasters: csmCount,
+      blobShadows: blobCount,
       totalObjects: this.config.size,
+      totalCasters: csmCount + blobCount,
+      renderingCasters: csmCount + blobCount,
+      culledCasters: 0,
+      updates: 0,
     };
   }
 
