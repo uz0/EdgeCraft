@@ -7,6 +7,7 @@
 import { W3NCampaignLoader } from './W3NCampaignLoader';
 import { W3FCampaignInfoParser } from './W3FCampaignInfoParser';
 import { MPQParser } from '../../mpq/MPQParser';
+import { W3XMapLoader } from '../w3x/W3XMapLoader';
 import type { RawMapData } from '../types';
 
 // Mock dependencies
@@ -42,8 +43,7 @@ describe('W3NCampaignLoader', () => {
     };
 
     // Mock the W3XMapLoader parse method BEFORE creating loader
-    const W3XMapLoader = require('../w3x/W3XMapLoader').W3XMapLoader;
-    W3XMapLoader.prototype.parse = jest.fn().mockResolvedValue(mockMapData);
+    jest.mocked(W3XMapLoader).prototype.parse = jest.fn().mockResolvedValue(mockMapData);
 
     loader = new W3NCampaignLoader();
   });
@@ -204,8 +204,7 @@ describe('W3NCampaignLoader', () => {
         doodads: [],
       };
 
-      const W3XMapLoader = require('../w3x/W3XMapLoader').W3XMapLoader;
-      W3XMapLoader.prototype.parse = jest.fn().mockResolvedValue(mockMapData);
+      jest.mocked(W3XMapLoader).prototype.parse = jest.fn().mockResolvedValue(mockMapData);
 
       const result = await loader.parse(mockFile);
 

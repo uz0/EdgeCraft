@@ -5,9 +5,4 @@
 
 export { W3NCampaignLoader } from './W3NCampaignLoader';
 export { W3FCampaignInfoParser } from './W3FCampaignInfoParser';
-export type {
-  W3FCampaignInfo,
-  CampaignDifficulty,
-  EmbeddedMapInfo,
-  W3NParseResult,
-} from './types';
+export type { W3FCampaignInfo, CampaignDifficulty, EmbeddedMapInfo, W3NParseResult } from './types';
