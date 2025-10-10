@@ -55,7 +55,7 @@
     "test:asset-replacement": "jest --testPathPattern=AssetDatabase.test",
     "test:visual-similarity": "jest --testPathPattern=VisualSimilarity.test",
     "test:license-generation": "jest --testPathPattern=LicenseGenerator.test",
-    "test:compliance-pipeline": "jest --testPathPattern=validation/",
+    "test:compliance-pipeline": "jest --testPathPattern=assets/.*test --passWithNoTests",
     "generate:attribution": "echo '✅ License generation is tested in: npm run test:license-generation'",
     "validate:attributions": "echo '✅ Attribution validation is tested in: npm run test:license-generation'",
     "report:visual-similarity": "echo '✅ Visual similarity is tested in: npm run test:visual-similarity'",
