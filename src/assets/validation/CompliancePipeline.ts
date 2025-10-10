@@ -161,9 +161,14 @@ export class LegalCompliancePipeline {
         warnings: warnings.length > 0 ? warnings : undefined,
       };
     } catch (error) {
-      throw new Error(
-        `Validation failed for ${metadata.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : JSON.stringify(error);
+      console.error(`Validation error for ${metadata.name}:`, error);
+      throw new Error(`Validation failed for ${metadata.name}: ${errorMsg}`);
     }
   }
 
