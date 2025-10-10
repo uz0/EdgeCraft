@@ -197,7 +197,7 @@ export class WeatherSystem {
     const emitterPos = this.cameraPosition.clone();
     emitterPos.y += 50; // High above
 
-    this.currentParticleEffect = await this.particleSystem.createEffect({
+    this.currentParticleEffect = this.particleSystem.createEffect({
       type: 'rain',
       position: emitterPos,
       capacity: particleCount,
@@ -232,7 +232,7 @@ export class WeatherSystem {
     const emitterPos = this.cameraPosition.clone();
     emitterPos.y += 50; // High above
 
-    this.currentParticleEffect = await this.particleSystem.createEffect({
+    this.currentParticleEffect = this.particleSystem.createEffect({
       type: 'snow',
       position: emitterPos,
       capacity: particleCount,

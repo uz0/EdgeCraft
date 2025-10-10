@@ -141,6 +141,7 @@ export class QualityPresetManager {
   private minimap: MinimapSystem | null = null;
 
   // Auto-adjustment
+  // @ts-expect-error - Reserved for future auto-adjustment features
   private _enableAutoAdjust: boolean = false;
   private targetFPS: number = 60;
   private fpsSamples: number[] = [];

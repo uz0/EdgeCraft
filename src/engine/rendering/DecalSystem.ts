@@ -110,6 +110,7 @@ export class DecalSystem {
   private decals: Map<string, DecalInstance> = new Map();
   private maxDecals: number;
   private nextDecalId: number = 0;
+  // @ts-expect-error - Reserved for future mesh targeting implementation
   private _targetMeshes: BABYLON.AbstractMesh[] = [];
 
   constructor(scene: BABYLON.Scene, config: { quality: QualityPreset }) {
