@@ -2,7 +2,13 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  roots: ['<rootDir>/src'],
+  setupFiles: ['<rootDir>/jest.setup.js'],
+
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
+
+  transformIgnorePatterns: [
+    'node_modules/(?!@babylonjs)',
+  ],
 
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',

@@ -1,143 +1,86 @@
-import React, { useEffect, useState } from 'react';
-import {
-  logExternalStatus,
-  getLauncherPath,
-  getMultiplayerEndpoint,
-  LAUNCHER_CONFIG,
-} from './config/external';
+import React, { useState } from 'react';
+import { GameCanvas } from './ui/GameCanvas';
+import { DebugOverlay } from './ui/DebugOverlay';
+import type { EdgeCraftEngine } from './engine/core/Engine';
 import './App.css';
 
 const App: React.FC = () => {
-  const [isReady, setIsReady] = useState(false);
-  const [launcherStatus, setLauncherStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
-  const [externalDeps, setExternalDeps] = useState({
-    launcher: '',
-    multiplayer: '',
-  });
+  const [engine, setEngine] = useState<EdgeCraftEngine | null>(null);
+  const [showDebug, setShowDebug] = useState(true);
 
-  useEffect(() => {
-    // Initialize app
-    console.log('Edge Craft initializing...');
-
-    // Log external dependencies status
-    logExternalStatus();
-
-    // Load launcher (REQUIREMENT: Always loads /maps/index.edgecraft)
-    const initializeLauncher = async (): Promise<void> => {
-      try {
-        console.log(`🚀 Loading default launcher: ${LAUNCHER_CONFIG.DEFAULT_MAP}`);
-
-        const launcherPath = getLauncherPath();
-        const multiplayerEndpoint = getMultiplayerEndpoint();
-
-        setExternalDeps({
-          launcher: launcherPath,
-          multiplayer: multiplayerEndpoint,
-        });
-
-        // Simulate launcher loading
-        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-
-        console.log(`✅ Launcher loaded from: ${launcherPath}`);
-        setLauncherStatus('loaded');
-        setIsReady(true);
-      } catch (error) {
-        console.error('❌ Failed to load launcher:', error);
-        setLauncherStatus('error');
-        setIsReady(true); // Still show UI even if launcher fails
-      }
-    };
-
-    void initializeLauncher();
-
-    return () => {
-      console.log('Edge Craft cleanup');
-    };
-  }, []);
+  const handleEngineReady = (engine: EdgeCraftEngine): void => {
+    setEngine(engine);
+    console.log('✅ Babylon.js engine initialized and ready');
+  };
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>🏗️ Edge Craft</h1>
-        <p>WebGL-Based RTS Game Engine</p>
+        <p>WebGL-Based RTS Game Engine - Phase 1: Babylon.js Integration</p>
       </header>
 
       <main className="app-main">
-        {!isReady ? (
-          <div className="loading">
-            <div className="spinner" />
-            <p>Loading {LAUNCHER_CONFIG.DEFAULT_MAP}...</p>
-          </div>
-        ) : (
-          <div className="content">
-            <section className="external-deps">
-              <h2>🔗 External Dependencies</h2>
-              <div className="deps-grid">
-                <div className="dep-item">
-                  <h3>Launcher Map</h3>
-                  <p className={launcherStatus === 'loaded' ? 'status-ok' : 'status-warn'}>
-                    {launcherStatus === 'loaded' ? '✅ Loaded' : '⚠️ Mock'}
-                  </p>
-                  <code>{externalDeps.launcher || 'Loading...'}</code>
-                  <a
-                    href="https://github.com/uz0/index.edgecraft"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    → Full Launcher Repo
-                  </a>
-                </div>
-                <div className="dep-item">
-                  <h3>Multiplayer Server</h3>
-                  <p
-                    className={
-                      externalDeps.multiplayer.includes('localhost') ? 'status-warn' : 'status-ok'
-                    }
-                  >
-                    {externalDeps.multiplayer.includes('localhost') ? '⚠️ Mock' : '✅ Production'}
-                  </p>
-                  <code>{externalDeps.multiplayer || 'Loading...'}</code>
-                  <a
-                    href="https://github.com/uz0/core-edge"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    → Core-Edge Server
-                  </a>
-                </div>
-              </div>
-            </section>
+        <div className="game-container">
+          <GameCanvas height="600px" debug={showDebug} onEngineReady={handleEngineReady} />
+          {showDebug && <DebugOverlay engine={engine} />}
+        </div>
 
-            <section className="status">
-              <h2>Development Environment</h2>
+        <section className="controls">
+          <h2>🎮 Controls</h2>
+          <div className="controls-grid">
+            <div className="control-group">
+              <h3>Camera Movement</h3>
               <ul>
-                <li>✅ React {React.version}</li>
-                <li>✅ TypeScript Strict Mode</li>
-                <li>✅ Vite Build System</li>
-                <li>✅ Hot Module Replacement</li>
-                <li>✅ Launcher Auto-Load: {LAUNCHER_CONFIG.DEFAULT_MAP}</li>
+                <li><strong>W/↑</strong> - Move forward</li>
+                <li><strong>S/↓</strong> - Move backward</li>
+                <li><strong>A/←</strong> - Move left</li>
+                <li><strong>D/→</strong> - Move right</li>
+                <li><strong>Q</strong> - Move up</li>
+                <li><strong>E</strong> - Move down</li>
               </ul>
-            </section>
-
-            <section className="phase-info">
-              <h2>Current Phase</h2>
-              <p>
-                <strong>Phase 0:</strong> Project Bootstrap
-              </p>
-              <p>Setting up development environment and tooling</p>
-            </section>
-
-            <section className="next-steps">
-              <h2>Next Steps</h2>
-              <ol>
-                <li>Complete Phase 0 PRPs</li>
-                <li>Initialize Babylon.js engine</li>
-                <li>Set up testing framework</li>
-                <li>Configure CI/CD pipeline</li>
-              </ol>
-            </section>
+            </div>
+            <div className="control-group">
+              <h3>Camera Control</h3>
+              <ul>
+                <li><strong>Mouse Wheel</strong> - Zoom in/out</li>
+                <li><strong>Edge Scroll</strong> - Move to screen edges</li>
+              </ul>
+            </div>
+            <div className="control-group">
+              <h3>Debug</h3>
+              <ul>
+                <li>
+                  <button onClick={() => setShowDebug(!showDebug)}>
+                    {showDebug ? 'Hide' : 'Show'} Debug Overlay
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
-        )}
+        </section>
+
+        <section className="status">
+          <h2>✨ Features Implemented</h2>
+          <ul>
+            <li>✅ Babylon.js 7.0 rendering engine</li>
+            <li>✅ RTS-style camera with WASD + edge scrolling</li>
+            <li>✅ Heightmap terrain rendering (flat terrain demo)</li>
+            <li>✅ MPQ archive parser (basic implementation)</li>
+            <li>✅ Asset management and caching</li>
+            <li>✅ glTF model loader</li>
+            <li>✅ Copyright validation system</li>
+            <li>✅ Real-time FPS monitoring</li>
+          </ul>
+        </section>
+
+        <section className="phase-info">
+          <h2>Current Phase</h2>
+          <p>
+            <strong>Phase 1:</strong> Babylon.js Foundation
+          </p>
+          <p>Core rendering engine, terrain system, and RTS camera controls</p>
+        </section>
       </main>
 
       <footer className="app-footer">
