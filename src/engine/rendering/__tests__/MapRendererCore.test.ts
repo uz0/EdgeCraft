@@ -82,10 +82,10 @@ describeIfWebGL('MapRendererCore', () => {
       // This test validates that MapRendererCore is properly structured
       // Actual map loading would require mocking MapLoaderRegistry
       expect(mapRenderer).toBeDefined();
-      expect(mapRenderer.getCurrentMap).toBeDefined();
-      expect(mapRenderer.loadMap).toBeDefined();
-      expect(mapRenderer.getStats).toBeDefined();
-      expect(mapRenderer.dispose).toBeDefined();
+      expect(typeof mapRenderer.getCurrentMap).toBe('function');
+      expect(typeof mapRenderer.loadMap).toBe('function');
+      expect(typeof mapRenderer.getStats).toBe('function');
+      expect(typeof mapRenderer.dispose).toBe('function');
     });
   });
 

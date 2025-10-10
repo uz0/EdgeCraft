@@ -89,10 +89,7 @@ export class MapRendererCore {
   /**
    * Load and render a map file
    */
-  public async loadMap(
-    file: File | ArrayBuffer,
-    extension: string
-  ): Promise<MapRenderResult> {
+  public async loadMap(file: File | ArrayBuffer, extension: string): Promise<MapRenderResult> {
     const startTime = performance.now();
 
     try {
@@ -161,7 +158,7 @@ export class MapRendererCore {
     await this.renderTerrain(mapData.terrain);
 
     // Step 2: Initialize units
-    await this.renderUnits(mapData.units);
+    this.renderUnits(mapData.units);
 
     // Step 3: Apply environment settings
     this.applyEnvironment(mapData.info.environment);
@@ -192,7 +189,9 @@ export class MapRendererCore {
 
     // Determine texture URLs
     const textureUrls =
-      terrain.textures.length > 0 && terrain.textures[0]?.path
+      terrain.textures.length > 0 &&
+      terrain.textures[0]?.path != null &&
+      terrain.textures[0].path !== ''
         ? [terrain.textures[0].path]
         : [];
 
@@ -210,11 +209,7 @@ export class MapRendererCore {
   /**
    * Convert heightmap Float32Array to data URL
    */
-  private createHeightmapDataUrl(
-    heightmap: Float32Array,
-    width: number,
-    height: number
-  ): string {
+  private createHeightmapDataUrl(heightmap: Float32Array, width: number, height: number): string {
     // Create canvas to encode heightmap as image
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -258,7 +253,7 @@ export class MapRendererCore {
   /**
    * Render units
    */
-  private async renderUnits(units: RawMapData['units']): Promise<void> {
+  private renderUnits(units: RawMapData['units']): void {
     this.unitRenderer = new InstancedUnitRenderer(this.scene, {
       enableInstancing: true,
       maxInstancesPerBuffer: 1000,
@@ -329,14 +324,11 @@ export class MapRendererCore {
     };
 
     const tilesetColor =
-      tilesetColors[tileset.toLowerCase()] ?? tilesetColors['default'] ?? new BABYLON.Color3(0.3, 0.4, 0.5);
+      tilesetColors[tileset.toLowerCase()] ??
+      tilesetColors['default'] ??
+      new BABYLON.Color3(0.3, 0.4, 0.5);
 
-    this.scene.clearColor = new BABYLON.Color4(
-      tilesetColor.r,
-      tilesetColor.g,
-      tilesetColor.b,
-      1.0
-    );
+    this.scene.clearColor = new BABYLON.Color4(tilesetColor.r, tilesetColor.g, tilesetColor.b, 1.0);
 
     console.log(`Environment applied: tileset=${tileset}, fog=${fog != null}`);
   }
