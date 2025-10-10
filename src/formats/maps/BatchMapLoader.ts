@@ -91,7 +91,7 @@ export class BatchMapLoader {
     this.config = {
       maxConcurrent: config?.maxConcurrent ?? 3,
       maxCacheSize: config?.maxCacheSize ?? 10,
-      onProgress: config?.onProgress ?? (() => {}),
+      onProgress: config?.onProgress ?? ((): void => {}),
       enableCache: config?.enableCache ?? true,
       registry: this.registry,
     };
