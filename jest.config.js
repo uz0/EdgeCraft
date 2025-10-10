@@ -21,6 +21,12 @@ export default {
         jsx: 'react-jsx',
       },
     }],
+    '^.+\\.js$': ['ts-jest', {
+      tsconfig: {
+        allowJs: true,
+        jsx: 'react-jsx',
+      },
+    }],
   },
 
   moduleNameMapper: {

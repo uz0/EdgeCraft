@@ -22,7 +22,6 @@ export class RTSCamera {
   private controls: CameraControls;
 
   constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, options: RTSCameraOptions = {}) {
-
     // Create camera with initial position
     const initialPos = options.position ?? { x: 50, y: 50, z: -50 };
     this.camera = new BABYLON.UniversalCamera(

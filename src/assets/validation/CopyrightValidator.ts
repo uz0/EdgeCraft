@@ -76,7 +76,7 @@ export class CopyrightValidator {
     }
 
     // Extract and check metadata
-    const metadata = await this.extractMetadata(buffer);
+    const metadata = this.extractMetadata(buffer);
     const metadataCheck = this.validateMetadata(metadata);
     if (!metadataCheck.valid) {
       return metadataCheck;
@@ -119,7 +119,7 @@ export class CopyrightValidator {
    * This is a simplified implementation.
    * Real implementation would parse actual file formats.
    */
-  private async extractMetadata(buffer: ArrayBuffer): Promise<AssetMetadata> {
+  private extractMetadata(buffer: ArrayBuffer): AssetMetadata {
     const text = new TextDecoder().decode(buffer);
 
     // Look for copyright/license info in first 1KB
@@ -138,7 +138,9 @@ export class CopyrightValidator {
   private extractField(text: string, field: string): string | undefined {
     const regex = new RegExp(`${field}[:\\s]+([^\n]+)`, 'i');
     const match = text.match(regex);
-    return match && match[1] ? match[1].trim() : undefined;
+    return match !== null && match[1] !== undefined && match[1] !== ''
+      ? match[1].trim()
+      : undefined;
   }
 
   /**
@@ -146,7 +148,7 @@ export class CopyrightValidator {
    */
   private validateMetadata(metadata: AssetMetadata): ValidationResult {
     // Check copyright field
-    if (metadata.copyright) {
+    if (metadata.copyright !== undefined && metadata.copyright !== '') {
       for (const pattern of this.blacklistedPatterns) {
         if (pattern.test(metadata.copyright)) {
           return {
@@ -158,7 +160,7 @@ export class CopyrightValidator {
     }
 
     // Check author field
-    if (metadata.author) {
+    if (metadata.author !== undefined && metadata.author !== '') {
       for (const pattern of this.blacklistedPatterns) {
         if (pattern.test(metadata.author)) {
           return {

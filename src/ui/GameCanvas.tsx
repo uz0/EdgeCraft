@@ -88,7 +88,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           outline: 'none',
         }}
       />
-      {error && (
+      {error !== null && error !== '' && (
         <div
           style={{
             position: 'absolute',
@@ -104,7 +104,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           <strong>Error:</strong> {error}
         </div>
       )}
-      {!isReady && !error && (
+      {!isReady && (error === null || error === '') && (
         <div
           style={{
             position: 'absolute',

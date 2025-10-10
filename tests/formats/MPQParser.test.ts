@@ -11,16 +11,16 @@ describe('MPQParser', () => {
     expect(parser).toBeDefined();
   });
 
-  it('should reject invalid MPQ magic number', async () => {
+  it('should reject invalid MPQ magic number', () => {
     const buffer = new ArrayBuffer(1024);
     const parser = new MPQParser(buffer);
 
-    const result = await parser.parse();
+    const result = parser.parse();
     expect(result.success).toBe(false);
     expect(result.error).toContain('Invalid MPQ header');
   });
 
-  it('should parse valid MPQ header', async () => {
+  it('should parse valid MPQ header', () => {
     // Create minimal valid MPQ header
     const buffer = new ArrayBuffer(512);
     const view = new DataView(buffer);
@@ -45,14 +45,14 @@ describe('MPQParser', () => {
     view.setUint32(28, 0, true);
 
     const parser = new MPQParser(buffer);
-    const result = await parser.parse();
+    const result = parser.parse();
 
     expect(result.success).toBe(true);
     expect(result.archive).toBeDefined();
     expect(result.archive?.header).toBeDefined();
   });
 
-  it('should list files', async () => {
+  it('should list files', () => {
     const buffer = new ArrayBuffer(512);
     const view = new DataView(buffer);
 
@@ -68,13 +68,13 @@ describe('MPQParser', () => {
     view.setUint32(28, 0, true);
 
     const parser = new MPQParser(buffer);
-    await parser.parse();
+    parser.parse();
 
     const files = parser.listFiles();
     expect(Array.isArray(files)).toBe(true);
   });
 
-  it('should get archive info', async () => {
+  it('should get archive info', () => {
     const buffer = new ArrayBuffer(512);
     const view = new DataView(buffer);
 
@@ -90,7 +90,7 @@ describe('MPQParser', () => {
     view.setUint32(28, 0, true);
 
     const parser = new MPQParser(buffer);
-    await parser.parse();
+    parser.parse();
 
     const info = parser.getInfo();
     expect(info).toBeDefined();

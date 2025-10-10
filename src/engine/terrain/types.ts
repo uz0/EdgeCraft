@@ -65,6 +65,9 @@ export enum TerrainLoadStatus {
  */
 export interface TerrainLoadResult {
   status: TerrainLoadStatus;
-  mesh?: any; // BABYLON.Mesh
+  mesh?: {
+    name: string;
+    position: { x: number; y: number; z: number };
+  };
   error?: string;
 }

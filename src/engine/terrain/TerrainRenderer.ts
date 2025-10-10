@@ -63,7 +63,7 @@ export class TerrainRenderer {
         );
 
         // Set wireframe if requested
-        if (options.wireframe) {
+        if (options.wireframe === true) {
           this.mesh.material = new BABYLON.StandardMaterial('wireframe', this.scene);
           (this.mesh.material as BABYLON.StandardMaterial).wireframe = true;
         }
@@ -84,7 +84,12 @@ export class TerrainRenderer {
     this.material = new BABYLON.StandardMaterial('terrainMaterial', this.scene);
 
     // Apply diffuse texture if available
-    if (options.textures && options.textures.length > 0 && options.textures[0]) {
+    if (
+      options.textures &&
+      options.textures.length > 0 &&
+      options.textures[0] !== undefined &&
+      options.textures[0] !== ''
+    ) {
       const texture = new BABYLON.Texture(options.textures[0], this.scene);
       this.material.diffuseTexture = texture;
 
@@ -110,7 +115,11 @@ export class TerrainRenderer {
   /**
    * Create flat terrain (for testing)
    */
-  public createFlatTerrain(width: number, height: number, subdivisions: number): BABYLON.GroundMesh {
+  public createFlatTerrain(
+    width: number,
+    height: number,
+    subdivisions: number
+  ): BABYLON.GroundMesh {
     this.mesh = BABYLON.MeshBuilder.CreateGround(
       'flatTerrain',
       {

@@ -46,7 +46,7 @@ export class MPQParser {
   /**
    * Parse MPQ archive
    */
-  public async parse(): Promise<MPQParseResult> {
+  public parse(): MPQParseResult {
     try {
       // Read and validate header
       const header = this.readHeader();
@@ -150,7 +150,7 @@ export class MPQParser {
    *
    * Note: Basic implementation - only supports uncompressed files for now
    */
-  public async extractFile(filename: string): Promise<MPQFile | null> {
+  public extractFile(filename: string): MPQFile | null {
     if (!this.archive) {
       throw new Error('Archive not parsed. Call parse() first.');
     }
@@ -179,9 +179,7 @@ export class MPQParser {
 
     // For now, only support uncompressed, unencrypted files
     if (isCompressed || isEncrypted) {
-      throw new Error(
-        'Compressed and encrypted files not yet supported. Coming in Phase 2.'
-      );
+      throw new Error('Compressed and encrypted files not yet supported. Coming in Phase 2.');
     }
 
     // Read file data

@@ -38,7 +38,7 @@ describe('CopyrightValidator', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('should add hash to blacklist', async () => {
+  it('should add hash to blacklist', () => {
     const testHash = 'abc123';
     validator.addBlacklistedHash(testHash);
 

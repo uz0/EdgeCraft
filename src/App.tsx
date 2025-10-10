@@ -32,19 +32,35 @@ const App: React.FC = () => {
             <div className="control-group">
               <h3>Camera Movement</h3>
               <ul>
-                <li><strong>W/↑</strong> - Move forward</li>
-                <li><strong>S/↓</strong> - Move backward</li>
-                <li><strong>A/←</strong> - Move left</li>
-                <li><strong>D/→</strong> - Move right</li>
-                <li><strong>Q</strong> - Move up</li>
-                <li><strong>E</strong> - Move down</li>
+                <li>
+                  <strong>W/↑</strong> - Move forward
+                </li>
+                <li>
+                  <strong>S/↓</strong> - Move backward
+                </li>
+                <li>
+                  <strong>A/←</strong> - Move left
+                </li>
+                <li>
+                  <strong>D/→</strong> - Move right
+                </li>
+                <li>
+                  <strong>Q</strong> - Move up
+                </li>
+                <li>
+                  <strong>E</strong> - Move down
+                </li>
               </ul>
             </div>
             <div className="control-group">
               <h3>Camera Control</h3>
               <ul>
-                <li><strong>Mouse Wheel</strong> - Zoom in/out</li>
-                <li><strong>Edge Scroll</strong> - Move to screen edges</li>
+                <li>
+                  <strong>Mouse Wheel</strong> - Zoom in/out
+                </li>
+                <li>
+                  <strong>Edge Scroll</strong> - Move to screen edges
+                </li>
               </ul>
             </div>
             <div className="control-group">

@@ -127,11 +127,11 @@ export class ModelLoader {
     // Apply shadow settings
     for (const mesh of meshes) {
       if (mesh instanceof BABYLON.Mesh) {
-        if (options.castShadows) {
+        if (options.castShadows === true) {
           // Shadow casting will be configured when shadow generator is available
           mesh.receiveShadows = false;
         }
-        if (options.receiveShadows) {
+        if (options.receiveShadows === true) {
           mesh.receiveShadows = true;
         }
       }
