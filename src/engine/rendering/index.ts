@@ -48,6 +48,8 @@ export type {
   DoodadInstance,
   DoodadRenderStats,
 } from './DoodadRenderer';
+export { MapPreviewGenerator } from './MapPreviewGenerator';
+export type { PreviewConfig, PreviewResult } from './MapPreviewGenerator';
 
 // Enums
 export { QualityPreset } from './types';
