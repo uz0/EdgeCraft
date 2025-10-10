@@ -22,14 +22,16 @@ const originalCreateElement = document.createElement.bind(document);
 document.createElement = jest.fn((tagName: string) => {
   const element = originalCreateElement(tagName);
   if (tagName === 'canvas') {
-    element.getContext = mockGetContext;
+    (element as HTMLCanvasElement).getContext = mockGetContext as never;
   }
   return element;
 });
 
 // Mock CascadedShadowGenerator for NullEngine
 jest.mock('@babylonjs/core', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const actual = jest.requireActual('@babylonjs/core');
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...actual,
     CascadedShadowGenerator: jest.fn().mockImplementation(() => ({

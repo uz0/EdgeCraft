@@ -22,7 +22,7 @@ const originalCreateElement = document.createElement.bind(document);
 document.createElement = jest.fn((tagName: string) => {
   const element = originalCreateElement(tagName);
   if (tagName === 'canvas') {
-    element.getContext = mockGetContext;
+    (element as HTMLCanvasElement).getContext = mockGetContext as never;
   }
   return element;
 });

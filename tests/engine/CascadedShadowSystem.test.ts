@@ -7,7 +7,9 @@ import { CascadedShadowSystem } from '@/engine/rendering/CascadedShadowSystem';
 
 // Mock CascadedShadowGenerator for NullEngine
 jest.mock('@babylonjs/core', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const actual = jest.requireActual('@babylonjs/core');
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {
     ...actual,
     CascadedShadowGenerator: jest.fn().mockImplementation(() => ({
