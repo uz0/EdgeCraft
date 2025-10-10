@@ -41,6 +41,7 @@ lerna-debug.log*
 # Assets (copyrighted content)
 temp-assets/
 extracted-assets/
+maps/
 # *.mpq
 # *.w3x
 # *.w3m

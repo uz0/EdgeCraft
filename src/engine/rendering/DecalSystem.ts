@@ -110,7 +110,6 @@ export class DecalSystem {
   private decals: Map<string, DecalInstance> = new Map();
   private maxDecals: number;
   private nextDecalId: number = 0;
-  private targetMeshes: BABYLON.AbstractMesh[] = [];
 
   constructor(scene: BABYLON.Scene, config: { quality: QualityPreset }) {
     this.scene = scene;
@@ -151,7 +150,7 @@ export class DecalSystem {
   /**
    * Create a new decal
    */
-  public async createDecal(config: DecalConfig): Promise<string> {
+  public createDecal(config: DecalConfig): string {
     // Check limit
     if (this.decals.size >= this.maxDecals) {
       // Remove oldest decal
@@ -277,7 +276,7 @@ export class DecalSystem {
   public update(): void {
     const now = Date.now();
 
-    for (const [decalId, decal] of this.decals.entries()) {
+    for (const [_decalId, decal] of this.decals.entries()) {
       // Check if decal has expired
       if (decal.lifetime > 0 && now - decal.createdAt > decal.lifetime) {
         if (!decal.isFading) {

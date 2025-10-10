@@ -209,11 +209,7 @@ export class AdvancedLightingSystem {
     let light: BABYLON.Light;
 
     if (config.type === 'point') {
-      light = new BABYLON.PointLight(
-        `pointLight_${this.nextLightId}`,
-        config.position,
-        this.scene
-      );
+      light = new BABYLON.PointLight(`pointLight_${this.nextLightId}`, config.position, this.scene);
       (light as BABYLON.PointLight).range = config.range ?? 100;
     } else {
       const direction = config.direction ?? new BABYLON.Vector3(0, -1, 0);
@@ -241,8 +237,10 @@ export class AdvancedLightingSystem {
   private configureLight(pooled: PooledLight, config: LightConfig): void {
     const light = pooled.light;
 
-    // Position
-    light.position = config.position.clone();
+    // Position (only for positional lights)
+    if (light instanceof BABYLON.PointLight || light instanceof BABYLON.SpotLight) {
+      light.position = config.position.clone();
+    }
 
     // Direction (for spot lights)
     if (config.direction != null && light instanceof BABYLON.SpotLight) {
@@ -266,8 +264,14 @@ export class AdvancedLightingSystem {
       light.range = config.range ?? 100;
     }
 
-    // Shadows
-    if (config.castShadows === true && pooled.shadowGenerator == null) {
+    // Shadows (only for shadow-capable lights)
+    if (
+      config.castShadows === true &&
+      pooled.shadowGenerator == null &&
+      (light instanceof BABYLON.DirectionalLight ||
+        light instanceof BABYLON.PointLight ||
+        light instanceof BABYLON.SpotLight)
+    ) {
       const shadowMapSize = config.shadowMapSize ?? 1024;
       pooled.shadowGenerator = new BABYLON.ShadowGenerator(shadowMapSize, light);
       pooled.shadowGenerator.useBlurExponentialShadowMap = true;
@@ -324,14 +328,18 @@ export class AdvancedLightingSystem {
         continue;
       }
 
-      const distance = BABYLON.Vector3.Distance(cameraPosition, pooled.light.position);
-      const shouldEnable = distance < this.cullingDistance;
+      const light = pooled.light;
+      // Only cull positional lights
+      if (light instanceof BABYLON.PointLight || light instanceof BABYLON.SpotLight) {
+        const distance = BABYLON.Vector3.Distance(cameraPosition, light.position);
+        const shouldEnable = distance < this.cullingDistance;
 
-      if (pooled.light.isEnabled() !== shouldEnable) {
-        pooled.light.setEnabled(shouldEnable);
-        console.log(
-          `Light ${lightId} ${shouldEnable ? 'enabled' : 'disabled'} (distance: ${Math.round(distance)})`
-        );
+        if (light.isEnabled() !== shouldEnable) {
+          light.setEnabled(shouldEnable);
+          console.log(
+            `Light ${lightId} ${shouldEnable ? 'enabled' : 'disabled'} (distance: ${Math.round(distance)})`
+          );
+        }
       }
     }
   }
