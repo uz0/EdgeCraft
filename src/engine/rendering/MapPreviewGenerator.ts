@@ -165,7 +165,7 @@ export class MapPreviewGenerator {
       this.scene.render();
 
       // Step 6: Capture screenshot
-      if (!this.camera) {
+      if (this.camera === null) {
         throw new Error('Camera not initialized');
       }
 
@@ -266,11 +266,7 @@ export class MapPreviewGenerator {
    * Convert heightmap Float32Array to data URL
    * (Same logic as MapRendererCore)
    */
-  private createHeightmapDataUrl(
-    heightmap: Float32Array,
-    width: number,
-    height: number
-  ): string {
+  private createHeightmapDataUrl(heightmap: Float32Array, width: number, height: number): string {
     // Create canvas to encode heightmap as image
     const canvas = document.createElement('canvas');
     canvas.width = width;

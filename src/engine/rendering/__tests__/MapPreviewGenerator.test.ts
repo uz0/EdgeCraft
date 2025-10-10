@@ -209,7 +209,7 @@ describeIfWebGL('MapPreviewGenerator', () => {
       ];
 
       const progressCalls: Array<{ current: number; total: number }> = [];
-      const onProgress = (current: number, total: number) => {
+      const onProgress = (current: number, total: number): void => {
         progressCalls.push({ current, total });
       };
 
