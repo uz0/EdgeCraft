@@ -360,16 +360,19 @@ export interface ShadowStats {
 
   /** Shadow map size */
   shadowMapSize?: number;
+
+  /** Shadow casters count (alias for totalCasters) */
+  shadowCasters?: number;
 }
 
 /**
  * Shadow priority levels
  */
 export enum ShadowPriority {
-  LOW = 0,
-  MEDIUM = 1,
-  HIGH = 2,
-  CRITICAL = 3,
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
 }
 
 /**
@@ -388,8 +391,14 @@ export interface UnitInstance {
   /** Position */
   position?: BABYLON.Vector3;
 
-  /** Rotation */
-  rotation?: BABYLON.Vector3;
+  /** Rotation in radians (Y-axis) */
+  rotation?: number;
+
+  /** Scale */
+  scale?: BABYLON.Vector3 | number;
+
+  /** Team color */
+  teamColor?: BABYLON.Color3;
 
   /** Animation state */
   animationState?: string;
@@ -428,6 +437,9 @@ export interface RenderingStats {
 
   /** Total units */
   totalUnits?: number;
+
+  /** CPU time in milliseconds */
+  cpuTime?: number;
 }
 
 /**
@@ -496,7 +508,7 @@ export interface ShadowCasterConfig {
   quality?: ShadowQuality;
 
   /** Shadow type */
-  type?: 'csm' | 'blob' | 'standard' | 'hero' | 'building' | 'unit' | 'none';
+  type?: 'csm' | 'blob' | 'standard' | 'hero' | 'building' | 'unit' | 'doodad' | 'none';
 
   /** Shadow cast method */
   castMethod?: 'csm' | 'blob';
