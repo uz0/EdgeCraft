@@ -91,7 +91,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         hero.material = mat;
 
         // Register as hero (uses CSM)
-        shadowManager.registerObject(`hero${i}`, hero, 'hero');
+        shadowManager.registerObject(`hero${i}`, hero as BABYLON.AbstractMesh, 'hero');
       });
 
       // Buildings (CSM shadows)
@@ -114,7 +114,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         building.material = mat;
 
         // Register as building (uses CSM)
-        shadowManager.registerObject(`building${i}`, building, 'building');
+        shadowManager.registerObject(`building${i}`, building as BABYLON.AbstractMesh, 'building');
       });
 
       // Regular units (blob shadows)
@@ -135,7 +135,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         unit.material = mat;
 
         // Register as unit (uses blob shadow)
-        shadowManager.registerObject(`unit${i}`, unit, 'unit');
+        shadowManager.registerObject(`unit${i}`, unit as BABYLON.AbstractMesh, 'unit');
       }
 
       // Log shadow stats

@@ -72,11 +72,7 @@ export class BlobShadowSystem {
    */
   public createBlobShadow(unitId: string, position: BABYLON.Vector3, size: number = 2): void {
     // Create a simple plane mesh for the blob
-    const blob = BABYLON.MeshBuilder.CreatePlane(
-      `blob_${unitId}`,
-      { size: size },
-      this.scene,
-    );
+    const blob = BABYLON.MeshBuilder.CreatePlane(`blob_${unitId}`, { size: size }, this.scene);
 
     // Position slightly above ground to avoid z-fighting
     blob.position = position.clone();

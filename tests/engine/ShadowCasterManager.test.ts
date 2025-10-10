@@ -5,17 +5,59 @@
 import * as BABYLON from '@babylonjs/core';
 import { ShadowCasterManager } from '@/engine/rendering/ShadowCasterManager';
 
+// Mock canvas 2D context for blob texture generation
+const mockCreateRadialGradient = jest.fn().mockReturnValue({
+  addColorStop: jest.fn(),
+});
+
+const mockGetContext = jest.fn().mockReturnValue({
+  createRadialGradient: mockCreateRadialGradient,
+  fillStyle: '',
+  arc: jest.fn(),
+  fill: jest.fn(),
+  fillRect: jest.fn(),
+});
+
+const originalCreateElement = document.createElement.bind(document);
+document.createElement = jest.fn((tagName: string) => {
+  const element = originalCreateElement(tagName);
+  if (tagName === 'canvas') {
+    element.getContext = mockGetContext;
+  }
+  return element;
+});
+
+// Mock CascadedShadowGenerator for NullEngine
+jest.mock('@babylonjs/core', () => {
+  const actual = jest.requireActual('@babylonjs/core');
+  return {
+    ...actual,
+    CascadedShadowGenerator: jest.fn().mockImplementation(() => ({
+      numCascades: 3,
+      cascadeBlendPercentage: 0.15,
+      splitFrustum: true,
+      filter: 2,
+      useContactHardeningShadow: false,
+      contactHardeningLightSizeUVRatio: 0.1,
+      bias: 0.00001,
+      normalBias: 0.02,
+      getShadowMap: jest.fn().mockReturnValue({
+        getSize: jest.fn().mockReturnValue({ width: 2048, height: 2048 }),
+      }),
+      addShadowCaster: jest.fn(),
+      removeShadowCaster: jest.fn(),
+      dispose: jest.fn(),
+    })),
+  };
+});
+
 describe('ShadowCasterManager', () => {
-  let engine: BABYLON.Engine;
+  let engine: BABYLON.NullEngine;
   let scene: BABYLON.Scene;
-  let canvas: HTMLCanvasElement;
 
   beforeEach(() => {
-    // Create canvas and engine
-    canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
-    engine = new BABYLON.Engine(canvas, true);
+    // Use NullEngine for CI compatibility (no WebGL required)
+    engine = new BABYLON.NullEngine();
     scene = new BABYLON.Scene(engine);
   });
 
@@ -218,7 +260,7 @@ describe('ShadowCasterManager', () => {
       const terrainMesh = BABYLON.MeshBuilder.CreateGround(
         'terrain',
         { width: 100, height: 100 },
-        scene,
+        scene
       );
 
       expect(terrainMesh.receiveShadows).toBe(false);
@@ -307,19 +349,19 @@ describe('ShadowCasterManager', () => {
       // Add 10 heroes (CSM)
       for (let i = 0; i < 10; i++) {
         const hero = BABYLON.MeshBuilder.CreateBox(`hero${i}`, {}, scene);
-        manager.registerObject(`hero${i}`, hero, 'hero');
+        manager.registerObject(`hero${i}`, hero as BABYLON.AbstractMesh, 'hero');
       }
 
       // Add 30 buildings (CSM)
       for (let i = 0; i < 30; i++) {
         const building = BABYLON.MeshBuilder.CreateBox(`building${i}`, {}, scene);
-        manager.registerObject(`building${i}`, building, 'building');
+        manager.registerObject(`building${i}`, building as BABYLON.AbstractMesh, 'building');
       }
 
       // Add 460 units (blob)
       for (let i = 0; i < 460; i++) {
         const unit = BABYLON.MeshBuilder.CreateBox(`unit${i}`, {}, scene);
-        manager.registerObject(`unit${i}`, unit, 'unit');
+        manager.registerObject(`unit${i}`, unit as BABYLON.AbstractMesh, 'unit');
       }
 
       const stats = manager.getStats();

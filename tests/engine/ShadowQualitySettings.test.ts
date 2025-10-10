@@ -111,14 +111,10 @@ describe('ShadowQualitySettings', () => {
   });
 
   describe('autoDetectQuality', () => {
-    let engine: BABYLON.Engine;
-    let canvas: HTMLCanvasElement;
+    let engine: BABYLON.NullEngine;
 
     beforeEach(() => {
-      canvas = document.createElement('canvas');
-      canvas.width = 800;
-      canvas.height = 600;
-      engine = new BABYLON.Engine(canvas, true);
+      engine = new BABYLON.NullEngine();
     });
 
     afterEach(() => {
@@ -143,7 +139,7 @@ describe('ShadowQualitySettings', () => {
       jest.spyOn(engine, 'getCaps').mockReturnValue({
         ...caps,
         maxTextureSize: 1024, // Less than 2048
-        textureFloatRender: true
+        textureFloatRender: true,
       });
 
       const quality = autoDetectQuality(engine);
@@ -155,7 +151,7 @@ describe('ShadowQualitySettings', () => {
       jest.spyOn(engine, 'getCaps').mockReturnValue({
         ...caps,
         maxTextureSize: 4096,
-        textureFloatRender: false
+        textureFloatRender: false,
       });
 
       const quality = autoDetectQuality(engine);
@@ -167,7 +163,7 @@ describe('ShadowQualitySettings', () => {
       jest.spyOn(engine, 'getCaps').mockReturnValue({
         ...caps,
         maxTextureSize: 4096,
-        textureFloatRender: true
+        textureFloatRender: true,
       });
 
       // Mock high FPS
@@ -183,7 +179,7 @@ describe('ShadowQualitySettings', () => {
     it('should have valid shadow map sizes (powers of 2)', () => {
       const presets = Object.values(SHADOW_QUALITY_PRESETS);
 
-      presets.forEach(preset => {
+      presets.forEach((preset) => {
         const size = preset.shadowMapSize;
         // Check if power of 2
         expect(Math.log2(size) % 1).toBe(0);
@@ -196,7 +192,7 @@ describe('ShadowQualitySettings', () => {
     it('should have valid cascade counts', () => {
       const presets = Object.values(SHADOW_QUALITY_PRESETS);
 
-      presets.forEach(preset => {
+      presets.forEach((preset) => {
         expect(preset.numCascades).toBeGreaterThanOrEqual(1);
         expect(preset.numCascades).toBeLessThanOrEqual(8);
       });
@@ -205,7 +201,7 @@ describe('ShadowQualitySettings', () => {
     it('should have valid blend percentages', () => {
       const presets = Object.values(SHADOW_QUALITY_PRESETS);
 
-      presets.forEach(preset => {
+      presets.forEach((preset) => {
         expect(preset.cascadeBlendPercentage).toBeGreaterThanOrEqual(0);
         expect(preset.cascadeBlendPercentage).toBeLessThanOrEqual(1);
       });
@@ -214,7 +210,7 @@ describe('ShadowQualitySettings', () => {
     it('should have positive max shadow casters', () => {
       const presets = Object.values(SHADOW_QUALITY_PRESETS);
 
-      presets.forEach(preset => {
+      presets.forEach((preset) => {
         expect(preset.maxShadowCasters).toBeGreaterThan(0);
       });
     });

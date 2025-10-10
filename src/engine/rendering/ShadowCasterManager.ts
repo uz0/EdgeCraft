@@ -36,10 +36,8 @@ export class ShadowCasterManager {
   private blobSystem: BlobShadowSystem;
   private config: Map<string, ShadowCasterConfig> = new Map();
   private maxCSMCasters: number;
-  
 
   constructor(scene: BABYLON.Scene, maxCSMCasters: number = 50) {
-    
     this.maxCSMCasters = maxCSMCasters;
 
     // Initialize CSM system with default settings

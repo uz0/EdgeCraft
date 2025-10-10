@@ -5,17 +5,35 @@
 import * as BABYLON from '@babylonjs/core';
 import { BlobShadowSystem } from '@/engine/rendering/BlobShadowSystem';
 
+// Mock canvas 2D context for blob texture generation
+const mockCreateRadialGradient = jest.fn().mockReturnValue({
+  addColorStop: jest.fn(),
+});
+
+const mockGetContext = jest.fn().mockReturnValue({
+  createRadialGradient: mockCreateRadialGradient,
+  fillStyle: '',
+  arc: jest.fn(),
+  fill: jest.fn(),
+  fillRect: jest.fn(),
+});
+
+const originalCreateElement = document.createElement.bind(document);
+document.createElement = jest.fn((tagName: string) => {
+  const element = originalCreateElement(tagName);
+  if (tagName === 'canvas') {
+    element.getContext = mockGetContext;
+  }
+  return element;
+});
+
 describe('BlobShadowSystem', () => {
-  let engine: BABYLON.Engine;
+  let engine: BABYLON.NullEngine;
   let scene: BABYLON.Scene;
-  let canvas: HTMLCanvasElement;
 
   beforeEach(() => {
-    // Create canvas and engine
-    canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
-    engine = new BABYLON.Engine(canvas, true);
+    // Use NullEngine for CI compatibility (no WebGL required)
+    engine = new BABYLON.NullEngine();
     scene = new BABYLON.Scene(engine);
   });
 

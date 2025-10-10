@@ -59,7 +59,7 @@ export class CascadedShadowSystem {
     this.directionalLight = new BABYLON.DirectionalLight(
       'shadowLight',
       new BABYLON.Vector3(-1, -2, -1),
-      this.scene,
+      this.scene
     );
 
     this.directionalLight.intensity = 1.0;
@@ -67,7 +67,7 @@ export class CascadedShadowSystem {
     // Create Cascaded Shadow Generator
     this.shadowGenerator = new BABYLON.CascadedShadowGenerator(
       this.config.shadowMapSize,
-      this.directionalLight,
+      this.directionalLight
     );
 
     // Configure number of cascades
@@ -81,6 +81,7 @@ export class CascadedShadowSystem {
       // @ts-expect-error - API may vary by Babylon.js version
       this.shadowGenerator.splitFrustum = false;
       // @ts-expect-error - API may vary by Babylon.js version
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       this.shadowGenerator.setCascadeSplitDistances(this.config.splitDistances);
     } else {
       // Auto-split based on camera frustum (recommended)
