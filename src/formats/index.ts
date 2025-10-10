@@ -3,3 +3,4 @@
  */
 
 export * from './mpq';
+export * from './maps';
