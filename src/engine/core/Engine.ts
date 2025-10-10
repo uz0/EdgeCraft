@@ -76,14 +76,14 @@ export class EdgeCraftEngine implements IEngineCore {
   /**
    * Initialize optimized rendering pipeline
    */
-  public async initializeRenderPipeline(): Promise<void> {
-    if (this._renderPipeline) {
+  public initializeRenderPipeline(): void {
+    if (this._renderPipeline != null) {
       console.warn('Render pipeline already initialized');
       return;
     }
 
     this._renderPipeline = new OptimizedRenderPipeline(this._scene);
-    await this._renderPipeline.initialize({
+    this._renderPipeline.initialize({
       enableMaterialSharing: true,
       enableMeshMerging: true,
       enableCulling: true,
@@ -198,7 +198,7 @@ export class EdgeCraftEngine implements IEngineCore {
     this.stopRenderLoop();
 
     // Dispose render pipeline
-    if (this._renderPipeline) {
+    if (this._renderPipeline != null) {
       this._renderPipeline.dispose();
     }
 

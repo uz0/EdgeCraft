@@ -98,7 +98,8 @@ export class CullingStrategy {
       // Mark large objects for occlusion testing
       if (mesh.getBoundingInfo().boundingSphere.radiusWorld > 5) {
         mesh.occlusionType = BABYLON.AbstractMesh.OCCLUSION_TYPE_OPTIMISTIC;
-        mesh.occlusionQueryAlgorithmType = BABYLON.AbstractMesh.OCCLUSION_ALGORITHM_TYPE_CONSERVATIVE;
+        mesh.occlusionQueryAlgorithmType =
+          BABYLON.AbstractMesh.OCCLUSION_ALGORITHM_TYPE_CONSERVATIVE;
       }
     }
   }
