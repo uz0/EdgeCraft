@@ -44,6 +44,8 @@ export default {
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/mocks/__mocks__/fileMock.js',
+    // Mock shader files
+    '\\.fx\\?raw$': '<rootDir>/tests/__mocks__/shaderMock.js',
   },
 
   collectCoverageFrom: [
