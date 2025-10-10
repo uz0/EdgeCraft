@@ -1,24 +1,30 @@
 /**
- * Rendering module exports
+ * Rendering Optimization Module
  *
- * Provides rendering systems for Edge Craft:
- * - GPU instancing and animation system for high-performance unit rendering
- * - Cascaded Shadow Maps (CSM) for high-quality shadows
- * - Blob shadows for performance-critical scenarios
- * - Intelligent shadow management
+ * Exports all rendering optimization components:
+ * - RenderPipeline: Main optimization orchestrator
+ * - MaterialCache: Material sharing system
+ * - CullingStrategy: Frustum and occlusion culling
+ * - DrawCallOptimizer: Mesh merging and batching
  */
 
-export * from './types';
+export { OptimizedRenderPipeline } from './RenderPipeline';
+export { MaterialCache } from './MaterialCache';
+export { CullingStrategy } from './CullingStrategy';
+export { DrawCallOptimizer } from './DrawCallOptimizer';
 
-// GPU Instancing & Animation
-export * from './InstancedUnitRenderer';
-export * from './UnitInstanceManager';
-export * from './BakedAnimationSystem';
-export * from './UnitAnimationController';
-export * from './UnitPool';
+export { QualityPreset } from './types';
 
-// Shadow Systems
-export * from './CascadedShadowSystem';
-export * from './BlobShadowSystem';
-export * from './ShadowCasterManager';
-export * from './ShadowQualitySettings';
+export type {
+  RenderPipelineOptions,
+  RenderPipelineState,
+  MaterialCacheConfig,
+  MaterialCacheEntry,
+  DrawCallOptimizerConfig,
+  MeshMergeResult,
+  CullingConfig,
+  CullingStats,
+  PerformanceMetrics,
+  OptimizationStats,
+  DynamicLODState,
+} from './types';
