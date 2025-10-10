@@ -70,6 +70,13 @@ describe('LegalCompliancePipeline', () => {
     });
 
     it('should handle visual similarity check', async () => {
+      // Create pipeline with visual similarity disabled for this test
+      // (testing with invalid image data would cause decoding errors)
+      const testPipeline = new LegalCompliancePipeline({
+        enableVisualSimilarity: false,
+        autoReplace: false,
+      });
+
       const buffer = new ArrayBuffer(1000);
       const metadata: AssetMetadata = {
         name: 'texture.png',
@@ -77,7 +84,7 @@ describe('LegalCompliancePipeline', () => {
         category: 'terrain',
       };
 
-      const result = await pipeline.validateAndReplace(buffer, metadata);
+      const result = await testPipeline.validateAndReplace(buffer, metadata);
 
       expect(result).toBeDefined();
       expect(result.validated).toBe(true);

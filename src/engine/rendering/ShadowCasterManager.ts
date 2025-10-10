@@ -180,10 +180,16 @@ export class ShadowCasterManager {
    * ```
    */
   public getStats(): ShadowCasterStats {
+    const csmCount = this.csmSystem.getShadowCasterCount();
+    const blobCount = this.blobSystem.getBlobCount();
     return {
-      csmCasters: this.csmSystem.getShadowCasterCount(),
-      blobShadows: this.blobSystem.getBlobCount(),
+      csmCasters: csmCount,
+      blobShadows: blobCount,
       totalObjects: this.config.size,
+      totalCasters: csmCount + blobCount,
+      renderingCasters: csmCount + blobCount,
+      culledCasters: 0,
+      updates: 0,
     };
   }
 

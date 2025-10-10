@@ -72,7 +72,7 @@ export class CascadedShadowSystem {
 
     // Configure number of cascades
     this.shadowGenerator.numCascades = this.config.numCascades;
-    this.shadowGenerator.cascadeBlendPercentage = this.config.cascadeBlendPercentage;
+    this.shadowGenerator.cascadeBlendPercentage = this.config.cascadeBlendPercentage ?? 0.1;
 
     // Configure cascade splits
     if (this.config.splitDistances) {
@@ -90,7 +90,7 @@ export class CascadedShadowSystem {
     }
 
     // Shadow quality settings
-    if (this.config.enablePCF) {
+    if (this.config.enablePCF === true) {
       // Enable Percentage Closer Filtering for soft shadows
       this.shadowGenerator.usePercentageCloserFiltering = true;
       this.shadowGenerator.filteringQuality = BABYLON.ShadowGenerator.QUALITY_HIGH;
@@ -130,7 +130,7 @@ export class CascadedShadowSystem {
   public addShadowCaster(mesh: BABYLON.AbstractMesh, priority: ShadowPriority): void {
     // Only add high priority objects to CSM
     // Medium/low priority should use blob shadows (see BlobShadowSystem)
-    if (priority === 'high') {
+    if (priority === ShadowPriority.HIGH) {
       this.shadowGenerator.addShadowCaster(mesh);
       this.shadowCasters.add(mesh);
     }
@@ -240,6 +240,9 @@ export class CascadedShadowSystem {
       shadowMapSize: this.config.shadowMapSize,
       shadowCasters: this.shadowCasters.size,
       memoryUsage: totalMemory,
+      totalCasters: this.shadowCasters.size,
+      activeCasters: this.shadowCasters.size,
+      updatesPerFrame: 1,
     };
   }
 
