@@ -51,6 +51,10 @@ export class InstancedUnitRenderer {
       enablePicking: config.enablePicking ?? false,
       lodDistances: config.lodDistances ?? [50, 100, 200],
       freezeActiveMeshes: config.freezeActiveMeshes ?? false,
+      enableInstancing: config.enableInstancing ?? true,
+      maxInstancesPerBuffer: config.maxInstancesPerBuffer ?? 1000,
+      enableFrustumCulling: config.enableFrustumCulling ?? true,
+      enableOcclusionCulling: config.enableOcclusionCulling ?? false,
     };
 
     this.setupRenderLoop();
@@ -97,6 +101,7 @@ export class InstancedUnitRenderer {
     this.unitTypes.set(unitType, {
       type: unitType,
       mesh,
+      modelPath: '', // Path not tracked in runtime
       animations,
       bakedAnimationData,
     });
@@ -324,6 +329,10 @@ export class InstancedUnitRenderer {
         continue;
       }
 
+      if (!ref.instance.position) {
+        continue;
+      }
+
       const distSquared = BABYLON.Vector3.DistanceSquared(ref.instance.position, center);
 
       if (distSquared <= radiusSquared) {
@@ -358,11 +367,11 @@ export class InstancedUnitRenderer {
           }
 
           // Advance animation time
-          instance.animationTime += deltaTime;
+          instance.animationTime = (instance.animationTime ?? 0) + deltaTime;
 
           // Normalize time for looping
           instance.animationTime = animSystem.normalizeAnimationTime(
-            instance.animationState,
+            instance.animationState ?? 'idle',
             instance.animationTime
           );
 
@@ -394,7 +403,10 @@ export class InstancedUnitRenderer {
     return {
       unitTypes: this.unitTypes.size,
       totalUnits,
+      totalInstances: totalUnits,
+      visibleInstances: totalUnits,
       drawCalls: this.unitManagers.size, // 1 draw call per unit type!
+      triangles: 0, // Not tracked in current implementation
       cpuTime: this.cpuTimeMs,
       memoryUsage,
     };

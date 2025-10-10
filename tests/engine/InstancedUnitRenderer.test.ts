@@ -199,8 +199,8 @@ describe('InstancedUnitRenderer', () => {
       renderer.moveUnit(unitId, newPosition);
 
       const unit = renderer.getUnit(unitId);
-      expect(unit?.position.x).toBeCloseTo(10);
-      expect(unit?.position.z).toBeCloseTo(10);
+      expect(unit?.position?.x).toBeCloseTo(10);
+      expect(unit?.position?.z).toBeCloseTo(10);
     });
 
     it('should update unit properties', () => {
@@ -213,7 +213,7 @@ describe('InstancedUnitRenderer', () => {
 
       const unit = renderer.getUnit(unitId);
       expect(unit?.rotation).toBeCloseTo(Math.PI / 2);
-      expect(unit?.teamColor.b).toBeCloseTo(1);
+      expect(unit?.teamColor?.b).toBeCloseTo(1);
     });
 
     it('should despawn unit', () => {

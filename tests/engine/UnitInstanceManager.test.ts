@@ -132,8 +132,8 @@ describe('UnitInstanceManager', () => {
       manager.updateInstance(instanceIndex, { position: newPosition });
 
       const instance = manager.getInstance(instanceIndex);
-      expect(instance?.position.x).toBe(10);
-      expect(instance?.position.z).toBe(10);
+      expect(instance?.position?.x).toBe(10);
+      expect(instance?.position?.z).toBe(10);
     });
 
     it('should update instance rotation', () => {
@@ -149,7 +149,7 @@ describe('UnitInstanceManager', () => {
       });
 
       const instance = manager.getInstance(instanceIndex);
-      expect(instance?.teamColor.b).toBe(1);
+      expect(instance?.teamColor?.b).toBe(1);
     });
 
     it('should update animation state', () => {
@@ -248,8 +248,8 @@ describe('UnitInstanceManager', () => {
       const instance2 = manager.getInstance(2);
 
       expect(instance0?.rotation).toBeCloseTo(Math.PI);
-      expect(instance1?.teamColor.b).toBe(1);
-      expect(instance2?.position.x).toBe(100);
+      expect(instance1?.teamColor?.b).toBe(1);
+      expect(instance2?.position?.x).toBe(100);
     });
 
     it('should get all instances', () => {
