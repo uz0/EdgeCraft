@@ -182,7 +182,7 @@ export class QualityPresetManager {
 
     // Setup auto-adjustment
     if (config?.enableAutoAdjust === true) {
-      this.enableAutoAdjust = true;
+      this._enableAutoAdjust = true;
       this.targetFPS = config.targetFPS ?? 60;
       this.setupAutoAdjustment();
     }
