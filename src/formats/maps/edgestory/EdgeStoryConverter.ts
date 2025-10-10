@@ -141,7 +141,7 @@ export class EdgeStoryConverter {
       const sourceFormat =
         rawMap.format === 'w3m' || rawMap.format === 'w3n'
           ? 'w3x'
-          : rawMap.format === 'scx'
+          : rawMap.format === 'scx' || rawMap.format === 'sc2map'
             ? 'scm'
             : rawMap.format;
       const mapping = this.assetMapper.mapDoodadType(doodad.typeId, sourceFormat);
@@ -188,7 +188,7 @@ export class EdgeStoryConverter {
     const sourceFormat =
       rawMap.format === 'w3m' || rawMap.format === 'w3n'
         ? 'w3x'
-        : rawMap.format === 'scx'
+        : rawMap.format === 'scx' || rawMap.format === 'sc2map'
           ? 'scm'
           : rawMap.format;
     const units: EdgeUnit[] = rawMap.units.map((unit) => {

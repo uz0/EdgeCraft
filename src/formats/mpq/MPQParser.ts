@@ -245,22 +245,21 @@ export class MPQParser {
     }
 
     const view = new DataView(data);
-    const firstByte = view.getUint8(0);
+    const firstByte = view.getUint8(0) as CompressionAlgorithm;
 
     // Check for known compression algorithms
-    switch (firstByte) {
-      case CompressionAlgorithm.LZMA:
-        return CompressionAlgorithm.LZMA;
-      case CompressionAlgorithm.PKZIP:
-        return CompressionAlgorithm.PKZIP;
-      case CompressionAlgorithm.ZLIB:
-        return CompressionAlgorithm.ZLIB;
-      case CompressionAlgorithm.BZIP2:
-        return CompressionAlgorithm.BZIP2;
-      default:
-        // Unknown or no compression indicator
-        return CompressionAlgorithm.NONE;
+    if (firstByte === CompressionAlgorithm.LZMA) {
+      return CompressionAlgorithm.LZMA;
+    } else if (firstByte === CompressionAlgorithm.PKZIP) {
+      return CompressionAlgorithm.PKZIP;
+    } else if (firstByte === CompressionAlgorithm.ZLIB) {
+      return CompressionAlgorithm.ZLIB;
+    } else if (firstByte === CompressionAlgorithm.BZIP2) {
+      return CompressionAlgorithm.BZIP2;
     }
+
+    // Unknown or no compression indicator
+    return CompressionAlgorithm.NONE;
   }
 
   /**

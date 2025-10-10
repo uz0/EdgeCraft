@@ -11,8 +11,12 @@
 
 import type { IDecompressor } from './types';
 
+interface LZMAModule {
+  decompress: (buffer: Buffer, callback: (result: Buffer, error?: Error) => void) => void;
+}
+
 export class LZMADecompressor implements IDecompressor {
-  private lzmaModule: any = null;
+  private lzmaModule: LZMAModule | null = null;
 
   /**
    * Check if LZMA decompression is available
@@ -23,7 +27,8 @@ export class LZMADecompressor implements IDecompressor {
       try {
         // Try to require lzma-native
         if (typeof require !== 'undefined') {
-          this.lzmaModule = require('lzma-native');
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          this.lzmaModule = require('lzma-native') as LZMAModule;
           return true;
         }
       } catch (e) {
@@ -69,7 +74,12 @@ export class LZMADecompressor implements IDecompressor {
         const buffer = Buffer.from(data);
 
         // Use LZMA alone decompression (not LZMA2)
-        this.lzmaModule.decompress(buffer, (result: Buffer, error: Error) => {
+        if (!this.lzmaModule) {
+          reject(new Error('LZMA module not initialized'));
+          return;
+        }
+
+        this.lzmaModule.decompress(buffer, (result: Buffer, error?: Error) => {
           if (error) {
             reject(new Error(`LZMA decompression failed: ${error.message}`));
             return;
@@ -91,7 +101,11 @@ export class LZMADecompressor implements IDecompressor {
           resolve(arrayBuffer);
         });
       } catch (error) {
-        reject(new Error(`LZMA decompression error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+        reject(
+          new Error(
+            `LZMA decompression error: ${error instanceof Error ? error.message : 'Unknown error'}`
+          )
+        );
       }
     });
   }
@@ -103,8 +117,7 @@ export class LZMADecompressor implements IDecompressor {
     return {
       name: 'LZMA Decompressor',
       available: this.isAvailable(),
-      environment:
-        typeof process !== 'undefined' && process.versions?.node ? 'Node.js' : 'Browser',
+      environment: typeof process !== 'undefined' && process.versions?.node ? 'Node.js' : 'Browser',
     };
   }
 }

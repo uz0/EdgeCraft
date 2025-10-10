@@ -4,6 +4,14 @@
  * Unit tests for LZMA decompression functionality.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import { LZMADecompressor } from './LZMADecompressor';
 
 // Mock lzma-native module
@@ -115,9 +123,7 @@ describe('LZMADecompressor', () => {
 
       expect(result).toBeDefined();
       expect(result.byteLength).toBeDefined();
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('size mismatch')
-      );
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('size mismatch'));
 
       warnSpy.mockRestore();
     });

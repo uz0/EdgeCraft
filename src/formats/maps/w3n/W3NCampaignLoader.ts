@@ -90,7 +90,9 @@ export class W3NCampaignLoader implements IMapLoader {
    * Extract embedded maps from campaign archive
    * Maps are stored as separate MPQ files within the campaign MPQ
    */
-  private async extractEmbeddedMaps(mpqParser: MPQParser): Promise<Array<{ data: ArrayBuffer; index: number }>> {
+  private async extractEmbeddedMaps(
+    mpqParser: MPQParser
+  ): Promise<Array<{ data: ArrayBuffer; index: number }>> {
     const maps: Array<{ data: ArrayBuffer; index: number }> = [];
 
     // Try to extract (listfile) to get list of all files

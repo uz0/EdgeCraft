@@ -1,6 +1,6 @@
 /**
  * Common types for map loading system
- * Supports W3X/W3M (Warcraft 3) and SCM/SCX (StarCraft 1) formats
+ * Supports W3X/W3M (Warcraft 3), SCM/SCX (StarCraft 1), and SC2Map (StarCraft 2) formats
  */
 
 /**
@@ -19,7 +19,7 @@ export interface IMapLoader {
  * Raw map data from any source format
  */
 export interface RawMapData {
-  format: 'w3x' | 'w3m' | 'w3n' | 'scm' | 'scx';
+  format: 'w3x' | 'w3m' | 'w3n' | 'scm' | 'scx' | 'sc2map';
   info: MapInfo;
   terrain: TerrainData;
   units: UnitPlacement[];
