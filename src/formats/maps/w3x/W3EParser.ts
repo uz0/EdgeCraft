@@ -84,6 +84,8 @@ export class W3EParser {
    * Read ground tile data
    */
   private readGroundTile(): W3EGroundTile {
+    this.checkBounds(7); // 2 + 2 + 1 + 1 + 1 = 7 bytes
+
     // Ground height (16-bit signed, divided by 4 for actual height)
     const rawHeight = this.view.getInt16(this.offset, true);
     this.offset += 2;
@@ -123,6 +125,8 @@ export class W3EParser {
    * Read cliff tile data
    */
   private readCliffTile(): W3ECliffTile {
+    this.checkBounds(3); // 1 + 1 + 1 = 3 bytes
+
     const cliffType = this.view.getUint8(this.offset);
     this.offset += 1;
 
@@ -186,9 +190,21 @@ export class W3EParser {
   }
 
   /**
+   * Helper: Check if we can read 'size' bytes from current offset
+   */
+  private checkBounds(size: number): void {
+    if (this.offset + size > this.buffer.byteLength) {
+      throw new Error(
+        `W3E read would exceed buffer bounds: offset=${this.offset}, size=${size}, bufferLength=${this.buffer.byteLength}`
+      );
+    }
+  }
+
+  /**
    * Helper: Read 4-character code
    */
   private read4CC(): string {
+    this.checkBounds(4);
     const chars = String.fromCharCode(
       this.view.getUint8(this.offset),
       this.view.getUint8(this.offset + 1),
@@ -203,6 +219,7 @@ export class W3EParser {
    * Helper: Read uint32
    */
   private readUint32(): number {
+    this.checkBounds(4);
     const value = this.view.getUint32(this.offset, true);
     this.offset += 4;
     return value;

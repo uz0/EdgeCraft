@@ -32,7 +32,41 @@ export class W3XMapLoader implements IMapLoader {
    */
   public async parse(file: File | ArrayBuffer): Promise<RawMapData> {
     // Convert File to ArrayBuffer if needed
-    const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+    let buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+
+    // Check for HM3W header (Warcraft 3: Reforged format)
+    const view = new DataView(buffer);
+    const magic = String.fromCharCode(
+      view.getUint8(0),
+      view.getUint8(1),
+      view.getUint8(2),
+      view.getUint8(3)
+    );
+
+    console.log(
+      `[W3XMapLoader] File size: ${buffer.byteLength}, magic: "${magic}" (0x${view.getUint32(0, false).toString(16)})`
+    );
+
+    if (magic === 'HM3W') {
+      console.log('[W3XMapLoader] HM3W format detected, skipping 512-byte header');
+      // HM3W format: 512-byte header followed by MPQ data
+      // Skip the header and parse the MPQ archive from offset 512
+      buffer = buffer.slice(512);
+
+      // Check MPQ magic after header
+      const mpqView = new DataView(buffer);
+      const mpqMagic = String.fromCharCode(
+        mpqView.getUint8(0),
+        mpqView.getUint8(1),
+        mpqView.getUint8(2),
+        mpqView.getUint8(3)
+      );
+      console.log(
+        `[W3XMapLoader] MPQ magic after header: "${mpqMagic}" (0x${mpqView.getUint32(0, true).toString(16)})`
+      );
+    } else {
+      console.log('[W3XMapLoader] No HM3W header, assuming direct MPQ format');
+    }
 
     // Parse MPQ archive
     const mpqParser = new MPQParser(buffer);
@@ -42,9 +76,38 @@ export class W3XMapLoader implements IMapLoader {
       throw new Error(`Failed to parse MPQ archive: ${mpqResult.error}`);
     }
 
-    // Extract war3map files
-    const w3iData = await mpqParser.extractFile('war3map.w3i');
-    const w3eData = await mpqParser.extractFile('war3map.w3e');
+    // Try to extract the file list first to see what's in the archive
+    const listFile = await mpqParser.extractFile('(listfile)');
+    if (listFile) {
+      const fileList = new TextDecoder().decode(listFile.data);
+      console.log('[W3XMapLoader] Files in archive:', fileList.split('\n').slice(0, 10));
+    } else {
+      console.log('[W3XMapLoader] No (listfile) found, trying direct extraction');
+    }
+
+    // Extract war3map files - try both with and without backslashes
+    console.log('[W3XMapLoader] Extracting war3map.w3i...');
+    let w3iData = await mpqParser.extractFile('war3map.w3i');
+    if (!w3iData) {
+      console.log('[W3XMapLoader] Trying War3Map.w3i...');
+      w3iData = await mpqParser.extractFile('War3Map.w3i'); // Try capitalized
+    }
+
+    if (w3iData) {
+      console.log(`[W3XMapLoader] Got w3i data: ${w3iData.data.byteLength} bytes`);
+    }
+
+    console.log('[W3XMapLoader] Extracting war3map.w3e...');
+    let w3eData = await mpqParser.extractFile('war3map.w3e');
+    if (!w3eData) {
+      console.log('[W3XMapLoader] Trying War3Map.w3e...');
+      w3eData = await mpqParser.extractFile('War3Map.w3e');
+    }
+
+    if (w3eData) {
+      console.log(`[W3XMapLoader] Got w3e data: ${w3eData.data.byteLength} bytes`);
+    }
+
     const dooData = await mpqParser.extractFile('war3map.doo');
     const unitsData = await mpqParser.extractFile('war3mapUnits.doo');
 
@@ -57,27 +120,61 @@ export class W3XMapLoader implements IMapLoader {
     }
 
     // Parse map info
-    const w3iParser = new W3IParser(w3iData.data);
-    const w3iInfo = w3iParser.parse();
+    console.log(`[W3XMapLoader] Parsing war3map.w3i (${w3iData.data.byteLength} bytes)...`);
+    let w3iInfo;
+    try {
+      const w3iParser = new W3IParser(w3iData.data);
+      w3iInfo = w3iParser.parse();
+      console.log(`[W3XMapLoader] Successfully parsed map info`);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to parse war3map.w3i: ${errorMsg}`);
+    }
 
     // Parse terrain
-    const w3eParser = new W3EParser(w3eData.data);
-    const w3eTerrain = w3eParser.parse();
+    console.log(`[W3XMapLoader] Parsing war3map.w3e (${w3eData.data.byteLength} bytes)...`);
+    let w3eTerrain;
+    try {
+      const w3eParser = new W3EParser(w3eData.data);
+      w3eTerrain = w3eParser.parse();
+      console.log(
+        `[W3XMapLoader] Successfully parsed terrain: ${w3eTerrain.width}x${w3eTerrain.height} (${w3eTerrain.groundTiles.length} tiles)`
+      );
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to parse war3map.w3e: ${errorMsg}`);
+    }
 
     // Parse doodads (optional)
     let doodads: DoodadPlacement[] = [];
     if (dooData) {
-      const w3dParser = new W3DParser(dooData.data);
-      const w3oDoodads = w3dParser.parse();
-      doodads = this.convertDoodads(w3oDoodads.doodads);
+      try {
+        console.log(`[W3XMapLoader] Parsing war3map.doo (${dooData.data.byteLength} bytes)...`);
+        const w3dParser = new W3DParser(dooData.data);
+        const w3oDoodads = w3dParser.parse();
+        doodads = this.convertDoodads(w3oDoodads.doodads);
+        console.log(`[W3XMapLoader] Successfully parsed ${doodads.length} doodads`);
+      } catch (err) {
+        console.error(`[W3XMapLoader] Failed to parse war3map.doo:`, err);
+        // Continue without doodads
+      }
     }
 
     // Parse units (optional)
     let units: UnitPlacement[] = [];
     if (unitsData) {
-      const w3uParser = new W3UParser(unitsData.data);
-      const w3uUnits = w3uParser.parse();
-      units = this.convertUnits(w3uUnits.units);
+      try {
+        console.log(
+          `[W3XMapLoader] Parsing war3mapUnits.doo (${unitsData.data.byteLength} bytes)...`
+        );
+        const w3uParser = new W3UParser(unitsData.data);
+        const w3uUnits = w3uParser.parse();
+        units = this.convertUnits(w3uUnits.units);
+        console.log(`[W3XMapLoader] Successfully parsed ${units.length} units`);
+      } catch (err) {
+        console.error(`[W3XMapLoader] Failed to parse war3mapUnits.doo:`, err);
+        // Continue without units
+      }
     }
 
     // Convert to RawMapData

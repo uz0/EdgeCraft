@@ -245,6 +245,31 @@ npm run typecheck
 /agent documentation-manager
 ```
 
+## 🧪 Testing
+
+Edge Craft has comprehensive test coverage:
+
+### Unit Tests (Jest)
+```bash
+npm test                 # Run all unit tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # Coverage report
+```
+
+### E2E Tests (Playwright)
+```bash
+npm run test:e2e         # Run all e2e tests
+npm run test:e2e:ui      # Interactive UI mode
+npm run test:e2e:debug   # Debug mode with browser
+```
+
+### All Tests
+```bash
+npm run test:all         # Run unit + e2e tests
+```
+
+See [e2e/README.md](./e2e/README.md) for detailed e2e testing documentation.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see [LICENSE](./LICENSE) file for details.
