@@ -64,9 +64,17 @@ export default defineConfig(({ mode }) => {
 
     // Development server (optimized by Rolldown)
     server: {
-      port: parseInt(env.PORT) || 3000,
+      port: parseInt(env.PORT) || 3001, // Changed from 3000 to bypass browser cache
       host: true,
       open: true,
+
+      // Disable caching in development to prevent stale code issues
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      },
 
       // Hot Module Replacement (super fast with Rolldown)
       hmr: {
