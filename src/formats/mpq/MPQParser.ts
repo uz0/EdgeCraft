@@ -251,11 +251,40 @@ export class MPQParser {
    * Read MPQ header
    */
   private readHeader(): MPQHeader | null {
-    // Check magic number (support both v1 and v2)
-    const magic = this.view.getUint32(0, true);
-    if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
+    // VERSION MARKER: MPQ Header debugging v3.0 (2025-10-11)
+    console.log('[MPQParser] 🔧 MPQ HEADER CHECK v3.0');
+
+    // Check buffer size
+    if (this.buffer.byteLength < 32) {
+      console.error(
+        `[MPQParser] ❌ Buffer too small for MPQ header: ${this.buffer.byteLength} bytes (need 32+)`
+      );
       return null;
     }
+
+    // Read first 16 bytes for debugging
+    const bytes = new Uint8Array(this.buffer.slice(0, Math.min(16, this.buffer.byteLength)));
+    console.log(
+      `[MPQParser] First 16 bytes: ${Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' ')}`
+    );
+
+    // Check magic number (support both v1 and v2)
+    const magic = this.view.getUint32(0, true);
+    const magicBytes = String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!);
+    console.log(
+      `[MPQParser] Magic: 0x${magic.toString(16)} ("${magicBytes}"), expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`
+    );
+
+    if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
+      console.error(
+        `[MPQParser] ❌ Invalid MPQ magic number: 0x${magic.toString(16)} ("${magicBytes}")`
+      );
+      return null;
+    }
+
+    console.log('[MPQParser] ✅ Valid MPQ header detected');
 
     return {
       archiveSize: this.view.getUint32(8, true),
