@@ -1,7 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MapGallery, type MapMetadata } from './ui/MapGallery';
 import { MapRendererCore } from './engine/rendering/MapRendererCore';
 import { QualityPresetManager } from './engine/rendering/QualityPresetManager';
+import { useMapPreviews } from './hooks/useMapPreviews';
+import { W3XMapLoader } from './formats/maps/w3x/W3XMapLoader';
+import { SC2MapLoader } from './formats/maps/sc2/SC2MapLoader';
+import { W3NCampaignLoader } from './formats/maps/w3n/W3NCampaignLoader';
+import type { RawMapData } from './formats/maps/types';
 import * as BABYLON from '@babylonjs/core';
 import './App.css';
 
@@ -18,6 +23,9 @@ const App: React.FC = () => {
   const engineRef = useRef<BABYLON.Engine | null>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
   const rendererRef = useRef<MapRendererCore | null>(null);
+
+  // Use the map previews hook
+  const { previews, isLoading: previewsLoading, generatePreviews } = useMapPreviews();
 
   // Hardcoded map list (matching actual /maps folder)
   const MAP_LIST = [
@@ -154,6 +162,74 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Generate previews for maps (background process)
+  useEffect(() => {
+    if (maps.length === 0) return;
+
+    const loadMapsAndGeneratePreviews = async (): Promise<void> => {
+      console.log('Starting preview generation for', maps.length, 'maps...');
+      const mapDataMap = new Map<string, RawMapData>();
+
+      // Load and parse maps (skip very large ones >100MB for preview generation)
+      for (const map of maps) {
+        try {
+          // Skip very large maps (>100MB) to avoid long load times
+          const sizeMB = map.sizeBytes / (1024 * 1024);
+          if (sizeMB > 100) {
+            console.log(`Skipping preview for large map ${map.name} (${sizeMB.toFixed(1)}MB)`);
+            continue;
+          }
+
+          console.log(`Loading ${map.name} for preview generation...`);
+
+          // Fetch map file
+          const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
+          if (!response.ok) {
+            console.warn(`Failed to fetch ${map.name}: ${response.statusText}`);
+            continue;
+          }
+
+          const blob = await response.blob();
+          const file = new File([blob], map.name);
+
+          // Update map metadata with actual file
+          map.file = file;
+
+          // Parse map based on format
+          let mapData: RawMapData | null = null;
+
+          if (map.format === 'w3x') {
+            const loader = new W3XMapLoader();
+            mapData = await loader.parse(file);
+          } else if (map.format === 'w3n') {
+            const loader = new W3NCampaignLoader();
+            // parse() returns the first map from the campaign
+            mapData = await loader.parse(file);
+          } else if (map.format === 'sc2map') {
+            const loader = new SC2MapLoader();
+            mapData = await loader.parse(file);
+          }
+
+          if (mapData) {
+            mapDataMap.set(map.id, mapData);
+          }
+        } catch (err) {
+          console.error(`Failed to load ${map.name} for preview:`, err);
+        }
+      }
+
+      // Generate previews
+      if (mapDataMap.size > 0) {
+        console.log(`Generating previews for ${mapDataMap.size} maps...`);
+        await generatePreviews(maps, mapDataMap);
+        console.log('Preview generation complete!');
+      }
+    };
+
+    // Run in background
+    void loadMapsAndGeneratePreviews();
+  }, [maps, generatePreviews]);
+
   // Handle map selection
   const handleMapSelect = async (map: MapMetadata): Promise<void> => {
     if (!rendererRef.current) {
@@ -207,6 +283,14 @@ const App: React.FC = () => {
     setError(null);
   };
 
+  // Merge previews with maps
+  const mapsWithPreviews = useMemo(() => {
+    return maps.map((map) => ({
+      ...map,
+      thumbnailUrl: previews.get(map.id),
+    }));
+  }, [maps, previews]);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -223,11 +307,11 @@ const App: React.FC = () => {
         {showGallery ? (
           <section className="gallery-view">
             <MapGallery
-              maps={maps}
+              maps={mapsWithPreviews}
               onMapSelect={(map) => {
                 void handleMapSelect(map);
               }}
-              isLoading={isLoading}
+              isLoading={isLoading || previewsLoading}
             />
           </section>
         ) : (
