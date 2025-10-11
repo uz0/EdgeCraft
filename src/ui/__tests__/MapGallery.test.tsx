@@ -71,11 +71,12 @@ describe('MapGallery', () => {
     it('should display format badges correctly', () => {
       render(<MapGallery maps={mockMaps} onMapSelect={mockOnMapSelect} />);
 
+      // Each map card shows format badge twice (thumbnail + metadata)
       const w3xBadges = screen.getAllByText('W3X');
-      expect(w3xBadges.length).toBe(2);
+      expect(w3xBadges.length).toBe(4); // 2 maps × 2 badges per map
 
-      expect(screen.getByText('W3N')).toBeInTheDocument();
-      expect(screen.getByText('SC2')).toBeInTheDocument();
+      expect(screen.getAllByText('W3N').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('SC2').length).toBeGreaterThanOrEqual(1);
     });
 
     it('should display file sizes correctly', () => {

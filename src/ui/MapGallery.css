@@ -44,7 +44,9 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.95rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .map-search:focus {
@@ -118,7 +120,10 @@
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
   background: white;
 }
 
