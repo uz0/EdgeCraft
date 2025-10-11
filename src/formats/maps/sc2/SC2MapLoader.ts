@@ -46,8 +46,8 @@ export class SC2MapLoader implements IMapLoader {
     let buffer: ArrayBuffer;
     if (file instanceof ArrayBuffer) {
       buffer = file;
-    } else if (Buffer.isBuffer(file)) {
-      // Node.js Buffer - convert to ArrayBuffer
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(file)) {
+      // Node.js Buffer - convert to ArrayBuffer (only in Node environment)
       // Create a new ArrayBuffer and copy the data to avoid SharedArrayBuffer issues
       buffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as ArrayBuffer;
     } else {
