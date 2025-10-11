@@ -299,11 +299,23 @@ export class W3IParser {
   }
 
   /**
+   * Helper: Check if we can read 'size' bytes from current offset
+   */
+  private checkBounds(size: number): void {
+    if (this.offset + size > this.buffer.byteLength) {
+      throw new Error(
+        `W3I read would exceed buffer bounds: offset=${this.offset}, size=${size}, bufferLength=${this.buffer.byteLength}`
+      );
+    }
+  }
+
+  /**
    * Helper: Read null-terminated string
    */
   private readString(): string {
     const bytes = [];
     while (this.offset < this.buffer.byteLength) {
+      this.checkBounds(1);
       const byte = this.view.getUint8(this.offset);
       this.offset++;
       if (byte === 0) break;
@@ -316,6 +328,7 @@ export class W3IParser {
    * Helper: Read 4-character code
    */
   private read4CC(): string {
+    this.checkBounds(4);
     const chars = String.fromCharCode(
       this.view.getUint8(this.offset),
       this.view.getUint8(this.offset + 1),
@@ -330,6 +343,7 @@ export class W3IParser {
    * Helper: Read RGBA color
    */
   private readRGBA(): RGBA {
+    this.checkBounds(4);
     const r = this.view.getUint8(this.offset);
     const g = this.view.getUint8(this.offset + 1);
     const b = this.view.getUint8(this.offset + 2);
@@ -342,6 +356,7 @@ export class W3IParser {
    * Helper: Read uint32
    */
   private readUint32(): number {
+    this.checkBounds(4);
     const value = this.view.getUint32(this.offset, true);
     this.offset += 4;
     return value;
@@ -351,6 +366,7 @@ export class W3IParser {
    * Helper: Read float32
    */
   private readFloat32(): number {
+    this.checkBounds(4);
     const value = this.view.getFloat32(this.offset, true);
     this.offset += 4;
     return value;
