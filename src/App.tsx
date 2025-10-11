@@ -1,133 +1,276 @@
-import React, { useState } from 'react';
-import { GameCanvas } from './ui/GameCanvas';
-import { DebugOverlay } from './ui/DebugOverlay';
-import type { EdgeCraftEngine } from './engine/core/Engine';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapGallery, type MapMetadata } from './ui/MapGallery';
+import { MapRendererCore } from './engine/rendering/MapRendererCore';
+import { QualityPresetManager } from './engine/rendering/QualityPresetManager';
+import * as BABYLON from '@babylonjs/core';
 import './App.css';
 
 const App: React.FC = () => {
-  const [engine, setEngine] = useState<EdgeCraftEngine | null>(null);
-  const [showDebug, setShowDebug] = useState(true);
+  const [maps, setMaps] = useState<MapMetadata[]>([]);
+  const [currentMap, setCurrentMap] = useState<MapMetadata | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [fps, setFps] = useState<number>(0);
+  const [showGallery, setShowGallery] = useState(true);
 
-  const handleEngineReady = (engine: EdgeCraftEngine): void => {
-    setEngine(engine);
-    console.log('✅ Babylon.js engine initialized and ready');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const engineRef = useRef<BABYLON.Engine | null>(null);
+  const sceneRef = useRef<BABYLON.Scene | null>(null);
+  const rendererRef = useRef<MapRendererCore | null>(null);
+
+  // Hardcoded map list (matching actual /maps folder)
+  const MAP_LIST = [
+    { name: '3P Sentinel 01 v3.06.w3x', format: 'w3x' as const, sizeBytes: 10 * 1024 * 1024 },
+    { name: '3P Sentinel 02 v3.06.w3x', format: 'w3x' as const, sizeBytes: 16 * 1024 * 1024 },
+    { name: '3P Sentinel 03 v3.07.w3x', format: 'w3x' as const, sizeBytes: 12 * 1024 * 1024 },
+    { name: '3P Sentinel 04 v3.05.w3x', format: 'w3x' as const, sizeBytes: 9.5 * 1024 * 1024 },
+    { name: '3P Sentinel 05 v3.02.w3x', format: 'w3x' as const, sizeBytes: 19 * 1024 * 1024 },
+    { name: '3P Sentinel 06 v3.03.w3x', format: 'w3x' as const, sizeBytes: 19 * 1024 * 1024 },
+    { name: '3P Sentinel 07 v3.02.w3x', format: 'w3x' as const, sizeBytes: 27 * 1024 * 1024 },
+    { name: '3pUndeadX01v2.w3x', format: 'w3x' as const, sizeBytes: 18 * 1024 * 1024 },
+    { name: 'EchoIslesAlltherandom.w3x', format: 'w3x' as const, sizeBytes: 109 * 1024 },
+    { name: 'Footmen Frenzy 1.9f.w3x', format: 'w3x' as const, sizeBytes: 221 * 1024 },
+    {
+      name: 'Legion_TD_11.2c-hf1_TeamOZE.w3x',
+      format: 'w3x' as const,
+      sizeBytes: 15 * 1024 * 1024,
+    },
+    {
+      name: 'Unity_Of_Forces_Path_10.10.25.w3x',
+      format: 'w3x' as const,
+      sizeBytes: 4 * 1024 * 1024,
+    },
+    { name: 'qcloud_20013247.w3x', format: 'w3x' as const, sizeBytes: 7.9 * 1024 * 1024 },
+    { name: 'ragingstream.w3x', format: 'w3x' as const, sizeBytes: 200 * 1024 },
+    { name: 'BurdenOfUncrowned.w3n', format: 'w3n' as const, sizeBytes: 320 * 1024 * 1024 },
+    { name: 'HorrorsOfNaxxramas.w3n', format: 'w3n' as const, sizeBytes: 433 * 1024 * 1024 },
+    { name: 'JudgementOfTheDead.w3n', format: 'w3n' as const, sizeBytes: 923 * 1024 * 1024 },
+    { name: 'SearchingForPower.w3n', format: 'w3n' as const, sizeBytes: 74 * 1024 * 1024 },
+    {
+      name: 'TheFateofAshenvaleBySvetli.w3n',
+      format: 'w3n' as const,
+      sizeBytes: 316 * 1024 * 1024,
+    },
+    { name: 'War3Alternate1 - Undead.w3n', format: 'w3n' as const, sizeBytes: 106 * 1024 * 1024 },
+    { name: 'Wrath of the Legion.w3n', format: 'w3n' as const, sizeBytes: 57 * 1024 * 1024 },
+    {
+      name: 'Aliens Binary Mothership.SC2Map',
+      format: 'sc2map' as const,
+      sizeBytes: 3.3 * 1024 * 1024,
+    },
+    { name: 'Ruined Citadel.SC2Map', format: 'sc2map' as const, sizeBytes: 800 * 1024 },
+    { name: 'TheUnitTester7.SC2Map', format: 'sc2map' as const, sizeBytes: 879 * 1024 },
+  ];
+
+  // Initialize Babylon.js engine and scene
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const engine = new BABYLON.Engine(canvas, true, {
+      preserveDrawingBuffer: true,
+      stencil: true,
+    });
+
+    engineRef.current = engine;
+
+    // Create scene
+    const scene = new BABYLON.Scene(engine);
+    sceneRef.current = scene;
+
+    // Basic lighting
+    const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+    light.intensity = 0.7;
+
+    // Basic camera
+    const camera = new BABYLON.ArcRotateCamera(
+      'camera',
+      -Math.PI / 2,
+      Math.PI / 3,
+      50,
+      BABYLON.Vector3.Zero(),
+      scene
+    );
+    camera.attachControl(canvas, true);
+    camera.minZ = 0.1;
+    camera.maxZ = 1000;
+
+    // Initialize renderer
+    const qualityManager = new QualityPresetManager(scene);
+    rendererRef.current = new MapRendererCore({
+      scene,
+      qualityManager,
+    });
+
+    // FPS tracking
+    const fpsInterval = setInterval(() => {
+      setFps(Math.round(engine.getFps()));
+    }, 500);
+
+    // Render loop
+    engine.runRenderLoop(() => {
+      scene.render();
+    });
+
+    // Handle resize
+    const handleResize = (): void => {
+      engine.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearInterval(fpsInterval);
+      window.removeEventListener('resize', handleResize);
+      scene.dispose();
+      engine.dispose();
+    };
+  }, []);
+
+  // Load map list on mount
+  useEffect(() => {
+    const loadMaps = (): void => {
+      setIsLoading(true);
+      try {
+        // Create MapMetadata from hardcoded list
+        const mapMetadata: MapMetadata[] = MAP_LIST.map((m) => ({
+          id: m.name,
+          name: m.name,
+          format: m.format,
+          sizeBytes: m.sizeBytes,
+          file: new File([], m.name), // Placeholder, will be loaded on demand
+        }));
+
+        setMaps(mapMetadata);
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        setError(`Failed to load map list: ${errorMsg}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMaps();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle map selection
+  const handleMapSelect = async (map: MapMetadata): Promise<void> => {
+    if (!rendererRef.current) {
+      setError('Renderer not initialized');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setLoadingProgress(`Loading ${map.name}...`);
+    setShowGallery(false);
+
+    try {
+      // Fetch map file from /maps folder
+      const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch map: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const file = new File([blob], map.name);
+
+      // Determine file extension
+      const ext = `.${map.format}`;
+
+      setLoadingProgress('Parsing map data...');
+
+      // Load and render map
+      const result = await rendererRef.current.loadMap(file, ext);
+
+      if (result.success) {
+        setCurrentMap(map);
+        setLoadingProgress('');
+        console.log('✅ Map loaded successfully:', map.name);
+      } else {
+        throw new Error('Failed to load map');
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(`Failed to load map: ${errorMsg}`);
+      setShowGallery(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle back to gallery
+  const handleBackToGallery = (): void => {
+    setShowGallery(true);
+    setCurrentMap(null);
+    setError(null);
   };
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>🏗️ Edge Craft</h1>
-        <p>WebGL-Based RTS Game Engine - Phase 1: Babylon.js Integration</p>
+        <p>Phase 2: Advanced Rendering & Visual Effects - Map Viewer</p>
+        <div className="header-stats">
+          <span className="stat">FPS: {fps}</span>
+          <span className="stat">Maps: {maps.length}</span>
+          {currentMap && <span className="stat">Current: {currentMap.name}</span>}
+        </div>
       </header>
 
       <main className="app-main">
-        <div className="game-container">
-          <GameCanvas height="600px" debug={showDebug} onEngineReady={handleEngineReady} />
-          {showDebug && <DebugOverlay engine={engine} />}
-        </div>
-
-        <section className="controls">
-          <h2>🎮 Controls</h2>
-          <div className="controls-grid">
-            <div className="control-group">
-              <h3>Camera Movement</h3>
-              <ul>
-                <li>
-                  <strong>W/↑</strong> - Move forward
-                </li>
-                <li>
-                  <strong>S/↓</strong> - Move backward
-                </li>
-                <li>
-                  <strong>A/←</strong> - Move left
-                </li>
-                <li>
-                  <strong>D/→</strong> - Move right
-                </li>
-                <li>
-                  <strong>Q</strong> - Move up
-                </li>
-                <li>
-                  <strong>E</strong> - Move down
-                </li>
-              </ul>
+        {showGallery ? (
+          <section className="gallery-view">
+            <MapGallery
+              maps={maps}
+              onMapSelect={(map) => {
+                void handleMapSelect(map);
+              }}
+              isLoading={isLoading}
+            />
+          </section>
+        ) : (
+          <section className="viewer-view">
+            <div className="viewer-controls">
+              <button onClick={handleBackToGallery} className="btn-back">
+                ← Back to Gallery
+              </button>
+              {currentMap && (
+                <div className="current-map-info">
+                  <strong>{currentMap.name}</strong>
+                  <span className="map-format">{currentMap.format.toUpperCase()}</span>
+                  <span className="map-size">
+                    {(currentMap.sizeBytes / (1024 * 1024)).toFixed(1)} MB
+                  </span>
+                </div>
+              )}
             </div>
-            <div className="control-group">
-              <h3>Camera Control</h3>
-              <ul>
-                <li>
-                  <strong>Mouse Wheel</strong> - Zoom in/out
-                </li>
-                <li>
-                  <strong>Edge Scroll</strong> - Move to screen edges
-                </li>
-              </ul>
-            </div>
-            <div className="control-group">
-              <h3>Debug</h3>
-              <ul>
-                <li>
-                  <button onClick={() => setShowDebug(!showDebug)}>
-                    {showDebug ? 'Hide' : 'Show'} Debug Overlay
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
 
-        <section className="status">
-          <h2>✨ Features Implemented</h2>
-          <ul>
-            <li>✅ Babylon.js 7.0 rendering engine</li>
-            <li>✅ RTS-style camera with WASD + edge scrolling</li>
-            <li>✅ Heightmap terrain rendering (flat terrain demo)</li>
-            <li>✅ Cascaded Shadow Maps (CSM) for professional shadows</li>
-            <li>✅ Blob shadows for performance-efficient units</li>
-            <li>✅ Shadow quality presets (LOW/MEDIUM/HIGH/ULTRA)</li>
-            <li>✅ MPQ archive parser (basic implementation)</li>
-            <li>✅ Asset management and caching</li>
-            <li>✅ glTF model loader</li>
-            <li>✅ Copyright validation system</li>
-            <li>✅ Real-time FPS monitoring</li>
-          </ul>
-        </section>
+            <canvas ref={canvasRef} className="babylon-canvas" />
 
-        <section className="phase-info">
-          <h2>Current Phase</h2>
-          <p>
-            <strong>Phase 1:</strong> Babylon.js Foundation
-          </p>
-          <p>
-            Core rendering engine, terrain system, RTS camera controls, and professional shadow
-            system
-          </p>
-          <h3 style={{ marginTop: '1rem' }}>Shadow Demo</h3>
-          <ul>
-            <li>🔴 Red boxes = Heroes (4) - CSM shadows</li>
-            <li>⚫ Gray boxes = Buildings (3) - CSM shadows</li>
-            <li>🔵 Blue boxes = Units (20) - Blob shadows</li>
-          </ul>
-          <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            Check console for shadow system statistics
-          </p>
-        </section>
+            {isLoading && (
+              <div className="loading-overlay">
+                <div className="loading-spinner" />
+                <p>{loadingProgress}</p>
+              </div>
+            )}
+
+            {error !== null && error !== '' && (
+              <div className="error-overlay">
+                <p>❌ {error}</p>
+                <button onClick={handleBackToGallery}>Back to Gallery</button>
+              </div>
+            )}
+          </section>
+        )}
       </main>
 
       <footer className="app-footer">
         <p>Edge Craft © 2024 - Clean-room implementation</p>
         <p>
-          <a
-            href="https://github.com/your-org/edge-craft"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
-          </a>
-          {' | '}
-          <a href="/docs" target="_blank" rel="noopener noreferrer">
-            Documentation
-          </a>
+          Phase 2 Complete: Post-Processing, Advanced Lighting, GPU Particles, Weather Effects, PBR
+          Materials
         </p>
       </footer>
     </div>
