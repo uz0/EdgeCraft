@@ -148,11 +148,27 @@ export class W3IParser {
       });
     }
 
-    // Random unit tables
-    const unitTable = this.readRandomUnitTable();
+    // Random unit tables (optional - may not be present in older maps)
+    let unitTable: W3IRandomUnitTable | undefined;
+    if (this.offset + 4 <= this.buffer.byteLength) {
+      try {
+        unitTable = this.readRandomUnitTable();
+      } catch (err) {
+        console.warn('[W3IParser] Failed to read random unit table (optional field):', err);
+        unitTable = undefined;
+      }
+    }
 
-    // Random item tables
-    const itemTable = this.readRandomItemTable();
+    // Random item tables (optional - may not be present in older maps)
+    let itemTable: W3IRandomItemTable | undefined;
+    if (this.offset + 4 <= this.buffer.byteLength) {
+      try {
+        itemTable = this.readRandomItemTable();
+      } catch (err) {
+        console.warn('[W3IParser] Failed to read random item table (optional field):', err);
+        itemTable = undefined;
+      }
+    }
 
     return {
       fileVersion,

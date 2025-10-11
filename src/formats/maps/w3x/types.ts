@@ -32,8 +32,8 @@ export interface W3IMapInfo {
   forces: W3IForce[];
   upgradeAvailability: W3IUpgrade[];
   techAvailability: W3ITech[];
-  unitTable: W3IRandomUnitTable;
-  itemTable: W3IRandomItemTable;
+  unitTable?: W3IRandomUnitTable; // Optional - not present in older maps
+  itemTable?: W3IRandomItemTable; // Optional - not present in older maps
 }
 
 /**
