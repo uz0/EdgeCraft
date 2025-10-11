@@ -210,20 +210,33 @@ export class MPQParser {
    * Read MPQ header
    */
   private readHeader(): MPQHeader | null {
-    // Check magic number (support both v1 and v2)
-    const magic = this.view.getUint32(0, true);
+    // W3X maps often have user data (preview image) before the MPQ header
+    // Search for MPQ magic number in the first 4KB
+    let headerOffset = 0;
+    const searchLimit = Math.min(4096, this.buffer.byteLength);
+
+    for (let offset = 0; offset < searchLimit; offset += 512) {
+      const magic = this.view.getUint32(offset, true);
+      if (magic === MPQParser.MPQ_MAGIC_V1 || magic === MPQParser.MPQ_MAGIC_V2) {
+        headerOffset = offset;
+        break;
+      }
+    }
+
+    // Check magic number at found offset (support both v1 and v2)
+    const magic = this.view.getUint32(headerOffset, true);
     if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
       return null;
     }
 
     return {
-      archiveSize: this.view.getUint32(8, true),
-      formatVersion: this.view.getUint16(12, true),
-      blockSize: 512 * Math.pow(2, this.view.getUint16(14, true)),
-      hashTablePos: this.view.getUint32(16, true),
-      blockTablePos: this.view.getUint32(20, true),
-      hashTableSize: this.view.getUint32(24, true),
-      blockTableSize: this.view.getUint32(28, true),
+      archiveSize: this.view.getUint32(headerOffset + 8, true),
+      formatVersion: this.view.getUint16(headerOffset + 12, true),
+      blockSize: 512 * Math.pow(2, this.view.getUint16(headerOffset + 14, true)),
+      hashTablePos: this.view.getUint32(headerOffset + 16, true) + headerOffset,
+      blockTablePos: this.view.getUint32(headerOffset + 20, true) + headerOffset,
+      hashTableSize: this.view.getUint32(headerOffset + 24, true),
+      blockTableSize: this.view.getUint32(headerOffset + 28, true),
     };
   }
 
@@ -449,20 +462,32 @@ export class MPQParser {
   private parseHeaderFromBytes(data: Uint8Array): MPQHeader | null {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
 
-    // Check magic number
-    const magic = view.getUint32(0, true);
+    // W3X maps often have user data before the MPQ header - search for it
+    let headerOffset = 0;
+    const searchLimit = Math.min(4096, data.byteLength);
+
+    for (let offset = 0; offset < searchLimit; offset += 512) {
+      const magic = view.getUint32(offset, true);
+      if (magic === MPQParser.MPQ_MAGIC_V1 || magic === MPQParser.MPQ_MAGIC_V2) {
+        headerOffset = offset;
+        break;
+      }
+    }
+
+    // Check magic number at found offset
+    const magic = view.getUint32(headerOffset, true);
     if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
       return null;
     }
 
     return {
-      archiveSize: view.getUint32(8, true),
-      formatVersion: view.getUint16(12, true),
-      blockSize: 512 * Math.pow(2, view.getUint16(14, true)),
-      hashTablePos: view.getUint32(16, true),
-      blockTablePos: view.getUint32(20, true),
-      hashTableSize: view.getUint32(24, true),
-      blockTableSize: view.getUint32(28, true),
+      archiveSize: view.getUint32(headerOffset + 8, true),
+      formatVersion: view.getUint16(headerOffset + 12, true),
+      blockSize: 512 * Math.pow(2, view.getUint16(headerOffset + 14, true)),
+      hashTablePos: view.getUint32(headerOffset + 16, true) + headerOffset,
+      blockTablePos: view.getUint32(headerOffset + 20, true) + headerOffset,
+      hashTableSize: view.getUint32(headerOffset + 24, true),
+      blockTableSize: view.getUint32(headerOffset + 28, true),
     };
   }
 
