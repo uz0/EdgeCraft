@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapGallery, type MapMetadata } from './ui/MapGallery';
 import { MapRendererCore } from './engine/rendering/MapRendererCore';
+import { QualityPresetManager } from './engine/rendering/QualityPresetManager';
 import * as BABYLON from '@babylonjs/core';
 import './App.css';
 
@@ -30,18 +31,34 @@ const App: React.FC = () => {
     { name: '3pUndeadX01v2.w3x', format: 'w3x' as const, sizeBytes: 18 * 1024 * 1024 },
     { name: 'EchoIslesAlltherandom.w3x', format: 'w3x' as const, sizeBytes: 109 * 1024 },
     { name: 'Footmen Frenzy 1.9f.w3x', format: 'w3x' as const, sizeBytes: 221 * 1024 },
-    { name: 'Legion_TD_11.2c-hf1_TeamOZE.w3x', format: 'w3x' as const, sizeBytes: 15 * 1024 * 1024 },
-    { name: 'Unity_Of_Forces_Path_10.10.25.w3x', format: 'w3x' as const, sizeBytes: 4 * 1024 * 1024 },
+    {
+      name: 'Legion_TD_11.2c-hf1_TeamOZE.w3x',
+      format: 'w3x' as const,
+      sizeBytes: 15 * 1024 * 1024,
+    },
+    {
+      name: 'Unity_Of_Forces_Path_10.10.25.w3x',
+      format: 'w3x' as const,
+      sizeBytes: 4 * 1024 * 1024,
+    },
     { name: 'qcloud_20013247.w3x', format: 'w3x' as const, sizeBytes: 7.9 * 1024 * 1024 },
     { name: 'ragingstream.w3x', format: 'w3x' as const, sizeBytes: 200 * 1024 },
     { name: 'BurdenOfUncrowned.w3n', format: 'w3n' as const, sizeBytes: 320 * 1024 * 1024 },
     { name: 'HorrorsOfNaxxramas.w3n', format: 'w3n' as const, sizeBytes: 433 * 1024 * 1024 },
     { name: 'JudgementOfTheDead.w3n', format: 'w3n' as const, sizeBytes: 923 * 1024 * 1024 },
     { name: 'SearchingForPower.w3n', format: 'w3n' as const, sizeBytes: 74 * 1024 * 1024 },
-    { name: 'TheFateofAshenvaleBySvetli.w3n', format: 'w3n' as const, sizeBytes: 316 * 1024 * 1024 },
+    {
+      name: 'TheFateofAshenvaleBySvetli.w3n',
+      format: 'w3n' as const,
+      sizeBytes: 316 * 1024 * 1024,
+    },
     { name: 'War3Alternate1 - Undead.w3n', format: 'w3n' as const, sizeBytes: 106 * 1024 * 1024 },
     { name: 'Wrath of the Legion.w3n', format: 'w3n' as const, sizeBytes: 57 * 1024 * 1024 },
-    { name: 'Aliens Binary Mothership.SC2Map', format: 'sc2map' as const, sizeBytes: 3.3 * 1024 * 1024 },
+    {
+      name: 'Aliens Binary Mothership.SC2Map',
+      format: 'sc2map' as const,
+      sizeBytes: 3.3 * 1024 * 1024,
+    },
     { name: 'Ruined Citadel.SC2Map', format: 'sc2map' as const, sizeBytes: 800 * 1024 },
     { name: 'TheUnitTester7.SC2Map', format: 'sc2map' as const, sizeBytes: 879 * 1024 },
   ];
@@ -80,7 +97,11 @@ const App: React.FC = () => {
     camera.maxZ = 1000;
 
     // Initialize renderer
-    rendererRef.current = new MapRendererCore(engine, scene);
+    const qualityManager = new QualityPresetManager(scene);
+    rendererRef.current = new MapRendererCore({
+      scene,
+      qualityManager,
+    });
 
     // FPS tracking
     const fpsInterval = setInterval(() => {
@@ -93,7 +114,7 @@ const App: React.FC = () => {
     });
 
     // Handle resize
-    const handleResize = () => {
+    const handleResize = (): void => {
       engine.resize();
     };
     window.addEventListener('resize', handleResize);
@@ -108,7 +129,7 @@ const App: React.FC = () => {
 
   // Load map list on mount
   useEffect(() => {
-    const loadMaps = async () => {
+    const loadMaps = (): void => {
       setIsLoading(true);
       try {
         // Create MapMetadata from hardcoded list
@@ -122,17 +143,19 @@ const App: React.FC = () => {
 
         setMaps(mapMetadata);
       } catch (err) {
-        setError(`Failed to load map list: ${err}`);
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        setError(`Failed to load map list: ${errorMsg}`);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadMaps();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle map selection
-  const handleMapSelect = async (map: MapMetadata) => {
+  const handleMapSelect = async (map: MapMetadata): Promise<void> => {
     if (!rendererRef.current) {
       setError('Renderer not initialized');
       return;
@@ -169,7 +192,8 @@ const App: React.FC = () => {
         throw new Error('Failed to load map');
       }
     } catch (err) {
-      setError(`Failed to load map: ${err}`);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(`Failed to load map: ${errorMsg}`);
       setShowGallery(true);
     } finally {
       setIsLoading(false);
@@ -177,7 +201,7 @@ const App: React.FC = () => {
   };
 
   // Handle back to gallery
-  const handleBackToGallery = () => {
+  const handleBackToGallery = (): void => {
     setShowGallery(true);
     setCurrentMap(null);
     setError(null);
@@ -198,7 +222,13 @@ const App: React.FC = () => {
       <main className="app-main">
         {showGallery ? (
           <section className="gallery-view">
-            <MapGallery maps={maps} onMapSelect={handleMapSelect} isLoading={isLoading} />
+            <MapGallery
+              maps={maps}
+              onMapSelect={(map) => {
+                void handleMapSelect(map);
+              }}
+              isLoading={isLoading}
+            />
           </section>
         ) : (
           <section className="viewer-view">
@@ -226,7 +256,7 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {error && (
+            {error !== null && error !== '' && (
               <div className="error-overlay">
                 <p>❌ {error}</p>
                 <button onClick={handleBackToGallery}>Back to Gallery</button>

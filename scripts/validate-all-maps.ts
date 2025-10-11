@@ -39,7 +39,7 @@ async function validateAllMaps(): Promise<void> {
 
     for (const file of files) {
       const ext = SUPPORTED_EXTENSIONS.find((e) => file.toLowerCase().endsWith(e.toLowerCase()));
-      if (!ext) continue;
+      if (ext === undefined || ext === null) continue;
 
       console.log(`📁 Testing: ${file}`);
 
@@ -51,30 +51,39 @@ async function validateAllMaps(): Promise<void> {
         const buffer = await readFile(filePath);
 
         // Get appropriate loader
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         const loader = MapLoaderRegistry.getLoader(ext.toLowerCase());
 
-        if (!loader) {
+        if (loader === null || loader === undefined) {
           throw new Error(`No loader registered for extension: ${ext}`);
         }
 
         // Parse map
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         const mapData = await loader.parse(buffer.buffer as ArrayBuffer);
 
         const loadTimeMs = performance.now() - startTime;
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const width = mapData.info?.width;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        const height = mapData.info?.height;
 
         results.push({
           mapName: file,
           format: ext.replace('.', '').toUpperCase(),
           loadSuccess: true,
           loadTimeMs,
-          mapWidth: mapData.info?.width,
-          mapHeight: mapData.info?.height,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          mapWidth: width,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          mapHeight: height,
         });
 
         successCount++;
-        console.log(
-          `  ✅ SUCCESS - ${loadTimeMs.toFixed(0)}ms ${mapData.info?.width ? `(${mapData.info.width}x${mapData.info.height})` : ''}`
-        );
+        const dimensionStr =
+          width !== undefined && height !== undefined ? `(${width}x${height})` : '';
+        console.log(`  ✅ SUCCESS - ${loadTimeMs.toFixed(0)}ms ${dimensionStr}`);
       } catch (error) {
         const loadTimeMs = performance.now() - startTime;
 
@@ -87,7 +96,8 @@ async function validateAllMaps(): Promise<void> {
         });
 
         failCount++;
-        console.log(`  ❌ FAILED - ${error instanceof Error ? error.message : error}`);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.log(`  ❌ FAILED - ${errorMsg}`);
       }
 
       console.log('');
@@ -106,7 +116,7 @@ async function validateAllMaps(): Promise<void> {
     // Group by format
     const byFormat = results.reduce(
       (acc, r) => {
-        if (!acc[r.format]) acc[r.format] = { total: 0, success: 0 };
+        if (acc[r.format] === undefined) acc[r.format] = { total: 0, success: 0 };
         acc[r.format].total++;
         if (r.loadSuccess) acc[r.format].success++;
         return acc;
@@ -134,8 +144,7 @@ async function validateAllMaps(): Promise<void> {
 
     // Average load time
     const avgLoadTime =
-      results.filter((r) => r.loadSuccess).reduce((sum, r) => sum + r.loadTimeMs, 0) /
-      successCount;
+      results.filter((r) => r.loadSuccess).reduce((sum, r) => sum + r.loadTimeMs, 0) / successCount;
     console.log(`Average Load Time: ${avgLoadTime.toFixed(0)}ms`);
     console.log('═══════════════════════════════════════════════════════');
 
@@ -155,7 +164,7 @@ async function validateAllMaps(): Promise<void> {
 
 // Run if executed directly
 if (require.main === module) {
-  validateAllMaps();
+  void validateAllMaps();
 }
 
 export { validateAllMaps };

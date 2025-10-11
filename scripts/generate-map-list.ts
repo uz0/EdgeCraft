@@ -33,7 +33,7 @@ async function generateMapList(): Promise<void> {
 
     for (const file of files) {
       const ext = SUPPORTED_EXTENSIONS.find((e) => file.endsWith(e));
-      if (!ext) continue;
+      if (ext === undefined || ext === null) continue;
 
       const filePath = join(mapsDir, file);
       const stats = await stat(filePath);
@@ -86,7 +86,7 @@ async function generateMapList(): Promise<void> {
 
 // Run if executed directly
 if (require.main === module) {
-  generateMapList();
+  void generateMapList();
 }
 
 export { generateMapList };

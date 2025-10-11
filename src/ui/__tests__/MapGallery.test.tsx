@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MapGallery, type MapMetadata } from '../MapGallery';
 
@@ -55,7 +54,7 @@ describe('MapGallery', () => {
     });
 
     it('should display singular "map" for one map', () => {
-      render(<MapGallery maps={[mockMaps[0]]} onMapSelect={mockOnMapSelect} />);
+      render(<MapGallery maps={mockMaps.slice(0, 1)} onMapSelect={mockOnMapSelect} />);
 
       expect(screen.getByText('1 map')).toBeInTheDocument();
     });
@@ -267,8 +266,26 @@ describe('MapGallery', () => {
   describe('Loading State', () => {
     it('should display loading progress when isLoading is true', () => {
       const loadProgress = new Map([
-        ['map1', { status: 'success' as const, mapId: 'map1', mapName: 'Test Map 1' }],
-        ['map2', { status: 'loading' as const, mapId: 'map2', mapName: 'Small Map' }],
+        [
+          'map1',
+          {
+            taskId: 'task1',
+            status: 'success' as const,
+            progress: 100,
+            mapId: 'map1',
+            mapName: 'Test Map 1',
+          },
+        ],
+        [
+          'map2',
+          {
+            taskId: 'task2',
+            status: 'loading' as const,
+            progress: 50,
+            mapId: 'map2',
+            mapName: 'Small Map',
+          },
+        ],
       ]);
 
       render(
@@ -285,10 +302,46 @@ describe('MapGallery', () => {
 
     it('should calculate progress correctly', () => {
       const loadProgress = new Map([
-        ['map1', { status: 'success' as const, mapId: 'map1', mapName: 'Test Map 1' }],
-        ['map2', { status: 'success' as const, mapId: 'map2', mapName: 'Small Map' }],
-        ['map3', { status: 'loading' as const, mapId: 'map3', mapName: 'Large Campaign' }],
-        ['map4', { status: 'error' as const, mapId: 'map4', mapName: 'StarCraft Map' }],
+        [
+          'map1',
+          {
+            taskId: 'task1',
+            status: 'success' as const,
+            progress: 100,
+            mapId: 'map1',
+            mapName: 'Test Map 1',
+          },
+        ],
+        [
+          'map2',
+          {
+            taskId: 'task2',
+            status: 'success' as const,
+            progress: 100,
+            mapId: 'map2',
+            mapName: 'Small Map',
+          },
+        ],
+        [
+          'map3',
+          {
+            taskId: 'task3',
+            status: 'loading' as const,
+            progress: 50,
+            mapId: 'map3',
+            mapName: 'Large Campaign',
+          },
+        ],
+        [
+          'map4',
+          {
+            taskId: 'task4',
+            status: 'error' as const,
+            progress: 0,
+            mapId: 'map4',
+            mapName: 'StarCraft Map',
+          },
+        ],
       ]);
 
       render(

@@ -161,8 +161,7 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
               className="progress-fill"
               style={{
                 width: `${
-                  (Array.from(loadProgress.values()).filter((p) => p.status === 'success')
-                    .length /
+                  (Array.from(loadProgress.values()).filter((p) => p.status === 'success').length /
                     loadProgress.size) *
                   100
                 }%`,
@@ -235,7 +234,7 @@ const MapCard: React.FC<MapCardProps> = ({ map, progress, onClick }) => {
     >
       {/* Thumbnail */}
       <div className="map-card-thumbnail">
-        {map.thumbnailUrl ? (
+        {map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '' ? (
           <img src={map.thumbnailUrl} alt={map.name} />
         ) : (
           <div className="map-card-placeholder">
