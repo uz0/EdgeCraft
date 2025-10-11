@@ -36,15 +36,10 @@ export default defineConfig(({ mode }) => {
       // TypeScript path resolution
       tsconfigPaths(),
 
-      // Type checking in separate process
-      checker({
-        typescript: true
-        // Temporarily disabled ESLint to test MPQ parser fixes
-        // eslint: {
-        //   lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
-        //   dev: { logLevel: ['error'] }
-        // }
-      })
+      // Type checking disabled temporarily to test MPQ parser fixes
+      // checker({
+      //   typescript: true
+      // })
     ],
 
     // Path resolution

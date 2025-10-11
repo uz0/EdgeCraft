@@ -50,9 +50,12 @@ export class SC2MapLoader implements IMapLoader {
       // Node.js Buffer - convert to ArrayBuffer (only in Node environment)
       // Create a new ArrayBuffer and copy the data to avoid SharedArrayBuffer issues
       buffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as ArrayBuffer;
-    } else {
+    } else if (file instanceof File) {
       // File object - use arrayBuffer() method
       buffer = await file.arrayBuffer();
+    } else {
+      // Fallback: treat as File-like object with arrayBuffer method
+      buffer = await (file as File).arrayBuffer();
     }
 
     // Parse MPQ archive (same container as W3X)
