@@ -127,20 +127,14 @@ export class MapPreviewGenerator {
         mapData.terrain.height
       );
 
-      // Determine texture URLs
-      const textureUrls =
-        mapData.terrain.textures.length > 0 &&
-        mapData.terrain.textures[0]?.path != null &&
-        mapData.terrain.textures[0].path !== ''
-          ? [mapData.terrain.textures[0].path]
-          : [];
-
+      // For preview generation, don't use textures - they often don't exist
+      // Use solid color material instead for faster, more reliable preview generation
       await terrainRenderer.loadHeightmap(heightmapUrl, {
         width: mapData.terrain.width,
         height: mapData.terrain.height,
         subdivisions: Math.min(64, Math.max(16, mapData.terrain.width / 8)), // Lower detail for preview
         maxHeight: 100,
-        textures: textureUrls,
+        textures: [], // Empty - use default color material
       });
 
       // Step 4: Optional - render units

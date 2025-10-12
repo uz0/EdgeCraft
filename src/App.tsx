@@ -166,12 +166,18 @@ const App: React.FC = () => {
   useEffect(() => {
     if (maps.length === 0) return;
 
+    // Prevent multiple preview generation runs
+    let cancelled = false;
+
     const loadMapsAndGeneratePreviews = async (): Promise<void> => {
+      if (cancelled) return;
+
       console.log('Starting preview generation for', maps.length, 'maps...');
       const mapDataMap = new Map<string, RawMapData>();
 
       // Load and parse maps (skip very large ones >100MB for preview generation)
       for (const map of maps) {
+        if (cancelled) return; // Check cancellation between iterations
         try {
           // Skip very large maps (>100MB) to avoid long load times
           const sizeMB = map.sizeBytes / (1024 * 1024);
@@ -219,16 +225,25 @@ const App: React.FC = () => {
       }
 
       // Generate previews
-      if (mapDataMap.size > 0) {
+      if (!cancelled && mapDataMap.size > 0) {
         console.log(`Generating previews for ${mapDataMap.size} maps...`);
         await generatePreviews(maps, mapDataMap);
-        console.log('Preview generation complete!');
+        if (!cancelled) {
+          console.log('Preview generation complete!');
+        }
       }
     };
 
     // Run in background
     void loadMapsAndGeneratePreviews();
-  }, [maps, generatePreviews]);
+
+    // Cleanup: cancel preview generation if component unmounts or deps change
+    return () => {
+      cancelled = true;
+    };
+    // Only run when maps array changes (not when generatePreviews changes)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maps]);
 
   // Handle map selection
   const handleMapSelect = async (map: MapMetadata): Promise<void> => {
