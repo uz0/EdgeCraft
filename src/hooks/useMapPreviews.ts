@@ -39,10 +39,7 @@ export interface UseMapPreviewsResult {
   error: string | null;
 
   /** Generate previews for maps */
-  generatePreviews: (
-    maps: MapMetadata[],
-    mapDataMap: Map<string, RawMapData>
-  ) => Promise<void>;
+  generatePreviews: (maps: MapMetadata[], mapDataMap: Map<string, RawMapData>) => Promise<void>;
 
   /** Clear cache */
   clearCache: () => Promise<void>;

@@ -215,7 +215,9 @@ export class MPQParser {
     let headerOffset = 0;
     const searchLimit = Math.min(4096, this.buffer.byteLength);
 
-    console.log(`[MPQParser] Searching for MPQ header in ${this.buffer.byteLength} byte buffer (limit: ${searchLimit})`);
+    console.log(
+      `[MPQParser] Searching for MPQ header in ${this.buffer.byteLength} byte buffer (limit: ${searchLimit})`
+    );
 
     for (let offset = 0; offset < searchLimit; offset += 512) {
       const magic = this.view.getUint32(offset, true);
@@ -229,7 +231,9 @@ export class MPQParser {
     // Check magic number at found offset (support both v1 and v2)
     const magic = this.view.getUint32(headerOffset, true);
     if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
-      console.error(`[MPQParser] Invalid magic at offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`);
+      console.error(
+        `[MPQParser] Invalid magic at offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`
+      );
       return null;
     }
 

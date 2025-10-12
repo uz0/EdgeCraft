@@ -62,23 +62,21 @@ describe.skip('useMapPreviews', () => {
         get: jest.fn().mockResolvedValue(null), // No cached previews
         set: jest.fn().mockResolvedValue(undefined),
         clear: jest.fn().mockResolvedValue(undefined),
-      } as any;
+      } as unknown as PreviewCache;
     });
 
     // Mock MapPreviewExtractor
-    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(
-      () => {
-        return {
-          extract: jest.fn().mockResolvedValue({
-            success: true,
-            dataUrl: 'data:image/png;base64,mockdata',
-            source: 'generated',
-            extractTimeMs: 100,
-          }),
-          dispose: jest.fn(),
-        } as any;
-      }
-    );
+    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(() => {
+      return {
+        extract: jest.fn().mockResolvedValue({
+          success: true,
+          dataUrl: 'data:image/png;base64,mockdata',
+          source: 'generated',
+          extractTimeMs: 100,
+        }),
+        dispose: jest.fn(),
+      } as unknown as MapPreviewExtractor;
+    });
   });
 
   it('should initialize with empty state', () => {
@@ -123,7 +121,7 @@ describe.skip('useMapPreviews', () => {
         }),
         set: jest.fn().mockResolvedValue(undefined),
         clear: jest.fn().mockResolvedValue(undefined),
-      } as any;
+      } as unknown as PreviewCache;
     });
 
     const { result } = renderHook(() => useMapPreviews());
@@ -153,7 +151,7 @@ describe.skip('useMapPreviews', () => {
     mapDataMap.set('map1', mockMapData);
     mapDataMap.set('map2', mockMapData);
 
-    const progressStates: any[] = [];
+    const progressStates: Array<{ current: number; total: number }> = [];
 
     // Start generation and capture progress states
     const promise = result.current.generatePreviews(mockMaps, mapDataMap);
@@ -173,19 +171,17 @@ describe.skip('useMapPreviews', () => {
 
   it('should handle generation errors gracefully', async () => {
     // Mock extractor to return error
-    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(
-      () => {
-        return {
-          extract: jest.fn().mockResolvedValue({
-            success: false,
-            source: 'error',
-            error: 'Extraction failed',
-            extractTimeMs: 0,
-          }),
-          dispose: jest.fn(),
-        } as any;
-      }
-    );
+    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(() => {
+      return {
+        extract: jest.fn().mockResolvedValue({
+          success: false,
+          source: 'error',
+          error: 'Extraction failed',
+          extractTimeMs: 0,
+        }),
+        dispose: jest.fn(),
+      } as unknown as MapPreviewExtractor;
+    });
 
     const { result } = renderHook(() => useMapPreviews());
 
@@ -234,7 +230,7 @@ describe.skip('useMapPreviews', () => {
         get: jest.fn().mockResolvedValue(null),
         set: jest.fn().mockResolvedValue(undefined),
         clear: mockClear,
-      } as any;
+      } as unknown as PreviewCache;
     });
 
     const { result } = renderHook(() => useMapPreviews());
@@ -259,14 +255,12 @@ describe.skip('useMapPreviews', () => {
   it('should dispose extractor on unmount', () => {
     const mockDispose = jest.fn();
 
-    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(
-      () => {
-        return {
-          extract: jest.fn(),
-          dispose: mockDispose,
-        } as any;
-      }
-    );
+    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(() => {
+      return {
+        extract: jest.fn(),
+        dispose: mockDispose,
+      } as unknown as MapPreviewExtractor;
+    });
 
     const { unmount } = renderHook(() => useMapPreviews());
 
@@ -277,14 +271,12 @@ describe.skip('useMapPreviews', () => {
 
   it('should handle exception during generation', async () => {
     // Mock extractor to throw exception
-    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(
-      () => {
-        return {
-          extract: jest.fn().mockRejectedValue(new Error('Unexpected error')),
-          dispose: jest.fn(),
-        } as any;
-      }
-    );
+    (MapPreviewExtractor as jest.MockedClass<typeof MapPreviewExtractor>).mockImplementation(() => {
+      return {
+        extract: jest.fn().mockRejectedValue(new Error('Unexpected error')),
+        dispose: jest.fn(),
+      } as unknown as MapPreviewExtractor;
+    });
 
     const { result } = renderHook(() => useMapPreviews());
 

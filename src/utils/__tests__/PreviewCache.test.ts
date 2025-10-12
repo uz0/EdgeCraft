@@ -4,9 +4,15 @@
 
 import { PreviewCache } from '../PreviewCache';
 
+interface MockEntry {
+  mapId: string;
+  preview: string;
+  timestamp: number;
+}
+
 // Mock IndexedDB
 const mockIndexedDB = (() => {
-  let store: Record<string, any> = {};
+  let store: Record<string, MockEntry> = {};
 
   return {
     open: jest.fn((_name: string, _version: number) => {
@@ -22,36 +28,36 @@ const mockIndexedDB = (() => {
                   get: jest.fn((key: string) => {
                     return {
                       result: store[key],
-                      onerror: null as any,
-                      onsuccess: null as any,
+                      onerror: null as ((event: Event) => void) | null,
+                      onsuccess: null as ((event: Event) => void) | null,
                     };
                   }),
-                  put: jest.fn((entry: any) => {
+                  put: jest.fn((entry: MockEntry) => {
                     store[entry.mapId] = entry;
                     return {
-                      onerror: null as any,
-                      onsuccess: null as any,
+                      onerror: null as ((event: Event) => void) | null,
+                      onsuccess: null as ((event: Event) => void) | null,
                     };
                   }),
                   delete: jest.fn((key: string) => {
                     delete store[key];
                     return {
-                      onerror: null as any,
-                      onsuccess: null as any,
+                      onerror: null as ((event: Event) => void) | null,
+                      onsuccess: null as ((event: Event) => void) | null,
                     };
                   }),
                   clear: jest.fn(() => {
                     store = {};
                     return {
-                      onerror: null as any,
-                      onsuccess: null as any,
+                      onerror: null as ((event: Event) => void) | null,
+                      onsuccess: null as ((event: Event) => void) | null,
                     };
                   }),
                   getAll: jest.fn(() => {
                     return {
                       result: Object.values(store),
-                      onerror: null as any,
-                      onsuccess: null as any,
+                      onerror: null as ((event: Event) => void) | null,
+                      onsuccess: null as ((event: Event) => void) | null,
                     };
                   }),
                   createIndex: jest.fn(),
@@ -65,31 +71,34 @@ const mockIndexedDB = (() => {
             };
           }),
         },
-        onerror: null as any,
-        onsuccess: null as any,
-        onupgradeneeded: null as any,
+        onerror: null as ((event: Event) => void) | null,
+        onsuccess: null as (() => void) | null,
+        onupgradeneeded: null as ((event: { target: unknown }) => void) | null,
       };
 
       // Simulate async behavior
       setTimeout(() => {
-        if (request.onupgradeneeded) {
-          request.onupgradeneeded({ target: request } as any);
+        if (request.onupgradeneeded !== null) {
+          request.onupgradeneeded({ target: request });
         }
-        if (request.onsuccess) {
+        if (request.onsuccess !== null) {
           request.onsuccess();
         }
       }, 0);
 
       return request;
     }),
-    clearStore: () => {
+    clearStore: (): void => {
       store = {};
     },
   };
 })();
 
 // Replace global indexedDB
-(global as any).indexedDB = mockIndexedDB;
+interface GlobalWithIndexedDB {
+  indexedDB: typeof mockIndexedDB;
+}
+(global as unknown as GlobalWithIndexedDB).indexedDB = mockIndexedDB;
 
 // TODO: Requires proper IndexedDB mocking - skipping for now
 describe.skip('PreviewCache', () => {
@@ -178,26 +187,29 @@ describe.skip('PreviewCache', () => {
       const errorCache = new PreviewCache();
 
       // Mock indexedDB.open to throw error
-      const originalOpen = indexedDB.open;
-      (indexedDB as any).open = jest.fn(() => {
+      const originalOpen = indexedDB.open.bind(indexedDB);
+      const mockOpen = jest.fn(() => {
         const request = {
-          onerror: null as any,
-          onsuccess: null as any,
-          onupgradeneeded: null as any,
+          onerror: null as (() => void) | null,
+          onsuccess: null as (() => void) | null,
+          onupgradeneeded: null as ((event: { target: unknown }) => void) | null,
           error: new Error('Init failed'),
         };
         setTimeout(() => {
-          if (request.onerror) {
+          if (request.onerror !== null) {
             request.onerror();
           }
         }, 0);
         return request;
       });
+      (indexedDB as unknown as GlobalWithIndexedDB['indexedDB']).open =
+        mockOpen as unknown as typeof mockIndexedDB.open;
 
       await expect(errorCache.init()).rejects.toThrow();
 
       // Restore original
-      (indexedDB as any).open = originalOpen;
+      (indexedDB as unknown as GlobalWithIndexedDB['indexedDB']).open =
+        originalOpen as unknown as typeof mockIndexedDB.open;
     });
   });
 });

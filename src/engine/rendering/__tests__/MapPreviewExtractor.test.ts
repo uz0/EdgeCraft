@@ -63,14 +63,14 @@ describe.skip('MapPreviewExtractor', () => {
             archive: {},
           }),
           extractFile: mockExtractFile,
-        } as any;
+        } as unknown as MPQParser;
       });
 
       // Mock TGADecoder to return data URL
       (TGADecoder as jest.MockedClass<typeof TGADecoder>).mockImplementation(() => {
         return {
           decodeToDataURL: jest.fn().mockReturnValue('data:image/png;base64,mockdata'),
-        } as any;
+        } as unknown as TGADecoder;
       });
 
       const result = await extractor.extract(file, mockMapData);
@@ -92,7 +92,7 @@ describe.skip('MapPreviewExtractor', () => {
             archive: {},
           }),
           extractFile: jest.fn().mockResolvedValue(null), // No preview file
-        } as any;
+        } as unknown as MPQParser;
       });
 
       // Mock MapPreviewGenerator to return generated preview
@@ -105,7 +105,7 @@ describe.skip('MapPreviewExtractor', () => {
               generationTimeMs: 100,
             }),
             disposeEngine: jest.fn(),
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 
@@ -127,7 +127,7 @@ describe.skip('MapPreviewExtractor', () => {
             error: 'Invalid MPQ',
           }),
           extractFile: jest.fn(),
-        } as any;
+        } as unknown as MPQParser;
       });
 
       // Mock MapPreviewGenerator (will be called as fallback)
@@ -139,7 +139,7 @@ describe.skip('MapPreviewExtractor', () => {
               error: 'Generation failed',
             }),
             disposeEngine: jest.fn(),
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 
@@ -162,7 +162,7 @@ describe.skip('MapPreviewExtractor', () => {
               generationTimeMs: 100,
             }),
             disposeEngine: jest.fn(),
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 
@@ -186,7 +186,7 @@ describe.skip('MapPreviewExtractor', () => {
             archive: {},
           }),
           extractFile: mockExtractFile,
-        } as any;
+        } as unknown as MPQParser;
       });
 
       (MapPreviewGenerator as jest.MockedClass<typeof MapPreviewGenerator>).mockImplementation(
@@ -197,7 +197,7 @@ describe.skip('MapPreviewExtractor', () => {
               dataUrl: 'data:image/png;base64,generated',
             }),
             disposeEngine: jest.fn(),
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 
@@ -218,7 +218,7 @@ describe.skip('MapPreviewExtractor', () => {
             archive: {},
           }),
           extractFile: jest.fn().mockResolvedValue(null),
-        } as any;
+        } as unknown as MPQParser;
       });
 
       const mockGeneratePreview = jest.fn().mockResolvedValue({
@@ -231,7 +231,7 @@ describe.skip('MapPreviewExtractor', () => {
           return {
             generatePreview: mockGeneratePreview,
             disposeEngine: jest.fn(),
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 
@@ -255,14 +255,14 @@ describe.skip('MapPreviewExtractor', () => {
           extractFile: jest.fn().mockResolvedValue({
             data: new ArrayBuffer(100),
           }),
-        } as any;
+        } as unknown as MPQParser;
       });
 
       // Mock TGADecoder to fail decoding
       (TGADecoder as jest.MockedClass<typeof TGADecoder>).mockImplementation(() => {
         return {
           decodeToDataURL: jest.fn().mockReturnValue(null), // Decode failed
-        } as any;
+        } as unknown as TGADecoder;
       });
 
       // Mock MapPreviewGenerator for fallback
@@ -274,7 +274,7 @@ describe.skip('MapPreviewExtractor', () => {
               dataUrl: 'data:image/png;base64,fallback',
             }),
             disposeEngine: jest.fn(),
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 
@@ -301,7 +301,7 @@ describe.skip('MapPreviewExtractor', () => {
           return {
             generatePreview: jest.fn(),
             disposeEngine: mockDisposeEngine,
-          } as any;
+          } as unknown as MapPreviewGenerator;
         }
       );
 

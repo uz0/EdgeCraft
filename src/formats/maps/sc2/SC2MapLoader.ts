@@ -54,8 +54,7 @@ export class SC2MapLoader implements IMapLoader {
       // File object - use arrayBuffer() method
       buffer = await file.arrayBuffer();
     } else {
-      // Fallback: treat as File-like object with arrayBuffer method
-      buffer = await (file as File).arrayBuffer();
+      throw new Error('Invalid input type: expected File, ArrayBuffer, or Buffer');
     }
 
     // Parse MPQ archive (same container as W3X)
