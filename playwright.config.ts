@@ -44,7 +44,7 @@ export default defineConfig({
   // Shared settings for all tests
   use: {
     // Base URL for tests
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001',
 
     // Screenshot on failure for debugging
     screenshot: 'only-on-failure',
