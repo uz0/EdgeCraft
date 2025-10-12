@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MapGallery, type MapMetadata } from './ui/MapGallery';
+import { MapPreviewReport } from './ui/MapPreviewReport';
 import { MapRendererCore } from './engine/rendering/MapRendererCore';
 import { QualityPresetManager } from './engine/rendering/QualityPresetManager';
 import { useMapPreviews } from './hooks/useMapPreviews';
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [fps, setFps] = useState<number>(0);
   const [showGallery, setShowGallery] = useState(true);
+  const [viewMode, setViewMode] = useState<'gallery' | 'report'>('gallery');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<BABYLON.Engine | null>(null);
@@ -329,18 +331,38 @@ const App: React.FC = () => {
           <span className="stat">Maps: {maps.length}</span>
           {currentMap && <span className="stat">Current: {currentMap.name}</span>}
         </div>
+        {showGallery && (
+          <div className="view-toggle">
+            <button
+              onClick={() => setViewMode('gallery')}
+              className={`toggle-btn ${viewMode === 'gallery' ? 'active' : ''}`}
+            >
+              Gallery View
+            </button>
+            <button
+              onClick={() => setViewMode('report')}
+              className={`toggle-btn ${viewMode === 'report' ? 'active' : ''}`}
+            >
+              Report View
+            </button>
+          </div>
+        )}
       </header>
 
       <main className="app-main">
         {showGallery ? (
           <section className="gallery-view">
-            <MapGallery
-              maps={mapsWithPreviews}
-              onMapSelect={(map) => {
-                void handleMapSelect(map);
-              }}
-              isLoading={isLoading || previewsLoading}
-            />
+            {viewMode === 'gallery' ? (
+              <MapGallery
+                maps={mapsWithPreviews}
+                onMapSelect={(map) => {
+                  void handleMapSelect(map);
+                }}
+                isLoading={isLoading || previewsLoading}
+              />
+            ) : (
+              <MapPreviewReport maps={mapsWithPreviews} />
+            )}
           </section>
         ) : (
           <section className="viewer-view">
