@@ -42,6 +42,10 @@ export class W3XMapLoader implements IMapLoader {
       throw new Error(`Failed to parse MPQ archive: ${mpqResult.error}`);
     }
 
+    // Debug: List all files in archive
+    const allFiles = mpqParser.listFiles();
+    console.log(`[W3XMapLoader] Files in archive (${allFiles.length} total):`, allFiles.slice(0, 20));
+
     // Extract war3map files
     const w3iData = await mpqParser.extractFile('war3map.w3i');
     const w3eData = await mpqParser.extractFile('war3map.w3e');
