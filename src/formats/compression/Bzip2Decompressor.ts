@@ -17,30 +17,33 @@ export class Bzip2Decompressor implements IDecompressor {
    * @returns Decompressed data
    */
   public async decompress(compressed: ArrayBuffer, uncompressedSize: number): Promise<ArrayBuffer> {
-    try {
-      // Convert ArrayBuffer to Uint8Array for seek-bzip
-      const compressedArray = new Uint8Array(compressed);
+    // Wrap synchronous decompression in Promise for consistent async interface
+    return Promise.resolve().then(() => {
+      try {
+        // Convert ArrayBuffer to Uint8Array for seek-bzip
+        const compressedArray = new Uint8Array(compressed);
 
-      // Use seek-bzip to decode
-      const decompressedArray = Bunzip.decode(compressedArray);
+        // Use seek-bzip to decode
+        const decompressedArray = Bunzip.decode(compressedArray);
 
-      // Verify decompressed size (warn on mismatch, don't throw)
-      if (decompressedArray.byteLength !== uncompressedSize) {
-        console.warn(
-          `[Bzip2Decompressor] Size mismatch: expected ${uncompressedSize}, got ${decompressedArray.byteLength}`
-        );
+        // Verify decompressed size (warn on mismatch, don't throw)
+        if (decompressedArray.byteLength !== uncompressedSize) {
+          console.warn(
+            `[Bzip2Decompressor] Size mismatch: expected ${uncompressedSize}, got ${decompressedArray.byteLength}`
+          );
+        }
+
+        // Convert result back to ArrayBuffer
+        return decompressedArray.buffer.slice(
+          decompressedArray.byteOffset,
+          decompressedArray.byteOffset + decompressedArray.byteLength
+        ) as ArrayBuffer;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error('[Bzip2Decompressor] Decompression failed:', errorMsg);
+        throw new Error(`BZip2 decompression failed: ${errorMsg}`);
       }
-
-      // Convert result back to ArrayBuffer
-      return decompressedArray.buffer.slice(
-        decompressedArray.byteOffset,
-        decompressedArray.byteOffset + decompressedArray.byteLength
-      ) as ArrayBuffer;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('[Bzip2Decompressor] Decompression failed:', errorMsg);
-      throw new Error(`BZip2 decompression failed: ${errorMsg}`);
-    }
+    });
   }
 
   /**

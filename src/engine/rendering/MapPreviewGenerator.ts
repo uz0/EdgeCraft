@@ -85,7 +85,9 @@ export class MapPreviewGenerator {
         throw new Error('WebGL is not supported in this browser');
       }
 
-      console.log(`[MapPreviewGenerator] ✅ Engine created, WebGL version: ${this.engine.webGLVersion}`);
+      console.log(
+        `[MapPreviewGenerator] ✅ Engine created, WebGL version: ${this.engine.webGLVersion}`
+      );
     } catch (error) {
       console.error('[MapPreviewGenerator] ❌ Failed to create Engine:', error);
       throw error;
@@ -100,7 +102,9 @@ export class MapPreviewGenerator {
     config?: PreviewConfig
   ): Promise<PreviewResult> {
     const startTime = performance.now();
-    console.log(`[MapPreviewGenerator] generatePreview() called, map dimensions: ${mapData.info.dimensions.width}x${mapData.info.dimensions.height}`);
+    console.log(
+      `[MapPreviewGenerator] generatePreview() called, map dimensions: ${mapData.info.dimensions.width}x${mapData.info.dimensions.height}`
+    );
 
     // Validate engine is still valid
     if (!this.engine || this.engine.isDisposed) {
@@ -129,7 +133,6 @@ export class MapPreviewGenerator {
       this.scene.clearColor = new BABYLON.Color4(0.3, 0.4, 0.5, 1.0);
       console.log(`[MapPreviewGenerator] ✅ Scene created`);
 
-
       // Step 2: Setup orthographic camera (top-down)
       const { width, height } = mapData.info.dimensions;
       const maxDim = Math.max(width, height);
@@ -157,11 +160,15 @@ export class MapPreviewGenerator {
         mapData.terrain.width,
         mapData.terrain.height
       );
-      console.log(`[MapPreviewGenerator] Heightmap data URL created, length: ${heightmapUrl.length}`);
+      console.log(
+        `[MapPreviewGenerator] Heightmap data URL created, length: ${heightmapUrl.length}`
+      );
 
       // For preview generation, don't use textures - they often don't exist
       // Use solid color material instead for faster, more reliable preview generation
-      console.log(`[MapPreviewGenerator] Loading terrain: ${mapData.terrain.width}x${mapData.terrain.height}`);
+      console.log(
+        `[MapPreviewGenerator] Loading terrain: ${mapData.terrain.width}x${mapData.terrain.height}`
+      );
       await terrainRenderer.loadHeightmap(heightmapUrl, {
         width: mapData.terrain.width,
         height: mapData.terrain.height,
@@ -248,7 +255,9 @@ export class MapPreviewGenerator {
       this.dispose();
 
       const generationTimeMs = performance.now() - startTime;
-      console.log(`[MapPreviewGenerator] ✅ Preview generation complete in ${generationTimeMs.toFixed(0)}ms`);
+      console.log(
+        `[MapPreviewGenerator] ✅ Preview generation complete in ${generationTimeMs.toFixed(0)}ms`
+      );
 
       return {
         success: true,

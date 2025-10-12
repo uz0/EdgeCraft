@@ -35,10 +35,7 @@ declare module 'seek-bzip' {
      * @param multistream - Whether to handle multistream files
      * @returns Array of block information
      */
-    table(
-      input: Uint8Array | Buffer,
-      multistream?: boolean
-    ): Array<{ bits: number; size: number }>;
+    table(input: Uint8Array | Buffer, multistream?: boolean): Array<{ bits: number; size: number }>;
   }
 
   const bunzip: Bunzip;

@@ -258,7 +258,9 @@ export class MPQParser {
     // If we found MPQ user data header (0x1b51504d), read the real MPQ header offset
     if (magic === MPQParser.MPQ_MAGIC_V2) {
       const realHeaderOffset = this.view.getUint32(headerOffset + 8, true);
-      console.log(`[MPQParser] Found MPQ user data header, real MPQ header at offset ${realHeaderOffset}`);
+      console.log(
+        `[MPQParser] Found MPQ user data header, real MPQ header at offset ${realHeaderOffset}`
+      );
       headerOffset = realHeaderOffset;
       magic = this.view.getUint32(headerOffset, true);
 
@@ -268,7 +270,9 @@ export class MPQParser {
         );
         return null;
       }
-      console.log(`[MPQParser] Found real MPQ header at offset ${headerOffset}: 0x${magic.toString(16)}`);
+      console.log(
+        `[MPQParser] Found real MPQ header at offset ${headerOffset}: 0x${magic.toString(16)}`
+      );
     } else if (magic !== MPQParser.MPQ_MAGIC_V1) {
       console.error(
         `[MPQParser] Invalid magic at offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`
@@ -299,8 +303,8 @@ export class MPQParser {
       return null;
     }
 
-    const hashTableEnd = hashTablePos + (hashTableSize * 16);
-    const blockTableEnd = blockTablePos + (blockTableSize * 16);
+    const hashTableEnd = hashTablePos + hashTableSize * 16;
+    const blockTableEnd = blockTablePos + blockTableSize * 16;
 
     if (hashTableEnd > this.buffer.byteLength) {
       console.error(
@@ -316,8 +320,12 @@ export class MPQParser {
       return null;
     }
 
-    console.log(`[MPQParser] Header validated: hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}`);
-    console.log(`[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`);
+    console.log(
+      `[MPQParser] Header validated: hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}`
+    );
+    console.log(
+      `[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`
+    );
 
     return {
       archiveSize,
@@ -363,7 +371,9 @@ export class MPQParser {
     let view = rawView;
     if (!hasValidBlockIndices) {
       // BlockIndex values out of range = table is encrypted
-      console.log('[MPQParser] Hash table appears encrypted (invalid blockIndex values), attempting decryption...');
+      console.log(
+        '[MPQParser] Hash table appears encrypted (invalid blockIndex values), attempting decryption...'
+      );
       const tableData = new Uint8Array(this.buffer, offset, size);
       const decryptedData = this.decryptTable(tableData, '(hash table)');
       view = new DataView(decryptedData.buffer as ArrayBuffer);
@@ -401,10 +411,14 @@ export class MPQParser {
       return blockTable;
     }
 
-    console.log(`[MPQParser] Block table: offset=${offset}, size=${size}, bufferSize=${this.buffer.byteLength}`);
+    console.log(
+      `[MPQParser] Block table: offset=${offset}, size=${size}, bufferSize=${this.buffer.byteLength}`
+    );
 
     if (offset + size > this.buffer.byteLength) {
-      throw new Error(`Block table out of bounds: offset=${offset}, size=${size}, bufferSize=${this.buffer.byteLength}`);
+      throw new Error(
+        `Block table out of bounds: offset=${offset}, size=${size}, bufferSize=${this.buffer.byteLength}`
+      );
     }
 
     // Try WITHOUT decryption first
@@ -413,7 +427,9 @@ export class MPQParser {
     // Check if raw data looks valid (filePos should be within archive)
     const firstFilePosRaw = rawView.getUint32(0, true);
 
-    console.log(`[MPQParser] Raw block table check: first filePos=${firstFilePosRaw}, archiveSize=${header.archiveSize}`);
+    console.log(
+      `[MPQParser] Raw block table check: first filePos=${firstFilePosRaw}, archiveSize=${header.archiveSize}`
+    );
 
     // If raw values look reasonable, use them; otherwise decrypt
     let view = rawView;
@@ -599,9 +615,13 @@ export class MPQParser {
         console.log(
           `[MPQParser] Decompressed ${filename}: ${compressedData.byteLength} → ${fileData.byteLength} bytes`
         );
-      } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
+      } else if (
+        compressionAlgorithm === CompressionAlgorithm.ZLIB ||
+        compressionAlgorithm === CompressionAlgorithm.PKZIP
+      ) {
         // ZLIB (0x02) or PKZIP (0x08) compression - both use DEFLATE
-        const algorithmName = compressionAlgorithm === CompressionAlgorithm.PKZIP ? 'PKZIP' : 'ZLIB';
+        const algorithmName =
+          compressionAlgorithm === CompressionAlgorithm.PKZIP ? 'PKZIP' : 'ZLIB';
         console.log(`[MPQParser] Decompressing ${filename} with ${algorithmName}...`);
         const compressedData = rawData.slice(1);
         fileData = await this.zlibDecompressor.decompress(
@@ -628,8 +648,10 @@ export class MPQParser {
         const firstByte = rawData.byteLength > 0 ? new DataView(rawData).getUint8(0) : 0;
 
         // Check if this is multi-compression (W3X style)
-        if (firstByte !== 0 && (blockEntry.compressedSize < blockEntry.uncompressedSize)) {
-          console.log(`[MPQParser] Detected multi-compression for ${filename}, flags: 0x${firstByte.toString(16)}`);
+        if (firstByte !== 0 && blockEntry.compressedSize < blockEntry.uncompressedSize) {
+          console.log(
+            `[MPQParser] Detected multi-compression for ${filename}, flags: 0x${firstByte.toString(16)}`
+          );
           fileData = await this.decompressMultiAlgorithm(
             rawData,
             blockEntry.uncompressedSize,

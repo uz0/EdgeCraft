@@ -199,7 +199,9 @@ const App: React.FC = () => {
             );
             continue;
           }
-          console.log(`[App] ✅ Fetched ${map.name}, size: ${response.headers.get('content-length')} bytes`);
+          console.log(
+            `[App] ✅ Fetched ${map.name}, size: ${response.headers.get('content-length')} bytes`
+          );
 
           const blob = await response.blob();
           const file = new File([blob], map.name);

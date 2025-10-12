@@ -6,7 +6,10 @@ export interface MapPreviewReportProps {
   /** All maps with preview data */
   maps: MapMetadata[];
   /** Preview generation progress */
-  previewProgress?: Map<string, { status: 'pending' | 'generating' | 'success' | 'error'; error?: string }>;
+  previewProgress?: Map<
+    string,
+    { status: 'pending' | 'generating' | 'success' | 'error'; error?: string }
+  >;
 }
 
 /**
@@ -50,8 +53,12 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
   const stats = React.useMemo(() => {
     const total = maps.length;
     const withPreviews = maps.filter((m) => m.thumbnailUrl).length;
-    const pending = maps.filter((m) => !m.thumbnailUrl && previewProgress?.get(m.id)?.status === 'pending').length;
-    const generating = maps.filter((m) => previewProgress?.get(m.id)?.status === 'generating').length;
+    const pending = maps.filter(
+      (m) => !m.thumbnailUrl && previewProgress?.get(m.id)?.status === 'pending'
+    ).length;
+    const generating = maps.filter(
+      (m) => previewProgress?.get(m.id)?.status === 'generating'
+    ).length;
     const errors = maps.filter((m) => previewProgress?.get(m.id)?.status === 'error').length;
 
     return { total, withPreviews, pending, generating, errors };
@@ -59,7 +66,8 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
 
   const renderMapRow = (map: MapMetadata, index: number) => {
     const progress = previewProgress?.get(map.id);
-    const hasPreview = map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '';
+    const hasPreview =
+      map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '';
 
     return (
       <div key={map.id} className="map-preview-row">
@@ -87,7 +95,9 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
         <div className="map-preview-details">
           <div className="map-preview-name">{map.name}</div>
           <div className="map-preview-meta">
-            <span className="meta-format">{formatLabel[map.format] || map.format.toUpperCase()}</span>
+            <span className="meta-format">
+              {formatLabel[map.format] || map.format.toUpperCase()}
+            </span>
             <span className="meta-size">{formatSize(map.sizeBytes)}</span>
             {hasPreview && <span className="meta-status">✅ Preview Ready</span>}
             {progress?.status === 'error' && (
@@ -149,7 +159,8 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
             />
           </div>
           <div className="progress-text">
-            {stats.withPreviews} / {stats.total} previews ready ({Math.round((stats.withPreviews / stats.total) * 100)}%)
+            {stats.withPreviews} / {stats.total} previews ready (
+            {Math.round((stats.withPreviews / stats.total) * 100)}%)
           </div>
         </div>
       )}

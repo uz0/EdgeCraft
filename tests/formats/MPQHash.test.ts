@@ -31,7 +31,9 @@ describe('MPQParser Hash Algorithm', () => {
 
     // W3X files use multi-compression which is not yet supported
     // This test verifies hash lookup works, even though extraction will fail
-    await expect(parser.extractFile('war3map.w3i')).rejects.toThrow('Multi-compression not supported');
+    await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
+      'Multi-compression not supported'
+    );
   });
 
   it('should find war3map.w3e in W3X archive (hash lookup only)', async () => {
@@ -41,7 +43,9 @@ describe('MPQParser Hash Algorithm', () => {
     }
 
     // W3X files use multi-compression which is not yet supported
-    await expect(parser.extractFile('war3map.w3e')).rejects.toThrow('Multi-compression not supported');
+    await expect(parser.extractFile('war3map.w3e')).rejects.toThrow(
+      'Multi-compression not supported'
+    );
   });
 
   it('should handle case-insensitive file lookups (hash lookup only)', async () => {
@@ -51,7 +55,9 @@ describe('MPQParser Hash Algorithm', () => {
     }
 
     // MPQ hash algorithm should handle uppercase (even though extraction fails due to compression)
-    await expect(parser.extractFile('WAR3MAP.W3I')).rejects.toThrow('Multi-compression not supported');
+    await expect(parser.extractFile('WAR3MAP.W3I')).rejects.toThrow(
+      'Multi-compression not supported'
+    );
   });
 
   it('should normalize path separators (hash lookup only)', async () => {
@@ -61,7 +67,9 @@ describe('MPQParser Hash Algorithm', () => {
     }
 
     // Forward slashes should be converted to backslashes (even though extraction fails)
-    await expect(parser.extractFile('war3map.w3i')).rejects.toThrow('Multi-compression not supported');
+    await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
+      'Multi-compression not supported'
+    );
   });
 
   it('should list files in archive (empty due to extraction not supported)', () => {

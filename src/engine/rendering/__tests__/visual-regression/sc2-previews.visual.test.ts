@@ -8,11 +8,7 @@
  */
 
 import type { RawMapData } from '../../../../formats/maps/types';
-import {
-  generateMockPreviewImage,
-  generateMockTerrainImage,
-  hashString,
-} from '../visualTestUtils';
+import { generateMockPreviewImage, generateMockTerrainImage, hashString } from '../visualTestUtils';
 
 /**
  * Convert base64 data URL to image buffer for jest-image-snapshot
@@ -24,7 +20,6 @@ function dataUrlToBuffer(dataUrl: string): Buffer {
   }
   return Buffer.from(base64Data, 'base64');
 }
-
 
 /**
  * Create mock map data for testing
@@ -61,7 +56,7 @@ function createMockMapData(width: number = 128, height: number = 128): RawMapDat
         height,
       },
       environment: {
-        tileset: 'Bel\'Shir',
+        tileset: "Bel'Shir",
       },
     },
     terrain: {

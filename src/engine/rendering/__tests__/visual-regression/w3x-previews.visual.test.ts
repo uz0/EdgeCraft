@@ -11,11 +11,7 @@
  */
 
 import type { RawMapData } from '../../../../formats/maps/types';
-import {
-  generateMockPreviewImage,
-  generateMockTerrainImage,
-  hashString,
-} from '../visualTestUtils';
+import { generateMockPreviewImage, generateMockTerrainImage, hashString } from '../visualTestUtils';
 
 /**
  * Convert base64 data URL to image buffer for jest-image-snapshot

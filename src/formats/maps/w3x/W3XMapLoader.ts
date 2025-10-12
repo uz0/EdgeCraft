@@ -35,8 +35,9 @@ export class W3XMapLoader implements IMapLoader {
     let buffer: ArrayBuffer;
 
     // Check type more carefully
-    const isArrayBuffer = file instanceof ArrayBuffer ||
-                          Object.prototype.toString.call(file) === '[object ArrayBuffer]';
+    const isArrayBuffer =
+      file instanceof ArrayBuffer ||
+      Object.prototype.toString.call(file) === '[object ArrayBuffer]';
     const hasBufferProperty = (file as any).buffer instanceof ArrayBuffer;
 
     if (isArrayBuffer) {
@@ -48,9 +49,11 @@ export class W3XMapLoader implements IMapLoader {
       buffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
     } else if (typeof (file as any).arrayBuffer === 'function') {
       // File object - use arrayBuffer() method
-      buffer = await (file as File).arrayBuffer();
+      buffer = await file.arrayBuffer();
     } else {
-      throw new Error(`Invalid input type: expected File, ArrayBuffer, or Buffer. Got ${Object.prototype.toString.call(file)}`);
+      throw new Error(
+        `Invalid input type: expected File, ArrayBuffer, or Buffer. Got ${Object.prototype.toString.call(file)}`
+      );
     }
 
     // Parse MPQ archive
@@ -63,7 +66,10 @@ export class W3XMapLoader implements IMapLoader {
 
     // Debug: List all files in archive
     const allFiles = mpqParser.listFiles();
-    console.log(`[W3XMapLoader] Files in archive (${allFiles.length} total):`, allFiles.slice(0, 20));
+    console.log(
+      `[W3XMapLoader] Files in archive (${allFiles.length} total):`,
+      allFiles.slice(0, 20)
+    );
 
     // Try to extract files, but catch errors (multi-compression, encryption, etc.)
     let w3iData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
@@ -83,13 +89,19 @@ export class W3XMapLoader implements IMapLoader {
         w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
       }
     } catch (err) {
-      console.warn('[W3XMapLoader] ⚠️ Failed to extract war3map.w3i:', err instanceof Error ? err.message : String(err));
+      console.warn(
+        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3i:',
+        err instanceof Error ? err.message : String(err)
+      );
     }
 
     try {
       w3eData = await mpqParser.extractFile('war3map.w3e');
     } catch (err) {
-      console.warn('[W3XMapLoader] ⚠️ Failed to extract war3map.w3e:', err instanceof Error ? err.message : String(err));
+      console.warn(
+        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3e:',
+        err instanceof Error ? err.message : String(err)
+      );
     }
 
     try {
@@ -278,7 +290,7 @@ export class W3XMapLoader implements IMapLoader {
 
     // Determine map size from filename hints if possible
     let mapSize = 256;
-    const fileName = availableFiles.find(f => f.includes('war3map')) || '';
+    const fileName = availableFiles.find((f) => f.includes('war3map')) || '';
     if (fileName.toLowerCase().includes('small')) {
       mapSize = 128;
     } else if (fileName.toLowerCase().includes('large')) {

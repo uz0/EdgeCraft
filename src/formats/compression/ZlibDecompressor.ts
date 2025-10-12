@@ -17,36 +17,39 @@ export class ZlibDecompressor implements IDecompressor {
    * @returns Decompressed data
    */
   public async decompress(compressed: ArrayBuffer, uncompressedSize: number): Promise<ArrayBuffer> {
-    try {
-      // Convert ArrayBuffer to Uint8Array for pako
-      const compressedArray = new Uint8Array(compressed);
-
-      // Try raw deflate first (PKZIP style - no zlib wrapper)
-      let decompressedArray: Uint8Array;
+    // Wrap synchronous decompression in Promise for consistent async interface
+    return Promise.resolve().then(() => {
       try {
-        decompressedArray = pako.inflateRaw(compressedArray);
-      } catch (rawError) {
-        // If raw deflate fails, try with zlib wrapper
-        console.log('[ZlibDecompressor] Raw deflate failed, trying with zlib wrapper...');
-        decompressedArray = pako.inflate(compressedArray);
-      }
+        // Convert ArrayBuffer to Uint8Array for pako
+        const compressedArray = new Uint8Array(compressed);
 
-      // Verify decompressed size
-      if (decompressedArray.byteLength !== uncompressedSize) {
-        console.warn(
-          `[ZlibDecompressor] Size mismatch: expected ${uncompressedSize}, got ${decompressedArray.byteLength}`
-        );
-      }
+        // Try raw deflate first (PKZIP style - no zlib wrapper)
+        let decompressedArray: Uint8Array;
+        try {
+          decompressedArray = pako.inflateRaw(compressedArray);
+        } catch (rawError) {
+          // If raw deflate fails, try with zlib wrapper
+          console.log('[ZlibDecompressor] Raw deflate failed, trying with zlib wrapper...');
+          decompressedArray = pako.inflate(compressedArray);
+        }
 
-      // Convert back to ArrayBuffer
-      return decompressedArray.buffer.slice(
-        decompressedArray.byteOffset,
-        decompressedArray.byteOffset + decompressedArray.byteLength
-      ) as ArrayBuffer;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      throw new Error(`ZLIB decompression failed: ${errorMsg}`);
-    }
+        // Verify decompressed size
+        if (decompressedArray.byteLength !== uncompressedSize) {
+          console.warn(
+            `[ZlibDecompressor] Size mismatch: expected ${uncompressedSize}, got ${decompressedArray.byteLength}`
+          );
+        }
+
+        // Convert back to ArrayBuffer
+        return decompressedArray.buffer.slice(
+          decompressedArray.byteOffset,
+          decompressedArray.byteOffset + decompressedArray.byteLength
+        ) as ArrayBuffer;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        throw new Error(`ZLIB decompression failed: ${errorMsg}`);
+      }
+    });
   }
 
   /**

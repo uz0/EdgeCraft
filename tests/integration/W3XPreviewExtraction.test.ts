@@ -11,10 +11,7 @@ import { MPQParser } from '../../src/formats/mpq/MPQParser';
 import { W3XMapLoader } from '../../src/formats/maps/w3x/W3XMapLoader';
 
 describe('W3X Preview Extraction Integration', () => {
-  const testMapPath = path.join(
-    __dirname,
-    '../../maps/EchoIslesAlltherandom.w3x'
-  );
+  const testMapPath = path.join(__dirname, '../../maps/EchoIslesAlltherandom.w3x');
 
   it('should load W3X map archive but extraction fails due to multi-compression', async () => {
     // Read map file
@@ -31,8 +28,12 @@ describe('W3X Preview Extraction Integration', () => {
     console.log(`MPQ parsed successfully in ${result.parseTimeMs.toFixed(2)}ms`);
 
     // Extraction fails due to multi-compression not being supported
-    await expect(parser.extractFile('war3map.w3i')).rejects.toThrow('Multi-compression not supported');
-    await expect(parser.extractFile('war3map.w3e')).rejects.toThrow('Multi-compression not supported');
+    await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
+      'Multi-compression not supported'
+    );
+    await expect(parser.extractFile('war3map.w3e')).rejects.toThrow(
+      'Multi-compression not supported'
+    );
   });
 
   it.skip('should parse W3X map using W3XMapLoader (SKIP: multi-compression not yet supported)', async () => {
@@ -41,7 +42,7 @@ describe('W3X Preview Extraction Integration', () => {
 
     // Use W3XMapLoader to parse (pass ArrayBuffer directly)
     const loader = new W3XMapLoader();
-    const mapData = await loader.parse(buffer.buffer as ArrayBuffer);
+    const mapData = await loader.parse(buffer.buffer);
 
     expect(mapData).toBeDefined();
     expect(mapData.format).toBe('w3x');
@@ -62,7 +63,7 @@ describe('W3X Preview Extraction Integration', () => {
   it.skip('should complete full extraction pipeline (SKIP: multi-compression not yet supported)', async () => {
     // Read map file
     const buffer = fs.readFileSync(testMapPath);
-    const arrayBuffer = buffer.buffer as ArrayBuffer;
+    const arrayBuffer = buffer.buffer;
 
     // Parse with MPQ
     const parser = new MPQParser(arrayBuffer);
@@ -81,9 +82,7 @@ describe('W3X Preview Extraction Integration', () => {
 
     // Check for preview files
     const hasPreview = files.some(
-      (f) =>
-        f.toLowerCase().includes('preview') ||
-        f.toLowerCase().includes('map.tga')
+      (f) => f.toLowerCase().includes('preview') || f.toLowerCase().includes('map.tga')
     );
     console.log(`Has preview file: ${hasPreview}`);
 

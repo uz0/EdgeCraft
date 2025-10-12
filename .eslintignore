@@ -1,0 +1,23 @@
+# Build outputs
+dist/
+build/
+coverage/
+
+# Dependencies
+node_modules/
+
+# Jest setup file (not included in TypeScript project)
+jest.setup.ts
+
+# Vite config
+vite.config.ts
+vite.config.*.ts
+
+# TypeScript config
+tsconfig.json
+tsconfig.*.json
+
+# Other config files
+*.config.js
+*.config.cjs
+*.config.mjs
