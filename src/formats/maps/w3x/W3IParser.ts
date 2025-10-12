@@ -148,8 +148,8 @@ export class W3IParser {
 
     // All remaining fields are optional and may not be present
     // Wrap in try-catch to handle truncated files gracefully
-    let upgradeAvailability: W3IUpgrade[] = [];
-    let techAvailability: W3ITech[] = [];
+    const upgradeAvailability: W3IUpgrade[] = [];
+    const techAvailability: W3ITech[] = [];
     let unitTable: W3IRandomUnitTable | undefined;
     let itemTable: W3IRandomItemTable | undefined;
 
