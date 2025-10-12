@@ -20,7 +20,13 @@ import type {
   MPQStreamOptions,
 } from './types';
 import { StreamingFileReader } from '../../utils/StreamingFileReader';
-import { LZMADecompressor, ZlibDecompressor, Bzip2Decompressor, CompressionAlgorithm } from '../compression';
+import {
+  LZMADecompressor,
+  ZlibDecompressor,
+  Bzip2Decompressor,
+  HuffmanDecompressor,
+  CompressionAlgorithm,
+} from '../compression';
 
 /**
  * MPQ Archive parser
@@ -41,6 +47,7 @@ export class MPQParser {
   private lzmaDecompressor: LZMADecompressor;
   private zlibDecompressor: ZlibDecompressor;
   private bzip2Decompressor: Bzip2Decompressor;
+  private huffmanDecompressor: HuffmanDecompressor;
 
   // MPQ Magic numbers
   private static readonly MPQ_MAGIC_V1 = 0x1a51504d; // 'MPQ\x1A' in little-endian
@@ -52,6 +59,7 @@ export class MPQParser {
     this.lzmaDecompressor = new LZMADecompressor();
     this.zlibDecompressor = new ZlibDecompressor();
     this.bzip2Decompressor = new Bzip2Decompressor();
+    this.huffmanDecompressor = new HuffmanDecompressor();
   }
 
   /**
@@ -633,9 +641,14 @@ export class MPQParser {
 
     // Check HUFFMAN (0x01)
     if (compressionFlags & CompressionAlgorithm.HUFFMAN) {
-      console.log('[MPQParser] Multi-algo: HUFFMAN detected (not yet implemented, skipping)');
-      // TODO: Implement Huffman decompression
-      // For now, skip this step as it's rarely used alone in W3X files
+      console.log('[MPQParser] Multi-algo: Applying Huffman decompression...');
+      try {
+        currentData = await this.huffmanDecompressor.decompress(currentData, uncompressedSize);
+        console.log(`[MPQParser] Multi-algo: Huffman completed, size: ${currentData.byteLength}`);
+      } catch (error) {
+        console.error('[MPQParser] Multi-algo: Huffman failed:', error);
+        throw error;
+      }
     }
 
     // Check ZLIB (0x02)
