@@ -189,11 +189,15 @@ const App: React.FC = () => {
           console.log(`Loading ${map.name} for preview generation...`);
 
           // Fetch map file
+          console.log(`[App] Fetching map file: /maps/${encodeURIComponent(map.name)}`);
           const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
           if (!response.ok) {
-            console.warn(`Failed to fetch ${map.name}: ${response.statusText}`);
+            console.error(
+              `[App] ❌ Failed to fetch ${map.name}: ${response.status} ${response.statusText}`
+            );
             continue;
           }
+          console.log(`[App] ✅ Fetched ${map.name}, size: ${response.headers.get('content-length')} bytes`);
 
           const blob = await response.blob();
           const file = new File([blob], map.name);

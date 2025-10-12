@@ -72,9 +72,24 @@ export class MapPreviewGenerator {
     targetCanvas.width = 512;
     targetCanvas.height = 512;
 
-    this.engine = new BABYLON.Engine(targetCanvas, false, {
-      preserveDrawingBuffer: true, // Required for screenshots
-    });
+    console.log('[MapPreviewGenerator] Creating Babylon.js Engine...');
+
+    try {
+      this.engine = new BABYLON.Engine(targetCanvas, false, {
+        preserveDrawingBuffer: true, // Required for screenshots
+        powerPreference: 'high-performance',
+      });
+
+      if (!this.engine.isWebGPUSupported && !this.engine.webGLVersion) {
+        console.error('[MapPreviewGenerator] ❌ WebGL not supported!');
+        throw new Error('WebGL is not supported in this browser');
+      }
+
+      console.log(`[MapPreviewGenerator] ✅ Engine created, WebGL version: ${this.engine.webGLVersion}`);
+    } catch (error) {
+      console.error('[MapPreviewGenerator] ❌ Failed to create Engine:', error);
+      throw error;
+    }
   }
 
   /**
@@ -86,6 +101,17 @@ export class MapPreviewGenerator {
   ): Promise<PreviewResult> {
     const startTime = performance.now();
     console.log(`[MapPreviewGenerator] generatePreview() called, map dimensions: ${mapData.info.dimensions.width}x${mapData.info.dimensions.height}`);
+
+    // Validate engine is still valid
+    if (!this.engine || this.engine.isDisposed) {
+      const error = 'Engine has been disposed';
+      console.error(`[MapPreviewGenerator] ❌ ${error}`);
+      return {
+        success: false,
+        generationTimeMs: 0,
+        error,
+      };
+    }
 
     const finalConfig: Required<PreviewConfig> = {
       width: config?.width ?? 512,
