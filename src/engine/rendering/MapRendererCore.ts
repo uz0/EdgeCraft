@@ -237,6 +237,10 @@ export class MapRendererCore {
       maxHeight = Math.max(maxHeight, heightmap[i] ?? 0);
     }
 
+    console.log(
+      `[MapRendererCore] Heightmap stats: min=${minHeight}, max=${maxHeight}, total=${heightmap.length}`
+    );
+
     const range = maxHeight - minHeight || 1;
 
     for (let i = 0; i < heightmap.length; i++) {
