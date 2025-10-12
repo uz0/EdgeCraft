@@ -67,10 +67,22 @@ export class MPQParser {
       }
 
       // Read hash table
-      const hashTable = this.readHashTable(header);
+      let hashTable;
+      try {
+        hashTable = this.readHashTable(header);
+      } catch (error) {
+        console.error('[MPQParser] Error reading hash table:', error);
+        throw error;
+      }
 
       // Read block table
-      const blockTable = this.readBlockTable(header);
+      let blockTable;
+      try {
+        blockTable = this.readBlockTable(header);
+      } catch (error) {
+        console.error('[MPQParser] Error reading block table:', error);
+        throw error;
+      }
 
       // Create archive structure
       this.archive = {
@@ -228,23 +240,48 @@ export class MPQParser {
       }
     }
 
-    // Check magic number at found offset (support both v1 and v2)
-    const magic = this.view.getUint32(headerOffset, true);
-    if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
+    // Check magic number at found offset
+    let magic = this.view.getUint32(headerOffset, true);
+
+    // If we found MPQ user data header (0x1b51504d), read the real MPQ header offset
+    if (magic === MPQParser.MPQ_MAGIC_V2) {
+      const realHeaderOffset = this.view.getUint32(headerOffset + 8, true);
+      console.log(`[MPQParser] Found MPQ user data header, real MPQ header at offset ${realHeaderOffset}`);
+      headerOffset = realHeaderOffset;
+      magic = this.view.getUint32(headerOffset, true);
+
+      if (magic !== MPQParser.MPQ_MAGIC_V1) {
+        console.error(
+          `[MPQParser] Invalid MPQ magic at real header offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)}`
+        );
+        return null;
+      }
+      console.log(`[MPQParser] Found real MPQ header at offset ${headerOffset}: 0x${magic.toString(16)}`);
+    } else if (magic !== MPQParser.MPQ_MAGIC_V1) {
       console.error(
         `[MPQParser] Invalid magic at offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`
       );
       return null;
     }
 
+    const archiveSize = this.view.getUint32(headerOffset + 8, true);
+    const formatVersion = this.view.getUint16(headerOffset + 12, true);
+    const blockSize = 512 * Math.pow(2, this.view.getUint16(headerOffset + 14, true));
+    const hashTablePos = this.view.getUint32(headerOffset + 16, true) + headerOffset;
+    const blockTablePos = this.view.getUint32(headerOffset + 20, true) + headerOffset;
+    const hashTableSize = this.view.getUint32(headerOffset + 24, true);
+    const blockTableSize = this.view.getUint32(headerOffset + 28, true);
+
+    console.log(`[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`);
+
     return {
-      archiveSize: this.view.getUint32(headerOffset + 8, true),
-      formatVersion: this.view.getUint16(headerOffset + 12, true),
-      blockSize: 512 * Math.pow(2, this.view.getUint16(headerOffset + 14, true)),
-      hashTablePos: this.view.getUint32(headerOffset + 16, true) + headerOffset,
-      blockTablePos: this.view.getUint32(headerOffset + 20, true) + headerOffset,
-      hashTableSize: this.view.getUint32(headerOffset + 24, true),
-      blockTableSize: this.view.getUint32(headerOffset + 28, true),
+      archiveSize,
+      formatVersion,
+      blockSize,
+      hashTablePos,
+      blockTablePos,
+      hashTableSize,
+      blockTableSize,
     };
   }
 
@@ -256,29 +293,32 @@ export class MPQParser {
     const offset = header.hashTablePos;
     const size = header.hashTableSize * 16; // 16 bytes per entry
 
-    // Try WITHOUT decryption first (many W3X maps don't encrypt tables)
+    // Handle empty hash table
+    if (header.hashTableSize === 0) {
+      console.log('[MPQParser] Hash table is empty (size=0)');
+      return hashTable;
+    }
+
+    // Try WITHOUT decryption first (many maps don't encrypt tables)
     const rawView = new DataView(this.buffer, offset, size);
 
-    // Check if raw data looks valid
-    const firstBlockIndexRaw = rawView.getUint32(12, true);
-    const secondBlockIndexRaw = size >= 32 ? rawView.getUint32(12 + 16, true) : 0xffffffff;
-
-    console.log(`[MPQParser] Raw hash table check: first blockIndex=${firstBlockIndexRaw}, second=${secondBlockIndexRaw}`);
-
-    // Check if table needs decryption by looking for empty slots (0xFFFFFFFF)
-    let hasEmptySlots = false;
+    // Check if raw blockIndex values are reasonable (should be < blockTableSize or 0xFFFFFFFF for empty)
+    let hasValidBlockIndices = true;
     for (let i = 0; i < Math.min(header.hashTableSize, 10); i++) {
-      const hashA = rawView.getUint32(i * 16, true);
-      if (hashA === 0xffffffff) {
-        hasEmptySlots = true;
+      const blockIndex = rawView.getUint32(i * 16 + 12, true);
+      // Valid if empty (0xFFFFFFFF) or within block table range
+      if (blockIndex !== 0xffffffff && blockIndex >= header.blockTableSize) {
+        hasValidBlockIndices = false;
         break;
       }
     }
 
+    console.log(`[MPQParser] Raw hash table check: hasValidBlockIndices=${hasValidBlockIndices}`);
+
     let view = rawView;
-    if (!hasEmptySlots) {
-      // No empty slots found in raw data = table is likely encrypted
-      console.log('[MPQParser] Hash table appears encrypted (no 0xFFFFFFFF slots), attempting decryption...');
+    if (!hasValidBlockIndices) {
+      // BlockIndex values out of range = table is encrypted
+      console.log('[MPQParser] Hash table appears encrypted (invalid blockIndex values), attempting decryption...');
       const tableData = new Uint8Array(this.buffer, offset, size);
       const decryptedData = this.decryptTable(tableData, '(hash table)');
       view = new DataView(decryptedData.buffer);
@@ -309,6 +349,18 @@ export class MPQParser {
     const blockTable: MPQBlockEntry[] = [];
     const offset = header.blockTablePos;
     const size = header.blockTableSize * 16; // 16 bytes per entry
+
+    // Handle empty block table
+    if (header.blockTableSize === 0) {
+      console.log('[MPQParser] Block table is empty (size=0)');
+      return blockTable;
+    }
+
+    console.log(`[MPQParser] Block table: offset=${offset}, size=${size}, bufferSize=${this.buffer.byteLength}`);
+
+    if (offset + size > this.buffer.byteLength) {
+      throw new Error(`Block table out of bounds: offset=${offset}, size=${size}, bufferSize=${this.buffer.byteLength}`);
+    }
 
     // Try WITHOUT decryption first
     const rawView = new DataView(this.buffer, offset, size);
@@ -361,8 +413,9 @@ export class MPQParser {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     const outView = new DataView(decrypted.buffer);
 
-    // Generate encryption key from string (hash type 0x300 for decrypt)
-    let seed1 = this.hashString(key, 0x300);
+    // Generate encryption key from string (hash type 3 for decryption key)
+    // Hash type 3 means offset 0x300 in the crypt table
+    let seed1 = this.hashString(key, 3);
     let seed2 = 0xeeeeeeee;
 
     // Decrypt in 4-byte (DWORD) chunks
@@ -506,8 +559,9 @@ export class MPQParser {
   private findFile(filename: string): MPQHashEntry | null {
     if (!this.archive) return null;
 
-    const hashA = this.hashString(filename, 0);
-    const hashB = this.hashString(filename, 1);
+    // MPQ hash types: 0=table offset, 1=name hash A, 2=name hash B
+    const hashA = this.hashString(filename, 1);
+    const hashB = this.hashString(filename, 2);
 
     console.log(`[MPQParser findFile] Looking for: ${filename}`);
     console.log(`[MPQParser findFile] Computed hashes: hashA=${hashA}, hashB=${hashB}`);
