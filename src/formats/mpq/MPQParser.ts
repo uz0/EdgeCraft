@@ -426,22 +426,58 @@ export class MPQParser {
     return null;
   }
 
+  // MPQ hash encryption table (1280 entries)
+  private static cryptTable: number[] | null = null;
+
   /**
-   * Hash string for MPQ lookup
+   * Initialize MPQ encryption table
+   */
+  private static initCryptTable(): void {
+    if (this.cryptTable) return;
+
+    this.cryptTable = new Array(0x500);
+    let seed = 0x00100001;
+
+    for (let index1 = 0; index1 < 0x100; index1++) {
+      let index2 = index1;
+      for (let i = 0; i < 5; i++) {
+        seed = (seed * 125 + 3) % 0x2aaaab;
+        const temp1 = (seed & 0xffff) << 0x10;
+
+        seed = (seed * 125 + 3) % 0x2aaaab;
+        const temp2 = seed & 0xffff;
+
+        this.cryptTable[index2] = temp1 | temp2;
+        index2 += 0x100;
+      }
+    }
+  }
+
+  /**
+   * Hash string for MPQ lookup using proper MPQ hash algorithm
    *
-   * Simplified version - full implementation would use MPQ's hash algorithm
+   * @param str - String to hash
+   * @param hashType - Hash type (0 = hashA, 1 = hashB, 2 = table offset)
    */
   private hashString(str: string, hashType: number): number {
-    let hash = 0;
-    const upperStr = str.toUpperCase();
-
-    for (let i = 0; i < upperStr.length; i++) {
-      const char = upperStr.charCodeAt(i);
-      hash = (hash << 5) + hash + char + hashType;
-      hash = hash & 0xffffffff; // Keep as 32-bit
+    // Initialize crypt table on first use
+    if (!MPQParser.cryptTable) {
+      MPQParser.initCryptTable();
     }
 
-    return hash;
+    const cryptTable = MPQParser.cryptTable!;
+    const upperStr = str.toUpperCase().replace(/\//g, '\\'); // Normalize path separators
+    let seed1 = 0x7fed7fed;
+    let seed2 = 0xeeeeeeee;
+
+    for (let i = 0; i < upperStr.length; i++) {
+      const ch = upperStr.charCodeAt(i);
+      const value = cryptTable[hashType * 0x100 + ch] ?? 0;
+      seed1 = (value ^ (seed1 + seed2)) >>> 0;
+      seed2 = (ch + seed1 + seed2 + (seed2 << 5) + 3) >>> 0;
+    }
+
+    return seed1;
   }
 
   /**
