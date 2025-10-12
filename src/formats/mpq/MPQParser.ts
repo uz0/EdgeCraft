@@ -249,44 +249,98 @@ export class MPQParser {
   }
 
   /**
-   * Read hash table
+   * Read hash table (with decryption)
    */
   private readHashTable(header: MPQHeader): MPQHashEntry[] {
     const hashTable: MPQHashEntry[] = [];
-    let offset = header.hashTablePos;
+    const offset = header.hashTablePos;
+    const size = header.hashTableSize * 16; // 16 bytes per entry
 
+    // Read encrypted hash table data
+    const encryptedData = new Uint8Array(this.buffer, offset, size);
+
+    // Decrypt hash table
+    const decryptedData = this.decryptTable(encryptedData, '(hash table)');
+
+    // Parse decrypted entries
+    const view = new DataView(decryptedData.buffer);
     for (let i = 0; i < header.hashTableSize; i++) {
+      const entryOffset = i * 16;
       hashTable.push({
-        hashA: this.view.getUint32(offset, true),
-        hashB: this.view.getUint32(offset + 4, true),
-        locale: this.view.getUint16(offset + 8, true),
-        platform: this.view.getUint16(offset + 10, true),
-        blockIndex: this.view.getUint32(offset + 12, true),
+        hashA: view.getUint32(entryOffset, true),
+        hashB: view.getUint32(entryOffset + 4, true),
+        locale: view.getUint16(entryOffset + 8, true),
+        platform: view.getUint16(entryOffset + 10, true),
+        blockIndex: view.getUint32(entryOffset + 12, true),
       });
-      offset += 16;
     }
 
     return hashTable;
   }
 
   /**
-   * Read block table
+   * Read block table (with decryption)
    */
   private readBlockTable(header: MPQHeader): MPQBlockEntry[] {
     const blockTable: MPQBlockEntry[] = [];
-    let offset = header.blockTablePos;
+    const offset = header.blockTablePos;
+    const size = header.blockTableSize * 16; // 16 bytes per entry
 
+    // Read encrypted block table data
+    const encryptedData = new Uint8Array(this.buffer, offset, size);
+
+    // Decrypt block table
+    const decryptedData = this.decryptTable(encryptedData, '(block table)');
+
+    // Parse decrypted entries
+    const view = new DataView(decryptedData.buffer);
     for (let i = 0; i < header.blockTableSize; i++) {
+      const entryOffset = i * 16;
       blockTable.push({
-        filePos: this.view.getUint32(offset, true),
-        compressedSize: this.view.getUint32(offset + 4, true),
-        uncompressedSize: this.view.getUint32(offset + 8, true),
-        flags: this.view.getUint32(offset + 12, true),
+        filePos: view.getUint32(entryOffset, true),
+        compressedSize: view.getUint32(entryOffset + 4, true),
+        uncompressedSize: view.getUint32(entryOffset + 8, true),
+        flags: view.getUint32(entryOffset + 12, true),
       });
-      offset += 16;
     }
 
     return blockTable;
+  }
+
+  /**
+   * Decrypt MPQ table data
+   * @param data - Encrypted table data
+   * @param key - Encryption key string
+   */
+  private decryptTable(data: Uint8Array, key: string): Uint8Array {
+    // Initialize crypt table if needed
+    if (!MPQParser.cryptTable) {
+      MPQParser.initCryptTable();
+    }
+
+    const cryptTable = MPQParser.cryptTable!;
+    const decrypted = new Uint8Array(data.length);
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    const outView = new DataView(decrypted.buffer);
+
+    // Generate encryption key from string
+    let seed1 = this.hashString(key, 3); // Hash type 3 for table key
+    let seed2 = 0xeeeeeeee;
+
+    // Decrypt in 4-byte (DWORD) chunks
+    for (let i = 0; i < data.length; i += 4) {
+      seed2 = (seed2 + (cryptTable[(0x400 + (seed1 & 0xff)) % cryptTable.length] ?? 0)) >>> 0;
+
+      const encrypted = view.getUint32(i, true);
+      const decryptedValue = (encrypted ^ (seed1 + seed2)) >>> 0;
+
+      outView.setUint32(i, decryptedValue, true);
+
+      seed1 = (((~seed1 << 0x15) + 0x11111111) | (seed1 >>> 0x0b)) >>> 0;
+      seed2 = (encrypted + seed2 + (seed2 << 5) + 3) >>> 0;
+    }
+
+    return decrypted;
   }
 
   /**
@@ -417,12 +471,31 @@ export class MPQParser {
     const hashA = this.hashString(filename, 0);
     const hashB = this.hashString(filename, 1);
 
+    console.log(`[MPQParser findFile] Looking for: ${filename}`);
+    console.log(`[MPQParser findFile] Computed hashes: hashA=${hashA}, hashB=${hashB}`);
+
+    // Debug: Show all NON-EMPTY hash table entries (empty = 0xFFFFFFFF)
+    const nonEmptyEntries = this.archive.hashTable.filter(
+      (entry) => entry.hashA !== 0xffffffff && entry.hashB !== 0xffffffff
+    );
+    console.log(
+      `[MPQParser findFile] Non-empty entries: ${nonEmptyEntries.length}/${this.archive.hashTable.length}`
+    );
+    for (let i = 0; i < Math.min(10, nonEmptyEntries.length); i++) {
+      const entry = nonEmptyEntries[i];
+      console.log(
+        `  [${i}] hashA=${entry?.hashA}, hashB=${entry?.hashB}, blockIndex=${entry?.blockIndex}`
+      );
+    }
+
     for (const entry of this.archive.hashTable) {
       if (entry.hashA === hashA && entry.hashB === hashB) {
+        console.log(`[MPQParser findFile] ✅ FOUND at blockIndex=${entry.blockIndex}`);
         return entry;
       }
     }
 
+    console.log('[MPQParser findFile] ❌ NOT FOUND');
     return null;
   }
 
