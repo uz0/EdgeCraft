@@ -2,10 +2,11 @@
 
 **Goal**: Achieve 24/24 (100%) working map previews by implementing missing MPQ decompression algorithms
 
-**Status**: 📋 Planned
+**Status**: 🟡 **IN PROGRESS** (Huffman implemented via StormJS WASM, browser testing pending)
 **Priority**: Critical
 **Duration**: 2-3 days
 **Estimated Effort**: 16-24 hours
+**Implementation Date**: 2025-10-13
 
 ---
 
