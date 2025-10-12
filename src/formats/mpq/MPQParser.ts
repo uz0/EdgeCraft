@@ -514,12 +514,10 @@ export class MPQParser {
 
         // Check if this is multi-compression (W3X style)
         if (firstByte !== 0 && (blockEntry.compressedSize < blockEntry.uncompressedSize)) {
-          console.warn(
-            `[MPQParser] Multi-compression detected for ${filename} (byte: 0x${firstByte.toString(16)}). ` +
-            `This is not yet supported. Returning compressed data as-is.`
+          throw new Error(
+            `Multi-compression not supported for ${filename} (algorithm: 0x${firstByte.toString(16)}). ` +
+            `W3X maps require zlib/bzip2/huffman decompression which is not yet implemented.`
           );
-          // Return compressed data - parser will need to handle it
-          fileData = rawData;
         } else {
           console.log(`[MPQParser] No compression for ${filename}, using raw data`);
           fileData = rawData;
