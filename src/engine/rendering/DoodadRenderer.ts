@@ -132,7 +132,7 @@ export class DoodadRenderer {
       enableInstancing: config?.enableInstancing ?? true,
       enableLOD: config?.enableLOD ?? true,
       lodDistance: config?.lodDistance ?? 100,
-      maxDoodads: config?.maxDoodads ?? 2000,
+      maxDoodads: config?.maxDoodads ?? 10000, // Increased from 2000 to handle large maps
     };
   }
 
@@ -295,36 +295,21 @@ export class DoodadRenderer {
 
   /**
    * Create placeholder mesh for testing
+   * NOTE: Using simple boxes for ALL doodads to maximize performance
+   * Creating unique shapes/materials for each type tanks FPS from 60 to 4
    */
   private createPlaceholderMesh(name: string): BABYLON.Mesh {
-    // Randomize shape for visual variety
-    const shapes = ['box', 'cylinder', 'cone', 'sphere'];
-    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    // Use simple box for all doodads (much better performance)
+    const mesh = BABYLON.MeshBuilder.CreateBox(name, { size: 2 }, this.scene);
 
-    let mesh: BABYLON.Mesh;
-
-    if (shape === 'box') {
-      mesh = BABYLON.MeshBuilder.CreateBox(name, { size: 3 }, this.scene);
-    } else if (shape === 'cylinder') {
-      mesh = BABYLON.MeshBuilder.CreateCylinder(name, { height: 5, diameter: 2 }, this.scene);
-    } else if (shape === 'cone') {
-      mesh = BABYLON.MeshBuilder.CreateCylinder(
-        name,
-        { height: 6, diameterTop: 0, diameterBottom: 3 },
-        this.scene
-      );
-    } else {
-      mesh = BABYLON.MeshBuilder.CreateSphere(name, { diameter: 3 }, this.scene);
+    // Use a shared material for all doodads (better performance)
+    if (!this.scene.getMaterialByName('doodad_shared_material')) {
+      const material = new BABYLON.StandardMaterial('doodad_shared_material', this.scene);
+      material.diffuseColor = new BABYLON.Color3(0.6, 0.4, 0.2); // Brown color
+      material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     }
 
-    // Random color
-    const material = new BABYLON.StandardMaterial(`${name}_mat`, this.scene);
-    material.diffuseColor = new BABYLON.Color3(
-      Math.random() * 0.5 + 0.2, // 0.2-0.7
-      Math.random() * 0.5 + 0.3, // 0.3-0.8
-      Math.random() * 0.3 + 0.1 // 0.1-0.4
-    );
-    mesh.material = material;
+    mesh.material = this.scene.getMaterialByName('doodad_shared_material');
 
     return mesh;
   }

@@ -159,6 +159,73 @@ test.describe('Simple Map Rendering', () => {
 
     await page.waitForTimeout(5000); // Increased wait for larger map
 
+    // Debug: Check scene state before screenshot
+    const sceneDebug = await page.evaluate(() => {
+      const win = window as any;
+      const engine = win.__testBabylonEngine;
+      const scene = win.__testBabylonScene;
+
+      if (!scene) return { error: 'No scene found' };
+
+      // Check mesh states
+      const meshStates = scene.meshes.map((m: any) => ({
+        name: m.name,
+        enabled: m.isEnabled(),
+        visible: m.isVisible,
+        hasInstances: m.thinInstanceCount > 0,
+        instanceCount: m.thinInstanceCount || 0
+      }));
+
+      const enabledMeshes = meshStates.filter((m: any) => m.enabled);
+      const disabledMeshes = meshStates.filter((m: any) => !m.enabled);
+
+      // Get terrain mesh details
+      const terrainMesh = scene.getMeshByName('terrain');
+      const camera = scene.activeCamera;
+
+      return {
+        activeMeshes: scene.getActiveMeshes().length,
+        totalMeshes: scene.meshes.length,
+        enabledMeshes: enabledMeshes.length,
+        disabledMeshes: disabledMeshes.length,
+        disabledMeshNames: disabledMeshes.slice(0, 10).map((m: any) => m.name), // First 10
+        terrainMesh: meshStates.find((m: any) => m.name === 'terrain'),
+        terrainPosition: terrainMesh ? {
+          x: terrainMesh.position.x,
+          y: terrainMesh.position.y,
+          z: terrainMesh.position.z
+        } : null,
+        terrainBoundingBox: terrainMesh ? {
+          min: terrainMesh.getBoundingInfo().boundingBox.minimumWorld,
+          max: terrainMesh.getBoundingInfo().boundingBox.maximumWorld
+        } : null,
+        cameraPosition: camera ? {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z
+        } : null,
+        cameraTarget: camera && camera.target ? {
+          x: camera.target.x,
+          y: camera.target.y,
+          z: camera.target.z
+        } : null,
+        lights: scene.lights.length,
+        cameras: scene.cameras.length,
+        clearColor: scene.clearColor ? {
+          r: scene.clearColor.r,
+          g: scene.clearColor.g,
+          b: scene.clearColor.b,
+          a: scene.clearColor.a
+        } : null,
+        isReady: scene.isReady(),
+        activeCamera: scene.activeCamera ? scene.activeCamera.name : null
+      };
+    });
+
+    console.log('\n=== Scene Debug Info ===');
+    console.log(JSON.stringify(sceneDebug, null, 2));
+    console.log('========================\n');
+
     // Verify actual 3D rendering
     const canvasAnalysis = await page.evaluate(() => {
       const canvas = document.querySelector('.babylon-canvas') as HTMLCanvasElement;
@@ -178,6 +245,13 @@ test.describe('Simple Map Rendering', () => {
         colorSet.add(`${pixels[i]},${pixels[i+1]},${pixels[i+2]}`);
       }
 
+      // Sample some colors for debugging
+      const sampleColors = [];
+      for (let i = 0; i < Math.min(10, pixels.length / 4); i++) {
+        const idx = Math.floor((pixels.length / 4 / 10) * i) * 4;
+        sampleColors.push(`RGB(${pixels[idx]},${pixels[idx+1]},${pixels[idx+2]},${pixels[idx+3]})`);
+      }
+
       return {
         found: true,
         visible: style.display !== 'none',
@@ -185,6 +259,8 @@ test.describe('Simple Map Rendering', () => {
         canvasWidth: canvas.width,
         canvasHeight: canvas.height,
         uniqueColors: colorSet.size,
+        sampleColors: sampleColors,
+        allColors: Array.from(colorSet).slice(0, 20), // First 20 unique colors
         isProperlySized: canvas.width > 300 && canvas.height > 150
       };
     });
@@ -196,17 +272,27 @@ test.describe('Simple Map Rendering', () => {
     console.log(`Total errors/warnings: ${nonESLintErrors.length}`);
     console.log('=======================================\n');
 
-    // Log terrain rendering messages
-    const terrainMessages = consoleMessages.filter(msg =>
+    // Log rendering messages (terrain + doodads)
+    const renderingMessages = consoleMessages.filter(msg =>
       msg.includes('[TerrainRenderer]') ||
       msg.includes('[MapRendererCore]') ||
       msg.includes('Camera initialized') ||
-      msg.includes('[W3XMapLoader] Tileset:')
+      msg.includes('[W3XMapLoader] Tileset:') ||
+      msg.includes('doodad') ||
+      msg.includes('Doodad') ||
+      msg.includes('Rendering')
     );
-    console.log('\n=== Terrain Rendering Messages ===');
-    terrainMessages.forEach(msg => console.log(msg));
-    console.log(`Found ${terrainMessages.length} terrain messages`);
-    console.log('===================================\n');
+    console.log('\n=== Rendering Messages ===');
+    renderingMessages.forEach(msg => console.log(msg));
+    console.log(`Found ${renderingMessages.length} rendering messages`);
+    console.log('==========================\n');
+
+    // Log canvas pixel analysis
+    console.log('\n=== Canvas Pixel Analysis ===');
+    console.log(`Unique colors: ${canvasAnalysis.uniqueColors}`);
+    console.log(`Sample colors: ${canvasAnalysis.sampleColors?.join(', ')}`);
+    console.log(`All unique colors: ${canvasAnalysis.allColors?.join(', ')}`);
+    console.log('==============================\n');
 
     expect(canvasAnalysis.found).toBe(true);
     expect(canvasAnalysis.visible).toBe(true);

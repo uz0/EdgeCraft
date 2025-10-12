@@ -79,6 +79,10 @@ const App: React.FC = () => {
     const scene = new BABYLON.Scene(engine);
     sceneRef.current = scene;
 
+    // Expose engine and scene to window for E2E tests
+    (window as any).__testBabylonEngine = engine;
+    (window as any).__testBabylonScene = scene;
+
     // Basic lighting
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 0.7;

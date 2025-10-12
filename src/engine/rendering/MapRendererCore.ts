@@ -336,14 +336,17 @@ export class MapRendererCore {
       return;
     }
 
+    // Set maxDoodads to actual doodad count + 10% buffer for safety
+    const maxDoodads = Math.ceil(doodads.length * 1.1);
+
     this.doodadRenderer = new DoodadRenderer(this.scene, {
       enableInstancing: true,
       enableLOD: true,
       lodDistance: 100,
-      maxDoodads: 2000,
+      maxDoodads,
     });
 
-    console.log(`Rendering ${doodads.length} doodads...`);
+    console.log(`Rendering ${doodads.length} doodads (limit: ${maxDoodads})...`);
 
     // Add all doodads
     for (const doodad of doodads) {
@@ -366,13 +369,15 @@ export class MapRendererCore {
   private applyEnvironment(environment: RawMapData['info']['environment']): void {
     const { tileset, fog } = environment;
 
-    // Ambient light
+    // Ambient light - INCREASED INTENSITY for better visibility
     const ambientLight = new BABYLON.HemisphericLight(
       'ambient',
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
-    ambientLight.intensity = 0.6;
+    ambientLight.intensity = 1.5; // Increased from 0.6 to make terrain/doodads more visible
+
+    console.log(`[MapRendererCore] Ambient light created: intensity=${ambientLight.intensity}`);
 
     // Fog (if specified)
     if (fog != null) {
@@ -412,12 +417,13 @@ export class MapRendererCore {
 
     if (this.config.cameraMode === 'rts') {
       // RTS camera with bounds
+      // Set camera target Y to 50 (mid-height of typical terrain with maxHeight=100)
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
         -Math.PI / 2,
         Math.PI / 4,
         width * 0.8,
-        new BABYLON.Vector3(width / 2, 0, height / 2),
+        new BABYLON.Vector3(width / 2, 50, height / 2),
         this.scene
       );
 
