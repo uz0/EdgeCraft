@@ -15,14 +15,18 @@ import * as path from 'path';
 
 // Get all .w3x map files
 const mapsDir = path.join(process.cwd(), 'public', 'maps');
-const allW3XMaps = fs.readdirSync(mapsDir)
-  .filter(file => file.endsWith('.w3x'))
+const allW3XMaps = fs
+  .readdirSync(mapsDir)
+  .filter((file) => file.endsWith('.w3x'))
   .sort();
 
 // Test all maps
 const testMaps = allW3XMaps;
 
-console.log(`Found ${testMaps.length} maps to test:`, testMaps.map(m => m.substring(0, 30)));
+console.log(
+  `Found ${testMaps.length} maps to test:`,
+  testMaps.map((m) => m.substring(0, 30))
+);
 
 test.describe('Screenshot All Maps', () => {
   for (const mapName of testMaps) {
