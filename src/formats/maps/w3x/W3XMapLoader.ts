@@ -31,8 +31,27 @@ export class W3XMapLoader implements IMapLoader {
    * @returns Raw map data
    */
   public async parse(file: File | ArrayBuffer): Promise<RawMapData> {
-    // Convert File to ArrayBuffer if needed
-    const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+    // Convert to ArrayBuffer
+    let buffer: ArrayBuffer;
+
+    // Check type more carefully
+    const isArrayBuffer = file instanceof ArrayBuffer ||
+                          Object.prototype.toString.call(file) === '[object ArrayBuffer]';
+    const hasBufferProperty = (file as any).buffer instanceof ArrayBuffer;
+
+    if (isArrayBuffer) {
+      // Already an ArrayBuffer
+      buffer = file as ArrayBuffer;
+    } else if (hasBufferProperty) {
+      // Node.js Buffer or TypedArray - extract the underlying ArrayBuffer
+      const buf = file as any;
+      buffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
+    } else if (typeof (file as any).arrayBuffer === 'function') {
+      // File object - use arrayBuffer() method
+      buffer = await (file as File).arrayBuffer();
+    } else {
+      throw new Error(`Invalid input type: expected File, ArrayBuffer, or Buffer. Got ${Object.prototype.toString.call(file)}`);
+    }
 
     // Parse MPQ archive
     const mpqParser = new MPQParser(buffer);
