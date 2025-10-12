@@ -39,6 +39,8 @@
 
 import * as BABYLON from '@babylonjs/core';
 import type { DoodadPlacement } from '../../formats/maps/types';
+import type { AssetLoader } from '../assets/AssetLoader';
+import { mapAssetID } from '../assets/AssetMap';
 
 /**
  * Doodad renderer configuration
@@ -119,6 +121,7 @@ export interface DoodadRenderStats {
  */
 export class DoodadRenderer {
   private scene: BABYLON.Scene;
+  private assetLoader: AssetLoader;
   private config: Required<DoodadRendererConfig>;
 
   private doodadTypes: Map<string, DoodadType> = new Map();
@@ -126,8 +129,9 @@ export class DoodadRenderer {
   private instanceBuffers: Map<string, Float32Array> = new Map();
   private maxDoodadsWarningLogged = false;
 
-  constructor(scene: BABYLON.Scene, config?: DoodadRendererConfig) {
+  constructor(scene: BABYLON.Scene, assetLoader: AssetLoader, config?: DoodadRendererConfig) {
     this.scene = scene;
+    this.assetLoader = assetLoader;
     this.config = {
       enableInstancing: config?.enableInstancing ?? true,
       enableLOD: config?.enableLOD ?? true,
@@ -138,34 +142,48 @@ export class DoodadRenderer {
 
   /**
    * Load doodad type (model)
-   * @param typeId - Doodad type identifier
-   * @param _modelPath - Path to model file (MDX/M3) - unused until format parsers ready
-   * @param variations - Optional variation model paths
+   * @param typeId - Doodad type identifier (e.g., 'ATtr', 'ARrk')
+   * @param _modelPath - Path to model file (unused, uses AssetMap instead)
+   * @param variations - Optional variation model paths (unused for now)
    */
-  public loadDoodadType(typeId: string, _modelPath: string, variations?: string[]): void {
-    // For now, use placeholder meshes
-    // TODO: Load actual MDX/M3 models when format parsers ready
+  public async loadDoodadType(typeId: string, _modelPath: string, variations?: string[]): Promise<void> {
+    try {
+      // Map the doodad type ID to our asset ID
+      const mappedId = mapAssetID('w3x', 'doodad', typeId);
+      console.log(`[DoodadRenderer] Mapped doodad ID: ${typeId} -> ${mappedId}`);
 
-    const baseMesh = this.createPlaceholderMesh(typeId);
-    baseMesh.setEnabled(false); // Use as template only
+      // Load the model from AssetLoader
+      const baseMesh = await this.assetLoader.loadModel(mappedId);
+      baseMesh.setEnabled(false); // Use as template only
 
-    const variationMeshes: BABYLON.Mesh[] = [];
-    if (variations) {
-      for (let i = 0; i < variations.length; i++) {
-        const varMesh = this.createPlaceholderMesh(`${typeId}_var${i}`);
-        varMesh.setEnabled(false);
-        variationMeshes.push(varMesh);
+      const variationMeshes: BABYLON.Mesh[] = [];
+      if (variations && variations.length > 0) {
+        // For now, skip variations - will implement in Phase 2
+        console.log(`[DoodadRenderer] Skipping ${variations.length} variations for ${typeId}`);
       }
+
+      this.doodadTypes.set(typeId, {
+        typeId,
+        mesh: baseMesh,
+        variations: variationMeshes.length > 0 ? variationMeshes : undefined,
+        boundingRadius: 5, // TODO: Calculate from mesh bounds
+      });
+
+      console.log(`[DoodadRenderer] Loaded doodad type: ${typeId} (mapped to ${mappedId})`);
+    } catch (error) {
+      console.warn(`[DoodadRenderer] Failed to load doodad type ${typeId}, using fallback`, error);
+
+      // Fallback to placeholder mesh
+      const baseMesh = this.createPlaceholderMesh(typeId);
+      baseMesh.setEnabled(false);
+
+      this.doodadTypes.set(typeId, {
+        typeId,
+        mesh: baseMesh,
+        variations: undefined,
+        boundingRadius: 5,
+      });
     }
-
-    this.doodadTypes.set(typeId, {
-      typeId,
-      mesh: baseMesh,
-      variations: variationMeshes.length > 0 ? variationMeshes : undefined,
-      boundingRadius: 5, // Placeholder
-    });
-
-    console.log(`Loaded doodad type: ${typeId}`);
   }
 
   /**
@@ -183,10 +201,10 @@ export class DoodadRenderer {
       return;
     }
 
-    // Load type if not loaded
+    // Type should already be loaded - if not, log a warning
     if (!this.doodadTypes.has(placement.typeId)) {
-      // Auto-load with placeholder
-      void this.loadDoodadType(placement.typeId, '');
+      console.warn(`[DoodadRenderer] Doodad type ${placement.typeId} not loaded, skipping instance`);
+      return;
     }
 
     const instance: DoodadInstance = {

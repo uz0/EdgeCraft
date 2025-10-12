@@ -27,6 +27,7 @@ import { TerrainRenderer } from '../terrain/TerrainRenderer';
 import { InstancedUnitRenderer } from './InstancedUnitRenderer';
 import { DoodadRenderer } from './DoodadRenderer';
 import { QualityPresetManager } from './QualityPresetManager';
+import { AssetLoader } from '../assets/AssetLoader';
 
 /**
  * Map renderer configuration
@@ -66,6 +67,7 @@ export class MapRendererCore {
   private qualityManager: QualityPresetManager;
   private config: Required<MapRendererConfig>;
   private loaderRegistry: MapLoaderRegistry;
+  private assetLoader: AssetLoader;
 
   private terrainRenderer: TerrainRenderer | null = null;
   private unitRenderer: InstancedUnitRenderer | null = null;
@@ -84,6 +86,7 @@ export class MapRendererCore {
     };
 
     this.loaderRegistry = new MapLoaderRegistry();
+    this.assetLoader = new AssetLoader(this.scene);
 
     console.log('MapRendererCore initialized');
   }
@@ -95,6 +98,10 @@ export class MapRendererCore {
     const startTime = performance.now();
 
     try {
+      // Step 0: Load asset manifest (if not already loaded)
+      console.log('Loading asset manifest...');
+      await this.assetLoader.loadManifest();
+
       // Step 1: Load map data using registry
       console.log(`Loading map (${extension})...`);
 
@@ -163,7 +170,7 @@ export class MapRendererCore {
     this.renderUnits(mapData.units);
 
     // Step 3: Initialize doodads
-    this.renderDoodads(mapData.doodads);
+    await this.renderDoodads(mapData.doodads);
 
     // Step 4: Apply environment settings
     this.applyEnvironment(mapData.info.environment);
@@ -183,7 +190,7 @@ export class MapRendererCore {
    * Render terrain
    */
   private async renderTerrain(terrain: RawMapData['terrain']): Promise<void> {
-    this.terrainRenderer = new TerrainRenderer(this.scene);
+    this.terrainRenderer = new TerrainRenderer(this.scene, this.assetLoader);
 
     // Convert heightmap Float32Array to a data URL for TerrainRenderer
     const heightmapUrl = this.createHeightmapDataUrl(
@@ -192,17 +199,12 @@ export class MapRendererCore {
       terrain.height
     );
 
-    // Determine texture URLs
-    const textureUrls =
-      terrain.textures.length > 0 &&
-      terrain.textures[0]?.path != null &&
-      terrain.textures[0].path !== ''
-        ? [terrain.textures[0].path]
-        : [];
+    // Extract texture ID from terrain data
+    const textureId = terrain.textures.length > 0 ? terrain.textures[0]?.id : undefined;
 
     console.log(
       `[MapRendererCore] Loading terrain heightmap: ${terrain.width}x${terrain.height}, ` +
-        `heightmap data URL length: ${heightmapUrl.length}, textures: ${textureUrls.length}`
+        `heightmap data URL length: ${heightmapUrl.length}, textureId: ${textureId ?? 'none'}`
     );
 
     const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
@@ -210,7 +212,7 @@ export class MapRendererCore {
       height: terrain.height,
       subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
       maxHeight: 100, // Default max height
-      textures: textureUrls,
+      textureId,
     });
 
     if ('error' in result) {
@@ -330,7 +332,7 @@ export class MapRendererCore {
   /**
    * Render doodads
    */
-  private renderDoodads(doodads: RawMapData['doodads']): void {
+  private async renderDoodads(doodads: RawMapData['doodads']): Promise<void> {
     if (doodads.length === 0) {
       console.log('No doodads to render');
       return;
@@ -339,7 +341,7 @@ export class MapRendererCore {
     // Set maxDoodads to actual doodad count + 10% buffer for safety
     const maxDoodads = Math.ceil(doodads.length * 1.1);
 
-    this.doodadRenderer = new DoodadRenderer(this.scene, {
+    this.doodadRenderer = new DoodadRenderer(this.scene, this.assetLoader, {
       enableInstancing: true,
       enableLOD: true,
       lodDistance: 100,
@@ -347,6 +349,18 @@ export class MapRendererCore {
     });
 
     console.log(`Rendering ${doodads.length} doodads (limit: ${maxDoodads})...`);
+
+    // Collect unique doodad types
+    const uniqueTypes = new Set<string>();
+    for (const doodad of doodads) {
+      uniqueTypes.add(doodad.typeId);
+    }
+
+    // Load all doodad types in parallel
+    console.log(`Loading ${uniqueTypes.size} unique doodad types...`);
+    await Promise.all(
+      Array.from(uniqueTypes).map(typeId => this.doodadRenderer!.loadDoodadType(typeId, ''))
+    );
 
     // Add all doodads
     for (const doodad of doodads) {
@@ -540,6 +554,7 @@ export class MapRendererCore {
       this.camera = null;
     }
 
+    this.assetLoader.dispose();
     this.currentMap = null;
 
     console.log('MapRendererCore disposed');

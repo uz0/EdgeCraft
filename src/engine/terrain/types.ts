@@ -16,8 +16,10 @@ export interface TerrainOptions {
   minHeight?: number;
   /** Maximum height of terrain */
   maxHeight: number;
-  /** Texture URLs for terrain materials */
+  /** Texture URLs for terrain materials (deprecated, use textureId instead) */
   textures?: string[];
+  /** Texture ID from map data (e.g., 'Ashenvale', 'Agrs') */
+  textureId?: string;
   /** Enable wireframe mode */
   wireframe?: boolean;
 }
