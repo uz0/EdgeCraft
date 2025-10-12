@@ -64,30 +64,39 @@ export class MapPreviewExtractor {
     options?: ExtractOptions
   ): Promise<ExtractResult> {
     const startTime = performance.now();
+    console.log(`[MapPreviewExtractor] extract() called for: ${file.name}`);
 
     try {
       // Skip embedded extraction if forced generation
       if (!options?.forceGenerate) {
         // Try extracting embedded preview
+        console.log(`[MapPreviewExtractor] Trying embedded extraction for: ${file.name}`);
         const embeddedResult = await this.extractEmbedded(file, mapData.format);
 
         if (embeddedResult.success && embeddedResult.dataUrl) {
+          console.log(
+            `[MapPreviewExtractor] ✅ Embedded extraction SUCCESS for: ${file.name}, dataUrl length: ${embeddedResult.dataUrl.length}`
+          );
           return {
             ...embeddedResult,
             source: 'embedded',
             extractTimeMs: performance.now() - startTime,
           };
         }
+        console.log(`[MapPreviewExtractor] Embedded extraction failed: ${embeddedResult.error}`);
       }
 
       // Fallback: Generate preview from map data
-      console.log(`No embedded preview found for ${file.name}, generating...`);
+      console.log(`[MapPreviewExtractor] Generating preview for: ${file.name}`);
       const generatedResult = await this.previewGenerator.generatePreview(mapData, {
         width: options?.width,
         height: options?.height,
       });
 
       if (generatedResult.success && generatedResult.dataUrl) {
+        console.log(
+          `[MapPreviewExtractor] ✅ Generation SUCCESS for: ${file.name}, dataUrl length: ${generatedResult.dataUrl.length}, first 50 chars: ${generatedResult.dataUrl.substring(0, 50)}`
+        );
         return {
           success: true,
           dataUrl: generatedResult.dataUrl,
@@ -96,6 +105,9 @@ export class MapPreviewExtractor {
         };
       }
 
+      console.log(
+        `[MapPreviewExtractor] ❌ Generation FAILED for: ${file.name}, error: ${generatedResult.error}`
+      );
       return {
         success: false,
         source: 'error',
@@ -103,10 +115,12 @@ export class MapPreviewExtractor {
         extractTimeMs: performance.now() - startTime,
       };
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[MapPreviewExtractor] ❌ EXCEPTION for: ${file.name}, error:`, errorMsg);
       return {
         success: false,
         source: 'error',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMsg,
         extractTimeMs: performance.now() - startTime,
       };
     }
