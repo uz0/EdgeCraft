@@ -200,7 +200,12 @@ export class MapRendererCore {
         ? [terrain.textures[0].path]
         : [];
 
-    await this.terrainRenderer.loadHeightmap(heightmapUrl, {
+    console.log(
+      `[MapRendererCore] Loading terrain heightmap: ${terrain.width}x${terrain.height}, ` +
+        `heightmap data URL length: ${heightmapUrl.length}, textures: ${textureUrls.length}`
+    );
+
+    const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
       width: terrain.width,
       height: terrain.height,
       subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
@@ -208,7 +213,15 @@ export class MapRendererCore {
       textures: textureUrls,
     });
 
-    console.log(`Terrain rendered: ${terrain.width}x${terrain.height}`);
+    if ('error' in result) {
+      console.error(`[MapRendererCore] Terrain loading failed: ${result.error}`);
+      throw new Error(`Terrain loading failed: ${result.error}`);
+    }
+
+    console.log(
+      `[MapRendererCore] Terrain rendered successfully: ${terrain.width}x${terrain.height}, ` +
+        `mesh: ${result.mesh?.name ?? 'unknown'}`
+    );
   }
 
   /**
@@ -241,17 +254,33 @@ export class MapRendererCore {
       `[MapRendererCore] Heightmap stats: min=${minHeight}, max=${maxHeight}, total=${heightmap.length}`
     );
 
-    const range = maxHeight - minHeight || 1;
+    const range = maxHeight - minHeight;
 
-    for (let i = 0; i < heightmap.length; i++) {
-      const normalizedHeight = ((heightmap[i] ?? 0) - minHeight) / range;
-      const grayscale = Math.floor(normalizedHeight * 255);
+    // Handle flat terrain (when all heights are the same)
+    if (range === 0) {
+      console.warn(
+        `[MapRendererCore] Flat terrain detected (all heights = ${minHeight}), using mid-gray (127) for visibility`
+      );
+      // Use mid-gray (127) for flat terrain so it renders at mid-height
+      for (let i = 0; i < heightmap.length; i++) {
+        const idx = i * 4;
+        imageData.data[idx] = 127; // R
+        imageData.data[idx + 1] = 127; // G
+        imageData.data[idx + 2] = 127; // B
+        imageData.data[idx + 3] = 255; // A
+      }
+    } else {
+      // Normal heightmap with variation
+      for (let i = 0; i < heightmap.length; i++) {
+        const normalizedHeight = ((heightmap[i] ?? 0) - minHeight) / range;
+        const grayscale = Math.floor(normalizedHeight * 255);
 
-      const idx = i * 4;
-      imageData.data[idx] = grayscale; // R
-      imageData.data[idx + 1] = grayscale; // G
-      imageData.data[idx + 2] = grayscale; // B
-      imageData.data[idx + 3] = 255; // A
+        const idx = i * 4;
+        imageData.data[idx] = grayscale; // R
+        imageData.data[idx + 1] = grayscale; // G
+        imageData.data[idx + 2] = grayscale; // B
+        imageData.data[idx + 3] = 255; // A
+      }
     }
 
     ctx.putImageData(imageData, 0, 0);

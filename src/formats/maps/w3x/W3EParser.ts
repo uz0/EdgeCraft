@@ -198,10 +198,14 @@ export class W3EParser {
       if (height === 0) zeroCount++;
     }
 
+    // Sample first 10 values for debugging
+    const sample = Array.from(heightmap.slice(0, Math.min(10, heightmap.length)));
+
     console.log(
       `[W3EParser] Heightmap created: ${width}x${height} (${groundTiles.length} tiles), ` +
         `min=${minHeight.toFixed(2)}, max=${maxHeight.toFixed(2)}, ` +
-        `zeros=${zeroCount}/${groundTiles.length} (${((zeroCount / groundTiles.length) * 100).toFixed(1)}%)`
+        `zeros=${zeroCount}/${groundTiles.length} (${((zeroCount / groundTiles.length) * 100).toFixed(1)}%), ` +
+        `sample: [${sample.map((v) => v.toFixed(1)).join(', ')}]`
     );
 
     return heightmap;
