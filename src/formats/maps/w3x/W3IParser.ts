@@ -126,26 +126,44 @@ export class W3IParser {
       forces.push(this.readForce());
     }
 
-    // Upgrade availability
-    const upgradeCount = this.readUint32();
-    const upgradeAvailability: W3IUpgrade[] = [];
-    for (let i = 0; i < upgradeCount; i++) {
-      upgradeAvailability.push({
-        playerFlags: this.readUint32(),
-        upgradeId: this.read4CC(),
-        levelAffected: this.readUint32(),
-        availability: this.readUint32(),
-      });
+    // Upgrade availability (optional - may not be present in some maps)
+    let upgradeAvailability: W3IUpgrade[] = [];
+    if (this.offset + 4 <= this.buffer.byteLength) {
+      const upgradeCount = this.readUint32();
+      for (let i = 0; i < upgradeCount; i++) {
+        // Check if we have enough buffer for this upgrade entry (4 + 4 + 4 + 4 = 16 bytes)
+        if (this.offset + 16 > this.buffer.byteLength) {
+          console.warn(
+            `[W3IParser] Insufficient buffer for upgrade ${i}/${upgradeCount} at offset ${this.offset}`
+          );
+          break;
+        }
+        upgradeAvailability.push({
+          playerFlags: this.readUint32(),
+          upgradeId: this.read4CC(),
+          levelAffected: this.readUint32(),
+          availability: this.readUint32(),
+        });
+      }
     }
 
-    // Tech availability
-    const techCount = this.readUint32();
-    const techAvailability: W3ITech[] = [];
-    for (let i = 0; i < techCount; i++) {
-      techAvailability.push({
-        playerFlags: this.readUint32(),
-        techId: this.read4CC(),
-      });
+    // Tech availability (optional - may not be present in some maps)
+    let techAvailability: W3ITech[] = [];
+    if (this.offset + 4 <= this.buffer.byteLength) {
+      const techCount = this.readUint32();
+      for (let i = 0; i < techCount; i++) {
+        // Check if we have enough buffer for this tech entry (4 + 4 = 8 bytes)
+        if (this.offset + 8 > this.buffer.byteLength) {
+          console.warn(
+            `[W3IParser] Insufficient buffer for tech ${i}/${techCount} at offset ${this.offset}`
+          );
+          break;
+        }
+        techAvailability.push({
+          playerFlags: this.readUint32(),
+          techId: this.read4CC(),
+        });
+      }
     }
 
     // Random unit tables (optional - may not be present in older maps)

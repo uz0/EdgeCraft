@@ -221,6 +221,35 @@ const App: React.FC = () => {
     };
   }, [handleMapSelect]); // Only depend on handleMapSelect (stable with useCallback)
 
+  // Register event listener for test:loadMap events (E2E testing)
+  useEffect(() => {
+    const handleTestLoadMap = (event: Event): void => {
+      const customEvent = event as CustomEvent<{ name: string; path: string; format: string }>;
+      console.log('[APP] test:loadMap event received:', customEvent.detail);
+
+      // Find the map by name
+      const map = maps.find((m) => m.name === customEvent.detail.name);
+      if (map) {
+        console.log('[APP] Loading map from event:', map.name);
+        void handleMapSelect(map);
+      } else {
+        console.error('[APP] Map not found:', customEvent.detail.name);
+      }
+    };
+
+    console.log('[APP] Registering test:loadMap event listener');
+    window.addEventListener('test:loadMap', handleTestLoadMap);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).__testLoadMapListenerRegistered = true;
+
+    return () => {
+      console.log('[APP] Removing test:loadMap event listener');
+      window.removeEventListener('test:loadMap', handleTestLoadMap);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      delete (window as any).__testLoadMapListenerRegistered;
+    };
+  }, [maps, handleMapSelect]);
+
   // Handle back to gallery
   const handleBackToGallery = (): void => {
     setShowGallery(true);
