@@ -59,6 +59,11 @@ Phase 2 transforms Edge Craft from a functional renderer into a visually stunnin
 
 ### What Phase 2 Will Deliver
 
+**CRITICAL DEPENDENCY**: 🔴 **PRP 2.12: Legal Asset Library** - REQUIRED for full map rendering
+- [ ] Without this, maps render with placeholder boxes (unacceptable for release)
+- [ ] Provides terrain textures + doodad models with legal licenses
+- [ ] See `PRPs/phase2-rendering/2.12-legal-asset-library.md`
+
 **1. Post-Processing Pipeline**
 - [x] FXAA Anti-Aliasing (1-1.5ms) @ MEDIUM ✅ Implemented
 - [x] Bloom Effect (2-2.5ms) @ MEDIUM ✅ Implemented

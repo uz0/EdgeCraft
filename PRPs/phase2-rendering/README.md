@@ -83,8 +83,26 @@ All Phase 2 rendering systems have been implemented (~4,000 lines of code):
 | **2.8** | MapPreviewGenerator | ⏳ Pending | Medium | - |
 | **2.9** | DoodadRenderer | ✅ Complete | Medium | - |
 | **2.10** | MapStreamingSystem | ⏳ Deferred | Low | For 923MB file |
+| **🔴 2.12** | **Legal Asset Library** | ⏳ **PLANNED** | **🔴 CRITICAL** | **[2.12-legal-asset-library.md](./2.12-legal-asset-library.md)** |
 
-**Progress**: 9/11 PRPs complete (82%)
+**Progress**: 9/12 PRPs complete (75%)
+
+### 🚨 CRITICAL BLOCKER: PRP 2.12 - Legal Asset Library
+
+**Without this, maps render with placeholder boxes (unacceptable for release)**
+
+Currently:
+- ❌ No terrain textures (grass, dirt, rock, snow, etc.)
+- ❌ No doodad models (trees, rocks, buildings)
+- ❌ Cannot use Blizzard's original assets (copyright)
+
+**Required**:
+- ✅ 12 terrain texture types (CC0/MIT licensed)
+- ✅ 30 doodad model types (CC0/MIT licensed)
+- ✅ AssetLoader system for runtime loading
+- ✅ Legal compliance validation
+
+**See**: [PRPs/phase2-rendering/2.12-legal-asset-library.md](./2.12-legal-asset-library.md)
 
 ---
 
