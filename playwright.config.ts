@@ -81,11 +81,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         // Enable WebGL
         launchOptions: {
-          args: [
-            '--enable-webgl',
-            '--enable-gpu-rasterization',
-            '--ignore-gpu-blocklist',
-          ],
+          args: ['--enable-webgl', '--enable-gpu-rasterization', '--ignore-gpu-blocklist'],
         },
       },
     },

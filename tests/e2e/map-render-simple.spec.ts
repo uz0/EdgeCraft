@@ -25,9 +25,12 @@ test.describe('Simple Map Rendering', () => {
     await page.waitForSelector('.gallery-view', { timeout: 15000 });
 
     // Wait for test infrastructure to be ready
-    await page.waitForFunction(() => {
-      return (window as any).__testLoadMapListenerRegistered === true;
-    }, { timeout: 5000 });
+    await page.waitForFunction(
+      () => {
+        return (window as any).__testLoadMapListenerRegistered === true;
+      },
+      { timeout: 5000 }
+    );
 
     // Dispatch event to load map
     await page.evaluate(() => {
@@ -36,20 +39,27 @@ test.describe('Simple Map Rendering', () => {
         detail: {
           name: 'EchoIslesAlltherandom.w3x',
           path: '/maps/EchoIslesAlltherandom.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
     });
 
     // Wait for map to load and render
-    await page.waitForFunction(() => {
-      // Check for success message in console
-      const body = document.body.textContent || '';
-      return body.includes('Map loaded successfully') || body.includes('Map rendering complete');
-    }, { timeout: 15000 }).catch(() => {
-      console.log('[TEST] Timeout waiting for success message, checking logs...');
-    });
+    await page
+      .waitForFunction(
+        () => {
+          // Check for success message in console
+          const body = document.body.textContent || '';
+          return (
+            body.includes('Map loaded successfully') || body.includes('Map rendering complete')
+          );
+        },
+        { timeout: 15000 }
+      )
+      .catch(() => {
+        console.log('[TEST] Timeout waiting for success message, checking logs...');
+      });
 
     // Wait additional time for rendering to stabilize
     await page.waitForTimeout(2000);
@@ -74,7 +84,7 @@ test.describe('Simple Map Rendering', () => {
       // Count unique colors
       const colorSet = new Set<string>();
       for (let i = 0; i < pixels.length; i += 4) {
-        const color = `${pixels[i]},${pixels[i+1]},${pixels[i+2]}`;
+        const color = `${pixels[i]},${pixels[i + 1]},${pixels[i + 2]}`;
         colorSet.add(color);
       }
 
@@ -95,16 +105,15 @@ test.describe('Simple Map Rendering', () => {
         displayHeight: rect.height,
         uniqueColors: colorSet.size,
         centerColor: centerColor,
-        isProperlySized: isProperlySized
+        isProperlySized: isProperlySized,
       };
     });
 
     console.log('[TEST] Canvas analysis:', canvasAnalysis);
 
     // Check for success message in console
-    const hasSuccessMessage = consoleMessages.some(msg =>
-      msg.includes('Map loaded successfully') ||
-      msg.includes('Map rendering complete')
+    const hasSuccessMessage = consoleMessages.some(
+      (msg) => msg.includes('Map loaded successfully') || msg.includes('Map rendering complete')
     );
     console.log('[TEST] Has success message:', hasSuccessMessage);
 
@@ -141,9 +150,12 @@ test.describe('Simple Map Rendering', () => {
     await page.goto('/');
     await page.waitForSelector('.gallery-view', { timeout: 15000 });
 
-    await page.waitForFunction(() => {
-      return (window as any).__testLoadMapListenerRegistered === true;
-    }, { timeout: 5000 });
+    await page.waitForFunction(
+      () => {
+        return (window as any).__testLoadMapListenerRegistered === true;
+      },
+      { timeout: 5000 }
+    );
 
     // Load 3P Sentinel 01
     await page.evaluate(() => {
@@ -151,8 +163,8 @@ test.describe('Simple Map Rendering', () => {
         detail: {
           name: '3P Sentinel 01 v3.06.w3x',
           path: '/maps/3P Sentinel 01 v3.06.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
     });
@@ -162,7 +174,6 @@ test.describe('Simple Map Rendering', () => {
     // Debug: Check scene state before screenshot
     const sceneDebug = await page.evaluate(() => {
       const win = window as any;
-      const engine = win.__testBabylonEngine;
       const scene = win.__testBabylonScene;
 
       if (!scene) return { error: 'No scene found' };
@@ -173,7 +184,7 @@ test.describe('Simple Map Rendering', () => {
         enabled: m.isEnabled(),
         visible: m.isVisible,
         hasInstances: m.thinInstanceCount > 0,
-        instanceCount: m.thinInstanceCount || 0
+        instanceCount: m.thinInstanceCount || 0,
       }));
 
       const enabledMeshes = meshStates.filter((m: any) => m.enabled);
@@ -190,35 +201,46 @@ test.describe('Simple Map Rendering', () => {
         disabledMeshes: disabledMeshes.length,
         disabledMeshNames: disabledMeshes.slice(0, 10).map((m: any) => m.name), // First 10
         terrainMesh: meshStates.find((m: any) => m.name === 'terrain'),
-        terrainPosition: terrainMesh ? {
-          x: terrainMesh.position.x,
-          y: terrainMesh.position.y,
-          z: terrainMesh.position.z
-        } : null,
-        terrainBoundingBox: terrainMesh ? {
-          min: terrainMesh.getBoundingInfo().boundingBox.minimumWorld,
-          max: terrainMesh.getBoundingInfo().boundingBox.maximumWorld
-        } : null,
-        cameraPosition: camera ? {
-          x: camera.position.x,
-          y: camera.position.y,
-          z: camera.position.z
-        } : null,
-        cameraTarget: camera && camera.target ? {
-          x: camera.target.x,
-          y: camera.target.y,
-          z: camera.target.z
-        } : null,
+        terrainPosition: terrainMesh
+          ? {
+              x: terrainMesh.position.x,
+              y: terrainMesh.position.y,
+              z: terrainMesh.position.z,
+            }
+          : null,
+        terrainBoundingBox: terrainMesh
+          ? {
+              min: terrainMesh.getBoundingInfo().boundingBox.minimumWorld,
+              max: terrainMesh.getBoundingInfo().boundingBox.maximumWorld,
+            }
+          : null,
+        cameraPosition: camera
+          ? {
+              x: camera.position.x,
+              y: camera.position.y,
+              z: camera.position.z,
+            }
+          : null,
+        cameraTarget:
+          camera && camera.target
+            ? {
+                x: camera.target.x,
+                y: camera.target.y,
+                z: camera.target.z,
+              }
+            : null,
         lights: scene.lights.length,
         cameras: scene.cameras.length,
-        clearColor: scene.clearColor ? {
-          r: scene.clearColor.r,
-          g: scene.clearColor.g,
-          b: scene.clearColor.b,
-          a: scene.clearColor.a
-        } : null,
+        clearColor: scene.clearColor
+          ? {
+              r: scene.clearColor.r,
+              g: scene.clearColor.g,
+              b: scene.clearColor.b,
+              a: scene.clearColor.a,
+            }
+          : null,
         isReady: scene.isReady(),
-        activeCamera: scene.activeCamera ? scene.activeCamera.name : null
+        activeCamera: scene.activeCamera ? scene.activeCamera.name : null,
       };
     });
 
@@ -242,14 +264,16 @@ test.describe('Simple Map Rendering', () => {
 
       const colorSet = new Set<string>();
       for (let i = 0; i < pixels.length; i += 4) {
-        colorSet.add(`${pixels[i]},${pixels[i+1]},${pixels[i+2]}`);
+        colorSet.add(`${pixels[i]},${pixels[i + 1]},${pixels[i + 2]}`);
       }
 
       // Sample some colors for debugging
       const sampleColors = [];
       for (let i = 0; i < Math.min(10, pixels.length / 4); i++) {
         const idx = Math.floor((pixels.length / 4 / 10) * i) * 4;
-        sampleColors.push(`RGB(${pixels[idx]},${pixels[idx+1]},${pixels[idx+2]},${pixels[idx+3]})`);
+        sampleColors.push(
+          `RGB(${pixels[idx]},${pixels[idx + 1]},${pixels[idx + 2]},${pixels[idx + 3]})`
+        );
       }
 
       return {
@@ -261,29 +285,30 @@ test.describe('Simple Map Rendering', () => {
         uniqueColors: colorSet.size,
         sampleColors: sampleColors,
         allColors: Array.from(colorSet).slice(0, 20), // First 20 unique colors
-        isProperlySized: canvas.width > 300 && canvas.height > 150
+        isProperlySized: canvas.width > 300 && canvas.height > 150,
       };
     });
 
     // Log console errors (excluding ESLint warnings)
-    const nonESLintErrors = consoleErrors.filter(err => !err.includes('[ESLint]'));
+    const nonESLintErrors = consoleErrors.filter((err) => !err.includes('[ESLint]'));
     console.log('\n=== Browser Console Errors/Warnings ===');
-    nonESLintErrors.forEach(err => console.log(err));
+    nonESLintErrors.forEach((err) => console.log(err));
     console.log(`Total errors/warnings: ${nonESLintErrors.length}`);
     console.log('=======================================\n');
 
     // Log rendering messages (terrain + doodads)
-    const renderingMessages = consoleMessages.filter(msg =>
-      msg.includes('[TerrainRenderer]') ||
-      msg.includes('[MapRendererCore]') ||
-      msg.includes('Camera initialized') ||
-      msg.includes('[W3XMapLoader] Tileset:') ||
-      msg.includes('doodad') ||
-      msg.includes('Doodad') ||
-      msg.includes('Rendering')
+    const renderingMessages = consoleMessages.filter(
+      (msg) =>
+        msg.includes('[TerrainRenderer]') ||
+        msg.includes('[MapRendererCore]') ||
+        msg.includes('Camera initialized') ||
+        msg.includes('[W3XMapLoader] Tileset:') ||
+        msg.includes('doodad') ||
+        msg.includes('Doodad') ||
+        msg.includes('Rendering')
     );
     console.log('\n=== Rendering Messages ===');
-    renderingMessages.forEach(msg => console.log(msg));
+    renderingMessages.forEach((msg) => console.log(msg));
     console.log(`Found ${renderingMessages.length} rendering messages`);
     console.log('==========================\n');
 

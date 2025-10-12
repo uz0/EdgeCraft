@@ -15,7 +15,9 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Actual Map Rendering - EchoIsles', () => {
-  test('should render EchoIsles map with WebGL content and verify all rendering systems', async ({ page }) => {
+  test('should render EchoIsles map with WebGL content and verify all rendering systems', async ({
+    page,
+  }) => {
     // Track console messages
     const consoleMessages: string[] = [];
     page.on('console', (msg) => {
@@ -31,9 +33,12 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
 
     // Wait for test event listener to be registered
     console.log('[TEST] Waiting for event listener...');
-    await page.waitForFunction(() => {
-      return (window as any).__testLoadMapListenerRegistered === true;
-    }, { timeout: 5000 });
+    await page.waitForFunction(
+      () => {
+        return (window as any).__testLoadMapListenerRegistered === true;
+      },
+      { timeout: 5000 }
+    );
 
     // Dispatch test:loadMap event
     console.log('[TEST] Dispatching test:loadMap event for EchoIsles...');
@@ -42,8 +47,8 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
         detail: {
           name: 'EchoIslesAlltherandom.w3x',
           path: '/maps/EchoIslesAlltherandom.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
       console.log('[TEST] Event dispatched');
@@ -51,26 +56,27 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
 
     // Wait for canvas to become visible (indicates map is loaded and rendering)
     console.log('[TEST] Waiting for canvas to become visible...');
-    await page.waitForFunction(() => {
-      const canvas = document.querySelector('.babylon-canvas');
-      if (!canvas) return false;
-      const style = getComputedStyle(canvas);
-      return style.display !== 'none' && style.visibility !== 'hidden';
-    }, { timeout: 15000 });
+    await page.waitForFunction(
+      () => {
+        const canvas = document.querySelector('.babylon-canvas');
+        if (!canvas) return false;
+        const style = getComputedStyle(canvas);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      },
+      { timeout: 15000 }
+    );
 
     // Additional wait for WebGL to fully render
     await page.waitForTimeout(2000);
 
     // Check console logs for success indicators
-    const hasMapLoadSuccess = consoleMessages.some(msg =>
+    const hasMapLoadSuccess = consoleMessages.some((msg) =>
       msg.includes('✅ Map loaded successfully')
     );
-    const hasRenderingComplete = consoleMessages.some(msg =>
+    const hasRenderingComplete = consoleMessages.some((msg) =>
       msg.includes('Map rendering complete')
     );
-    const hasDoodadsRendered = consoleMessages.some(msg =>
-      msg.includes('Doodads rendered')
-    );
+    const hasDoodadsRendered = consoleMessages.some((msg) => msg.includes('Doodads rendered'));
 
     console.log('[TEST] Console checks:');
     console.log('  - Map load success:', hasMapLoadSuccess);
@@ -85,7 +91,7 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
       if (!canvas) {
         return {
           status: 'no_canvas',
-          found: false
+          found: false,
         };
       }
 
@@ -106,11 +112,11 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
         hasWebGLContext: !!gl,
         dimensions: {
           width: rect.width,
-          height: rect.height
+          height: rect.height,
         },
         opacity: style.opacity,
         zIndex: style.zIndex,
-        galleryHidden: !galleryVisible
+        galleryHidden: !galleryVisible,
       };
     });
 
@@ -141,9 +147,12 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
     await page.goto('/');
     await page.waitForSelector('.gallery-view', { timeout: 15000 });
 
-    await page.waitForFunction(() => {
-      return (window as any).__testLoadMapListenerRegistered === true;
-    }, { timeout: 5000 });
+    await page.waitForFunction(
+      () => {
+        return (window as any).__testLoadMapListenerRegistered === true;
+      },
+      { timeout: 5000 }
+    );
 
     // Load map
     await page.evaluate(() => {
@@ -151,8 +160,8 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
         detail: {
           name: 'EchoIslesAlltherandom.w3x',
           path: '/maps/EchoIslesAlltherandom.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
     });
@@ -171,7 +180,7 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
       const logs = (window as any).__renderLogs || [];
       return {
         logCount: logs.length,
-        bodyText: document.body.textContent
+        bodyText: document.body.textContent,
       };
     });
 

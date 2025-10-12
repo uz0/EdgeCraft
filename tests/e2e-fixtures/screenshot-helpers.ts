@@ -73,8 +73,10 @@ export async function screenshotCanvas(page: Page): Promise<Buffer> {
  */
 export async function getFPS(page: Page): Promise<number> {
   const fpsText = await page.locator('.header-stats .stat').first().textContent();
-  const match = fpsText?.match(/FPS: (\d+)/);
-  return match && match[1] ? parseInt(match[1], 10) : 0;
+  if (fpsText == null) return 0;
+  const match = fpsText.match(/FPS: (\d+)/);
+  const fpsString = match?.[1];
+  return fpsString != null ? parseInt(fpsString, 10) : 0;
 }
 
 /**
@@ -86,6 +88,7 @@ export async function selectMap(page: Page, mapName: string): Promise<void> {
   await page.waitForSelector('.map-card', { timeout: 15000 });
 
   // Wait for __testReady flag
+
   await page.waitForFunction(() => (window as any).__testReady === true, { timeout: 10000 });
 
   // Extract format from map name
@@ -103,6 +106,7 @@ export async function selectMap(page: Page, mapName: string): Promise<void> {
       console.log('[TEST] Calling handleMapSelect directly for:', name);
 
       const handleMapSelect = (window as any).__handleMapSelect;
+
       if (!handleMapSelect) {
         throw new Error('handleMapSelect not available on window');
       }
@@ -117,6 +121,7 @@ export async function selectMap(page: Page, mapName: string): Promise<void> {
       };
 
       console.log('[TEST] Calling handleMapSelect with:', map);
+
       handleMapSelect(map);
     },
     { name: mapName, fmt: format }

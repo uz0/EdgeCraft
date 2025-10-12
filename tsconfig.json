@@ -73,7 +73,7 @@
     "build",
     "coverage",
     "*.js",
-    "**/*.spec.ts"
+    "src/**/*.spec.ts"
   ],
 
   "references": [

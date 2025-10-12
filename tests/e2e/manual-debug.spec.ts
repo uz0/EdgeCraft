@@ -26,7 +26,7 @@ test('manual debug - check if map loads', async ({ page }) => {
     return {
       testReady: (window as any).__testReady,
       hasHandleMapSelect: typeof (window as any).__handleMapSelect === 'function',
-      mapCardCount: document.querySelectorAll('.map-card').length
+      mapCardCount: document.querySelectorAll('.map-card').length,
     };
   });
   console.log('State:', state);

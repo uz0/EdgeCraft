@@ -39,8 +39,8 @@ test.describe('Complete Map Rendering', () => {
         detail: {
           name: 'EchoIslesAlltherandom.w3x',
           path: '/maps/EchoIslesAlltherandom.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
     });
@@ -61,7 +61,10 @@ test.describe('Complete Map Rendering', () => {
     });
 
     // Check for errors
-    const hasError = await page.locator('.error-overlay').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('.error-overlay')
+      .isVisible()
+      .catch(() => false);
 
     if (hasError) {
       const errorText = await page.locator('.error-overlay').textContent();
@@ -110,8 +113,8 @@ test.describe('Complete Map Rendering', () => {
         detail: {
           name: 'Footmen Frenzy 1.9f.w3x',
           path: '/maps/Footmen Frenzy 1.9f.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
     });
@@ -123,7 +126,10 @@ test.describe('Complete Map Rendering', () => {
       return canvas ? getComputedStyle(canvas).display !== 'none' : false;
     });
 
-    const hasError = await page.locator('.error-overlay').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('.error-overlay')
+      .isVisible()
+      .catch(() => false);
 
     console.log('[TEST] Canvas visible:', canvasVisible);
     console.log('[TEST] Has error:', hasError);
@@ -159,8 +165,8 @@ test.describe('Complete Map Rendering', () => {
         detail: {
           name: 'ragingstream.w3x',
           path: '/maps/ragingstream.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
     });
@@ -172,7 +178,10 @@ test.describe('Complete Map Rendering', () => {
       return canvas ? getComputedStyle(canvas).display !== 'none' : false;
     });
 
-    const hasError = await page.locator('.error-overlay').isVisible().catch(() => false);
+    const hasError = await page
+      .locator('.error-overlay')
+      .isVisible()
+      .catch(() => false);
 
     console.log('[TEST] Canvas visible:', canvasVisible);
     console.log('[TEST] Has error:', hasError);

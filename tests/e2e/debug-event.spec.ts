@@ -43,8 +43,8 @@ test.describe('Debug Event Listener', () => {
         detail: {
           name: 'EchoIslesAlltherandom.w3x',
           path: '/maps/EchoIslesAlltherandom.w3x',
-          format: 'w3x'
-        }
+          format: 'w3x',
+        },
       });
       window.dispatchEvent(event);
       console.log('[TEST] Event dispatched');

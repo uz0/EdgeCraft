@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 /**
  * Debug test - Directly verify event mechanism
@@ -25,8 +25,8 @@ test('should trigger test:loadMap event', async ({ page }) => {
       detail: {
         name: 'EchoIslesAlltherandom.w3x',
         path: '/maps/EchoIslesAlltherandom.w3x',
-        format: 'w3x'
-      }
+        format: 'w3x',
+      },
     });
 
     window.dispatchEvent(event);
@@ -43,6 +43,9 @@ test('should trigger test:loadMap event', async ({ page }) => {
   const galleryVisible = await page.locator('.gallery-view').isVisible();
   console.log('[TEST] Gallery still visible?', galleryVisible);
 
-  const loadingVisible = await page.locator('.loading-overlay').isVisible().catch(() => false);
+  const loadingVisible = await page
+    .locator('.loading-overlay')
+    .isVisible()
+    .catch(() => false);
   console.log('[TEST] Loading overlay visible?', loadingVisible);
 });

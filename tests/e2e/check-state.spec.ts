@@ -7,9 +7,6 @@ test('check app state before event dispatch', async ({ page }) => {
   await page.waitForTimeout(2000);
 
   const state = await page.evaluate(() => {
-    // Check if React state is accessible
-    const appElement = document.querySelector('.app');
-
     // Check window flag
     const hasListener = (window as any).__testLoadMapListenerRegistered;
 
@@ -19,10 +16,12 @@ test('check app state before event dispatch', async ({ page }) => {
     return {
       hasListener,
       mapCardCount: mapCards.length,
-      mapNames: Array.from(mapCards).slice(0, 5).map(card => {
-        const nameEl = card.querySelector('.map-card-name');
-        return nameEl?.textContent;
-      })
+      mapNames: Array.from(mapCards)
+        .slice(0, 5)
+        .map((card) => {
+          const nameEl = card.querySelector('.map-card-name');
+          return nameEl?.textContent;
+        }),
     };
   });
 

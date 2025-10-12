@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectMap, waitForMapLoaded, screenshotCanvas } from '../e2e-fixtures/screenshot-helpers';
+import { selectMap, waitForMapLoaded } from '../e2e-fixtures/screenshot-helpers';
 
 /**
  * Map Rendering E2E Tests
