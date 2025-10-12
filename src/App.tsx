@@ -165,6 +165,12 @@ const App: React.FC = () => {
         setCurrentMap(map);
         setLoadingProgress('');
         console.log('✅ Map loaded successfully:', map.name);
+
+        // Resize canvas now that it's visible
+        if (engineRef.current && !engineRef.current.isDisposed) {
+          engineRef.current.resize();
+          console.log('[APP] Canvas resized after map load');
+        }
       } else {
         throw new Error('Failed to load map');
       }

@@ -21,8 +21,6 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Disable StrictMode to prevent double-mounting issues with Babylon.js
+// StrictMode causes mount -> cleanup -> remount which disposes the WebGL engine
+root.render(<App />);
