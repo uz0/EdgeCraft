@@ -422,4 +422,147 @@ describe('MapGallery', () => {
       expect(screen.getByText('2 maps')).toBeInTheDocument();
     });
   });
+
+  describe('Preview Image Rendering', () => {
+    it('should render image when thumbnailUrl is provided', () => {
+      const mapsWithThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      const image = screen.getByAltText('Test Map 1.w3x');
+      expect(image).toBeInTheDocument();
+      expect(image).toHaveAttribute('src', mapsWithThumbnails[0]?.thumbnailUrl);
+      expect(image.tagName).toBe('IMG');
+    });
+
+    it('should render placeholder when thumbnailUrl is undefined', () => {
+      const mapsWithoutThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: undefined,
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithoutThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      expect(screen.queryByAltText('Test Map 1.w3x')).not.toBeInTheDocument();
+      expect(screen.getAllByText('W3X').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should render placeholder when thumbnailUrl is null', () => {
+      const mapsWithNullThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: null,
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithNullThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      expect(screen.queryByAltText('Test Map 1.w3x')).not.toBeInTheDocument();
+      const placeholders = document.querySelectorAll('.map-card-placeholder');
+      expect(placeholders.length).toBeGreaterThan(0);
+    });
+
+    it('should render placeholder when thumbnailUrl is empty string', () => {
+      const mapsWithEmptyThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: '',
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithEmptyThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      expect(screen.queryByAltText('Test Map 1.w3x')).not.toBeInTheDocument();
+      const placeholders = document.querySelectorAll('.map-card-placeholder');
+      expect(placeholders.length).toBeGreaterThan(0);
+    });
+
+    it('should render multiple images correctly', () => {
+      const mapsWithMixedThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: 'data:image/png;base64,imagedata1',
+        },
+        {
+          ...mockMaps[1]!,
+          thumbnailUrl: undefined,
+        },
+        {
+          ...mockMaps[2]!,
+          thumbnailUrl: 'data:image/png;base64,imagedata2',
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithMixedThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      const images = document.querySelectorAll('img');
+      expect(images.length).toBe(2); // Only 2 maps have thumbnails
+
+      expect(screen.getByAltText('Test Map 1.w3x')).toBeInTheDocument();
+      expect(screen.queryByAltText('Small Map.w3x')).not.toBeInTheDocument();
+      expect(screen.getByAltText('Large Campaign.w3n')).toBeInTheDocument();
+    });
+
+    it('should use correct alt text for accessibility', () => {
+      const mapsWithThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: 'data:image/png;base64,imagedata',
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      const image = screen.getByAltText('Test Map 1.w3x');
+      expect(image).toBeInTheDocument();
+      expect(image.getAttribute('alt')).toBe('Test Map 1.w3x');
+    });
+
+    it('should render preview images with correct data URL format', () => {
+      const validDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const mapsWithValidThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: validDataUrl,
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithValidThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      const image = screen.getByAltText('Test Map 1.w3x');
+      expect(image).toHaveAttribute('src', validDataUrl);
+      expect(image.getAttribute('src')).toMatch(/^data:image\/(png|jpeg);base64,/);
+    });
+
+    it('should render format badge in placeholder when no thumbnail', () => {
+      const mapsWithoutThumbnails: MapMetadata[] = [
+        {
+          ...mockMaps[0]!,
+          thumbnailUrl: undefined,
+        },
+        {
+          ...mockMaps[3]!,
+          thumbnailUrl: undefined,
+        },
+      ];
+
+      render(<MapGallery maps={mapsWithoutThumbnails} onMapSelect={mockOnMapSelect} />);
+
+      const placeholders = document.querySelectorAll('.map-card-placeholder');
+      expect(placeholders.length).toBe(2);
+
+      // Check that format badges are in placeholders
+      const w3xBadges = screen.getAllByText('W3X');
+      const sc2Badges = screen.getAllByText('SC2');
+      expect(w3xBadges.length).toBeGreaterThan(0);
+      expect(sc2Badges.length).toBeGreaterThan(0);
+    });
+  });
 });
