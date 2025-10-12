@@ -36,10 +36,12 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
       w3n: [],
     };
     maps.forEach((map) => {
-      if (!grouped[map.format]) {
-        grouped[map.format] = [];
+      const formatGroup = grouped[map.format];
+      if (formatGroup) {
+        formatGroup.push(map);
+      } else {
+        grouped[map.format] = [map];
       }
-      grouped[map.format].push(map);
     });
     return grouped;
   }, [maps]);

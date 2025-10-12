@@ -200,32 +200,42 @@ export class MapPreviewGenerator {
       }
 
       console.log(`[MapPreviewGenerator] Step 6: Capturing screenshot...`);
-      const mimeType = finalConfig.format === 'png' ? 'image/png' : 'image/jpeg';
+
+      // Use canvas.toDataURL() directly - more reliable than CreateScreenshotUsingRenderTarget
       const dataUrl = await new Promise<string>((resolve, reject) => {
         try {
-          BABYLON.Tools.CreateScreenshotUsingRenderTarget(
-            this.engine,
-            this.camera!,
-            {
-              width: finalConfig.width,
-              height: finalConfig.height,
-              precision: 1,
-            },
-            (data) => {
-              console.log(
-                `[MapPreviewGenerator] Screenshot captured! Data URL length: ${data.length}, starts with: ${data.substring(0, 50)}`
-              );
-              resolve(data);
-            },
-            mimeType,
-            1, // samples
-            false, // antialiasing
-            undefined, // fileName
-            false, // renderSprites
-            false, // enableStencilBuffer
-            false, // useLayerMask
-            finalConfig.quality
+          // Get the canvas element
+          const canvas = this.engine.getRenderingCanvas();
+          if (!canvas) {
+            throw new Error('Canvas not found');
+          }
+
+          // Set timeout fallback (5 seconds)
+          const timeoutId = setTimeout(() => {
+            console.error('[MapPreviewGenerator] ⚠️ Screenshot timeout - using fallback');
+            // Fallback: just use the current canvas state
+            const mimeType = finalConfig.format === 'png' ? 'image/png' : 'image/jpeg';
+            try {
+              const fallbackDataUrl = canvas.toDataURL(mimeType, finalConfig.quality);
+              resolve(fallbackDataUrl);
+            } catch (err) {
+              reject(new Error('Screenshot timeout and fallback failed'));
+            }
+          }, 5000);
+
+          // Render one more frame to ensure everything is drawn
+          this.scene!.render();
+
+          // Get data URL directly from canvas
+          const mimeType = finalConfig.format === 'png' ? 'image/png' : 'image/jpeg';
+          const canvasDataUrl = canvas.toDataURL(mimeType, finalConfig.quality);
+
+          console.log(
+            `[MapPreviewGenerator] Screenshot captured! Data URL length: ${canvasDataUrl.length}, starts with: ${canvasDataUrl.substring(0, 50)}`
           );
+
+          clearTimeout(timeoutId);
+          resolve(canvasDataUrl);
         } catch (error) {
           console.error(`[MapPreviewGenerator] Screenshot capture error:`, error);
           reject(error);
