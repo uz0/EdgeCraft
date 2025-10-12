@@ -65,21 +65,44 @@ export class W3XMapLoader implements IMapLoader {
     const allFiles = mpqParser.listFiles();
     console.log(`[W3XMapLoader] Files in archive (${allFiles.length} total):`, allFiles.slice(0, 20));
 
-    // Try different case variations for war3map.w3i
-    let w3iData = await mpqParser.extractFile('war3map.w3i');
-    if (!w3iData) {
-      console.log('[W3XMapLoader] Trying uppercase: war3map.W3I');
-      w3iData = await mpqParser.extractFile('war3map.W3I');
-    }
-    if (!w3iData) {
-      console.log('[W3XMapLoader] Trying all caps: WAR3MAP.W3I');
-      w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
+    // Try to extract files, but catch errors (multi-compression, encryption, etc.)
+    let w3iData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let w3eData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let dooData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let unitsData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+
+    try {
+      // Try different case variations for war3map.w3i
+      w3iData = await mpqParser.extractFile('war3map.w3i');
+      if (!w3iData) {
+        console.log('[W3XMapLoader] Trying uppercase: war3map.W3I');
+        w3iData = await mpqParser.extractFile('war3map.W3I');
+      }
+      if (!w3iData) {
+        console.log('[W3XMapLoader] Trying all caps: WAR3MAP.W3I');
+        w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
+      }
+    } catch (err) {
+      console.warn('[W3XMapLoader] ⚠️ Failed to extract war3map.w3i:', err instanceof Error ? err.message : String(err));
     }
 
-    // Extract other war3map files
-    const w3eData = await mpqParser.extractFile('war3map.w3e');
-    const dooData = await mpqParser.extractFile('war3map.doo');
-    const unitsData = await mpqParser.extractFile('war3mapUnits.doo');
+    try {
+      w3eData = await mpqParser.extractFile('war3map.w3e');
+    } catch (err) {
+      console.warn('[W3XMapLoader] ⚠️ Failed to extract war3map.w3e:', err instanceof Error ? err.message : String(err));
+    }
+
+    try {
+      dooData = await mpqParser.extractFile('war3map.doo');
+    } catch (err) {
+      // Optional file, silent fail
+    }
+
+    try {
+      unitsData = await mpqParser.extractFile('war3mapUnits.doo');
+    } catch (err) {
+      // Optional file, silent fail
+    }
 
     // If extraction fails (likely due to multi-compression not being supported),
     // create placeholder data so we can still generate SOME preview
