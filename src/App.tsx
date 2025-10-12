@@ -300,10 +300,19 @@ const App: React.FC = () => {
 
   // Merge previews with maps
   const mapsWithPreviews = useMemo(() => {
-    return maps.map((map) => ({
-      ...map,
-      thumbnailUrl: previews.get(map.id),
-    }));
+    console.log('[App] Merging previews - previews Map size:', previews.size);
+    console.log('[App] Previews Map keys:', Array.from(previews.keys()));
+
+    const merged = maps.map((map) => {
+      const thumbnailUrl = previews.get(map.id);
+      console.log(`[App] Map "${map.id}" -> thumbnailUrl:`, thumbnailUrl ? 'HAS URL' : 'NO URL');
+      return {
+        ...map,
+        thumbnailUrl,
+      };
+    });
+
+    return merged;
   }, [maps, previews]);
 
   return (

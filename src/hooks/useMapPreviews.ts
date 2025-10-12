@@ -123,6 +123,8 @@ export function useMapPreviews(): UseMapPreviewsResult {
           }
         }
 
+        console.log('[useMapPreviews] Setting previews Map, size:', newPreviews.size);
+        console.log('[useMapPreviews] Preview keys:', Array.from(newPreviews.keys()));
         setPreviews(newPreviews);
         setProgress({ current: maps.length, total: maps.length });
       } catch (err) {
