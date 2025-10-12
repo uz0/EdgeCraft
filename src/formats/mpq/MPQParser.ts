@@ -249,21 +249,45 @@ export class MPQParser {
   }
 
   /**
-   * Read hash table (with decryption)
+   * Read hash table (with optional decryption)
    */
   private readHashTable(header: MPQHeader): MPQHashEntry[] {
     const hashTable: MPQHashEntry[] = [];
     const offset = header.hashTablePos;
     const size = header.hashTableSize * 16; // 16 bytes per entry
 
-    // Read encrypted hash table data
-    const encryptedData = new Uint8Array(this.buffer, offset, size);
+    // Try WITHOUT decryption first (many W3X maps don't encrypt tables)
+    const rawView = new DataView(this.buffer, offset, size);
 
-    // Decrypt hash table
-    const decryptedData = this.decryptTable(encryptedData, '(hash table)');
+    // Check if raw data looks valid
+    const firstBlockIndexRaw = rawView.getUint32(12, true);
+    const secondBlockIndexRaw = size >= 32 ? rawView.getUint32(12 + 16, true) : 0xffffffff;
 
-    // Parse decrypted entries
-    const view = new DataView(decryptedData.buffer);
+    console.log(`[MPQParser] Raw hash table check: first blockIndex=${firstBlockIndexRaw}, second=${secondBlockIndexRaw}`);
+
+    // Check if table needs decryption by looking for empty slots (0xFFFFFFFF)
+    let hasEmptySlots = false;
+    for (let i = 0; i < Math.min(header.hashTableSize, 10); i++) {
+      const hashA = rawView.getUint32(i * 16, true);
+      if (hashA === 0xffffffff) {
+        hasEmptySlots = true;
+        break;
+      }
+    }
+
+    let view = rawView;
+    if (!hasEmptySlots) {
+      // No empty slots found in raw data = table is likely encrypted
+      console.log('[MPQParser] Hash table appears encrypted (no 0xFFFFFFFF slots), attempting decryption...');
+      const tableData = new Uint8Array(this.buffer, offset, size);
+      const decryptedData = this.decryptTable(tableData, '(hash table)');
+      view = new DataView(decryptedData.buffer);
+      console.log(`[MPQParser] Decrypted first blockIndex: ${view.getUint32(12, true)}`);
+    } else {
+      console.log('[MPQParser] Using raw (unencrypted) hash table');
+    }
+
+    // Parse entries
     for (let i = 0; i < header.hashTableSize; i++) {
       const entryOffset = i * 16;
       hashTable.push({
@@ -279,21 +303,35 @@ export class MPQParser {
   }
 
   /**
-   * Read block table (with decryption)
+   * Read block table (with optional decryption)
    */
   private readBlockTable(header: MPQHeader): MPQBlockEntry[] {
     const blockTable: MPQBlockEntry[] = [];
     const offset = header.blockTablePos;
     const size = header.blockTableSize * 16; // 16 bytes per entry
 
-    // Read encrypted block table data
-    const encryptedData = new Uint8Array(this.buffer, offset, size);
+    // Try WITHOUT decryption first
+    const rawView = new DataView(this.buffer, offset, size);
 
-    // Decrypt block table
-    const decryptedData = this.decryptTable(encryptedData, '(block table)');
+    // Check if raw data looks valid (filePos should be within archive)
+    const firstFilePosRaw = rawView.getUint32(0, true);
 
-    // Parse decrypted entries
-    const view = new DataView(decryptedData.buffer);
+    console.log(`[MPQParser] Raw block table check: first filePos=${firstFilePosRaw}, archiveSize=${header.archiveSize}`);
+
+    // If raw values look reasonable, use them; otherwise decrypt
+    let view = rawView;
+    if (firstFilePosRaw > header.archiveSize * 2) {
+      // File position way outside archive = encrypted
+      console.log('[MPQParser] Block table appears encrypted, attempting decryption...');
+      const tableData = new Uint8Array(this.buffer, offset, size);
+      const decryptedData = this.decryptTable(tableData, '(block table)');
+      view = new DataView(decryptedData.buffer);
+      console.log(`[MPQParser] Decrypted first filePos: ${view.getUint32(0, true)}`);
+    } else {
+      console.log('[MPQParser] Using raw (unencrypted) block table');
+    }
+
+    // Parse entries
     for (let i = 0; i < header.blockTableSize; i++) {
       const entryOffset = i * 16;
       blockTable.push({
@@ -323,13 +361,13 @@ export class MPQParser {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     const outView = new DataView(decrypted.buffer);
 
-    // Generate encryption key from string
-    let seed1 = this.hashString(key, 3); // Hash type 3 for table key
+    // Generate encryption key from string (hash type 0x300 for decrypt)
+    let seed1 = this.hashString(key, 0x300);
     let seed2 = 0xeeeeeeee;
 
     // Decrypt in 4-byte (DWORD) chunks
     for (let i = 0; i < data.length; i += 4) {
-      seed2 = (seed2 + (cryptTable[(0x400 + (seed1 & 0xff)) % cryptTable.length] ?? 0)) >>> 0;
+      seed2 = (seed2 + (cryptTable[0x400 + (seed1 & 0xff)] ?? 0)) >>> 0;
 
       const encrypted = view.getUint32(i, true);
       const decryptedValue = (encrypted ^ (seed1 + seed2)) >>> 0;
@@ -337,7 +375,7 @@ export class MPQParser {
       outView.setUint32(i, decryptedValue, true);
 
       seed1 = (((~seed1 << 0x15) + 0x11111111) | (seed1 >>> 0x0b)) >>> 0;
-      seed2 = (encrypted + seed2 + (seed2 << 5) + 3) >>> 0;
+      seed2 = (decryptedValue + seed2 + (seed2 << 5) + 3) >>> 0; // Use decrypted value!
     }
 
     return decrypted;
