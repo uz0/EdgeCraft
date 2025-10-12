@@ -2,7 +2,7 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  setupFiles: ['<rootDir>/jest.setup.js'],
+  setupFiles: ['<rootDir>/jest.setup.cjs'],
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
 
   roots: ['<rootDir>/src', '<rootDir>/tests'],
@@ -15,7 +15,7 @@ export default {
   ],
 
   transformIgnorePatterns: [
-    'node_modules/(?!@babylonjs)',
+    'node_modules/(?!@babylonjs|node-pkware)',
   ],
 
   testMatch: [
