@@ -6,6 +6,7 @@
  */
 
 import { MPQParser } from '../../formats/mpq/MPQParser';
+import { StormJSAdapter } from '../../formats/mpq/StormJSAdapter';
 import { TGADecoder } from './TGADecoder';
 import { MapPreviewGenerator } from './MapPreviewGenerator';
 import type { RawMapData } from '../../formats/maps/types';
@@ -128,50 +129,91 @@ export class MapPreviewExtractor {
 
   /**
    * Extract embedded preview from map archive
+   *
+   * Tries MPQParser first, falls back to StormJS (WASM) if Huffman errors occur
    */
   private async extractEmbedded(
     file: File,
     format: 'w3x' | 'w3m' | 'w3n' | 'scm' | 'scx' | 'sc2map'
   ): Promise<{ success: boolean; dataUrl?: string; error?: string }> {
+    const buffer = await file.arrayBuffer();
+
+    // Determine preview file names based on format
+    const previewFiles =
+      format === 'sc2map'
+        ? MapPreviewExtractor.SC2_PREVIEW_FILES
+        : MapPreviewExtractor.W3X_PREVIEW_FILES;
+
+    // Try MPQParser first (faster, pure TypeScript)
     try {
-      // Parse MPQ archive
-      const buffer = await file.arrayBuffer();
+      console.log(`[MapPreviewExtractor] Trying MPQParser for ${file.name}...`);
       const mpqParser = new MPQParser(buffer);
       const mpqResult = mpqParser.parse();
 
-      if (!mpqResult.success || !mpqResult.archive) {
-        return { success: false, error: 'Failed to parse MPQ archive' };
-      }
+      if (mpqResult.success && mpqResult.archive) {
+        // Try each preview file name
+        for (const fileName of previewFiles) {
+          const fileData = await mpqParser.extractFile(fileName);
 
-      // Determine preview file names based on format
-      const previewFiles =
-        format === 'sc2map'
-          ? MapPreviewExtractor.SC2_PREVIEW_FILES
-          : MapPreviewExtractor.W3X_PREVIEW_FILES;
+          if (fileData) {
+            console.log(`[MapPreviewExtractor] ✅ MPQParser extracted: ${fileName}`);
 
-      // Try each preview file name
-      for (const fileName of previewFiles) {
-        const fileData = await mpqParser.extractFile(fileName);
+            // Decode TGA to data URL
+            const dataUrl = this.tgaDecoder.decodeToDataURL(fileData.data);
 
-        if (fileData) {
-          console.log(`Found embedded preview: ${fileName}`);
-
-          // Decode TGA to data URL
-          const dataUrl = this.tgaDecoder.decodeToDataURL(fileData.data);
-
-          if (dataUrl) {
-            return { success: true, dataUrl };
+            if (dataUrl) {
+              return { success: true, dataUrl };
+            }
           }
         }
       }
-
-      return { success: false, error: 'No preview files found in archive' };
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.warn(`[MapPreviewExtractor] MPQParser failed: ${errorMsg}`);
+
+      // Check if this is a Huffman decompression error
+      const isHuffmanError = errorMsg.includes('Huffman') || errorMsg.includes('Invalid distance');
+
+      if (isHuffmanError) {
+        console.log(
+          `[MapPreviewExtractor] Detected Huffman error, falling back to StormJS (WASM)...`
+        );
+
+        // Try StormJS adapter as fallback
+        try {
+          const isStormJSAvailable = await StormJSAdapter.isAvailable();
+
+          if (isStormJSAvailable) {
+            for (const fileName of previewFiles) {
+              const result = await StormJSAdapter.extractFile(buffer, fileName);
+
+              if (result.success && result.data) {
+                console.log(`[MapPreviewExtractor] ✅ StormJS extracted: ${fileName}`);
+
+                // Decode TGA to data URL
+                const dataUrl = this.tgaDecoder.decodeToDataURL(result.data);
+
+                if (dataUrl) {
+                  return { success: true, dataUrl };
+                }
+              }
+            }
+          } else {
+            console.warn('[MapPreviewExtractor] StormJS not available');
+          }
+        } catch (stormError) {
+          console.error(
+            '[MapPreviewExtractor] StormJS fallback failed:',
+            stormError instanceof Error ? stormError.message : String(stormError)
+          );
+        }
+      }
     }
+
+    return {
+      success: false,
+      error: 'No preview files found or extraction failed',
+    };
   }
 
   /**

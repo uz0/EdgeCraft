@@ -71,6 +71,7 @@
     "@babylonjs/materials": "^7.0.0",
     "@types/lzma-native": "^4.0.4",
     "@types/pako": "^2.0.4",
+    "@wowserhq/stormjs": "^0.4.1",
     "colyseus": "^0.15.0",
     "colyseus.js": "^0.15.0",
     "compressjs": "^1.0.3",
