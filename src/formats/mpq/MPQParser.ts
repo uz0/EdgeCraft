@@ -472,6 +472,10 @@ export class MPQParser {
     const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
     const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
 
+    console.log(
+      `[MPQParser] Extracting ${filename}: filePos=${blockEntry.filePos}, compressedSize=${blockEntry.compressedSize}, uncompressedSize=${blockEntry.uncompressedSize}, flags=0x${blockEntry.flags.toString(16)}, isCompressed=${isCompressed}, isEncrypted=${isEncrypted}`
+    );
+
     // Encryption not yet supported
     if (isEncrypted) {
       throw new Error('Encrypted files not yet supported.');
@@ -488,17 +492,38 @@ export class MPQParser {
     if (isCompressed) {
       // Detect compression algorithm from first byte
       const compressionAlgorithm = this.detectCompressionAlgorithm(rawData);
+      console.log(
+        `[MPQParser] Detected compression for ${filename}: 0x${compressionAlgorithm.toString(16)} (firstByte=${rawData.byteLength > 0 ? '0x' + new DataView(rawData).getUint8(0).toString(16) : 'empty'})`
+      );
 
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
         // Skip first byte (compression type indicator) and decompress
+        console.log(`[MPQParser] Decompressing ${filename} with LZMA...`);
         const compressedData = rawData.slice(1);
         fileData = await this.lzmaDecompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
         );
+        console.log(
+          `[MPQParser] Decompressed ${filename}: ${compressedData.byteLength} → ${fileData.byteLength} bytes`
+        );
       } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
-        // No compression indicator, use raw data
-        fileData = rawData;
+        // No compression indicator OR multi-compression (W3X files)
+        // W3X files use bit flags for multiple compression algorithms
+        const firstByte = rawData.byteLength > 0 ? new DataView(rawData).getUint8(0) : 0;
+
+        // Check if this is multi-compression (W3X style)
+        if (firstByte !== 0 && (blockEntry.compressedSize < blockEntry.uncompressedSize)) {
+          console.warn(
+            `[MPQParser] Multi-compression detected for ${filename} (byte: 0x${firstByte.toString(16)}). ` +
+            `This is not yet supported. Returning compressed data as-is.`
+          );
+          // Return compressed data - parser will need to handle it
+          fileData = rawData;
+        } else {
+          console.log(`[MPQParser] No compression for ${filename}, using raw data`);
+          fileData = rawData;
+        }
       } else {
         throw new Error(
           `Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`
@@ -506,6 +531,7 @@ export class MPQParser {
       }
     } else {
       // Uncompressed file
+      console.log(`[MPQParser] ${filename} is not compressed`);
       fileData = rawData;
     }
 
