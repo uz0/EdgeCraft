@@ -41,10 +41,24 @@ Implement complete MPQ decompression support to extract previews from all 24 map
 
 Implement missing compression algorithms and fix extraction pipeline:
 
+### Priority 0: Huffman Decompression (BLOCKS EVERYTHING) 🔴 **CRITICAL - ROOT CAUSE**
+- **Issue**: `HuffmanDecompressor.ts` is **fundamentally broken** - implements wrong algorithm
+- **Root Cause**: Current implementation treats Huffman as DEFLATE-style (length-distance pairs), but MPQ Huffman is pure adaptive Huffman coding (tree-based byte decoding)
+- **Files Affected**: **ALL** maps using multi-compression (0x15, 0x97, etc.)
+- **Console Error**: `"Invalid distance in Huffman stream"` at lines 77/114
+- **Why It Fails**:
+  - Current code (lines 56-124): Reads bit patterns like `10` and `11` to decode length-distance pairs
+  - Actual MPQ Huffman: Builds Huffman tree from weight tables, traverses tree bit-by-bit to decode individual bytes
+  - No length-distance pairs exist in MPQ Huffman → causes "Invalid distance" errors
+- **Fix Options**:
+  1. **Option A (Recommended)**: Use `@wowserhq/stormjs` - StormLib compiled to WASM (complete, tested, maintained)
+  2. **Option B**: Port StormLib's `src/huffman/huff.cpp` to TypeScript (complex, ~500 lines, weight tables + tree building)
+  3. **Option C**: Disable Huffman entirely (NOT VIABLE - breaks multi-compression chain)
+
 ### Priority 1: Multi-Compression (Blocks 10 Maps) 🔴 CRITICAL
-- **Issue**: `decompressMultiAlgorithm()` exists but BZip2Decompressor is a stub
+- **Issue**: `decompressMultiAlgorithm()` exists but BZip2Decompressor is a stub **AND** Huffman is broken (see Priority 0)
 - **Files Affected**: 3P Sentinel 01-07, 3pUndeadX01v2, etc. (compression flag 0x97)
-- **Fix**: Replace stub with `compressjs` library implementation
+- **Fix**: Replace BZip2 stub with `compressjs` library implementation **AND** fix Huffman (Priority 0)
 
 ### Priority 2: PKZIP Support (Blocks 3 Maps) 🟡 HIGH
 - **Issue**: PKZIP (0x08) not detected in `detectCompressionAlgorithm()`
@@ -877,22 +891,240 @@ npm run dev
 
 ---
 
-## Confidence Score: 8/10
+## Technical Deep-Dive: Huffman Decompression Root Cause Analysis
 
-**Reasoning**:
+**Date**: 2025-10-13
+**Severity**: 🔴 **CRITICAL - BLOCKS ALL MAP PREVIEWS**
+
+### Problem Summary
+
+Console logs show `"Invalid distance in Huffman stream"` errors at `HuffmanDecompressor.ts:77` and `:114` when attempting to extract map previews. This error occurs for **all maps** using multi-compression (W3N campaigns, Legion TD, multi-compressed W3X maps).
+
+### Current Implementation (WRONG)
+
+```typescript
+// src/formats/compression/HuffmanDecompressor.ts (lines 56-124)
+// ❌ INCORRECT: Treats Huffman as DEFLATE-style compression
+
+while (outPos < uncompressedSize) {
+  let code = readBits(1);
+
+  if (code === 0) {
+    // Literal byte
+    output[outPos++] = readBits(8);
+  } else {
+    code = (code << 1) | readBits(1);
+
+    if (code === 2) {
+      // ❌ WRONG: MPQ Huffman has NO length-distance pairs!
+      const length = readBits(2) + 2;
+      const distance = readBits(8) + 1;
+
+      // Copy from lookback buffer
+      for (let i = 0; i < length; i++) {
+        const sourcePos = outPos - distance;  // ❌ Fails here: Invalid distance
+        output[outPos] = output[sourcePos];
+        outPos++;
+      }
+    }
+  }
+}
+```
+
+**Why This Fails:**
+- Assumes Huffman codes represent length-distance pairs (like DEFLATE/GZIP)
+- Tries to read `distance` value and copy from lookback buffer
+- MPQ Huffman data has NO such pairs → `distance` value is garbage → `sourcePos` out of bounds → error thrown
+
+### Correct Implementation (StormLib Reference)
+
+```cpp
+// StormLib src/huffman/huff.cpp (simplified)
+// ✅ CORRECT: Pure adaptive Huffman tree traversal
+
+unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLength, TInputStream * is) {
+  // 1. Read compression type (0-8) from first byte
+  unsigned int CompressionType = 0;
+  is->Get8Bits(CompressionType);
+
+  // 2. Build Huffman tree from predefined weight tables
+  BuildTree(CompressionType);
+
+  // 3. Decode bytes by traversing tree
+  while ((DecompressedValue = DecodeOneByte(is)) != 0x100) {
+    if (DecompressedValue == 0x101) {
+      // Special: Insert new branch (adaptive Huffman)
+      is->Get8Bits(DecompressedValue);
+      InsertNewBranchAndRebalance(pLast->DecompressedValue, DecompressedValue);
+    }
+
+    *pbOutBuffer++ = (unsigned char)DecompressedValue;
+
+    // 4. Rebalance tree after each byte (adaptive)
+    IncWeightsAndRebalance(pItem);
+  }
+}
+
+unsigned int THuffmannTree::DecodeOneByte(TInputStream * is) {
+  THTreeItem * pItem = pFirst;  // Start at tree root
+
+  // Traverse tree bit-by-bit until terminal node
+  while (pItem->pChildLo != NULL) {
+    unsigned int BitValue = 0;
+    is->Get1Bit(BitValue);
+
+    // Navigate: 0 = right child, 1 = left child
+    pItem = BitValue ? pItem->pChildLo->pPrev : pItem->pChildLo;
+  }
+
+  return pItem->DecompressedValue;  // Return decoded byte
+}
+```
+
+**Key Differences:**
+- No length-distance pairs - just byte-by-byte decoding
+- Uses Huffman tree built from weight tables (different for each compression type 0-8)
+- Adaptive algorithm: tree rebalances after each byte
+- Special codes: `0x100` = end of stream, `0x101` = insert new branch
+
+### Weight Tables (Required for Implementation)
+
+MPQ Huffman uses **9 different weight tables** for compression types 0-8:
+
+```cpp
+// Weight table for compression type 0 (most common)
+static unsigned char Table1502A630[] = {
+  0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  // ... (256 bytes total)
+};
+// 8 more tables for types 1-8...
+```
+
+### Solution Options
+
+#### Option A: Use @wowserhq/stormjs (RECOMMENDED) ✅
+
+**Pros:**
+- Complete, battle-tested StormLib implementation
+- WASM-compiled (fast, near-native performance)
+- Actively maintained (last update 2020, but stable)
+- Handles all MPQ edge cases (encryption, sparse files, etc.)
+
+**Cons:**
+- Adds WASM dependency (~2MB)
+- Requires filesystem mounting for browser use
+- Not pure TypeScript
+
+**Implementation:**
+```bash
+npm install @wowserhq/stormjs
+```
+
+```typescript
+import { FS, MPQ } from '@wowserhq/stormjs';
+
+// Extract preview from W3X map
+const mpq = await MPQ.open('/path/to/map.w3x', 'r');
+const file = mpq.openFile('war3mapPreview.tga');
+const previewData = file.read();
+file.close();
+mpq.close();
+```
+
+#### Option B: Port StormLib Huffman to TypeScript 📋
+
+**Pros:**
+- Pure TypeScript (no WASM dependency)
+- Full control over implementation
+- Can optimize for browser (no filesystem needed)
+
+**Cons:**
+- Complex (~500 lines of C++ to port)
+- Requires deep understanding of adaptive Huffman coding
+- Must include all 9 weight tables
+- High risk of bugs in tree building/traversal
+- Estimated effort: 8-16 hours
+
+**Files to Port:**
+- `src/huffman/huff.h` - Class definitions
+- `src/huffman/huff.cpp` - Tree building, decoding, rebalancing
+- Weight tables (9 arrays, ~256 bytes each)
+
+**Estimated Complexity:**
+```
+Lines of Code:
+- Weight tables: ~100 lines
+- Tree data structures: ~50 lines
+- BuildTree(): ~80 lines
+- DecodeOneByte(): ~40 lines
+- InsertNewBranchAndRebalance(): ~100 lines
+- IncWeightsAndRebalance(): ~80 lines
+- Bit stream reading: ~50 lines
+Total: ~500 lines of complex C++ → TypeScript
+```
+
+#### Option C: Disable Huffman (NOT VIABLE) ❌
+
+**Why Not:**
+- Multi-compression applies algorithms in sequence: `ORIGINAL → BZip2 → ZLIB → Huffman`
+- To decompress: `Huffman → ZLIB → BZip2 → ORIGINAL`
+- Cannot skip Huffman step - it's the first layer
+- Would break **all** multi-compressed maps
+
+### Recommended Solution
+
+**Use Option A (@wowserhq/stormjs)** for the following reasons:
+
+1. **Time to Value**: 1-2 hours vs 8-16 hours for manual port
+2. **Reliability**: Battle-tested in production WoW clients
+3. **Completeness**: Handles all MPQ edge cases (not just Huffman)
+4. **Performance**: WASM is faster than pure JS Huffman traversal
+5. **Maintenance**: No need to maintain complex algorithm ourselves
+
+**Mitigation for WASM Concerns:**
+- WASM binary is only loaded when MPQ extraction is needed (lazy loading)
+- Can be bundled as separate chunk (code splitting)
+- Modern browsers have excellent WASM support (95%+ compatibility)
+- Fallback: Use generated terrain previews if WASM unavailable
+
+### Validation Plan
+
+After fixing Huffman:
+
+```bash
+# Test multi-compression extraction
+npm test -- MPQMultiCompressionExtraction.test.ts
+
+# Expected console output:
+[MPQParser] Multi-algo: Applying Huffman decompression...
+[MPQParser] Multi-algo: Huffman completed, size: 262144  # ✅ Success!
+[MPQParser] Multi-algo: Applying ZLIB decompression...
+[MPQParser] Multi-algo: ZLIB completed, size: 262144
+[MPQParser] Multi-algo: Applying BZip2 decompression...
+[MPQParser] Multi-algo: BZip2 completed, size: 262144
+[MPQParser] ✅ Decompression complete!
+```
+
+---
+
+## Confidence Score: 4/10 → **UPDATED** (Was 8/10)
+
+**Reasoning** (Updated after Huffman root cause analysis):
+- ❌ Huffman implementation is **completely broken** - not a simple stub fix
 - ✅ All compression libraries already installed (`compressjs`, `pako`)
-- ✅ Multi-compression pipeline already exists (just needs BZip2 fix)
-- ✅ Clear implementation path with existing patterns to follow
-- ✅ Real test maps available in `/public/maps/`
-- ⚠️ Risk: Multi-compression order might need adjustment (mitigated with logging)
-- ⚠️ Risk: Encrypted file decryption is optional (can defer for minimum success)
+- ⚠️ Multi-compression pipeline exists but **cannot work** without Huffman fix
+- ⚠️ BZip2 is just a stub (fixable in 1 hour) but **blocked by Huffman**
+- 🔴 **BLOCKER**: Option A (stormjs) requires architectural decision (add WASM dependency)
+- 🔴 **BLOCKER**: Option B (manual port) requires 8-16 hours of complex C++ → TS translation
 
-**One-Pass Success Factors**:
-1. All external dependencies pre-installed
-2. Existing code structure is correct (just needs stub replacement)
-3. Clear validation gates at each step
-4. Real-world test data available
-5. Detailed error logging for debugging
+**One-Pass Success Factors** (Revised):
+1. ❌ ~~Existing code structure is correct~~ → **Huffman is wrong algorithm entirely**
+2. ⚠️ External dependencies pre-installed **but missing stormjs (critical)**
+3. ✅ Clear validation gates at each step
+4. ✅ Real-world test data available
+5. ✅ Detailed error logging confirmed root cause
 
 **Potential Blockers**:
 1. BZip2 library API differences (mitigated with compressjs docs)
