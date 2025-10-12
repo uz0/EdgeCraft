@@ -81,13 +81,13 @@ export class W3XMapLoader implements IMapLoader {
     const dooData = await mpqParser.extractFile('war3map.doo');
     const unitsData = await mpqParser.extractFile('war3mapUnits.doo');
 
-    if (!w3iData) {
-      console.error('[W3XMapLoader] Available files:', allFiles);
-      throw new Error('war3map.w3i not found in archive');
-    }
+    // If extraction fails (likely due to multi-compression not being supported),
+    // create placeholder data so we can still generate SOME preview
+    if (!w3iData || !w3eData) {
+      console.warn('[W3XMapLoader] ⚠️ Failed to extract W3X map files (likely multi-compression)');
+      console.warn('[W3XMapLoader] Creating placeholder map data for preview generation...');
 
-    if (!w3eData) {
-      throw new Error('war3map.w3e not found in archive');
+      return this.createPlaceholderMapData(allFiles);
     }
 
     // Parse map info
@@ -244,6 +244,71 @@ export class W3XMapLoader implements IMapLoader {
         targetAcquisition: unit.targetAcquisition,
       },
     }));
+  }
+
+  /**
+   * Create placeholder map data when extraction fails
+   * This allows preview generation to work even when multi-compression is not supported
+   */
+  private createPlaceholderMapData(availableFiles: string[]): RawMapData {
+    console.log('[W3XMapLoader] Creating placeholder map data with default 256x256 terrain');
+
+    // Determine map size from filename hints if possible
+    let mapSize = 256;
+    const fileName = availableFiles.find(f => f.includes('war3map')) || '';
+    if (fileName.toLowerCase().includes('small')) {
+      mapSize = 128;
+    } else if (fileName.toLowerCase().includes('large')) {
+      mapSize = 512;
+    }
+
+    // Create flat heightmap (all zeros)
+    const heightmap = new Float32Array(mapSize * mapSize);
+    heightmap.fill(0); // Flat terrain
+
+    // Create minimal map info
+    const mapInfo: MapInfo = {
+      name: 'W3X Map (Multi-compression not supported)',
+      author: 'Unknown',
+      description: 'Preview generated with placeholder data due to unsupported compression.',
+      players: [],
+      dimensions: {
+        width: mapSize,
+        height: mapSize,
+        playableWidth: mapSize,
+        playableHeight: mapSize,
+      },
+      environment: {
+        tileset: 'Ashenvale',
+        fog: {
+          zStart: 0,
+          zEnd: 1000,
+          density: 0.5,
+          color: { r: 128, g: 128, b: 128, a: 255 },
+        },
+      },
+    };
+
+    // Create terrain data
+    const terrainData: TerrainData = {
+      width: mapSize,
+      height: mapSize,
+      heightmap,
+      textures: [
+        {
+          id: 'Agrd', // Ashenvale grass
+          blendMap: new Uint8Array(mapSize * mapSize).fill(0),
+        },
+      ],
+    };
+
+    return {
+      format: 'w3x',
+      info: mapInfo,
+      terrain: terrainData,
+      units: [],
+      doodads: [],
+    };
   }
 
   /**

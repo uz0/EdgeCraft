@@ -80,7 +80,7 @@ export class MapPreviewGenerator {
         powerPreference: 'high-performance',
       });
 
-      if (!this.engine.isWebGPUSupported && !this.engine.webGLVersion) {
+      if (!this.engine.webGLVersion) {
         console.error('[MapPreviewGenerator] ❌ WebGL not supported!');
         throw new Error('WebGL is not supported in this browser');
       }
