@@ -1,11 +1,11 @@
 /**
  * BZip2 Decompressor
  *
- * Handles BZip2 decompression for MPQ archives using compressjs library
+ * Handles BZip2 decompression for MPQ archives using seek-bzip library
  * BZip2 is used in multi-compression scenarios (e.g., Huffman+ZLIB+BZip2)
  */
 
-import * as compressjs from 'compressjs';
+import Bunzip from 'seek-bzip';
 import type { IDecompressor } from './types';
 
 export class Bzip2Decompressor implements IDecompressor {
@@ -18,12 +18,11 @@ export class Bzip2Decompressor implements IDecompressor {
    */
   public async decompress(compressed: ArrayBuffer, uncompressedSize: number): Promise<ArrayBuffer> {
     try {
-      // Convert ArrayBuffer to Uint8Array for compressjs
+      // Convert ArrayBuffer to Uint8Array for seek-bzip
       const compressedArray = new Uint8Array(compressed);
 
-      // Use compressjs Bzip2 algorithm
-      const Bzip2 = compressjs.Bzip2;
-      const decompressedArray = Bzip2.decompressFile(compressedArray);
+      // Use seek-bzip to decode
+      const decompressedArray = Bunzip.decode(compressedArray);
 
       // Verify decompressed size (warn on mismatch, don't throw)
       if (decompressedArray.byteLength !== uncompressedSize) {
@@ -32,7 +31,7 @@ export class Bzip2Decompressor implements IDecompressor {
         );
       }
 
-      // Convert Uint8Array back to ArrayBuffer
+      // Convert result back to ArrayBuffer
       return decompressedArray.buffer.slice(
         decompressedArray.byteOffset,
         decompressedArray.byteOffset + decompressedArray.byteLength
@@ -48,6 +47,6 @@ export class Bzip2Decompressor implements IDecompressor {
    * Check if BZip2 decompressor is available
    */
   public isAvailable(): boolean {
-    return typeof compressjs !== 'undefined';
+    return typeof Bunzip !== 'undefined';
   }
 }
