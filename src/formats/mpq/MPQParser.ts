@@ -20,7 +20,7 @@ import type {
   MPQStreamOptions,
 } from './types';
 import { StreamingFileReader } from '../../utils/StreamingFileReader';
-import { LZMADecompressor, CompressionAlgorithm } from '../compression';
+import { LZMADecompressor, ZlibDecompressor, Bzip2Decompressor, CompressionAlgorithm } from '../compression';
 
 /**
  * MPQ Archive parser
@@ -39,6 +39,8 @@ export class MPQParser {
   private view: DataView;
   private archive?: MPQArchive;
   private lzmaDecompressor: LZMADecompressor;
+  private zlibDecompressor: ZlibDecompressor;
+  private bzip2Decompressor: Bzip2Decompressor;
 
   // MPQ Magic numbers
   private static readonly MPQ_MAGIC_V1 = 0x1a51504d; // 'MPQ\x1A' in little-endian
@@ -48,6 +50,8 @@ export class MPQParser {
     this.buffer = buffer;
     this.view = new DataView(buffer);
     this.lzmaDecompressor = new LZMADecompressor();
+    this.zlibDecompressor = new ZlibDecompressor();
+    this.bzip2Decompressor = new Bzip2Decompressor();
   }
 
   /**
@@ -321,7 +325,7 @@ export class MPQParser {
       console.log('[MPQParser] Hash table appears encrypted (invalid blockIndex values), attempting decryption...');
       const tableData = new Uint8Array(this.buffer, offset, size);
       const decryptedData = this.decryptTable(tableData, '(hash table)');
-      view = new DataView(decryptedData.buffer);
+      view = new DataView(decryptedData.buffer as ArrayBuffer);
       console.log(`[MPQParser] Decrypted first blockIndex: ${view.getUint32(12, true)}`);
     } else {
       console.log('[MPQParser] Using raw (unencrypted) hash table');
@@ -377,7 +381,7 @@ export class MPQParser {
       console.log('[MPQParser] Block table appears encrypted, attempting decryption...');
       const tableData = new Uint8Array(this.buffer, offset, size);
       const decryptedData = this.decryptTable(tableData, '(block table)');
-      view = new DataView(decryptedData.buffer);
+      view = new DataView(decryptedData.buffer as ArrayBuffer);
       console.log(`[MPQParser] Decrypted first filePos: ${view.getUint32(0, true)}`);
     } else {
       console.log('[MPQParser] Using raw (unencrypted) block table');
@@ -507,6 +511,28 @@ export class MPQParser {
         console.log(
           `[MPQParser] Decompressed ${filename}: ${compressedData.byteLength} → ${fileData.byteLength} bytes`
         );
+      } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
+        // ZLIB or PKZIP compression
+        console.log(`[MPQParser] Decompressing ${filename} with ZLIB/PKZIP...`);
+        const compressedData = rawData.slice(1);
+        fileData = await this.zlibDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+        console.log(
+          `[MPQParser] Decompressed ${filename}: ${compressedData.byteLength} → ${fileData.byteLength} bytes`
+        );
+      } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
+        // BZip2 compression
+        console.log(`[MPQParser] Decompressing ${filename} with BZip2...`);
+        const compressedData = rawData.slice(1);
+        fileData = await this.bzip2Decompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+        console.log(
+          `[MPQParser] Decompressed ${filename}: ${compressedData.byteLength} → ${fileData.byteLength} bytes`
+        );
       } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
         // No compression indicator OR multi-compression (W3X files)
         // W3X files use bit flags for multiple compression algorithms
@@ -514,9 +540,11 @@ export class MPQParser {
 
         // Check if this is multi-compression (W3X style)
         if (firstByte !== 0 && (blockEntry.compressedSize < blockEntry.uncompressedSize)) {
-          throw new Error(
-            `Multi-compression not supported for ${filename} (algorithm: 0x${firstByte.toString(16)}). ` +
-            `W3X maps require zlib/bzip2/huffman decompression which is not yet implemented.`
+          console.log(`[MPQParser] Detected multi-compression for ${filename}, flags: 0x${firstByte.toString(16)}`);
+          fileData = await this.decompressMultiAlgorithm(
+            rawData,
+            blockEntry.uncompressedSize,
+            firstByte
           );
         } else {
           console.log(`[MPQParser] No compression for ${filename}, using raw data`);
@@ -575,6 +603,89 @@ export class MPQParser {
 
     // Unknown or no compression indicator
     return CompressionAlgorithm.NONE;
+  }
+
+  /**
+   * Decompress data using multiple chained algorithms (W3X style)
+   *
+   * W3X files use bit flags where multiple bits can be set simultaneously.
+   * The flags indicate which compression algorithms should be applied in sequence.
+   *
+   * @param data - Raw compressed data with flags byte
+   * @param uncompressedSize - Expected size after full decompression
+   * @param compressionFlags - Bit flags indicating compression algorithms
+   * @returns Fully decompressed data
+   */
+  private async decompressMultiAlgorithm(
+    data: ArrayBuffer,
+    uncompressedSize: number,
+    compressionFlags: number
+  ): Promise<ArrayBuffer> {
+    console.log(
+      `[MPQParser] Multi-algorithm decompression with flags: 0x${compressionFlags.toString(16)}`
+    );
+
+    // Skip the first byte (compression flags)
+    let currentData = data.slice(1);
+
+    // Apply compression algorithms in the order they were applied during compression
+    // The order matters! Typically: Huffman -> ZLIB/PKZIP -> BZip2
+
+    // Check HUFFMAN (0x01)
+    if (compressionFlags & CompressionAlgorithm.HUFFMAN) {
+      console.log('[MPQParser] Multi-algo: HUFFMAN detected (not yet implemented, skipping)');
+      // TODO: Implement Huffman decompression
+      // For now, skip this step as it's rarely used alone in W3X files
+    }
+
+    // Check ZLIB (0x02)
+    if (compressionFlags & CompressionAlgorithm.ZLIB) {
+      console.log('[MPQParser] Multi-algo: Applying ZLIB decompression...');
+      try {
+        currentData = await this.zlibDecompressor.decompress(currentData, uncompressedSize);
+        console.log(`[MPQParser] Multi-algo: ZLIB completed, size: ${currentData.byteLength}`);
+      } catch (error) {
+        console.error('[MPQParser] Multi-algo: ZLIB failed:', error);
+        throw error;
+      }
+    }
+
+    // Check PKZIP (0x08)
+    if (compressionFlags & CompressionAlgorithm.PKZIP) {
+      console.log('[MPQParser] Multi-algo: Applying PKZIP decompression...');
+      try {
+        currentData = await this.zlibDecompressor.decompress(currentData, uncompressedSize);
+        console.log(`[MPQParser] Multi-algo: PKZIP completed, size: ${currentData.byteLength}`);
+      } catch (error) {
+        console.error('[MPQParser] Multi-algo: PKZIP failed:', error);
+        throw error;
+      }
+    }
+
+    // Check BZIP2 (0x10)
+    if (compressionFlags & CompressionAlgorithm.BZIP2) {
+      console.log('[MPQParser] Multi-algo: Applying BZip2 decompression...');
+      try {
+        currentData = await this.bzip2Decompressor.decompress(currentData, uncompressedSize);
+        console.log(`[MPQParser] Multi-algo: BZip2 completed, size: ${currentData.byteLength}`);
+      } catch (error) {
+        console.error('[MPQParser] Multi-algo: BZip2 failed:', error);
+        throw error;
+      }
+    }
+
+    // Verify final size
+    if (currentData.byteLength !== uncompressedSize) {
+      console.warn(
+        `[MPQParser] Multi-algo: Size mismatch - expected ${uncompressedSize}, got ${currentData.byteLength}`
+      );
+    } else {
+      console.log(
+        `[MPQParser] Multi-algo: ✅ Decompression complete! Final size: ${currentData.byteLength}`
+      );
+    }
+
+    return currentData;
   }
 
   /**

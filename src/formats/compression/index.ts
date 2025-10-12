@@ -6,3 +6,5 @@
 
 export * from './types';
 export * from './LZMADecompressor';
+export * from './ZlibDecompressor';
+export * from './Bzip2Decompressor';
