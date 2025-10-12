@@ -29,10 +29,10 @@ describe('MPQParser Hash Algorithm', () => {
       return;
     }
 
-    // W3X files use multi-compression which is not yet supported
+    // W3X files use multi-compression with incomplete Huffman implementation
     // This test verifies hash lookup works, even though extraction will fail
     await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
-      'Multi-compression not supported'
+      /Huffman decompression failed|Multi-compression not supported/
     );
   });
 
@@ -42,9 +42,9 @@ describe('MPQParser Hash Algorithm', () => {
       return;
     }
 
-    // W3X files use multi-compression which is not yet supported
+    // W3X files use multi-compression with incomplete Huffman implementation
     await expect(parser.extractFile('war3map.w3e')).rejects.toThrow(
-      'Multi-compression not supported'
+      /Huffman decompression failed|Multi-compression not supported/
     );
   });
 
@@ -54,9 +54,9 @@ describe('MPQParser Hash Algorithm', () => {
       return;
     }
 
-    // MPQ hash algorithm should handle uppercase (even though extraction fails due to compression)
+    // MPQ hash algorithm should handle uppercase (even though extraction fails due to Huffman)
     await expect(parser.extractFile('WAR3MAP.W3I')).rejects.toThrow(
-      'Multi-compression not supported'
+      /Huffman decompression failed|Multi-compression not supported/
     );
   });
 
@@ -68,7 +68,7 @@ describe('MPQParser Hash Algorithm', () => {
 
     // Forward slashes should be converted to backslashes (even though extraction fails)
     await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
-      'Multi-compression not supported'
+      /Huffman decompression failed|Multi-compression not supported/
     );
   });
 
@@ -79,9 +79,9 @@ describe('MPQParser Hash Algorithm', () => {
     }
 
     // listFiles() returns cached extracted files
-    // Since W3X extraction is not supported, cache is empty
+    // Since W3X extraction is not supported (Huffman incomplete), cache is empty
     const files = parser.listFiles();
     expect(files.length).toBe(0);
-    console.log(`Files in cache: ${files.length} (expected 0 for W3X due to multi-compression)`);
+    console.log(`Files in cache: ${files.length} (expected 0 for W3X due to incomplete Huffman)`);
   });
 });

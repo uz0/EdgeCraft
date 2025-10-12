@@ -27,16 +27,16 @@ describe('W3X Preview Extraction Integration', () => {
     expect(result.archive).toBeDefined();
     console.log(`MPQ parsed successfully in ${result.parseTimeMs.toFixed(2)}ms`);
 
-    // Extraction fails due to multi-compression not being supported
+    // Extraction fails due to incomplete Huffman decompression implementation
     await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
-      'Multi-compression not supported'
+      /Huffman decompression failed|Multi-compression not supported/
     );
     await expect(parser.extractFile('war3map.w3e')).rejects.toThrow(
-      'Multi-compression not supported'
+      /Huffman decompression failed|Multi-compression not supported/
     );
   });
 
-  it.skip('should parse W3X map using W3XMapLoader (SKIP: multi-compression not yet supported)', async () => {
+  it.skip('should parse W3X map using W3XMapLoader (SKIP: Huffman decompression incomplete)', async () => {
     // Read map file
     const buffer = fs.readFileSync(testMapPath);
 
@@ -60,7 +60,7 @@ describe('W3X Preview Extraction Integration', () => {
     expect(mapData.terrain?.tiles?.length).toBeGreaterThan(0);
   });
 
-  it.skip('should complete full extraction pipeline (SKIP: multi-compression not yet supported)', async () => {
+  it.skip('should complete full extraction pipeline (SKIP: Huffman decompression incomplete)', async () => {
     // Read map file
     const buffer = fs.readFileSync(testMapPath);
     const arrayBuffer = buffer.buffer;

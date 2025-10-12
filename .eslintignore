@@ -6,7 +6,16 @@ coverage/
 # Dependencies
 node_modules/
 
-# Jest setup file (not included in TypeScript project)
+# Test files (excluded from tsconfig.json)
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__/**/*
+tests/**/*
+src/**/__tests__/**/*
+
+# Jest setup file
 jest.setup.ts
 
 # Vite config

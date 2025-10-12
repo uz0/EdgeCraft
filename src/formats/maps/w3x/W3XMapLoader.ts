@@ -34,20 +34,52 @@ export class W3XMapLoader implements IMapLoader {
     // Convert to ArrayBuffer
     let buffer: ArrayBuffer;
 
+    // Type guard for objects with buffer property (Node.js Buffer or TypedArray)
+    interface BufferLike {
+      buffer: ArrayBuffer;
+      byteOffset: number;
+      byteLength: number;
+    }
+
+    // Type guard for File-like objects
+    interface FileLike {
+      arrayBuffer: () => Promise<ArrayBuffer>;
+    }
+
+    function hasBuffer(obj: unknown): obj is BufferLike {
+      return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'buffer' in obj &&
+        obj.buffer instanceof ArrayBuffer &&
+        'byteOffset' in obj &&
+        typeof obj.byteOffset === 'number' &&
+        'byteLength' in obj &&
+        typeof obj.byteLength === 'number'
+      );
+    }
+
+    function hasArrayBuffer(obj: unknown): obj is FileLike {
+      return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'arrayBuffer' in obj &&
+        typeof obj.arrayBuffer === 'function'
+      );
+    }
+
     // Check type more carefully
     const isArrayBuffer =
       file instanceof ArrayBuffer ||
       Object.prototype.toString.call(file) === '[object ArrayBuffer]';
-    const hasBufferProperty = (file as any).buffer instanceof ArrayBuffer;
 
     if (isArrayBuffer) {
       // Already an ArrayBuffer
       buffer = file as ArrayBuffer;
-    } else if (hasBufferProperty) {
+    } else if (hasBuffer(file)) {
       // Node.js Buffer or TypedArray - extract the underlying ArrayBuffer
-      const buf = file as any;
-      buffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
-    } else if (typeof (file as any).arrayBuffer === 'function') {
+      buffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength);
+    } else if (hasArrayBuffer(file)) {
       // File object - use arrayBuffer() method
       buffer = await file.arrayBuffer();
     } else {
