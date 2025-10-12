@@ -165,6 +165,7 @@ export interface W3ETerrain {
   version: number;
   tileset: string;
   customTileset: boolean;
+  groundTextureIds?: string[]; // v11+ texture list
   width: number;
   height: number;
   groundTiles: W3EGroundTile[];

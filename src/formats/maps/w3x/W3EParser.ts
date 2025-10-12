@@ -45,8 +45,27 @@ export class W3EParser {
     // Custom tileset flag
     const customTileset = this.readUint32() === 1;
 
-    // Read ground tiles
-    const groundTileCount = this.readUint32();
+    // Read ground texture list (version 11+)
+    const groundTextureCount = this.readUint32();
+
+    // Read ground texture IDs (4 bytes each, like "Adrt", "Ldrt", etc.)
+    const groundTextureIds: string[] = [];
+    for (let i = 0; i < groundTextureCount; i++) {
+      const textureId = this.read4CC();
+      groundTextureIds.push(textureId);
+    }
+
+    // Calculate ground tile count
+    // If we have valid dimensions from W3I, use them. Otherwise calculate from buffer.
+    let groundTileCount: number;
+    if (mapWidth !== undefined && mapHeight !== undefined && mapWidth > 0 && mapHeight > 0) {
+      groundTileCount = mapWidth * mapHeight;
+    } else {
+      // Fallback: Each ground tile is 7 bytes (2 + 2 + 1 + 1 + 1)
+      const remainingBytes = this.buffer.byteLength - this.offset;
+      groundTileCount = Math.floor(remainingBytes / 7);
+    }
+
     const groundTiles: W3EGroundTile[] = [];
 
     for (let i = 0; i < groundTileCount; i++) {
@@ -57,12 +76,12 @@ export class W3EParser {
     let width: number;
     let height: number;
 
-    if (mapWidth !== undefined && mapHeight !== undefined) {
+    if (mapWidth !== undefined && mapHeight !== undefined && mapWidth > 0 && mapHeight > 0) {
       // Use dimensions from W3I file (most accurate)
       width = mapWidth;
       height = mapHeight;
     } else {
-      // Fallback: Calculate dimensions from tile count (less accurate for non-square maps)
+      // Fallback: Calculate dimensions from tile count (for corrupted W3I or maps without W3I)
       const totalTiles = groundTileCount;
       width = Math.floor(Math.sqrt(totalTiles));
       height = Math.ceil(totalTiles / width);
@@ -85,6 +104,7 @@ export class W3EParser {
       version,
       tileset: tilesetChar,
       customTileset,
+      groundTextureIds,
       width,
       height,
       groundTiles,
