@@ -23,8 +23,10 @@ export class W3EParser {
 
   /**
    * Parse the entire w3e file
+   * @param mapWidth - Map width from W3I file (optional, will be calculated if not provided)
+   * @param mapHeight - Map height from W3I file (optional, will be calculated if not provided)
    */
-  public parse(): W3ETerrain {
+  public parse(mapWidth?: number, mapHeight?: number): W3ETerrain {
     this.offset = 0;
 
     // Read and validate magic
@@ -51,11 +53,20 @@ export class W3EParser {
       groundTiles.push(this.readGroundTile());
     }
 
-    // Calculate terrain dimensions (tiles are in a grid)
-    // W3E stores tiles in linear array, dimensions are implicit from count
-    const totalTiles = groundTileCount;
-    const width = Math.floor(Math.sqrt(totalTiles));
-    const height = Math.ceil(totalTiles / width);
+    // Calculate dimensions from map info or tile count
+    let width: number;
+    let height: number;
+
+    if (mapWidth !== undefined && mapHeight !== undefined) {
+      // Use dimensions from W3I file (most accurate)
+      width = mapWidth;
+      height = mapHeight;
+    } else {
+      // Fallback: Calculate dimensions from tile count (less accurate for non-square maps)
+      const totalTiles = groundTileCount;
+      width = Math.floor(Math.sqrt(totalTiles));
+      height = Math.ceil(totalTiles / width);
+    }
 
     // Read cliff tiles (optional, version-dependent)
     let cliffTiles: W3ECliffTile[] | undefined;

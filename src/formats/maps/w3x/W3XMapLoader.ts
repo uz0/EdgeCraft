@@ -136,7 +136,8 @@ export class W3XMapLoader implements IMapLoader {
     let w3eTerrain;
     try {
       const w3eParser = new W3EParser(w3eData.data);
-      w3eTerrain = w3eParser.parse();
+      // Pass map dimensions from W3I to W3E parser for accurate terrain layout
+      w3eTerrain = w3eParser.parse(w3iInfo.playableWidth, w3iInfo.playableHeight);
       console.log(
         `[W3XMapLoader] Successfully parsed terrain: ${w3eTerrain.width}x${w3eTerrain.height} (${w3eTerrain.groundTiles.length} tiles)`
       );
