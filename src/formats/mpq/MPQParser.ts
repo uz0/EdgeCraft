@@ -284,6 +284,39 @@ export class MPQParser {
     const hashTableSize = this.view.getUint32(headerOffset + 24, true);
     const blockTableSize = this.view.getUint32(headerOffset + 28, true);
 
+    // Validate header offsets are within bounds
+    if (hashTablePos < 0 || hashTablePos > this.buffer.byteLength) {
+      console.error(
+        `[MPQParser] Invalid hash table position: ${hashTablePos} (buffer size: ${this.buffer.byteLength})`
+      );
+      return null;
+    }
+
+    if (blockTablePos < 0 || blockTablePos > this.buffer.byteLength) {
+      console.error(
+        `[MPQParser] Invalid block table position: ${blockTablePos} (buffer size: ${this.buffer.byteLength})`
+      );
+      return null;
+    }
+
+    const hashTableEnd = hashTablePos + (hashTableSize * 16);
+    const blockTableEnd = blockTablePos + (blockTableSize * 16);
+
+    if (hashTableEnd > this.buffer.byteLength) {
+      console.error(
+        `[MPQParser] Hash table extends beyond buffer: ${hashTableEnd} > ${this.buffer.byteLength}`
+      );
+      return null;
+    }
+
+    if (blockTableEnd > this.buffer.byteLength) {
+      console.error(
+        `[MPQParser] Block table extends beyond buffer: ${blockTableEnd} > ${this.buffer.byteLength}`
+      );
+      return null;
+    }
+
+    console.log(`[MPQParser] Header validated: hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}`);
     console.log(`[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`);
 
     return {
@@ -447,10 +480,44 @@ export class MPQParser {
   }
 
   /**
+   * Decrypt MPQ file data (same algorithm as table decryption)
+   * @param data - Encrypted file data
+   * @param key - File encryption key (hash of filename)
+   */
+  private decryptFile(data: Uint8Array, key: number): Uint8Array {
+    // Initialize crypt table if needed
+    if (!MPQParser.cryptTable) {
+      MPQParser.initCryptTable();
+    }
+
+    const cryptTable = MPQParser.cryptTable!;
+    const decrypted = new Uint8Array(data.length);
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    const outView = new DataView(decrypted.buffer);
+
+    let seed1 = key;
+    let seed2 = 0xeeeeeeee;
+
+    // Decrypt in 4-byte chunks
+    for (let i = 0; i < data.length; i += 4) {
+      seed2 = (seed2 + (cryptTable[0x400 + (seed1 & 0xff)] ?? 0)) >>> 0;
+
+      const encrypted = view.getUint32(i, true);
+      const decryptedValue = (encrypted ^ (seed1 + seed2)) >>> 0;
+
+      outView.setUint32(i, decryptedValue, true);
+
+      seed1 = (((~seed1 << 0x15) + 0x11111111) | (seed1 >>> 0x0b)) >>> 0;
+      seed2 = (decryptedValue + seed2 + (seed2 << 5) + 3) >>> 0;
+    }
+
+    return decrypted;
+  }
+
+  /**
    * Extract file from archive
    *
-   * Supports both compressed (LZMA) and uncompressed files.
-   * Note: Encrypted files are not yet supported.
+   * Supports compressed, uncompressed, and encrypted files.
    */
   public async extractFile(filename: string): Promise<MPQFile | null> {
     if (!this.archive) {
@@ -488,16 +555,29 @@ export class MPQParser {
       `[MPQParser] Extracting ${filename}: filePos=${blockEntry.filePos}, compressedSize=${blockEntry.compressedSize}, uncompressedSize=${blockEntry.uncompressedSize}, flags=0x${blockEntry.flags.toString(16)}, isCompressed=${isCompressed}, isEncrypted=${isEncrypted}`
     );
 
-    // Encryption not yet supported
-    if (isEncrypted) {
-      throw new Error('Encrypted files not yet supported.');
-    }
-
-    // Read compressed or uncompressed file data
-    const rawData = this.buffer.slice(
+    // Read file data
+    let rawData = this.buffer.slice(
       blockEntry.filePos,
       blockEntry.filePos + blockEntry.compressedSize
     );
+
+    // Decrypt file if encrypted
+    if (isEncrypted) {
+      console.log(`[MPQParser] File ${filename} is encrypted, attempting decryption...`);
+
+      // Generate decryption key from filename
+      const fileKey = this.hashString(filename, 3); // Hash type 3 = decryption key
+
+      // Decrypt file data using same algorithm as tables
+      const encryptedData = new Uint8Array(rawData);
+      const decryptedData = this.decryptFile(encryptedData, fileKey);
+      rawData = decryptedData.buffer.slice(
+        decryptedData.byteOffset,
+        decryptedData.byteOffset + decryptedData.byteLength
+      ) as ArrayBuffer;
+
+      console.log(`[MPQParser] Decrypted ${filename}: ${encryptedData.byteLength} bytes`);
+    }
 
     let fileData: ArrayBuffer;
 
@@ -520,8 +600,9 @@ export class MPQParser {
           `[MPQParser] Decompressed ${filename}: ${compressedData.byteLength} → ${fileData.byteLength} bytes`
         );
       } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
-        // ZLIB or PKZIP compression
-        console.log(`[MPQParser] Decompressing ${filename} with ZLIB/PKZIP...`);
+        // ZLIB (0x02) or PKZIP (0x08) compression - both use DEFLATE
+        const algorithmName = compressionAlgorithm === CompressionAlgorithm.PKZIP ? 'PKZIP' : 'ZLIB';
+        console.log(`[MPQParser] Decompressing ${filename} with ${algorithmName}...`);
         const compressedData = rawData.slice(1);
         fileData = await this.zlibDecompressor.decompress(
           compressedData,
