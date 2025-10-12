@@ -1,0 +1,79 @@
+{
+  "version": "1.0.0",
+  "description": "EdgeCraft Asset Library - Phase 1 MVP",
+  "textures": {
+    "terrain_grass_light": {
+      "id": "terrain_grass_light",
+      "path": "/assets/textures/terrain/grass_light.jpg",
+      "normalPath": "/assets/textures/terrain/grass_light_normal.jpg",
+      "roughnessPath": "/assets/textures/terrain/grass_light_roughness.jpg",
+      "license": "CC0",
+      "author": "Amal Kumar (Poly Haven)",
+      "sourceUrl": "https://polyhaven.com/a/sparse_grass"
+    },
+    "terrain_dirt_brown": {
+      "id": "terrain_dirt_brown",
+      "path": "/assets/textures/terrain/dirt_brown.jpg",
+      "normalPath": "/assets/textures/terrain/dirt_brown_normal.jpg",
+      "roughnessPath": "/assets/textures/terrain/dirt_brown_roughness.jpg",
+      "license": "CC0",
+      "author": "Poly Haven Contributors",
+      "sourceUrl": "https://polyhaven.com/a/dirt_floor"
+    },
+    "terrain_rock_gray": {
+      "id": "terrain_rock_gray",
+      "path": "/assets/textures/terrain/rock_gray.jpg",
+      "normalPath": "/assets/textures/terrain/rock_gray_normal.jpg",
+      "roughnessPath": "/assets/textures/terrain/rock_gray_roughness.jpg",
+      "license": "CC0",
+      "author": "Poly Haven Contributors",
+      "sourceUrl": "https://polyhaven.com/a/rock_surface"
+    }
+  },
+  "models": {
+    "doodad_tree_oak_01": {
+      "id": "doodad_tree_oak_01",
+      "path": "/assets/models/doodads/tree_oak_01.glb",
+      "triangles": 800,
+      "license": "CC0",
+      "author": "Quaternius",
+      "sourceUrl": "https://quaternius.com/packs/ultimatenature.html",
+      "fallback": "doodad_box_placeholder"
+    },
+    "doodad_bush_round_01": {
+      "id": "doodad_bush_round_01",
+      "path": "/assets/models/doodads/bush_round_01.glb",
+      "triangles": 400,
+      "license": "CC0",
+      "author": "Quaternius",
+      "sourceUrl": "https://quaternius.com/packs/ultimatenature.html",
+      "fallback": "doodad_box_placeholder"
+    },
+    "doodad_rock_large_01": {
+      "id": "doodad_rock_large_01",
+      "path": "/assets/models/doodads/rock_large_01.glb",
+      "triangles": 600,
+      "license": "CC0",
+      "author": "Quaternius",
+      "sourceUrl": "https://quaternius.com/packs/ultimatenature.html",
+      "fallback": "doodad_box_placeholder"
+    },
+    "doodad_box_placeholder": {
+      "id": "doodad_box_placeholder",
+      "path": "/assets/models/doodads/placeholder_box.glb",
+      "triangles": 12,
+      "license": "CC0",
+      "author": "EdgeCraft Team",
+      "sourceUrl": "Generated procedurally"
+    },
+    "doodad_marker_small": {
+      "id": "doodad_marker_small",
+      "path": "/assets/models/doodads/marker_small.glb",
+      "triangles": 12,
+      "license": "CC0",
+      "author": "EdgeCraft Team",
+      "sourceUrl": "Generated procedurally",
+      "fallback": "doodad_box_placeholder"
+    }
+  }
+}
