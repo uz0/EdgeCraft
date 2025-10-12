@@ -80,26 +80,14 @@ export class TerrainRenderer {
   /**
    * Apply material and textures to terrain
    */
-  private applyMaterial(mesh: BABYLON.GroundMesh, options: TerrainOptions): void {
+  private applyMaterial(mesh: BABYLON.GroundMesh, _options: TerrainOptions): void {
     this.material = new BABYLON.StandardMaterial('terrainMaterial', this.scene);
 
-    // Apply diffuse texture if available
-    if (
-      options.textures &&
-      options.textures.length > 0 &&
-      options.textures[0] !== undefined &&
-      options.textures[0] !== ''
-    ) {
-      const texture = new BABYLON.Texture(options.textures[0], this.scene);
-      this.material.diffuseTexture = texture;
-
-      // Set UV scaling for better tiling
-      texture.uScale = options.width / 10;
-      texture.vScale = options.height / 10;
-    } else {
-      // Default grass-like color
-      this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
-    }
+    // For now, always use a simple colored material
+    // TODO: Load actual tileset textures when assets are available
+    console.log('[TerrainRenderer] Using default grass color (textures not yet implemented)');
+    this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
+    this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1); // Low specular for grass
 
     // Enable backface culling for performance
     this.material.backFaceCulling = true;
@@ -110,6 +98,13 @@ export class TerrainRenderer {
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
     mesh.doNotSyncBoundingInfo = true;
+
+    console.log(
+      `[TerrainRenderer] Material applied: mesh=${mesh.name}, ` +
+        `position=${mesh.position.toString()}, ` +
+        `visible=${mesh.isVisible}, ` +
+        `material=${this.material?.name ?? 'none'}`
+    );
   }
 
   /**

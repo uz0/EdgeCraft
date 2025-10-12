@@ -41,8 +41,9 @@ export default defineConfig(({ mode }) => {
         typescript: true,
         eslint: {
           lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
-          dev: { logLevel: ['error'] }
-        }
+          dev: { logLevel: ['error'], overlay: false } // Disable overlay in tests
+        },
+        overlay: false // Disable error overlay (prevents blocking canvas in tests)
       })
     ],
 

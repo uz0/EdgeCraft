@@ -442,7 +442,16 @@ export class MapRendererCore {
 
     this.scene.activeCamera = this.camera;
 
-    console.log(`Camera initialized: mode=${this.config.cameraMode}`);
+    if (this.camera) {
+      const cam = this.camera as BABYLON.ArcRotateCamera;
+      console.log(
+        `Camera initialized: mode=${this.config.cameraMode}, ` +
+          `target=${cam.target?.toString() ?? 'N/A'}, ` +
+          `radius=${cam.radius ?? 'N/A'}, ` +
+          `alpha=${cam.alpha ?? 'N/A'}, ` +
+          `beta=${cam.beta ?? 'N/A'}`
+      );
+    }
   }
 
   /**

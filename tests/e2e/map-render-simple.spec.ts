@@ -130,8 +130,12 @@ test.describe('Simple Map Rendering', () => {
 
   test('should render 3P Sentinel map', async ({ page }) => {
     const consoleMessages: string[] = [];
+    const consoleErrors: string[] = [];
     page.on('console', (msg) => {
       consoleMessages.push(msg.text());
+      if (msg.type() === 'error' || msg.type() === 'warning') {
+        consoleErrors.push(`[${msg.type()}] ${msg.text()}`);
+      }
     });
 
     await page.goto('/');
@@ -153,7 +157,7 @@ test.describe('Simple Map Rendering', () => {
       window.dispatchEvent(event);
     });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000); // Increased wait for larger map
 
     // Verify actual 3D rendering
     const canvasAnalysis = await page.evaluate(() => {
@@ -184,6 +188,25 @@ test.describe('Simple Map Rendering', () => {
         isProperlySized: canvas.width > 300 && canvas.height > 150
       };
     });
+
+    // Log console errors (excluding ESLint warnings)
+    const nonESLintErrors = consoleErrors.filter(err => !err.includes('[ESLint]'));
+    console.log('\n=== Browser Console Errors/Warnings ===');
+    nonESLintErrors.forEach(err => console.log(err));
+    console.log(`Total errors/warnings: ${nonESLintErrors.length}`);
+    console.log('=======================================\n');
+
+    // Log terrain rendering messages
+    const terrainMessages = consoleMessages.filter(msg =>
+      msg.includes('[TerrainRenderer]') ||
+      msg.includes('[MapRendererCore]') ||
+      msg.includes('Camera initialized') ||
+      msg.includes('[W3XMapLoader] Tileset:')
+    );
+    console.log('\n=== Terrain Rendering Messages ===');
+    terrainMessages.forEach(msg => console.log(msg));
+    console.log(`Found ${terrainMessages.length} terrain messages`);
+    console.log('===================================\n');
 
     expect(canvasAnalysis.found).toBe(true);
     expect(canvasAnalysis.visible).toBe(true);

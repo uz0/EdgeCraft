@@ -256,6 +256,13 @@ export class W3XMapLoader implements IMapLoader {
       };
     }
 
+    // Map tileset ID to texture path
+    // For now, use a placeholder path based on tileset name
+    // TODO: Load actual tileset textures from game data
+    const tilesetPath = `/textures/tilesets/${w3e.tileset.toLowerCase()}.png`;
+
+    console.log(`[W3XMapLoader] Tileset: ${w3e.tileset}, path: ${tilesetPath}`);
+
     return {
       width: w3e.width,
       height: w3e.height,
@@ -263,6 +270,7 @@ export class W3XMapLoader implements IMapLoader {
       textures: [
         {
           id: w3e.tileset,
+          path: tilesetPath,
           blendMap: textureIndices,
         },
       ],

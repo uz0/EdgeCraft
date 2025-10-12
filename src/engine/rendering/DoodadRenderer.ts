@@ -124,6 +124,7 @@ export class DoodadRenderer {
   private doodadTypes: Map<string, DoodadType> = new Map();
   private instances: Map<string, DoodadInstance> = new Map();
   private instanceBuffers: Map<string, Float32Array> = new Map();
+  private maxDoodadsWarningLogged = false;
 
   constructor(scene: BABYLON.Scene, config?: DoodadRendererConfig) {
     this.scene = scene;
@@ -173,7 +174,12 @@ export class DoodadRenderer {
    */
   public addDoodad(placement: DoodadPlacement): void {
     if (this.instances.size >= this.config.maxDoodads) {
-      console.warn(`Max doodads reached (${this.config.maxDoodads})`);
+      if (!this.maxDoodadsWarningLogged) {
+        console.warn(
+          `Max doodads reached (${this.config.maxDoodads}), ignoring additional doodads`
+        );
+        this.maxDoodadsWarningLogged = true;
+      }
       return;
     }
 
