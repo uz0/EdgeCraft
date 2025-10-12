@@ -12,7 +12,7 @@ export default {
   ],
 
   testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/__tests__/**/*.(test|spec).+(ts|tsx|js)',
     '**/?(*.)+(spec|test).+(ts|tsx|js)',
   ],
 
