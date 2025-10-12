@@ -303,6 +303,11 @@ export class MPQParser {
     // Find file in hash table
     const hashEntry = this.findFile(filename);
     if (!hashEntry) {
+      console.log(`[MPQParser] File not found in hash table: ${filename}`);
+      console.log(
+        `[MPQParser] Hash values: hashA=${this.hashString(filename, 0)}, hashB=${this.hashString(filename, 1)}`
+      );
+      console.log(`[MPQParser] Hash table entries: ${this.archive.hashTable.length}`);
       return null;
     }
 

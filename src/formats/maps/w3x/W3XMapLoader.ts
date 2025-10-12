@@ -46,13 +46,24 @@ export class W3XMapLoader implements IMapLoader {
     const allFiles = mpqParser.listFiles();
     console.log(`[W3XMapLoader] Files in archive (${allFiles.length} total):`, allFiles.slice(0, 20));
 
-    // Extract war3map files
-    const w3iData = await mpqParser.extractFile('war3map.w3i');
+    // Try different case variations for war3map.w3i
+    let w3iData = await mpqParser.extractFile('war3map.w3i');
+    if (!w3iData) {
+      console.log('[W3XMapLoader] Trying uppercase: war3map.W3I');
+      w3iData = await mpqParser.extractFile('war3map.W3I');
+    }
+    if (!w3iData) {
+      console.log('[W3XMapLoader] Trying all caps: WAR3MAP.W3I');
+      w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
+    }
+
+    // Extract other war3map files
     const w3eData = await mpqParser.extractFile('war3map.w3e');
     const dooData = await mpqParser.extractFile('war3map.doo');
     const unitsData = await mpqParser.extractFile('war3mapUnits.doo');
 
     if (!w3iData) {
+      console.error('[W3XMapLoader] Available files:', allFiles);
       throw new Error('war3map.w3i not found in archive');
     }
 
