@@ -7,6 +7,13 @@ export default {
 
   roots: ['<rootDir>/src', '<rootDir>/tests'],
 
+  // Exclude E2E tests (Playwright) from Jest
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/e2e/',
+    '/tests/e2e-fixtures/',
+  ],
+
   transformIgnorePatterns: [
     'node_modules/(?!@babylonjs)',
   ],

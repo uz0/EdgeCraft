@@ -126,8 +126,9 @@ test.describe('Actual Map Rendering - EchoIsles', () => {
     expect(canvasInfo.found).toBe(true);
     expect(canvasInfo.visible).toBe(true);
     expect(canvasInfo.hasWebGLContext).toBe(true);
-    expect(canvasInfo.dimensions.width).toBeGreaterThan(0);
-    expect(canvasInfo.dimensions.height).toBeGreaterThan(0);
+    expect(canvasInfo.dimensions).toBeDefined();
+    expect(canvasInfo.dimensions?.width).toBeGreaterThan(0);
+    expect(canvasInfo.dimensions?.height).toBeGreaterThan(0);
     expect(canvasInfo.galleryHidden).toBe(true);
 
     // Take screenshot of the rendered map
