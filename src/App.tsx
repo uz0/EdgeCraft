@@ -80,7 +80,9 @@ const App: React.FC = () => {
     sceneRef.current = scene;
 
     // Expose engine and scene to window for E2E tests
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__testBabylonEngine = engine;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__testBabylonScene = scene;
 
     // Basic lighting
