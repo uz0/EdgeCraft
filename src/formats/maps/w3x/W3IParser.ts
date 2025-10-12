@@ -112,80 +112,108 @@ export class W3IParser {
     // Water tinting
     const waterTintingColor = this.readRGBA();
 
-    // Players
-    const playerCount = this.readUint32();
+    // Players (may be truncated in old/corrupted maps)
     const players: W3IPlayer[] = [];
-    for (let i = 0; i < playerCount; i++) {
-      players.push(this.readPlayer());
+    try {
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const playerCount = this.readUint32();
+        for (let i = 0; i < playerCount; i++) {
+          if (this.offset + 40 > this.buffer.byteLength) {
+            console.warn(`[W3IParser] Insufficient buffer for player ${i}/${playerCount}`);
+            break;
+          }
+          players.push(this.readPlayer());
+        }
+      }
+    } catch (err) {
+      console.warn('[W3IParser] Error reading players (map may be truncated):', err);
     }
 
-    // Forces
-    const forceCount = this.readUint32();
+    // Forces (may be truncated in old/corrupted maps)
     const forces: W3IForce[] = [];
-    for (let i = 0; i < forceCount; i++) {
-      forces.push(this.readForce());
+    try {
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const forceCount = this.readUint32();
+        for (let i = 0; i < forceCount; i++) {
+          if (this.offset + 12 > this.buffer.byteLength) {
+            console.warn(`[W3IParser] Insufficient buffer for force ${i}/${forceCount}`);
+            break;
+          }
+          forces.push(this.readForce());
+        }
+      }
+    } catch (err) {
+      console.warn('[W3IParser] Error reading forces (map may be truncated):', err);
     }
 
-    // Upgrade availability (optional - may not be present in some maps)
+    // All remaining fields are optional and may not be present
+    // Wrap in try-catch to handle truncated files gracefully
     let upgradeAvailability: W3IUpgrade[] = [];
-    if (this.offset + 4 <= this.buffer.byteLength) {
-      const upgradeCount = this.readUint32();
-      for (let i = 0; i < upgradeCount; i++) {
-        // Check if we have enough buffer for this upgrade entry (4 + 4 + 4 + 4 = 16 bytes)
-        if (this.offset + 16 > this.buffer.byteLength) {
-          console.warn(
-            `[W3IParser] Insufficient buffer for upgrade ${i}/${upgradeCount} at offset ${this.offset}`
-          );
-          break;
-        }
-        upgradeAvailability.push({
-          playerFlags: this.readUint32(),
-          upgradeId: this.read4CC(),
-          levelAffected: this.readUint32(),
-          availability: this.readUint32(),
-        });
-      }
-    }
-
-    // Tech availability (optional - may not be present in some maps)
     let techAvailability: W3ITech[] = [];
-    if (this.offset + 4 <= this.buffer.byteLength) {
-      const techCount = this.readUint32();
-      for (let i = 0; i < techCount; i++) {
-        // Check if we have enough buffer for this tech entry (4 + 4 = 8 bytes)
-        if (this.offset + 8 > this.buffer.byteLength) {
-          console.warn(
-            `[W3IParser] Insufficient buffer for tech ${i}/${techCount} at offset ${this.offset}`
-          );
-          break;
-        }
-        techAvailability.push({
-          playerFlags: this.readUint32(),
-          techId: this.read4CC(),
-        });
-      }
-    }
-
-    // Random unit tables (optional - may not be present in older maps)
     let unitTable: W3IRandomUnitTable | undefined;
-    if (this.offset + 4 <= this.buffer.byteLength) {
-      try {
-        unitTable = this.readRandomUnitTable();
-      } catch (err) {
-        console.warn('[W3IParser] Failed to read random unit table (optional field):', err);
-        unitTable = undefined;
-      }
-    }
-
-    // Random item tables (optional - may not be present in older maps)
     let itemTable: W3IRandomItemTable | undefined;
-    if (this.offset + 4 <= this.buffer.byteLength) {
-      try {
-        itemTable = this.readRandomItemTable();
-      } catch (err) {
-        console.warn('[W3IParser] Failed to read random item table (optional field):', err);
-        itemTable = undefined;
+
+    try {
+      // Upgrade availability (optional - may not be present in some maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const upgradeCount = this.readUint32();
+        for (let i = 0; i < upgradeCount; i++) {
+          // Check if we have enough buffer for this upgrade entry (4 + 4 + 4 + 4 = 16 bytes)
+          if (this.offset + 16 > this.buffer.byteLength) {
+            console.warn(
+              `[W3IParser] Insufficient buffer for upgrade ${i}/${upgradeCount} at offset ${this.offset}`
+            );
+            break;
+          }
+          upgradeAvailability.push({
+            playerFlags: this.readUint32(),
+            upgradeId: this.read4CC(),
+            levelAffected: this.readUint32(),
+            availability: this.readUint32(),
+          });
+        }
       }
+
+      // Tech availability (optional - may not be present in some maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const techCount = this.readUint32();
+        for (let i = 0; i < techCount; i++) {
+          // Check if we have enough buffer for this tech entry (4 + 4 = 8 bytes)
+          if (this.offset + 8 > this.buffer.byteLength) {
+            console.warn(
+              `[W3IParser] Insufficient buffer for tech ${i}/${techCount} at offset ${this.offset}`
+            );
+            break;
+          }
+          techAvailability.push({
+            playerFlags: this.readUint32(),
+            techId: this.read4CC(),
+          });
+        }
+      }
+
+      // Random unit tables (optional - may not be present in older maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        try {
+          unitTable = this.readRandomUnitTable();
+        } catch (err) {
+          console.warn('[W3IParser] Failed to read random unit table (optional field):', err);
+          unitTable = undefined;
+        }
+      }
+
+      // Random item tables (optional - may not be present in older maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        try {
+          itemTable = this.readRandomItemTable();
+        } catch (err) {
+          console.warn('[W3IParser] Failed to read random item table (optional field):', err);
+          itemTable = undefined;
+        }
+      }
+    } catch (err) {
+      // If any error occurs reading optional fields, log but continue
+      console.warn('[W3IParser] Error reading optional fields (this is OK for older maps):', err);
     }
 
     return {
