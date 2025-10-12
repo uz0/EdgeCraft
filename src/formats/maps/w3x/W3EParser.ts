@@ -184,9 +184,25 @@ export class W3EParser {
     const { width, height, groundTiles } = terrain;
     const heightmap = new Float32Array(width * height);
 
+    // Calculate stats for debugging
+    let minHeight = Infinity;
+    let maxHeight = -Infinity;
+    let zeroCount = 0;
+
     for (let i = 0; i < groundTiles.length; i++) {
-      heightmap[i] = groundTiles[i]?.groundHeight ?? 0;
+      const height = groundTiles[i]?.groundHeight ?? 0;
+      heightmap[i] = height;
+
+      minHeight = Math.min(minHeight, height);
+      maxHeight = Math.max(maxHeight, height);
+      if (height === 0) zeroCount++;
     }
+
+    console.log(
+      `[W3EParser] Heightmap created: ${width}x${height} (${groundTiles.length} tiles), ` +
+        `min=${minHeight.toFixed(2)}, max=${maxHeight.toFixed(2)}, ` +
+        `zeros=${zeroCount}/${groundTiles.length} (${((zeroCount / groundTiles.length) * 100).toFixed(1)}%)`
+    );
 
     return heightmap;
   }
