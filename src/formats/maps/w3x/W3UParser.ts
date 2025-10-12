@@ -44,7 +44,20 @@ export class W3UParser {
     const units: W3UUnit[] = [];
 
     for (let i = 0; i < unitCount; i++) {
-      units.push(this.readUnit());
+      try {
+        // Check if we have enough buffer left for at least the minimum unit data
+        // Minimum: 4 (typeId) + 4 (variation) + 12 (position) + 4 (rotation) + 12 (scale) + 1 (flags) = 37 bytes
+        if (this.offset + 37 > this.view.byteLength) {
+          console.warn(
+            `[W3UParser] Insufficient buffer for unit ${i + 1}/${unitCount}, stopping parse`
+          );
+          break;
+        }
+        units.push(this.readUnit());
+      } catch (error) {
+        console.warn(`[W3UParser] Failed to parse unit ${i + 1}/${unitCount}:`, error);
+        break; // Stop parsing remaining units if one fails
+      }
     }
 
     return {

@@ -59,9 +59,10 @@ export class W3EParser {
 
     // Read cliff tiles (optional, version-dependent)
     let cliffTiles: W3ECliffTile[] | undefined;
-    if (this.offset < this.buffer.byteLength) {
+    if (this.offset + 4 <= this.buffer.byteLength) {
       const cliffTileCount = this.readUint32();
-      if (cliffTileCount > 0) {
+      // Check if we have enough space for the cliff tiles
+      if (cliffTileCount > 0 && this.offset + cliffTileCount * 3 <= this.buffer.byteLength) {
         cliffTiles = [];
         for (let i = 0; i < cliffTileCount; i++) {
           cliffTiles.push(this.readCliffTile());
