@@ -16,6 +16,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPreviewExtractor } from '../engine/rendering/MapPreviewExtractor';
 import { PreviewCache } from '../utils/PreviewCache';
+import { LoadingMessageGenerator } from '../utils/funnyLoadingMessages';
 import type { MapMetadata } from '../ui/MapGallery';
 import type { RawMapData } from '../formats/maps/types';
 
@@ -34,6 +35,9 @@ export interface UseMapPreviewsResult {
   /** Map ID → Loading state */
   loadingStates: Map<string, PreviewLoadingState>;
 
+  /** Map ID → Funny loading message */
+  loadingMessages: Map<string, string>;
+
   /** Loading state */
   isLoading: boolean;
 
@@ -49,7 +53,7 @@ export interface UseMapPreviewsResult {
   /** Generate a single preview on demand */
   generateSinglePreview: (map: MapMetadata, mapData: RawMapData) => Promise<void>;
 
-  /** Clear cache */
+  /** Clear cache and reset all previews */
   clearCache: () => Promise<void>;
 }
 
@@ -59,12 +63,14 @@ export interface UseMapPreviewsResult {
 export function useMapPreviews(): UseMapPreviewsResult {
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
   const [loadingStates, setLoadingStates] = useState<Map<string, PreviewLoadingState>>(new Map());
+  const [loadingMessages, setLoadingMessages] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<PreviewProgress>({ current: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
 
   const extractorRef = useRef<MapPreviewExtractor | null>(null);
   const cacheRef = useRef<PreviewCache | null>(null);
+  const messageGeneratorRef = useRef<LoadingMessageGenerator>(new LoadingMessageGenerator());
 
   // Initialize on mount
   useEffect(() => {
@@ -91,6 +97,9 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
       const newPreviews = new Map<string, string>();
       const newStates = new Map<string, PreviewLoadingState>();
+      const newMessages = new Map<string, string>();
+
+      console.log(`[useMapPreviews] 🚀 Starting preview generation for ${maps.length} maps`);
 
       try {
         // Process maps in parallel batches of 4 for faster loading
@@ -98,24 +107,37 @@ export function useMapPreviews(): UseMapPreviewsResult {
         let completed = 0;
 
         const processBatch = async (batch: MapMetadata[]): Promise<void> => {
+          console.log(
+            `[useMapPreviews] 📦 Processing batch: ${batch.map((m) => m.name).join(', ')}`
+          );
+
           await Promise.all(
             batch.map(async (map) => {
               if (!map) return;
 
-              // Set loading state
+              // Generate funny loading message
+              const loadingMessage = messageGeneratorRef.current.getNext();
+              console.log(`[useMapPreviews] 🎲 "${loadingMessage}" - ${map.name}`);
+
+              // Set loading state with message
               newStates.set(map.id, 'loading');
+              newMessages.set(map.id, loadingMessage);
               setLoadingStates(new Map(newStates));
+              setLoadingMessages(new Map(newMessages));
 
               try {
                 // Check cache first
+                console.log(`[useMapPreviews] 🔍 Checking cache for ${map.name}...`);
                 const cachedPreview = await cacheRef.current!.get(map.id);
 
                 if (cachedPreview) {
-                  console.log(`Using cached preview for ${map.name}`);
+                  console.log(`[useMapPreviews] ✅ Using cached preview for ${map.name}`);
                   newPreviews.set(map.id, cachedPreview);
                   newStates.set(map.id, 'success');
+                  newMessages.delete(map.id);
                   setPreviews(new Map(newPreviews));
                   setLoadingStates(new Map(newStates));
+                  setLoadingMessages(new Map(newMessages));
                   return;
                 }
 
@@ -123,38 +145,55 @@ export function useMapPreviews(): UseMapPreviewsResult {
                 const mapData = mapDataMap.get(map.id);
 
                 if (!mapData) {
-                  console.warn(`No map data found for ${map.id}`);
+                  console.error(`[useMapPreviews] ❌ No map data found for ${map.id}`);
                   newStates.set(map.id, 'error');
+                  newMessages.delete(map.id);
                   setLoadingStates(new Map(newStates));
+                  setLoadingMessages(new Map(newMessages));
                   return;
                 }
 
-                console.log(`Generating preview for ${map.name}...`);
+                console.log(`[useMapPreviews] 🎨 Generating preview for ${map.name}...`);
+                const startTime = performance.now();
                 const result = await extractorRef.current!.extract(map.file, mapData);
+                const duration = performance.now() - startTime;
 
                 if (result.success && result.dataUrl) {
                   console.log(
-                    `Preview ${result.source} for ${map.name} (${result.extractTimeMs.toFixed(0)}ms)`
+                    `[useMapPreviews] ✅ Preview ${result.source} for ${map.name} in ${duration.toFixed(0)}ms`
                   );
 
                   newPreviews.set(map.id, result.dataUrl);
                   newStates.set(map.id, 'success');
+                  newMessages.delete(map.id);
                   setPreviews(new Map(newPreviews));
+                  setLoadingStates(new Map(newStates));
+                  setLoadingMessages(new Map(newMessages));
 
                   // Cache for future use
                   await cacheRef.current!.set(map.id, result.dataUrl);
+                  console.log(`[useMapPreviews] 💾 Cached preview for ${map.name}`);
                 } else {
-                  console.error(`Failed to generate preview for ${map.name}:`, result.error);
+                  console.error(
+                    `[useMapPreviews] ❌ Failed to generate preview for ${map.name}:`,
+                    result.error
+                  );
                   newStates.set(map.id, 'error');
+                  newMessages.delete(map.id);
+                  setLoadingStates(new Map(newStates));
+                  setLoadingMessages(new Map(newMessages));
                 }
-
-                setLoadingStates(new Map(newStates));
               } catch (err) {
-                console.error(`Error generating preview for ${map.name}:`, err);
+                console.error(`[useMapPreviews] ❌ Error generating preview for ${map.name}:`, err);
                 newStates.set(map.id, 'error');
+                newMessages.delete(map.id);
                 setLoadingStates(new Map(newStates));
+                setLoadingMessages(new Map(newMessages));
               } finally {
                 completed++;
+                console.log(
+                  `[useMapPreviews] 📊 Progress: ${completed}/${maps.length} (${((completed / maps.length) * 100).toFixed(1)}%)`
+                );
                 setProgress({ current: completed, total: maps.length, currentMap: map.name });
               }
             })
@@ -230,14 +269,19 @@ export function useMapPreviews(): UseMapPreviewsResult {
   const clearCache = useCallback(async (): Promise<void> => {
     if (!cacheRef.current) return;
 
+    console.log('[useMapPreviews] 🗑️ Clearing all previews and cache...');
     await cacheRef.current.clear();
     setPreviews(new Map());
-    console.log('Preview cache cleared');
+    setLoadingStates(new Map());
+    setLoadingMessages(new Map());
+    messageGeneratorRef.current.reset();
+    console.log('[useMapPreviews] ✅ Preview cache cleared');
   }, []);
 
   return {
     previews,
     loadingStates,
+    loadingMessages,
     isLoading,
     progress,
     error,

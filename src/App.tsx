@@ -30,8 +30,10 @@ const App: React.FC = () => {
   const {
     previews,
     loadingStates,
+    loadingMessages,
     isLoading: previewsLoading,
     generatePreviews,
+    clearCache,
   } = useMapPreviews();
 
   // Hardcoded map list (matching actual /maps folder)
@@ -371,6 +373,10 @@ const App: React.FC = () => {
                 }}
                 isLoading={isLoading || previewsLoading}
                 previewLoadingStates={loadingStates}
+                previewLoadingMessages={loadingMessages}
+                onClearPreviews={() => {
+                  void clearCache();
+                }}
               />
             ) : (
               <MapPreviewReport maps={mapsWithPreviews} />
