@@ -110,7 +110,12 @@ export class AssetLoader {
     }
 
     try {
-      const result = await BABYLON.SceneLoader.ImportMeshAsync('', '', asset.path, this.scene);
+      // Split path into rootUrl and filename for Babylon.js
+      const lastSlash = asset.path.lastIndexOf('/');
+      const rootUrl = asset.path.substring(0, lastSlash + 1);
+      const filename = asset.path.substring(lastSlash + 1);
+
+      const result = await BABYLON.SceneLoader.ImportMeshAsync('', rootUrl, filename, this.scene);
       if (!result.meshes || result.meshes.length === 0) {
         throw new Error('No meshes imported');
       }
