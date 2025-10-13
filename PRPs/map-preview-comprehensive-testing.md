@@ -1011,6 +1011,182 @@ Extract embedded `PreviewImage.tga` from SC2Map CASC archives instead of terrain
 
 ---
 
+---
+
+## 📚 All Possible Preview Rendering Configurations
+
+### Configuration Summary
+
+**Total Configurations**: 19 distinct preview rendering methods across 4 formats
+
+| Format | Configuration Options | Total |
+|--------|----------------------|-------|
+| **Warcraft 3 Classic** | war3mapPreview.tga, war3mapMap.tga, war3mapMap.blp, war3mapPreview.dds, Custom imports | 5 |
+| **Warcraft 3 Reforged** | war3mapPreview.blp, war3mapMap.blp (workaround), war3mapPreview.tga | 3 |
+| **Warcraft 3 Campaigns** | war3campaign.w3f icon, First map preview, Terrain generation | 3 |
+| **StarCraft 2** | PreviewImage.tga, Minimap.tga, Terrain generation | 3 |
+| **Universal Fallbacks** | Terrain generation, Placeholder/Error | 2 |
+
+### Configuration Details
+
+#### 1. Warcraft 3 Classic (.w3x) - 5 Options
+
+**1.1 war3mapPreview.tga** (PRIMARY)
+- **Format**: TGA Type 2 (Uncompressed True-color)
+- **Color Depth**: 32-bit BGRA (4 bytes per pixel)
+- **Dimensions**: Square, 4×4 scaling (map_width × 4, map_height × 4)
+- **Example**: 64×64 map → 256×256 preview
+- **Pixel Order**: Bottom-to-top, left-to-right
+- **Usage**: World Editor automatically generates when saving map
+- **Status**: ✅ Implemented
+
+**1.2 war3mapMap.tga** (FALLBACK)
+- **Format**: Same as war3mapPreview.tga (32-bit BGRA TGA)
+- **Dimensions**: Often smaller or different aspect ratio
+- **Usage**: Alternative preview if war3mapPreview.tga missing
+- **Use Case**: Older maps or custom map editors
+- **Status**: ✅ Implemented (fallback chain)
+
+**1.3 war3mapMap.blp** (FUTURE)
+- **Format**: BLP1 (Blip) - Blizzard's proprietary image format
+- **Compression**: JPEG-compressed or paletted
+- **Color Depth**: Supports alpha channel
+- **Usage**: Used in Warcraft 3 for textures and icons
+- **Status**: ⏳ Not yet implemented (BLP decoder required)
+
+**1.4 war3mapPreview.dds** (ALTERNATIVE)
+- **Format**: DDS (DirectDraw Surface)
+- **Compression**: DXT1/DXT5
+- **Alpha Channel**: Similar to TGA
+- **Usage**: Alternative format for custom preview images
+- **Status**: ⏳ Not yet implemented
+
+**1.5 Custom imported preview** (War3mapImported\*.tga)
+- **Format**: TGA files in War3mapImported\ directory
+- **Usage**: Custom preview images imported by map editor
+- **Path**: War3mapImported\CustomPreview.tga
+- **Status**: ⏳ Not yet implemented
+
+#### 2. Warcraft 3 Reforged (.w3x) - 3 Options
+
+**2.1 war3mapPreview.blp** (REFORGED PRIMARY)
+- **Format**: BLP1 or BLP2 (Reforged uses BLP2)
+- **Resolution**: Higher resolution than classic (512×512 or 1024×1024)
+- **Compression**: JPEG or DXT
+- **Usage**: Primary preview for Reforged UI
+- **Known Issues**: war3mapPreview.blp broken in some Reforged versions
+- **Status**: ⏳ Not yet implemented (awaiting BLP decoder)
+
+**2.2 war3mapMap.blp as custom preview** (REFORGED WORKAROUND)
+- **Format**: BLP1/BLP2
+- **Usage**: Workaround for broken war3mapPreview.blp
+- **Tool**: https://github.com/inwc3/ReforgedMapPreviewReplacer
+- **How it works**: Use war3mapPreview.blp as war3mapMap.blp
+- **Status**: ⏳ Not yet implemented
+
+**2.3 war3mapPreview.tga** (REFORGED FALLBACK - WORKS)
+- **Format**: Same as classic WC3 (32-bit BGRA TGA)
+- **Dimensions**: 256×256 (classic) or higher
+- **Usage**: Most reliable preview method in Reforged
+- **Recommendation**: Use TGA for best compatibility
+- **Status**: ✅ Implemented
+
+#### 3. Warcraft 3 Campaigns (.w3n) - 3 Options
+
+**3.1 war3campaign.w3f** (CAMPAIGN INFO FILE)
+- **Format**: Binary file with campaign metadata
+- **Contains**: Campaign name, description, icon, map list
+- **Icon Format**: Embedded BLP or reference to external file
+- **Usage**: Primary source for campaign preview
+- **Status**: ⏳ Not yet implemented
+
+**3.2 First map preview** (FALLBACK)
+- **Method**: Extract war3mapPreview.tga from first map in campaign
+- **Process**:
+  1. Read war3campaign.w3f to get map list
+  2. Extract first map file (*.w3x or *.w3m)
+  3. Extract war3mapPreview.tga from first map
+- **Status**: ⏳ Not yet implemented
+
+**3.3 Terrain generation from first map** (LAST RESORT)
+- **Method**: Generate preview from first map's terrain data
+- **Process**: Extract first map, parse terrain, render with Babylon.js
+- **Status**: ✅ Implemented (would work after Huffman fix)
+
+#### 4. StarCraft 2 (.sc2map) - 3 Options
+
+**4.1 PreviewImage.tga** (PRIMARY - LARGE PREVIEW)
+- **Format**: 24-bit TGA (True-color) or 32-bit TGA (with alpha)
+- **Dimensions**: **MUST BE SQUARE** (256×256, 512×512, 1024×1024)
+- **Color Depth**: 24-bit BGR or 32-bit BGRA
+- **Usage**: Large preview image shown in map selection
+- **Critical**: SC2 Editor REQUIRES square images
+- **Status**: ⏳ Not yet implemented
+
+**4.2 Minimap.tga** (FALLBACK - SMALL PREVIEW)
+- **Format**: 24-bit TGA (True-color)
+- **Dimensions**: MUST BE SQUARE (typically 256×256)
+- **Usage**: Small preview image, minimap
+- **Fallback**: Used if PreviewImage.tga not found
+- **Status**: ⏳ Not yet implemented
+
+**4.3 Terrain generation** (CURRENT IMPLEMENTATION)
+- **Method**: Babylon.js orthographic camera rendering
+- **Dimensions**: 512×512 (always square)
+- **Usage**: When no embedded preview exists
+- **Status**: ✅ Implemented (currently primary method for SC2)
+
+#### 5. Universal Fallbacks - 2 Options
+
+**5.1 Terrain Generation** (ALL FORMATS)
+- **Formats**: W3X, W3N, SC2
+- **Method**: Babylon.js orthographic rendering
+- **Output**: 512×512 PNG data URL
+- **Usage**: When no embedded preview available
+- **Status**: ✅ Implemented
+
+**5.2 Placeholder/Error** (FUTURE)
+- **Current**: Returns error when all methods fail
+- **Future**: Return generic placeholder image
+- **Features**: Map name overlay, format badge (W3X/SC2)
+- **Status**: ⏳ Not yet implemented
+
+---
+
+## 📊 Implementation Status Matrix
+
+| Configuration | W3X | W3N | SC2 | Status |
+|--------------|-----|-----|-----|--------|
+| **TGA Extraction** | ✅ | ❌ | ⏳ | 93% W3X, 0% W3N (Huffman), 0% SC2 |
+| **BLP Extraction** | ⏳ | ⏳ | N/A | Not implemented |
+| **DDS Extraction** | ⏳ | ⏳ | N/A | Not implemented |
+| **Campaign Icon** | N/A | ⏳ | N/A | Not implemented |
+| **Terrain Generation** | ✅ | ✅ | ✅ | 100% (after Huffman fix) |
+| **Placeholder Image** | ⏳ | ⏳ | ⏳ | Not implemented |
+
+---
+
+## 🎯 Research Sources
+
+### StarCraft 2
+- **Map Properties**: https://sc2mapster.fandom.com/wiki/Map_Properties
+- **Texture Files**: https://sc2mapster.fandom.com/wiki/Texture_Files
+- **Image Files**: https://sc2mapster.fandom.com/wiki/Image_Files
+- **Format Discussion**: https://www.sc2mapster.com/forums/development/miscellaneous-development/169244-format-of-sc2map
+
+### Warcraft 3 Classic
+- **W3X Format**: https://867380699.github.io/blog/2019/05/09/W3X_Files_Format
+- **W3M/W3X Format**: https://xgm.guru/p/wc3/warcraft-3-map-files-format
+- **war3mappreview.tga**: https://www.hiveworkshop.com/threads/war3mappreview-tga.122726/
+
+### Warcraft 3 Reforged
+- **ReforgedMapPreviewReplacer**: https://github.com/inwc3/ReforgedMapPreviewReplacer
+- **BLP Specifications**: https://www.hiveworkshop.com/threads/blp-specifications-wc3.279306/
+- **BLP Files**: https://warcraft.wiki.gg/wiki/BLP_files
+- **Reforged Bugs**: https://us.forums.blizzard.com/en/warcraft3/t/135020030-war3mappreview-still-broken/30131
+
+---
+
 ## 🎯 Next Steps
 
 1. ✅ Create test directory structure: `tests/comprehensive/`
@@ -1018,6 +1194,11 @@ Extract embedded `PreviewImage.tga` from SC2Map CASC archives instead of terrain
 3. ✅ Implement comprehensive test suite (265 tests)
 4. ✅ Run live browser validation (Chrome DevTools MCP)
 5. ✅ Document validation results (16/24 passing)
-6. ⏳ Fix Huffman decompressor edge cases
-7. ⏳ Refactor test infrastructure for automated execution
-8. ⏳ Achieve 100% map preview coverage (24/24)
+6. ✅ Research all SC2 and WC3 Reforged preview options
+7. ✅ Create comprehensive test examples (19 configurations)
+8. ⏳ Fix Huffman decompressor edge cases
+9. ⏳ Implement SC2 PreviewImage.tga extraction
+10. ⏳ Implement BLP decoder for Reforged support
+11. ⏳ Implement W3N campaign icon extraction
+12. ⏳ Refactor test infrastructure for automated execution
+13. ⏳ Achieve 100% map preview coverage (24/24)
