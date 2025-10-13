@@ -53,6 +53,97 @@ export class MapPreviewExtractor {
   }
 
   /**
+   * Check if data looks like a valid TGA file header
+   * TGA format: https://www.fileformat.info/format/tga/egff.htm
+   */
+  private isTGAHeader(data: Uint8Array): boolean {
+    if (data.length < 18) return false; // TGA header is 18 bytes
+
+    const idLength = data[0] ?? 0; // 0-255
+    const colorMapType = data[1] ?? 0; // 0 or 1
+    const imageType = data[2] ?? 0; // 1-11, commonly 2 (uncompressed) or 10 (RLE)
+    const width = (data[12] ?? 0) | ((data[13] ?? 0) << 8); // little-endian
+    const height = (data[14] ?? 0) | ((data[15] ?? 0) << 8); // little-endian
+    const pixelDepth = data[16] ?? 0; // 24 or 32 for RGB/RGBA
+
+    // Validate TGA header
+    const isValidColorMapType = colorMapType === 0 || colorMapType === 1;
+    const isValidImageType =
+      imageType === 1 ||
+      imageType === 2 ||
+      imageType === 3 ||
+      imageType === 9 ||
+      imageType === 10 ||
+      imageType === 11;
+    const isValidDimensions = width > 0 && width <= 4096 && height > 0 && height <= 4096;
+    const isValidPixelDepth = pixelDepth === 24 || pixelDepth === 32 || pixelDepth === 8;
+    const isValidIdLength = idLength < 256;
+
+    return (
+      isValidColorMapType &&
+      isValidImageType &&
+      isValidDimensions &&
+      isValidPixelDepth &&
+      isValidIdLength
+    );
+  }
+
+  /**
+   * Find and extract TGA files by scanning block table (fallback when listfile fails)
+   * Useful for W3N campaigns where nested W3X archives may have corrupted/encrypted listfiles
+   */
+  private async findTGAByBlockScan(parser: MPQParser): Promise<ArrayBuffer | null> {
+    console.log(`[MapPreviewExtractor] Scanning block table for TGA files...`);
+
+    const archive = parser['archive']; // Access private property
+    if (!archive?.blockTable) {
+      console.log(`[MapPreviewExtractor] No block table available`);
+      return null;
+    }
+
+    // Look for files that might be TGA files (reasonable size for preview images)
+    const candidates = archive.blockTable
+      .map((block, index) => ({ block, index }))
+      .filter(({ block }) => {
+        const exists = (block.flags & 0x80000000) !== 0;
+        const size = block.uncompressedSize;
+        // TGA previews are typically 50KB-2MB (128x128 to 512x512, 32-bit)
+        const isReasonableSize = size > 10000 && size < 3000000;
+        return exists && isReasonableSize;
+      })
+      .sort((a, b) => b.block.uncompressedSize - a.block.uncompressedSize); // Largest first
+
+    console.log(`[MapPreviewExtractor] Found ${candidates.length} candidate blocks for TGA files`);
+
+    // Check each candidate
+    for (const { block, index } of candidates.slice(0, 20)) {
+      // Check top 20
+      try {
+        console.log(
+          `[MapPreviewExtractor] Checking block ${index} (${block.uncompressedSize} bytes)...`
+        );
+
+        // Extract the file by index
+        const fileData = await parser.extractFileByIndex(index);
+        if (!fileData) continue;
+
+        // Check if it's a TGA file
+        const header = new Uint8Array(fileData.data, 0, Math.min(18, fileData.data.byteLength));
+        if (this.isTGAHeader(header)) {
+          console.log(`[MapPreviewExtractor] ✅ Found TGA file at block ${index}!`);
+          return fileData.data;
+        }
+      } catch (error) {
+        console.warn(`[MapPreviewExtractor] Failed to check block ${index}:`, error);
+        continue;
+      }
+    }
+
+    console.log(`[MapPreviewExtractor] No TGA files found in block scan`);
+    return null;
+  }
+
+  /**
    * Extract or generate preview for a map
    *
    * @param file - Map file (W3X/W3N/SC2Map)
@@ -252,6 +343,8 @@ export class MapPreviewExtractor {
                     `[MapPreviewExtractor] W3N: Looking for preview files in nested W3X...`
                   );
 
+                  // First try filename-based extraction
+                  let tgaData: ArrayBuffer | null = null;
                   for (const fileName of MapPreviewExtractor.W3X_PREVIEW_FILES) {
                     console.log(`[MapPreviewExtractor] W3N: Trying to extract ${fileName}...`);
                     const previewData = await nestedParser.extractFile(fileName);
@@ -260,26 +353,39 @@ export class MapPreviewExtractor {
                       console.log(
                         `[MapPreviewExtractor] W3N: ✅ Extracted ${fileName} (${previewData.data.byteLength} bytes)`
                       );
-
-                      console.log(`[MapPreviewExtractor] W3N: Decoding TGA...`);
-                      const dataUrl = this.tgaDecoder.decodeToDataURL(previewData.data);
-
-                      if (dataUrl) {
-                        console.log(
-                          `[MapPreviewExtractor] W3N: ✅ Successfully decoded TGA to data URL!`
-                        );
-                        return { success: true, dataUrl };
-                      } else {
-                        console.log(`[MapPreviewExtractor] W3N: ❌ TGA decode returned null`);
-                      }
+                      tgaData = previewData.data;
+                      break;
                     } else {
                       console.log(`[MapPreviewExtractor] W3N: ${fileName} not found in nested W3X`);
                     }
                   }
 
-                  console.log(
-                    `[MapPreviewExtractor] W3N: ❌ No preview files found in nested W3X block ${index}`
-                  );
+                  // If filename-based extraction failed, try block scanning
+                  if (!tgaData) {
+                    console.log(
+                      `[MapPreviewExtractor] W3N: Filename-based extraction failed, trying block scan...`
+                    );
+                    tgaData = await this.findTGAByBlockScan(nestedParser);
+                  }
+
+                  // If we found TGA data, try to decode it
+                  if (tgaData) {
+                    console.log(`[MapPreviewExtractor] W3N: Decoding TGA...`);
+                    const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
+
+                    if (dataUrl) {
+                      console.log(
+                        `[MapPreviewExtractor] W3N: ✅ Successfully decoded TGA to data URL!`
+                      );
+                      return { success: true, dataUrl };
+                    } else {
+                      console.log(`[MapPreviewExtractor] W3N: ❌ TGA decode returned null`);
+                    }
+                  } else {
+                    console.log(
+                      `[MapPreviewExtractor] W3N: ❌ No preview files found in nested W3X block ${index}`
+                    );
+                  }
                 }
               } else {
                 console.log(`[MapPreviewExtractor] W3N: Block ${index} is not an MPQ archive`);
