@@ -676,19 +676,23 @@ export class MapRendererCore {
       // RTS camera with classic perspective (like Warcraft 3)
       // alpha: -Math.PI/2 = facing "north" (negative Z direction)
       // beta: Math.PI/5 (~36 degrees from vertical) for classic RTS angle
-      // radius: Distance from target
+      // radius: Distance from target (in world units, terrain is 0-100 height)
       // target: Center of map at mid-height (terrain is 0-100, so target Y=50)
+
+      // For world-space coordinates (tile * 128), we need much smaller radius
+      // Typical map 100x100 tiles = 12,800 world units, radius ~800-1200 for good view
+      const mapDiagonal = Math.sqrt(worldWidth * worldWidth + worldHeight * worldHeight);
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
         -Math.PI / 2, // Facing north
         Math.PI / 5, // 36° from vertical (classic RTS angle like WC3)
-        Math.max(worldWidth, worldHeight) * 0.8, // Closer zoom for better detail
+        mapDiagonal * 0.06, // Much closer for terrain at height 0-100
         new BABYLON.Vector3(worldWidth / 2, 50, worldHeight / 2), // Target center at mid-height (terrain 0-100)
         this.scene
       );
 
-      camera.lowerRadiusLimit = Math.max(worldWidth, worldHeight) * 0.3;
-      camera.upperRadiusLimit = Math.max(worldWidth, worldHeight) * 2.0;
+      camera.lowerRadiusLimit = mapDiagonal * 0.02;
+      camera.upperRadiusLimit = mapDiagonal * 0.15;
       camera.lowerBetaLimit = 0.2; // Don't allow too steep
       camera.upperBetaLimit = Math.PI / 2.2; // Don't allow below horizon
 
