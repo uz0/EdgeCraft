@@ -960,7 +960,33 @@ export class MPQParser {
    * Parse hash table from byte array (for streaming)
    */
   private parseHashTableFromBytes(data: Uint8Array, entryCount: number): MPQHashEntry[] {
-    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    // Try WITHOUT decryption first (many maps don't encrypt tables)
+    const rawView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+
+    // Check if raw blockIndex values are reasonable (should be < blockTableSize or 0xFFFFFFFF for empty)
+    let hasValidBlockIndices = true;
+    for (let i = 0; i < Math.min(entryCount, 10); i++) {
+      const blockIndex = rawView.getUint32(i * 16 + 12, true);
+      // We don't have blockTableSize here, so just check if it's reasonable (< 10000 or empty)
+      if (blockIndex !== 0xffffffff && blockIndex >= 10000) {
+        hasValidBlockIndices = false;
+        break;
+      }
+    }
+
+    console.log(`[MPQParser Stream] Raw hash table check: hasValidBlockIndices=${hasValidBlockIndices}`);
+
+    let view = rawView;
+    if (!hasValidBlockIndices) {
+      // BlockIndex values out of range = table is encrypted
+      console.log('[MPQParser Stream] Hash table appears encrypted, attempting decryption...');
+      const decryptedData = this.decryptTable(data, '(hash table)');
+      view = new DataView(decryptedData.buffer as ArrayBuffer);
+      console.log(`[MPQParser Stream] Decrypted first blockIndex: ${view.getUint32(12, true)}`);
+    } else {
+      console.log('[MPQParser Stream] Using raw (unencrypted) hash table');
+    }
+
     const hashTable: MPQHashEntry[] = [];
     let offset = 0;
 
@@ -982,7 +1008,26 @@ export class MPQParser {
    * Parse block table from byte array (for streaming)
    */
   private parseBlockTableFromBytes(data: Uint8Array, entryCount: number): MPQBlockEntry[] {
-    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    // Try WITHOUT decryption first
+    const rawView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+
+    // Check if raw data looks valid (filePos should be reasonable)
+    const firstFilePosRaw = rawView.getUint32(0, true);
+
+    console.log(`[MPQParser Stream] Raw block table check: first filePos=${firstFilePosRaw}`);
+
+    // If raw values look unreasonable, decrypt
+    let view = rawView;
+    if (firstFilePosRaw > 1000000000) {
+      // File position way too large = likely encrypted
+      console.log('[MPQParser Stream] Block table appears encrypted, attempting decryption...');
+      const decryptedData = this.decryptTable(data, '(block table)');
+      view = new DataView(decryptedData.buffer as ArrayBuffer);
+      console.log(`[MPQParser Stream] Decrypted first filePos: ${view.getUint32(0, true)}`);
+    } else {
+      console.log('[MPQParser Stream] Using raw (unencrypted) block table');
+    }
+
     const blockTable: MPQBlockEntry[] = [];
     let offset = 0;
 
@@ -1001,6 +1046,7 @@ export class MPQParser {
 
   /**
    * Build file list from (listfile) in archive
+   * Falls back to trying common W3X/W3N filenames if (listfile) not found
    */
   private async buildFileListStream(
     reader: StreamingFileReader,
@@ -1011,7 +1057,8 @@ export class MPQParser {
       // Try to extract (listfile)
       const listFile = await this.extractFileStream('(listfile)', reader, hashTable, blockTable);
       if (!listFile) {
-        return [];
+        console.log('[MPQParser Stream] (listfile) not found, trying common W3N/W3X map names...');
+        return this.generateCommonMapNamesForStreaming();
       }
 
       // Parse listfile (text file with one filename per line)
@@ -1024,9 +1071,44 @@ export class MPQParser {
 
       return fileList;
     } catch (error) {
-      // Listfile not found or error - return empty list
-      return [];
+      // Listfile not found or error - return common names as fallback
+      console.log('[MPQParser Stream] Error extracting (listfile), trying common map names:', error);
+      return this.generateCommonMapNamesForStreaming();
     }
+  }
+
+  /**
+   * Generate common campaign map naming patterns for fallback (streaming mode)
+   * Similar to W3NCampaignLoader.generateCommonMapNames() but returns more patterns
+   */
+  private generateCommonMapNamesForStreaming(): string[] {
+    const names: string[] = [];
+
+    // Common W3N campaign patterns
+    for (let i = 1; i <= 20; i++) {
+      const num = i.toString().padStart(2, '0');
+      names.push(`Chapter${num}.w3x`);
+      names.push(`Chapter${num}.w3m`);
+      names.push(`Map${num}.w3x`);
+      names.push(`Map${num}.w3m`);
+      names.push(`chapter${num}.w3x`);
+      names.push(`chapter${num}.w3m`);
+      names.push(`map${num}.w3x`);
+      names.push(`map${num}.w3m`);
+      names.push(`${i}.w3x`);
+      names.push(`${i}.w3m`);
+    }
+
+    // Also try war3campaign.w3f
+    names.push('war3campaign.w3f');
+    names.push('war3campaign.w3u');
+    names.push('war3campaign.w3t');
+    names.push('war3campaign.w3a');
+    names.push('war3campaign.w3b');
+    names.push('war3campaign.w3d');
+    names.push('war3campaign.w3q');
+
+    return names;
   }
 
   /**
@@ -1052,8 +1134,9 @@ export class MPQParser {
     blockTable: MPQBlockEntry[]
   ): Promise<MPQFile | null> {
     // Find file in hash table
-    const hashA = this.hashString(fileName, 0);
-    const hashB = this.hashString(fileName, 1);
+    // Hash types: 0=table offset, 1=hashA, 2=hashB
+    const hashA = this.hashString(fileName, 1);
+    const hashB = this.hashString(fileName, 2);
 
     let hashEntry: MPQHashEntry | null = null;
     for (const entry of hashTable) {
@@ -1075,26 +1158,58 @@ export class MPQParser {
       return null;
     }
 
-    // Read file data from archive
-    const fileData = await reader.readRange(blockEntry.filePos, blockEntry.uncompressedSize);
-
-    // For now, only support uncompressed, unencrypted files
+    // Determine file flags
     const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
     const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
 
-    if (isCompressed || isEncrypted) {
-      console.warn(
-        `File ${fileName} is compressed/encrypted - not yet supported in streaming mode`
-      );
-      return null;
+    // Read file data from archive (read compressed size first)
+    let rawData = await reader.readRange(blockEntry.filePos, blockEntry.compressedSize);
+
+    // Decrypt if encrypted
+    if (isEncrypted) {
+      console.log(`[MPQParser Stream] Decrypting ${fileName}...`);
+      const fileKey = this.hashString(fileName, 3);
+      const decryptedData = this.decryptFile(new Uint8Array(rawData.buffer, rawData.byteOffset, rawData.byteLength), fileKey);
+      rawData = new Uint8Array(decryptedData);
+    }
+
+    // Decompress if compressed
+    let fileData: ArrayBuffer;
+    if (isCompressed) {
+      console.log(`[MPQParser Stream] Decompressing ${fileName}...`);
+      const compressionAlgorithm = this.detectCompressionAlgorithm(rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength));
+
+      if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
+        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
+        fileData = await this.lzmaDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
+      } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
+        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
+        fileData = await this.zlibDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
+      } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
+        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
+        fileData = await this.bzip2Decompressor.decompress(compressedData, blockEntry.uncompressedSize);
+      } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
+        // Multi-algorithm compression (W3X style)
+        const firstByte = rawData.length > 0 ? new DataView(rawData.buffer, rawData.byteOffset).getUint8(0) : 0;
+        if (firstByte !== 0 && blockEntry.compressedSize < blockEntry.uncompressedSize) {
+          fileData = await this.decompressMultiAlgorithm(
+            rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength),
+            blockEntry.uncompressedSize,
+            firstByte
+          );
+        } else {
+          fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+        }
+      } else {
+        throw new Error(`Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`);
+      }
+    } else {
+      fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
     }
 
     return {
       name: fileName,
-      data: fileData.buffer.slice(
-        fileData.byteOffset,
-        fileData.byteOffset + fileData.byteLength
-      ) as ArrayBuffer,
+      data: fileData,
       compressedSize: blockEntry.compressedSize,
       uncompressedSize: blockEntry.uncompressedSize,
       isCompressed,
