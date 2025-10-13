@@ -6,22 +6,48 @@
  */
 
 // Polyfill Buffer for browser environment (seek-bzip requires it)
-// This is a minimal polyfill - seek-bzip primarily needs Buffer.from and Buffer.alloc
+// seek-bzip calls 'new Buffer()' so we need a constructor-compatible polyfill
 if (typeof Buffer === 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  (globalThis as any).Buffer = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    from: (data: any): Uint8Array => {
-      if (data instanceof Uint8Array) return data;
-      if (data instanceof ArrayBuffer) return new Uint8Array(data);
-      if (Array.isArray(data)) return new Uint8Array(data);
-      return new Uint8Array(0);
-    },
-    alloc: (size: number): Uint8Array => new Uint8Array(size),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    isBuffer: (obj: any): boolean => obj instanceof Uint8Array,
+  // Create a function that can be called as a constructor
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const BufferPolyfill = function (arg: any): Uint8Array {
+    // Handle constructor calls: new Buffer(size), new Buffer(array), etc.
+    if (typeof arg === 'number') {
+      return new Uint8Array(arg);
+    }
+    if (arg instanceof ArrayBuffer) {
+      return new Uint8Array(arg);
+    }
+    if (arg instanceof Uint8Array) {
+      return arg;
+    }
+    if (Array.isArray(arg)) {
+      return new Uint8Array(arg);
+    }
+    return new Uint8Array(0);
   };
-  console.log('[Bzip2Decompressor] Buffer polyfill installed for browser environment');
+
+  // Add static methods
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  BufferPolyfill.from = (data: any): Uint8Array => {
+    if (data instanceof Uint8Array) return data;
+    if (data instanceof ArrayBuffer) return new Uint8Array(data);
+    if (Array.isArray(data)) return new Uint8Array(data);
+    return new Uint8Array(0);
+  };
+
+  BufferPolyfill.alloc = (size: number): Uint8Array => new Uint8Array(size);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  BufferPolyfill.isBuffer = (obj: any): boolean => obj instanceof Uint8Array;
+
+  // Install the polyfill globally
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  (globalThis as any).Buffer = BufferPolyfill;
+
+  console.log(
+    '[Bzip2Decompressor] Buffer polyfill installed for browser environment (with constructor support)'
+  );
 }
 
 import Bunzip from 'seek-bzip';
