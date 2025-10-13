@@ -431,18 +431,31 @@ export class MapPreviewExtractor {
 
       if (mpqResult.success && mpqResult.archive) {
         // Try each preview file name
+        let tgaData: ArrayBuffer | null = null;
         for (const fileName of previewFiles) {
           const fileData = await mpqParser.extractFile(fileName);
 
           if (fileData) {
             console.log(`[MapPreviewExtractor] ✅ MPQParser extracted: ${fileName}`);
+            tgaData = fileData.data;
+            break;
+          }
+        }
 
-            // Decode TGA to data URL
-            const dataUrl = this.tgaDecoder.decodeToDataURL(fileData.data);
+        // If filename-based extraction failed, try block scanning
+        if (!tgaData && format !== 'sc2map') {
+          // Only for W3X maps (SC2 maps have more reliable listfiles)
+          console.log(
+            `[MapPreviewExtractor] Filename-based extraction failed, trying block scan...`
+          );
+          tgaData = await this.findTGAByBlockScan(mpqParser);
+        }
 
-            if (dataUrl) {
-              return { success: true, dataUrl };
-            }
+        // If we found TGA data, decode it
+        if (tgaData) {
+          const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
+          if (dataUrl) {
+            return { success: true, dataUrl };
           }
         }
       }
