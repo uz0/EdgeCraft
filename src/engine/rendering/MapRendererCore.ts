@@ -359,7 +359,7 @@ export class MapRendererCore {
     // Load all doodad types in parallel
     console.log(`Loading ${uniqueTypes.size} unique doodad types...`);
     await Promise.all(
-      Array.from(uniqueTypes).map(typeId => this.doodadRenderer!.loadDoodadType(typeId, ''))
+      Array.from(uniqueTypes).map((typeId) => this.doodadRenderer!.loadDoodadType(typeId, ''))
     );
 
     // Add all doodads

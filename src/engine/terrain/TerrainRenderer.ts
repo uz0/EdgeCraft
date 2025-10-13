@@ -103,16 +103,16 @@ export class TerrainRenderer {
 
         // Load the diffuse texture
         const diffuseTexture = this.assetLoader.loadTexture(mappedId);
+        diffuseTexture.uScale = 16;
+        diffuseTexture.vScale = 16;
         this.material.diffuseTexture = diffuseTexture;
-        this.material.diffuseTexture.uScale = 16;
-        this.material.diffuseTexture.vScale = 16;
 
         // Try to load normal map (if available)
         try {
           const normalTexture = this.assetLoader.loadTexture(`${mappedId}_normal`);
+          normalTexture.uScale = 16;
+          normalTexture.vScale = 16;
           this.material.bumpTexture = normalTexture;
-          this.material.bumpTexture.uScale = 16;
-          this.material.bumpTexture.vScale = 16;
         } catch {
           // Normal map not available, continue without it
         }
@@ -120,9 +120,9 @@ export class TerrainRenderer {
         // Try to load roughness map (if available)
         try {
           const roughnessTexture = this.assetLoader.loadTexture(`${mappedId}_roughness`);
+          roughnessTexture.uScale = 16;
+          roughnessTexture.vScale = 16;
           this.material.specularTexture = roughnessTexture;
-          this.material.specularTexture.uScale = 16;
-          this.material.specularTexture.vScale = 16;
         } catch {
           // Roughness map not available, use default specular
           this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);

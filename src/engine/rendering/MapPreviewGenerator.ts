@@ -21,6 +21,7 @@
 import * as BABYLON from '@babylonjs/core';
 import type { RawMapData } from '../../formats/maps/types';
 import { TerrainRenderer } from '../terrain/TerrainRenderer';
+import { AssetLoader } from '../assets/AssetLoader';
 
 export interface PreviewConfig {
   /** Output width */
@@ -120,7 +121,8 @@ export class MapPreviewGenerator {
       this.camera.orthoBottom = -maxDim / 2;
 
       // Step 3: Render terrain using existing API
-      const terrainRenderer = new TerrainRenderer(this.scene);
+      const assetLoader = new AssetLoader(this.scene);
+      const terrainRenderer = new TerrainRenderer(this.scene, assetLoader);
       const heightmapUrl = this.createHeightmapDataUrl(
         mapData.terrain.heightmap,
         mapData.terrain.width,

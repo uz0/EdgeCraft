@@ -146,7 +146,11 @@ export class DoodadRenderer {
    * @param _modelPath - Path to model file (unused, uses AssetMap instead)
    * @param variations - Optional variation model paths (unused for now)
    */
-  public async loadDoodadType(typeId: string, _modelPath: string, variations?: string[]): Promise<void> {
+  public async loadDoodadType(
+    typeId: string,
+    _modelPath: string,
+    variations?: string[]
+  ): Promise<void> {
     try {
       // Map the doodad type ID to our asset ID
       const mappedId = mapAssetID('w3x', 'doodad', typeId);
@@ -203,7 +207,9 @@ export class DoodadRenderer {
 
     // Type should already be loaded - if not, log a warning
     if (!this.doodadTypes.has(placement.typeId)) {
-      console.warn(`[DoodadRenderer] Doodad type ${placement.typeId} not loaded, skipping instance`);
+      console.warn(
+        `[DoodadRenderer] Doodad type ${placement.typeId} not loaded, skipping instance`
+      );
       return;
     }
 

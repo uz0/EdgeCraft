@@ -137,10 +137,7 @@ export class AssetLoader {
       { size: 1 },
       this.scene
     );
-    const material = new BABYLON.StandardMaterial(
-      `fallback_mat_${Date.now()}`,
-      this.scene
-    );
+    const material = new BABYLON.StandardMaterial(`fallback_mat_${Date.now()}`, this.scene);
     material.diffuseColor = new BABYLON.Color3(1, 0, 1);
     box.material = material;
     return box;

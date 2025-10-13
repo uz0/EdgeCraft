@@ -7,18 +7,21 @@
 
 import * as BABYLON from '@babylonjs/core';
 import { TerrainRenderer } from '@/engine/terrain/TerrainRenderer';
+import { AssetLoader } from '@/engine/assets/AssetLoader';
 
 describe.skip('TerrainRenderer', () => {
   let canvas: HTMLCanvasElement;
   let engine: BABYLON.Engine;
   let scene: BABYLON.Scene;
+  let assetLoader: AssetLoader;
   let terrain: TerrainRenderer;
 
   beforeEach(() => {
     canvas = document.createElement('canvas');
     engine = new BABYLON.Engine(canvas, false);
     scene = new BABYLON.Scene(engine);
-    terrain = new TerrainRenderer(scene);
+    assetLoader = new AssetLoader(scene);
+    terrain = new TerrainRenderer(scene, assetLoader);
   });
 
   afterEach(() => {
