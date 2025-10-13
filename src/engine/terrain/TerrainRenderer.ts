@@ -376,7 +376,10 @@ void main(void) {
     }
 
     // Create splatmap texture from blendMap
-    const splatmapTexture = this.createSplatmapTexture(blendMap, options.width, options.height);
+    // Use tile dimensions, not world dimensions (splatmap is 1 pixel per tile)
+    const splatWidth = options.splatmapWidth ?? options.width;
+    const splatHeight = options.splatmapHeight ?? options.height;
+    const splatmapTexture = this.createSplatmapTexture(blendMap, splatWidth, splatHeight);
 
     // Create custom shader material
     const shaderMaterial = new BABYLON.ShaderMaterial(

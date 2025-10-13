@@ -357,8 +357,10 @@ export class MapRendererCore {
       // W3X world coordinates: 128 units per tile
       const TILE_SIZE = 128;
       const result = await this.terrainRenderer.loadHeightmapMultiTexture(heightmapUrl, {
-        width: terrain.width * TILE_SIZE,
+        width: terrain.width * TILE_SIZE, // World dimensions for mesh
         height: terrain.height * TILE_SIZE,
+        splatmapWidth: terrain.width, // Tile dimensions for splatmap (1 pixel per tile)
+        splatmapHeight: terrain.height,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
         maxHeight: 100, // Default max height
         textureIds,

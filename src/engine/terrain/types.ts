@@ -6,9 +6,9 @@
  * Terrain options for heightmap-based terrain
  */
 export interface TerrainOptions {
-  /** Width of terrain */
+  /** Width of terrain in world units */
   width: number;
-  /** Height of terrain */
+  /** Height of terrain in world units */
   height: number;
   /** Number of subdivisions (affects detail and performance) */
   subdivisions: number;
@@ -22,6 +22,10 @@ export interface TerrainOptions {
   textureId?: string;
   /** Enable wireframe mode */
   wireframe?: boolean;
+  /** Width of splatmap in tiles (for multi-texture terrain) */
+  splatmapWidth?: number;
+  /** Height of splatmap in tiles (for multi-texture terrain) */
+  splatmapHeight?: number;
 }
 
 /**
