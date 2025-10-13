@@ -151,6 +151,15 @@ void main(void) {
             maxHeight: options.maxHeight,
             onReady: (mesh) => {
               try {
+                // Position terrain mesh so (0,0) in W3X coords = (0,0) in Babylon
+                // Babylon centers the terrain at origin, but we need it positioned
+                // so its corner is at origin to match unit/doodad coordinates
+                mesh.position.x = options.width / 2;
+                mesh.position.z = options.height / 2;
+                console.log(
+                  `[TerrainRenderer] Positioned terrain mesh at (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
+                );
+
                 this.applyMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
                 resolve({
@@ -283,6 +292,15 @@ void main(void) {
             maxHeight: options.maxHeight,
             onReady: (mesh) => {
               try {
+                // Position terrain mesh so (0,0) in W3X coords = (0,0) in Babylon
+                // Babylon centers the terrain at origin, but we need it positioned
+                // so its corner is at origin to match unit/doodad coordinates
+                mesh.position.x = options.width / 2;
+                mesh.position.z = options.height / 2;
+                console.log(
+                  `[TerrainRenderer] Positioned multi-texture terrain mesh at (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
+                );
+
                 this.applyMultiTextureMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
                 resolve({
