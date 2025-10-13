@@ -49,6 +49,16 @@ export const W3X_DOODAD_MAP: Record<string, string> = {
   LTtr: 'doodad_tree_oak_02', // Lordaeron Tree
   ATtc: 'doodad_tree_oak_01', // Ashenvale Tree Canopy (use oak)
   ASx1: 'doodad_tree_oak_01', // Ashenvale Small Tree (use oak, scaled)
+  ASx0: 'doodad_tree_oak_01', // Ashenvale Small Tree (variant)
+  ASx2: 'doodad_tree_oak_01', // Ashenvale Small Tree (variant 2)
+  ATwf: 'doodad_tree_pine_01', // Ashenvale Twisted Fir
+  COlg: 'doodad_tree_oak_02', // Outland Large Tree
+  CTtc: 'doodad_tree_pine_01', // Cityscape Tree Canopy
+  LOtr: 'doodad_tree_oak_02', // Lordaeron Tree (variant)
+  LOth: 'doodad_tree_oak_02', // Lordaeron Thick Tree
+  LTe1: 'doodad_tree_oak_02', // Lordaeron Elder Tree
+  LTe3: 'doodad_tree_oak_02', // Lordaeron Elder Tree (variant)
+  LTbs: 'doodad_tree_dead_01', // Lordaeron Barren Stump
 
   // Bushes / Foliage
   ASbc: 'doodad_bush_round_01', // Ashenvale Bush (primary)
@@ -64,12 +74,61 @@ export const W3X_DOODAD_MAP: Record<string, string> = {
   LOss: 'doodad_rock_large_01', // Lordaeron Summer Stone
   LObz: 'doodad_rock_large_01', // Lordaeron Boulder
   LObr: 'doodad_rock_large_01', // Lordaeron Boulder (variant)
+  AOsk: 'doodad_rock_large_01', // Ashenvale Small Rock
+  AOsr: 'doodad_rock_large_01', // Ashenvale Stone Rock
+  COhs: 'doodad_rock_large_01', // Cityscape Hewn Stone
+  LOrb: 'doodad_rock_large_01', // Lordaeron River Boulder
+  LOsh: 'doodad_rock_large_01', // Lordaeron Stone
+  LOca: 'doodad_rock_large_01', // Lordaeron Cave Rock
+  LOcg: 'doodad_rock_large_01', // Lordaeron Crag
+  LTcr: 'doodad_rock_large_01', // Lordaeron Crag (variant)
+  ZPsh: 'doodad_rock_large_01', // Zen Platform Stone
+  ZZdt: 'doodad_rock_large_01', // Zen Dark Tower Stone
+  YOec: 'doodad_rock_large_01', // Outland Earth Crystal
+  YOf2: 'doodad_rock_large_01', // Outland Fire Crystal 2
+  YOf3: 'doodad_rock_large_01', // Outland Fire Crystal 3
 
   // Plants
   APct: 'doodad_plant_generic_01', // Ashenvale Plant/Cattail
   LOsm: 'doodad_plant_generic_01', // Mushroom
   AZrf: 'doodad_plant_generic_01', // Root/Fungus
   ASv0: 'doodad_plant_generic_01', // Vine
+  APbs: 'doodad_bush_round_01', // Ashenvale Plant Bush
+  APms: 'doodad_plant_generic_01', // Ashenvale Plant Moss
+  ASr1: 'doodad_plant_generic_01', // Ashenvale Shrub 1
+  ASv3: 'doodad_plant_generic_01', // Ashenvale Vine 3
+  AWfs: 'doodad_plant_generic_01', // Ashenvale Wild Flower Small
+  DTg1: 'doodad_plant_generic_01', // Dungeon Twisted Grass 1
+  DTg3: 'doodad_plant_generic_01', // Dungeon Twisted Grass 3
+  NWfb: 'doodad_plant_generic_01', // Northrend Wild Flower Big
+  NWfp: 'doodad_plant_generic_01', // Northrend Wild Flower Purple
+  NWpa: 'doodad_plant_generic_01', // Northrend Plant Arctic
+  VOfs: 'doodad_plant_generic_01', // Village Outland Flower Small
+  YOfr: 'doodad_plant_generic_01', // Outland Fire Rose
+
+  // Structures
+  AOhs: 'doodad_ruins_01', // Ashenvale House (use ruins)
+  AOks: 'doodad_pillar_stone_01', // Ashenvale Kiosk (use pillar)
+  AOla: 'doodad_pillar_stone_01', // Ashenvale Large Arch (use pillar)
+  AOlg: 'doodad_bridge_01', // Ashenvale Large Gate (use bridge)
+  DRfc: 'doodad_ruins_01', // Dalaran Ruined Fountain Court
+  NOft: 'doodad_well_01', // Northrend Fountain (use well)
+  NOfp: 'doodad_pillar_stone_01', // Northrend Fountain Pillar
+  NWsd: 'doodad_signpost_01', // Northrend Wooden Sign Door
+  OTis: 'doodad_pillar_stone_01', // Outland Temple Ice Statue
+  ZPfw: 'doodad_fence_01', // Zen Platform Fountain Wall (use fence)
+  LWw0: 'doodad_well_01', // Lordaeron Winter Well 0
+
+  // Misc
+  LOtz: 'doodad_pillar_stone_01', // Lordaeron Totem/Obelisk (use pillar)
+  LOwr: 'doodad_ruins_01', // Lordaeron Well Ruins
+  LTlt: 'doodad_torch_01', // Lordaeron Tower Light (use torch)
+  LTs5: 'doodad_pillar_stone_01', // Lordaeron Tower Small 5 (use pillar)
+  LTs8: 'doodad_pillar_stone_01', // Lordaeron Tower Small 8 (use pillar)
+  YTlb: 'doodad_pillar_stone_01', // Outland Tower Large Blue (use pillar)
+  YTpb: 'doodad_pillar_stone_01', // Outland Tower Platform Blue (use pillar)
+  Ytlc: 'doodad_pillar_stone_01', // Outland Tower Large Cyan (use pillar)
+  DSp9: 'doodad_marker_small', // Spawn Point 9 (invisible)
 
   // Special / Invisible (use small box)
   DSp0: 'doodad_marker_small', // Spawn Point (invisible)
