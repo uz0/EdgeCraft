@@ -215,6 +215,8 @@ export class MPQParser {
       return {
         success: true,
         header,
+        hashTable,
+        blockTable,
         files,
         fileList,
         parseTimeMs: performance.now() - startTime,
@@ -1305,6 +1307,83 @@ export class MPQParser {
 
     const regex = new RegExp(`^${regexPattern}$`, 'i');
     return regex.test(filename);
+  }
+
+  /**
+   * Extract file by block index from stream (for W3N nested archives)
+   *
+   * This reads and decompresses a file directly by its block table index,
+   * useful when we don't know the filename but can identify files by size/position.
+   */
+  public async extractFileByIndexStream(
+    blockIndex: number,
+    reader: StreamingFileReader,
+    blockTable: MPQBlockEntry[]
+  ): Promise<MPQFile | null> {
+    const blockEntry = blockTable[blockIndex];
+    if (!blockEntry) {
+      return null;
+    }
+
+    // Check if file exists
+    const exists = (blockEntry.flags & 0x80000000) !== 0;
+    if (!exists) {
+      return null;
+    }
+
+    // Check if file is encrypted (we can't decrypt without filename)
+    const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
+    if (isEncrypted) {
+      console.warn(`[MPQParser Stream] Block ${blockIndex} is encrypted, cannot decrypt without filename`);
+      return null;
+    }
+
+    const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
+
+    // Read file data from archive
+    const rawData = await reader.readRange(blockEntry.filePos, blockEntry.compressedSize);
+
+    // Decompress if compressed
+    let fileData: ArrayBuffer;
+    if (isCompressed) {
+      const compressionAlgorithm = this.detectCompressionAlgorithm(rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength));
+
+      if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
+        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
+        fileData = await this.lzmaDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
+      } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
+        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
+        fileData = await this.zlibDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
+      } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
+        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
+        fileData = await this.bzip2Decompressor.decompress(compressedData, blockEntry.uncompressedSize);
+      } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
+        // Multi-algorithm compression (W3X style)
+        const firstByte = rawData.length > 0 ? new DataView(rawData.buffer, rawData.byteOffset).getUint8(0) : 0;
+        if (firstByte !== 0 && blockEntry.compressedSize < blockEntry.uncompressedSize) {
+          fileData = await this.decompressMultiAlgorithm(
+            rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength),
+            blockEntry.uncompressedSize,
+            firstByte
+          );
+        } else {
+          fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+        }
+      } else {
+        throw new Error(`Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`);
+      }
+    } else {
+      fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+    }
+
+    return {
+      name: `block_${blockIndex}`,
+      data: fileData,
+      compressedSize: blockEntry.compressedSize,
+      uncompressedSize: blockEntry.uncompressedSize,
+      isCompressed,
+      isEncrypted,
+    };
   }
 
   /**

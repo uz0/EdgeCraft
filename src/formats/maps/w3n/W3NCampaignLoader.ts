@@ -125,58 +125,94 @@ export class W3NCampaignLoader implements IMapLoader {
     const mpqParser = new MPQParser(new ArrayBuffer(0));
 
     // Parse MPQ archive using streaming
+    // NOTE: We DON'T use extractFiles because W3N campaigns have unpredictable filenames
+    // Instead, we'll iterate the block table after parsing to find embedded W3X files
     const mpqResult = await mpqParser.parseStream(reader, {
-      extractFiles: ['war3campaign.w3f', '*.w3x', '*.w3m'], // Only extract what we need
       onProgress: (stage, progress) => {
         console.log(`${stage}: ${progress.toFixed(1)}%`);
       },
     });
 
     if (!mpqResult.success) {
-      throw new Error(`Failed to parse campaign MPQ archive: ${mpqResult.error}`);
+      console.warn(`[W3NCampaignLoader] Parse had issues: ${mpqResult.error}, but continuing...`);
+      // Don't throw - we can still work with partial results if we have map files
     }
 
     console.log(`Campaign parsed in ${mpqResult.parseTimeMs?.toFixed(0)}ms`);
+    console.log(`[W3NCampaignLoader] Block table entries: ${mpqResult.blockTable?.length || 0}`);
 
-    // Extract campaign info (optional - for metadata)
-    let campaignInfo: W3FCampaignInfo | undefined;
-    try {
-      const w3fData = mpqResult.files.find((f) => f.name === 'war3campaign.w3f');
-      if (w3fData) {
-        const w3fParser = new W3FCampaignInfoParser(w3fData.data);
-        campaignInfo = w3fParser.parse();
-      }
-    } catch (error) {
-      // Campaign info is optional, continue without it
-      console.warn('Failed to parse campaign info:', error);
+    // Find embedded W3X files by iterating block table and checking for MPQ magic
+    // This is more reliable than filename-based extraction since W3N campaigns
+    // have unpredictable internal filenames
+    if (!mpqResult.blockTable) {
+      throw new Error('Block table not available from streaming parse');
     }
 
-    // Find first map file (w3x or w3m)
-    const firstMapFile = mpqResult.files.find((f) => {
-      const lower = f.name.toLowerCase();
-      return lower.endsWith('.w3x') || lower.endsWith('.w3m');
-    });
+    console.log('[W3NCampaignLoader] Searching for embedded W3X files by size and MPQ magic...');
 
-    if (!firstMapFile) {
-      throw new Error('No maps found in campaign archive');
+    // Find large files (>100KB compressed) that are likely W3X maps
+    const largeBlocks = mpqResult.blockTable
+      .map((block, index) => ({ block, index }))
+      .filter(({ block }) => {
+        const exists = (block.flags & 0x80000000) !== 0;
+        const isLarge = block.compressedSize > 100000; // >100KB
+        return exists && isLarge;
+      })
+      .sort((a, b) => b.block.compressedSize - a.block.compressedSize);
+
+    console.log(`[W3NCampaignLoader] Found ${largeBlocks.length} large blocks (>100KB)`);
+
+    let firstMapData: ArrayBuffer | null = null;
+
+    for (const { block, index } of largeBlocks.slice(0, 10)) {
+      console.log(`[W3NCampaignLoader] Checking block ${index} (${block.compressedSize} bytes compressed)...`);
+
+      try {
+        // Read first 1KB to check for MPQ magic without extracting the whole file
+        const headerData = await reader.readRange(block.filePos, Math.min(1024, block.compressedSize));
+        const view = new DataView(headerData.buffer, headerData.byteOffset, headerData.byteLength);
+
+        // Check for MPQ magic at common offsets (0, 512, 1024)
+        const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
+        const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
+
+        const hasMPQMagic = magic0 === 0x1a51504d || magic512 === 0x1a51504d;
+
+        if (hasMPQMagic) {
+          console.log(`[W3NCampaignLoader] ✅ Found MPQ magic in block ${index}! Extracting...`);
+
+          // Extract the full file
+          const mapFile = await mpqParser.extractFileByIndexStream(index, reader, mpqResult.blockTable);
+
+          if (mapFile && mapFile.data.byteLength > 0) {
+            console.log(`[W3NCampaignLoader] ✅ Extracted ${mapFile.data.byteLength} bytes from block ${index}`);
+            firstMapData = mapFile.data;
+            break;
+          }
+        } else {
+          console.log(`[W3NCampaignLoader] Block ${index} is not an MPQ (magic: 0x${magic0.toString(16)}, 0x${magic512.toString(16)})`);
+        }
+      } catch (error) {
+        console.warn(`[W3NCampaignLoader] Failed to check block ${index}:`, error);
+        continue;
+      }
+    }
+
+    if (!firstMapData) {
+      throw new Error('No embedded W3X maps found in campaign archive');
     }
 
     // Parse first map using W3XMapLoader
-    const mapData = await this.w3xLoader.parse(firstMapFile.data);
+    console.log(`[W3NCampaignLoader] Parsing extracted W3X map...`);
+    const mapData = await this.w3xLoader.parse(firstMapData);
 
-    // Override format to 'w3n' and add campaign info to description
+    // Override format to 'w3n'
     const result: RawMapData = {
       ...mapData,
       format: 'w3n',
     };
 
-    // Add campaign info to map metadata if available
-    if (campaignInfo) {
-      result.info = {
-        ...result.info,
-        description: this.buildDescription(campaignInfo, result.info.description, 0),
-      };
-    }
+    console.log(`[W3NCampaignLoader] ✅ Successfully loaded map: ${result.info.name}`);
 
     return result;
   }
