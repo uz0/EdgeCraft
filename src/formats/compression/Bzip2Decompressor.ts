@@ -5,6 +5,25 @@
  * BZip2 is used in multi-compression scenarios (e.g., Huffman+ZLIB+BZip2)
  */
 
+// Polyfill Buffer for browser environment (seek-bzip requires it)
+// This is a minimal polyfill - seek-bzip primarily needs Buffer.from and Buffer.alloc
+if (typeof Buffer === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  (globalThis as any).Buffer = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    from: (data: any): Uint8Array => {
+      if (data instanceof Uint8Array) return data;
+      if (data instanceof ArrayBuffer) return new Uint8Array(data);
+      if (Array.isArray(data)) return new Uint8Array(data);
+      return new Uint8Array(0);
+    },
+    alloc: (size: number): Uint8Array => new Uint8Array(size),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    isBuffer: (obj: any): boolean => obj instanceof Uint8Array,
+  };
+  console.log('[Bzip2Decompressor] Buffer polyfill installed for browser environment');
+}
+
 import Bunzip from 'seek-bzip';
 import type { IDecompressor } from './types';
 

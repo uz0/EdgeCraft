@@ -383,40 +383,66 @@ export class W3NCampaignLoader implements IMapLoader {
 
     console.log(`[W3NCampaignLoader] Found ${largeBlocks.length} large blocks (>100KB)`);
 
-    // Try to extract the top candidates
-    for (const { index } of largeBlocks.slice(0, 10)) {
+    // Try to extract the top candidates (try more blocks to find a valid one)
+    for (const { index } of largeBlocks.slice(0, 20)) {
       try {
-        console.log(`[W3NCampaignLoader] Checking block ${index}...`);
+        console.log(`[W3NCampaignLoader] 🔍 Checking block ${index}...`);
 
         // Extract the file by index
         const mapData = await mpqParser.extractFileByIndex(index);
 
-        if (mapData && mapData.data.byteLength > 0) {
-          // Check for MPQ magic to confirm it's a W3X map
-          const view = new DataView(mapData.data.slice(0, Math.min(1024, mapData.data.byteLength)));
-          const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
-          const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
+        if (!mapData) {
+          console.log(`[W3NCampaignLoader] ⚠️ Block ${index}: extractFileByIndex returned null`);
+          continue;
+        }
 
-          if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
-            console.log(
-              `[W3NCampaignLoader] ✅ Found embedded W3X in block ${index} (${mapData.data.byteLength} bytes)`
-            );
-            maps.push({
-              data: mapData.data,
-              index: maps.length, // Use sequential index for result
-            });
+        if (mapData.data.byteLength === 0) {
+          console.log(`[W3NCampaignLoader] ⚠️ Block ${index}: extracted 0 bytes`);
+          continue;
+        }
 
-            // Only extract the first map for Phase 1
-            break;
-          }
+        console.log(
+          `[W3NCampaignLoader] 📦 Block ${index}: extracted ${mapData.data.byteLength} bytes`
+        );
+
+        // Check for MPQ magic to confirm it's a W3X map
+        const view = new DataView(mapData.data.slice(0, Math.min(1024, mapData.data.byteLength)));
+        const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
+        const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
+
+        console.log(
+          `[W3NCampaignLoader] 🔬 Block ${index}: magic0=0x${magic0.toString(16)}, magic512=0x${magic512.toString(16)}`
+        );
+
+        if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
+          console.log(
+            `[W3NCampaignLoader] ✅ Found embedded W3X in block ${index} (${mapData.data.byteLength} bytes)`
+          );
+          maps.push({
+            data: mapData.data,
+            index: maps.length, // Use sequential index for result
+          });
+
+          // Only extract the first map for Phase 1
+          break;
+        } else {
+          console.log(
+            `[W3NCampaignLoader] ❌ Block ${index}: Not an MPQ file (missing magic 0x1A51504D)`
+          );
         }
       } catch (error) {
-        console.warn(
-          `[W3NCampaignLoader] Failed to extract block ${index}:`,
+        console.error(
+          `[W3NCampaignLoader] ❌ Failed to extract block ${index}:`,
           error instanceof Error ? error.message : error
         );
         continue;
       }
+    }
+
+    if (maps.length === 0) {
+      console.error(
+        '[W3NCampaignLoader] ❌ No valid W3X maps found after scanning 20 largest blocks'
+      );
     }
 
     return maps;
