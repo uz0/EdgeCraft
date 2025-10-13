@@ -161,22 +161,40 @@ This project uses Context Engineering to ensure efficient AI-assisted developmen
 Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requirement Proposals). See [PRPs/README.md](./PRPs/README.md) for the complete development plan.
 
 ### Current Phase: Phase 2 - Advanced Rendering & Visual Effects
-**Status**: 🎨 Map Gallery Ready | ⏳ Browser Validation Pending
-**Implementation**: 100% Complete
-**Next Steps**: Browser testing and performance validation
+**Status**: ⚠️ 70% Complete | 🔴 3 Critical Issues Blocking Map Rendering
+**PRIMARY GOAL**: ALL 24 MAPS (14 w3x, 7 w3n, 3 SC2Map) RENDER CORRECTLY
 
-Phase 2 delivered:
-- ✅ Post-Processing Pipeline (FXAA, Bloom, Color Grading, Tone Mapping)
-- ✅ Advanced Lighting System (8 lights @ MEDIUM, distance culling)
-- ✅ GPU Particle System (5,000 particles @ 60 FPS)
-- ✅ Weather Effects (Rain, Snow, Fog with smooth transitions)
-- ✅ PBR Material System (glTF 2.0 compatible)
-- ✅ Custom Shader Framework (Water, Force Field, Hologram, Dissolve)
-- ✅ Decal System (50 texture decals @ MEDIUM)
-- ✅ Minimap RTT (256x256 @ 30fps)
-- ✅ Quality Preset System (LOW/MEDIUM/HIGH/ULTRA)
-- ✅ Map Gallery UI (Browse and load 24 maps)
-- ✅ Map Viewer App (Integrated rendering with Phase 2 effects)
+**✅ Completed (70%)**:
+- Post-Processing Pipeline (FXAA, Bloom, Color Grading, Tone Mapping)
+- Advanced Lighting System (8 lights @ MEDIUM, distance culling)
+- GPU Particle System (5,000 particles @ 60 FPS)
+- Weather Effects (Rain, Snow, Fog with smooth transitions)
+- PBR Material System (glTF 2.0 compatible)
+- Custom Shader Framework (Water, Force Field, Hologram, Dissolve)
+- Decal System (50 texture decals @ MEDIUM)
+- Minimap RTT (256x256 @ 30fps)
+- Quality Preset System (LOW/MEDIUM/HIGH/ULTRA)
+- Map Gallery UI (Browse and load 24 maps)
+- Map Viewer App (Integrated rendering with Phase 2 effects)
+- Legal Asset Library (PRP 2.12: 19 terrain textures, 33 doodad models)
+
+**❌ Critical Issues (30%)**:
+1. **Terrain Multi-Texture Splatmap** (P0) - All terrain rendered with single fallback texture
+   - Root Cause: `W3XMapLoader.ts:272` passes tileset letter "A" instead of `groundTextureIds` array
+   - Solution Required: Implement splatmap shader with 4-8 texture samplers
+   - ETA: 2-3 days
+
+2. **Asset Coverage Gap** (P0) - 60% of doodads render as placeholder boxes
+   - 56/93 doodad types missing (trees, rocks, plants, structures)
+   - Solution Required: Download Kenney.nl asset packs, map 40-50 new models
+   - ETA: 4-6 hours
+
+3. **Unit Parser Failures** (P1) - Only 1/342 units parsed (0.3% success rate)
+   - Error: `RangeError: Offset is outside bounds` in W3UParser
+   - Solution Required: Add version detection, optional field handling
+   - ETA: 1-2 days
+
+**Next Steps**: Fix 3 critical issues, validate all 24 maps, create screenshot tests
 
 **Previous Phase: Phase 1 - Foundation (COMPLETE ✅)**
 Completion Date: 2025-10-10

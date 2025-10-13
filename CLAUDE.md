@@ -203,6 +203,94 @@ steps:
 
 ---
 
+## 📊 CURRENT PROJECT STATUS
+
+### Phase 2: Advanced Rendering & Visual Effects (IN PROGRESS)
+
+**Overall Status**: ⚠️ 70% Complete | 🔴 3 Critical Issues Blocking Completion
+
+**PRIMARY GOAL**: ALL 24 MAPS (14 w3x, 7 w3n, 3 SC2Map) RENDER CORRECTLY
+
+#### ✅ What Works (70%)
+- Rendering system architecture
+- Post-processing effects (FXAA, Bloom, Color Grading, Tone Mapping)
+- Advanced lighting (8 dynamic lights @ MEDIUM, distance culling)
+- GPU particle system (5,000 particles @ 60 FPS)
+- Weather effects (Rain, Snow, Fog)
+- PBR material system (glTF 2.0)
+- Custom shader framework (Water, Force Field, Hologram, Dissolve)
+- Decal system (50 texture decals @ MEDIUM)
+- Minimap RTT (256x256 @ 30fps)
+- Quality presets (LOW/MEDIUM/HIGH/ULTRA)
+- Map Gallery UI
+- Legal Asset Library (19 terrain textures, 33 doodad models)
+
+#### ❌ Critical Issues (30%)
+
+**1. Terrain Multi-Texture Splatmap (P0 - CRITICAL)**
+- **Problem**: All terrain rendered with single fallback texture (`terrain_grass_light`)
+- **Root Cause**: `W3XMapLoader.ts:272` passes tileset letter "A" instead of `groundTextureIds` array
+- **Technical Details**:
+  - W3E parser correctly extracts `groundTextureIds` array: `["Adrt", "Ldrt", "Agrs", "Arok"]`
+  - Each tile has `groundTexture` index (0-3) pointing to this array
+  - Loader ignores this and passes "A" which has NO mapping in AssetMap
+  - Result: Fallback to single grass texture across entire map
+- **Solution Required**:
+  - Modify `W3XMapLoader.convertTerrain()` to pass `groundTextureIds` array as textures
+  - Implement splatmap shader with 4-8 texture samplers
+  - Use texture indices for per-vertex blending
+- **File Locations**: `src/formats/maps/w3x/W3XMapLoader.ts:272`, `src/engine/assets/AssetMap.ts`
+- **ETA**: 2-3 days
+
+**2. Asset Coverage Gap (P0 - CRITICAL)**
+- **Problem**: 56/93 doodad types missing (60% render as placeholder boxes)
+- **Stats for 3P Sentinel 01 v3.06.w3x**:
+  - Total unique doodads: 93
+  - Currently mapped: 34 (37%)
+  - Missing: 56 (60%)
+  - Visible as white cubes: ~2,520 instances
+- **Missing Categories**:
+  - Trees (10): `ASx0`, `ASx2`, `ATwf`, `COlg`, `CTtc`, `LOtr`, `LOth`, `LTe1`, `LTe3`, `LTbs`
+  - Rocks (12): `AOsk`, `AOsr`, `COhs`, `LOrb`, `LOsh`, `LOca`, `LOcg`, `LTcr`, `ZPsh`, `ZZdt`
+  - Plants (15): `APbs`, `APms`, `ASr1`, `ASv3`, `AWfs`, `DTg1`, `DTg3`, `NWfb`, `NWfp`, `NWpa`, `VOfs`, `YOec`, `YOf2`, `YOf3`, `YOfr`
+  - Structures (11): `AOhs`, `AOks`, `AOla`, `AOlg`, `DRfc`, `NOft`, `NOfp`, `NWsd`, `OTis`, `ZPfw`, `LWw0`
+  - Misc (8): `DSp9`, `LOtz`, `LOwr`, `LTlt`, `LTs5`, `LTs8`, `YTlb`, `YTpb`, `Ytlc`
+- **Solution Required**:
+  - Download Kenney.nl asset packs (CC0, FREE):
+    - Nature Kit - trees, rocks, plants
+    - Platformer Kit - structures
+    - Dungeon Kit - cave props
+  - Add to `public/assets/models/doodads/`
+  - Map 40-50 new entries in `AssetMap.ts`
+- **File Locations**: `src/engine/assets/AssetMap.ts`, `public/assets/models/doodads/`
+- **ETA**: 4-6 hours manual work
+
+**3. Unit Parser Failures (P1 - MAJOR)**
+- **Problem**: Only 1/342 units parsed (0.3% success rate)
+- **Error**: `[W3UParser] Failed to parse unit 2/342: RangeError: Offset is outside bounds`
+- **Impact**: Map appears empty of units (99.7% parse failure)
+- **Solution Required**:
+  - Debug W3U parser offset errors
+  - Add version detection for different W3X format versions
+  - Add optional field handling (some fields may not exist in all versions)
+  - Test with 3P Sentinel (342 units expected)
+- **File Locations**: `src/formats/maps/w3x/W3UParser.ts`
+- **ETA**: 1-2 days
+
+#### 🎯 Required Work to Complete Phase 2
+
+**Per PRP 2 (PRPs/phase2-rendering/2-advanced-rendering-visual-effects.md)**:
+
+1. **Fix Terrain Multi-Texture Splatmap** (P0, ETA 2-3 days)
+2. **Expand Asset Library** (P0, ETA 4-6 hours)
+3. **Fix Unit Parser** (P1, ETA 1-2 days)
+4. **Validate All 24 Maps** (P1, ETA 2 days)
+5. **Create Screenshot Test Suite** (P1, ETA 2 days)
+
+**Total Remaining Work**: 7-10 days to Phase 2 completion
+
+---
+
 ## 🚀 AI AGENT WORKFLOW
 
 ### When Working on a Phase
