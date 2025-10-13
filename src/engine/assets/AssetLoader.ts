@@ -4,6 +4,7 @@
  */
 
 import * as BABYLON from '@babylonjs/core';
+import '@babylonjs/loaders/glTF'; // Required for GLB/glTF file loading
 
 export interface AssetManifest {
   textures: Record<string, TextureAsset>;
