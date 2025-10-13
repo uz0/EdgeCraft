@@ -148,7 +148,7 @@ export function mapAssetID(
     return mappedID;
   }
 
-  console.warn(\`[AssetMap] No mapping for \${format}:\${assetType}:\${originalID}, using fallback\`);
+  console.warn(`[AssetMap] No mapping for ${format}:${assetType}:${originalID}, using fallback`);
   return mapping['_fallback'] || 'doodad_box_placeholder';
 }
 

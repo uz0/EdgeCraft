@@ -50,7 +50,7 @@ export class AssetLoader {
       if (!response.ok) {
         throw new Error(`Failed to load manifest: ${response.statusText}`);
       }
-      this.manifest = await response.json();
+      this.manifest = (await response.json()) as AssetManifest;
       console.log('[AssetLoader] Manifest loaded:', {
         textures: Object.keys(this.manifest.textures).length,
         models: Object.keys(this.manifest.models).length,
@@ -61,7 +61,7 @@ export class AssetLoader {
     }
   }
 
-  async loadTexture(id: string): Promise<BABYLON.Texture> {
+  loadTexture(id: string): BABYLON.Texture {
     if (!this.manifest) {
       throw new Error('Manifest not loaded. Call loadManifest() first.');
     }
@@ -95,17 +95,18 @@ export class AssetLoader {
 
     if (this.loadedModels.has(id)) {
       const cached = this.loadedModels.get(id)!;
-      return cached.clone(`${id}_instance_${Date.now()}`, null)!;
+      const cloned = cached.clone(`${id}_instance_${Date.now()}`, null);
+      return cloned || cached;
     }
 
     const asset = this.manifest.models[id];
     if (!asset) {
-      if (asset?.fallback) {
-        console.warn(`[AssetLoader] Model not found: ${id}, trying fallback: ${asset.fallback}`);
-        return this.loadModel(asset.fallback);
-      }
       console.warn(`[AssetLoader] Model not found: ${id}, using fallback box`);
       return this.createFallbackBox();
+    }
+
+    if (asset.fallback) {
+      console.warn(`[AssetLoader] Model ${id} has fallback: ${asset.fallback}`);
     }
 
     try {
@@ -117,7 +118,8 @@ export class AssetLoader {
       mesh.name = id;
       this.loadedModels.set(id, mesh);
       console.log(`[AssetLoader] Loaded model: ${id} from ${asset.path}`);
-      return mesh.clone(`${id}_instance_${Date.now()}`, null)!;
+      const cloned = mesh.clone(`${id}_instance_${Date.now()}`, null);
+      return cloned || mesh;
     } catch (error) {
       console.error(`[AssetLoader] Failed to load model ${id}:`, error);
       return this.createFallbackBox();
@@ -130,8 +132,15 @@ export class AssetLoader {
   }
 
   private createFallbackBox(): BABYLON.Mesh {
-    const box = BABYLON.MeshBuilder.CreateBox(`fallback_box_${Date.now()}`, { size: 1 }, this.scene);
-    const material = new BABYLON.StandardMaterial(`fallback_mat_${Date.now()}`, this.scene);
+    const box = BABYLON.MeshBuilder.CreateBox(
+      `fallback_box_${Date.now()}`,
+      { size: 1 },
+      this.scene
+    );
+    const material = new BABYLON.StandardMaterial(
+      `fallback_mat_${Date.now()}`,
+      this.scene
+    );
     material.diffuseColor = new BABYLON.Color3(1, 0, 1);
     box.material = material;
     return box;

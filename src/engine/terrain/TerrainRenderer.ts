@@ -54,9 +54,9 @@ export class TerrainRenderer {
             subdivisions: options.subdivisions,
             minHeight: options.minHeight ?? 0,
             maxHeight: options.maxHeight,
-            onReady: async (mesh) => {
+            onReady: (mesh) => {
               try {
-                await this.applyMaterial(mesh, options);
+                this.applyMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
                 resolve({
                   status: this.loadStatus,
@@ -91,7 +91,7 @@ export class TerrainRenderer {
   /**
    * Apply material and textures to terrain
    */
-  private async applyMaterial(mesh: BABYLON.GroundMesh, options: TerrainOptions): Promise<void> {
+  private applyMaterial(mesh: BABYLON.GroundMesh, options: TerrainOptions): void {
     this.material = new BABYLON.StandardMaterial('terrainMaterial', this.scene);
 
     // Try to load texture from AssetLoader if textureId is provided
@@ -102,14 +102,14 @@ export class TerrainRenderer {
         console.log(`[TerrainRenderer] Mapped texture ID: ${options.textureId} -> ${mappedId}`);
 
         // Load the diffuse texture
-        const diffuseTexture = await this.assetLoader.loadTexture(mappedId);
+        const diffuseTexture = this.assetLoader.loadTexture(mappedId);
         this.material.diffuseTexture = diffuseTexture;
         this.material.diffuseTexture.uScale = 16;
         this.material.diffuseTexture.vScale = 16;
 
         // Try to load normal map (if available)
         try {
-          const normalTexture = await this.assetLoader.loadTexture(`${mappedId}_normal`);
+          const normalTexture = this.assetLoader.loadTexture(`${mappedId}_normal`);
           this.material.bumpTexture = normalTexture;
           this.material.bumpTexture.uScale = 16;
           this.material.bumpTexture.vScale = 16;
@@ -119,7 +119,7 @@ export class TerrainRenderer {
 
         // Try to load roughness map (if available)
         try {
-          const roughnessTexture = await this.assetLoader.loadTexture(`${mappedId}_roughness`);
+          const roughnessTexture = this.assetLoader.loadTexture(`${mappedId}_roughness`);
           this.material.specularTexture = roughnessTexture;
           this.material.specularTexture.uScale = 16;
           this.material.specularTexture.vScale = 16;
@@ -130,7 +130,10 @@ export class TerrainRenderer {
 
         console.log(`[TerrainRenderer] Loaded texture: ${mappedId} for terrain`);
       } catch (error) {
-        console.warn(`[TerrainRenderer] Failed to load texture for ${options.textureId}, using fallback color`, error);
+        console.warn(
+          `[TerrainRenderer] Failed to load texture for ${options.textureId}, using fallback color`,
+          error
+        );
         // Fallback to default grass color
         this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
         this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
