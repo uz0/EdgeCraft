@@ -232,110 +232,104 @@ export class MPQParser {
 
   /**
    * Read MPQ header
+   * Searches for valid MPQ header, skipping any fake/encrypted headers
    */
   private readHeader(): MPQHeader | null {
     // W3X maps often have user data (preview image) before the MPQ header
-    // Search for MPQ magic number in the first 4KB
-    let headerOffset = 0;
+    // Some maps (like Legion TD) have fake/encrypted headers before the real one
+    // Search for MPQ magic number in the first 4KB and validate each candidate
     const searchLimit = Math.min(4096, this.buffer.byteLength);
 
     console.log(
-      `[MPQParser] Searching for MPQ header in ${this.buffer.byteLength} byte buffer (limit: ${searchLimit})`
+      `[MPQParser] Searching for valid MPQ header in ${this.buffer.byteLength} byte buffer (limit: ${searchLimit})`
     );
 
+    // Try each potential header location
     for (let offset = 0; offset < searchLimit; offset += 512) {
       const magic = this.view.getUint32(offset, true);
-      if (magic === MPQParser.MPQ_MAGIC_V1 || magic === MPQParser.MPQ_MAGIC_V2) {
-        headerOffset = offset;
-        console.log(`[MPQParser] Found MPQ magic at offset ${offset}: 0x${magic.toString(16)}`);
-        break;
+
+      // Skip if not MPQ magic
+      if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
+        continue;
       }
-    }
 
-    // Check magic number at found offset
-    let magic = this.view.getUint32(headerOffset, true);
+      console.log(`[MPQParser] Found MPQ magic at offset ${offset}: 0x${magic.toString(16)}`);
 
-    // If we found MPQ user data header (0x1b51504d), read the real MPQ header offset
-    if (magic === MPQParser.MPQ_MAGIC_V2) {
-      const realHeaderOffset = this.view.getUint32(headerOffset + 8, true);
-      console.log(
-        `[MPQParser] Found MPQ user data header, real MPQ header at offset ${realHeaderOffset}`
-      );
-      headerOffset = realHeaderOffset;
-      magic = this.view.getUint32(headerOffset, true);
+      // Handle MPQ user data header (0x1b51504d)
+      let headerOffset = offset;
+      let headerMagic = magic;
 
-      if (magic !== MPQParser.MPQ_MAGIC_V1) {
-        console.error(
-          `[MPQParser] Invalid MPQ magic at real header offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)}`
+      if (magic === MPQParser.MPQ_MAGIC_V2) {
+        const realHeaderOffset = this.view.getUint32(offset + 8, true);
+        console.log(
+          `[MPQParser] Found MPQ user data header, real MPQ header at offset ${realHeaderOffset}`
         );
-        return null;
+        headerOffset = realHeaderOffset;
+
+        if (headerOffset >= this.buffer.byteLength - 32) {
+          console.warn(`[MPQParser] Real header offset out of bounds, skipping...`);
+          continue;
+        }
+
+        headerMagic = this.view.getUint32(headerOffset, true);
+
+        if (headerMagic !== MPQParser.MPQ_MAGIC_V1) {
+          console.warn(
+            `[MPQParser] Invalid magic at real header offset ${headerOffset}: 0x${headerMagic.toString(16)}, skipping...`
+          );
+          continue;
+        }
       }
+
+      // Try to parse header at this offset
+      const archiveSize = this.view.getUint32(headerOffset + 8, true);
+      const formatVersion = this.view.getUint16(headerOffset + 12, true);
+      const sectorSizeShift = this.view.getUint16(headerOffset + 14, true);
+      const blockSize = 512 * Math.pow(2, sectorSizeShift);
+      const hashTablePos = this.view.getUint32(headerOffset + 16, true) + headerOffset;
+      const blockTablePos = this.view.getUint32(headerOffset + 20, true) + headerOffset;
+      const hashTableSize = this.view.getUint32(headerOffset + 24, true);
+      const blockTableSize = this.view.getUint32(headerOffset + 28, true);
+
+      // Validate header values are reasonable
+      const isValid =
+        formatVersion <= 3 && // Format version should be 0-3
+        sectorSizeShift <= 16 && // Sector size shift should be reasonable
+        hashTableSize < 1000000 && // Hash table size should be reasonable
+        blockTableSize < 1000000 && // Block table size should be reasonable
+        hashTablePos >= 0 && hashTablePos < this.buffer.byteLength &&
+        blockTablePos >= 0 && blockTablePos < this.buffer.byteLength &&
+        hashTablePos + hashTableSize * 16 <= this.buffer.byteLength &&
+        blockTablePos + blockTableSize * 16 <= this.buffer.byteLength;
+
+      if (!isValid) {
+        console.warn(
+          `[MPQParser] Header at offset ${headerOffset} has invalid values (formatVersion=${formatVersion}, sectorSizeShift=${sectorSizeShift}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}), skipping...`
+        );
+        continue;
+      }
+
+      // Found valid header!
       console.log(
-        `[MPQParser] Found real MPQ header at offset ${headerOffset}: 0x${magic.toString(16)}`
+        `[MPQParser] ✅ Found VALID MPQ header at offset ${headerOffset}`
       );
-    } else if (magic !== MPQParser.MPQ_MAGIC_V1) {
-      console.error(
-        `[MPQParser] Invalid magic at offset ${headerOffset}: 0x${magic.toString(16)}, expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`
+      console.log(
+        `[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`
       );
-      return null;
+
+      return {
+        archiveSize,
+        formatVersion,
+        blockSize,
+        hashTablePos,
+        blockTablePos,
+        hashTableSize,
+        blockTableSize,
+      };
     }
 
-    const archiveSize = this.view.getUint32(headerOffset + 8, true);
-    const formatVersion = this.view.getUint16(headerOffset + 12, true);
-    const blockSize = 512 * Math.pow(2, this.view.getUint16(headerOffset + 14, true));
-    const hashTablePos = this.view.getUint32(headerOffset + 16, true) + headerOffset;
-    const blockTablePos = this.view.getUint32(headerOffset + 20, true) + headerOffset;
-    const hashTableSize = this.view.getUint32(headerOffset + 24, true);
-    const blockTableSize = this.view.getUint32(headerOffset + 28, true);
-
-    // Validate header offsets are within bounds
-    if (hashTablePos < 0 || hashTablePos > this.buffer.byteLength) {
-      console.error(
-        `[MPQParser] Invalid hash table position: ${hashTablePos} (buffer size: ${this.buffer.byteLength})`
-      );
-      return null;
-    }
-
-    if (blockTablePos < 0 || blockTablePos > this.buffer.byteLength) {
-      console.error(
-        `[MPQParser] Invalid block table position: ${blockTablePos} (buffer size: ${this.buffer.byteLength})`
-      );
-      return null;
-    }
-
-    const hashTableEnd = hashTablePos + hashTableSize * 16;
-    const blockTableEnd = blockTablePos + blockTableSize * 16;
-
-    if (hashTableEnd > this.buffer.byteLength) {
-      console.error(
-        `[MPQParser] Hash table extends beyond buffer: ${hashTableEnd} > ${this.buffer.byteLength}`
-      );
-      return null;
-    }
-
-    if (blockTableEnd > this.buffer.byteLength) {
-      console.error(
-        `[MPQParser] Block table extends beyond buffer: ${blockTableEnd} > ${this.buffer.byteLength}`
-      );
-      return null;
-    }
-
-    console.log(
-      `[MPQParser] Header validated: hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}`
-    );
-    console.log(
-      `[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`
-    );
-
-    return {
-      archiveSize,
-      formatVersion,
-      blockSize,
-      hashTablePos,
-      blockTablePos,
-      hashTableSize,
-      blockTableSize,
-    };
+    console.error(`[MPQParser] No valid MPQ header found in first ${searchLimit} bytes`);
+    return null;
   }
 
   /**
@@ -923,37 +917,84 @@ export class MPQParser {
 
   /**
    * Parse header from byte array (for streaming)
+   * Searches for valid MPQ header, skipping any fake/encrypted headers
    */
   private parseHeaderFromBytes(data: Uint8Array): MPQHeader | null {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-
-    // W3X maps often have user data before the MPQ header - search for it
-    let headerOffset = 0;
     const searchLimit = Math.min(4096, data.byteLength);
 
+    console.log(`[MPQParser Stream] Searching for valid MPQ header in ${data.byteLength} bytes`);
+
+    // Try each potential header location
     for (let offset = 0; offset < searchLimit; offset += 512) {
       const magic = view.getUint32(offset, true);
-      if (magic === MPQParser.MPQ_MAGIC_V1 || magic === MPQParser.MPQ_MAGIC_V2) {
-        headerOffset = offset;
-        break;
+
+      // Skip if not MPQ magic
+      if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
+        continue;
       }
+
+      console.log(`[MPQParser Stream] Found MPQ magic at offset ${offset}: 0x${magic.toString(16)}`);
+
+      // Handle MPQ user data header
+      let headerOffset = offset;
+      if (magic === MPQParser.MPQ_MAGIC_V2) {
+        const realHeaderOffset = view.getUint32(offset + 8, true);
+        console.log(`[MPQParser Stream] User data header, real offset: ${realHeaderOffset}`);
+        if (realHeaderOffset >= data.byteLength - 32) {
+          console.warn(`[MPQParser Stream] Real header offset out of bounds, skipping...`);
+          continue;
+        }
+        headerOffset = realHeaderOffset;
+        const realMagic = view.getUint32(headerOffset, true);
+        if (realMagic !== MPQParser.MPQ_MAGIC_V1) {
+          console.warn(`[MPQParser Stream] Invalid magic at real offset, skipping...`);
+          continue;
+        }
+      }
+
+      // Parse header values
+      const archiveSize = view.getUint32(headerOffset + 8, true);
+      const formatVersion = view.getUint16(headerOffset + 12, true);
+      const sectorSizeShift = view.getUint16(headerOffset + 14, true);
+      const blockSize = 512 * Math.pow(2, sectorSizeShift);
+      const hashTablePos = view.getUint32(headerOffset + 16, true) + headerOffset;
+      const blockTablePos = view.getUint32(headerOffset + 20, true) + headerOffset;
+      const hashTableSize = view.getUint32(headerOffset + 24, true);
+      const blockTableSize = view.getUint32(headerOffset + 28, true);
+
+      // Validate header values
+      const isValid =
+        formatVersion <= 3 &&
+        sectorSizeShift <= 16 &&
+        hashTableSize < 1000000 &&
+        blockTableSize < 1000000 &&
+        hashTablePos >= 0 && hashTablePos < data.byteLength &&
+        blockTablePos >= 0 && blockTablePos < data.byteLength;
+
+      if (!isValid) {
+        console.warn(
+          `[MPQParser Stream] Invalid header values at offset ${headerOffset}, skipping...`
+        );
+        continue;
+      }
+
+      // Found valid header!
+      console.log(`[MPQParser Stream] ✅ Found VALID header at offset ${headerOffset}`);
+
+      return {
+        archiveSize,
+        formatVersion,
+        blockSize,
+        hashTablePos,
+        blockTablePos,
+        hashTableSize,
+        blockTableSize,
+      };
     }
 
-    // Check magic number at found offset
-    const magic = view.getUint32(headerOffset, true);
-    if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
-      return null;
-    }
-
-    return {
-      archiveSize: view.getUint32(headerOffset + 8, true),
-      formatVersion: view.getUint16(headerOffset + 12, true),
-      blockSize: 512 * Math.pow(2, view.getUint16(headerOffset + 14, true)),
-      hashTablePos: view.getUint32(headerOffset + 16, true) + headerOffset,
-      blockTablePos: view.getUint32(headerOffset + 20, true) + headerOffset,
-      hashTableSize: view.getUint32(headerOffset + 24, true),
-      blockTableSize: view.getUint32(headerOffset + 28, true),
-    };
+    console.error(`[MPQParser Stream] No valid MPQ header found`);
+    return null;
   }
 
   /**
