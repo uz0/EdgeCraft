@@ -171,12 +171,19 @@ export class MapPreviewExtractor {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`[MapPreviewExtractor] MPQParser failed: ${errorMsg}`);
 
-      // Check if this is a Huffman decompression error
-      const isHuffmanError = errorMsg.includes('Huffman') || errorMsg.includes('Invalid distance');
+      // Check if this is a decompression error (Huffman, ZLIB, PKZIP, etc.)
+      const isDecompressionError =
+        errorMsg.includes('Huffman') ||
+        errorMsg.includes('Invalid distance') ||
+        errorMsg.includes('ZLIB') ||
+        errorMsg.includes('PKZIP') ||
+        errorMsg.includes('decompression') ||
+        errorMsg.includes('unknown compression method') ||
+        errorMsg.includes('incorrect header check');
 
-      if (isHuffmanError) {
+      if (isDecompressionError) {
         console.log(
-          `[MapPreviewExtractor] Detected Huffman error, falling back to StormJS (WASM)...`
+          `[MapPreviewExtractor] Detected decompression error, falling back to StormJS (WASM)...`
         );
 
         // Try StormJS adapter as fallback

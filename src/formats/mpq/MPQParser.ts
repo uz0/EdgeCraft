@@ -964,17 +964,22 @@ export class MPQParser {
       const blockTableSize = view.getUint32(headerOffset + 28, true);
 
       // Validate header values
+      // Note: In streaming mode, we can't check if table positions are within data.byteLength
+      // because we only have the first 4KB chunk. Just validate the values are reasonable.
       const isValid =
         formatVersion <= 3 &&
         sectorSizeShift <= 16 &&
         hashTableSize < 1000000 &&
         blockTableSize < 1000000 &&
-        hashTablePos >= 0 && hashTablePos < data.byteLength &&
-        blockTablePos >= 0 && blockTablePos < data.byteLength;
+        hashTablePos >= 0 &&
+        blockTablePos >= 0;
 
       if (!isValid) {
         console.warn(
           `[MPQParser Stream] Invalid header values at offset ${headerOffset}, skipping...`
+        );
+        console.warn(
+          `  formatVersion=${formatVersion}, sectorSizeShift=${sectorSizeShift}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`
         );
         continue;
       }
