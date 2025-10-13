@@ -327,14 +327,17 @@ export class DoodadRenderer {
    * Creating unique shapes/materials for each type tanks FPS from 60 to 4
    */
   private createPlaceholderMesh(name: string): BABYLON.Mesh {
-    // Use simple box for all doodads (much better performance)
-    const mesh = BABYLON.MeshBuilder.CreateBox(name, { size: 2 }, this.scene);
+    // Use larger box size (5 instead of 2) for better visibility at RTS zoom levels
+    const mesh = BABYLON.MeshBuilder.CreateBox(name, { size: 5 }, this.scene);
 
     // Use a shared material for all doodads (better performance)
     if (!this.scene.getMaterialByName('doodad_shared_material')) {
       const material = new BABYLON.StandardMaterial('doodad_shared_material', this.scene);
-      material.diffuseColor = new BABYLON.Color3(0.6, 0.4, 0.2); // Brown color
-      material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+      // Brighter color for visibility (white with slight tint)
+      material.diffuseColor = new BABYLON.Color3(0.9, 0.9, 0.9);
+      material.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+      // Enable back-face culling
+      material.backFaceCulling = true;
     }
 
     mesh.material = this.scene.getMaterialByName('doodad_shared_material');
