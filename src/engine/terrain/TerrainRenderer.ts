@@ -349,10 +349,7 @@ void main(void) {
     // Pad with fallback textures if less than 4
     while (textures.length < 4) {
       textures.push(
-        new BABYLON.Texture(
-          this.createFallbackTextureDataUrl(textures.length),
-          this.scene
-        )
+        new BABYLON.Texture(this.createFallbackTextureDataUrl(textures.length), this.scene)
       );
     }
 
@@ -389,7 +386,10 @@ void main(void) {
     shaderMaterial.setTexture('splatmap', splatmapTexture);
 
     // Set uniforms
-    shaderMaterial.setVector3('cameraPosition', this.scene.activeCamera?.position ?? BABYLON.Vector3.Zero());
+    shaderMaterial.setVector3(
+      'cameraPosition',
+      this.scene.activeCamera?.position ?? BABYLON.Vector3.Zero()
+    );
     shaderMaterial.setVector3('lightDirection', new BABYLON.Vector3(0.5, -1, 0.5).normalize());
     shaderMaterial.setVector4('textureScales', new BABYLON.Vector4(16, 16, 16, 16)); // Texture tiling
 
