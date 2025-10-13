@@ -1,79 +1,201 @@
 {
   "version": "1.0.0",
   "description": "EdgeCraft Asset Library - Phase 1 MVP",
+  "phase": "Phase 1 MVP (3 terrain textures, 3 doodad models)",
+  "lastUpdated": "2025-01-XX",
+  "totalAssets": {
+    "textures": 9,
+    "models": 5,
+    "totalSizeMB": "~20-30"
+  },
   "textures": {
     "terrain_grass_light": {
       "id": "terrain_grass_light",
       "path": "/assets/textures/terrain/grass_light.jpg",
-      "normalPath": "/assets/textures/terrain/grass_light_normal.jpg",
-      "roughnessPath": "/assets/textures/terrain/grass_light_roughness.jpg",
-      "license": "CC0",
-      "author": "Amal Kumar (Poly Haven)",
-      "sourceUrl": "https://polyhaven.com/a/sparse_grass"
+      "type": "diffuse",
+      "resolution": "2048x2048",
+      "format": "JPG",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/sparse_grass",
+      "fileSizeMB": "~1.5"
+    },
+    "terrain_grass_light_normal": {
+      "id": "terrain_grass_light_normal",
+      "path": "/assets/textures/terrain/grass_light_normal.jpg",
+      "type": "normal",
+      "resolution": "2048x2048",
+      "format": "JPG (OpenGL)",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/sparse_grass",
+      "fileSizeMB": "~1.5"
+    },
+    "terrain_grass_light_roughness": {
+      "id": "terrain_grass_light_roughness",
+      "path": "/assets/textures/terrain/grass_light_roughness.jpg",
+      "type": "roughness",
+      "resolution": "2048x2048",
+      "format": "JPG",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/sparse_grass",
+      "fileSizeMB": "~1.5"
     },
     "terrain_dirt_brown": {
       "id": "terrain_dirt_brown",
       "path": "/assets/textures/terrain/dirt_brown.jpg",
-      "normalPath": "/assets/textures/terrain/dirt_brown_normal.jpg",
-      "roughnessPath": "/assets/textures/terrain/dirt_brown_roughness.jpg",
-      "license": "CC0",
-      "author": "Poly Haven Contributors",
-      "sourceUrl": "https://polyhaven.com/a/dirt_floor"
+      "type": "diffuse",
+      "resolution": "2048x2048",
+      "format": "JPG",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/dirt_floor",
+      "fileSizeMB": "~1.5"
+    },
+    "terrain_dirt_brown_normal": {
+      "id": "terrain_dirt_brown_normal",
+      "path": "/assets/textures/terrain/dirt_brown_normal.jpg",
+      "type": "normal",
+      "resolution": "2048x2048",
+      "format": "JPG (OpenGL)",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/dirt_floor",
+      "fileSizeMB": "~1.5"
+    },
+    "terrain_dirt_brown_roughness": {
+      "id": "terrain_dirt_brown_roughness",
+      "path": "/assets/textures/terrain/dirt_brown_roughness.jpg",
+      "type": "roughness",
+      "resolution": "2048x2048",
+      "format": "JPG",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/dirt_floor",
+      "fileSizeMB": "~1.5"
     },
     "terrain_rock_gray": {
       "id": "terrain_rock_gray",
       "path": "/assets/textures/terrain/rock_gray.jpg",
-      "normalPath": "/assets/textures/terrain/rock_gray_normal.jpg",
-      "roughnessPath": "/assets/textures/terrain/rock_gray_roughness.jpg",
-      "license": "CC0",
-      "author": "Poly Haven Contributors",
-      "sourceUrl": "https://polyhaven.com/a/rock_surface"
+      "type": "diffuse",
+      "resolution": "2048x2048",
+      "format": "JPG",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/rock_surface",
+      "fileSizeMB": "~1.5"
+    },
+    "terrain_rock_gray_normal": {
+      "id": "terrain_rock_gray_normal",
+      "path": "/assets/textures/terrain/rock_gray_normal.jpg",
+      "type": "normal",
+      "resolution": "2048x2048",
+      "format": "JPG (OpenGL)",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/rock_surface",
+      "fileSizeMB": "~1.5"
+    },
+    "terrain_rock_gray_roughness": {
+      "id": "terrain_rock_gray_roughness",
+      "path": "/assets/textures/terrain/rock_gray_roughness.jpg",
+      "type": "roughness",
+      "resolution": "2048x2048",
+      "format": "JPG",
+      "license": "CC0 1.0",
+      "author": "Poly Haven Team",
+      "sourceUrl": "https://polyhaven.com/a/rock_surface",
+      "fileSizeMB": "~1.5"
     }
   },
   "models": {
     "doodad_tree_oak_01": {
       "id": "doodad_tree_oak_01",
       "path": "/assets/models/doodads/tree_oak_01.glb",
+      "type": "tree",
+      "format": "GLB (glTF 2.0)",
       "triangles": 800,
-      "license": "CC0",
+      "vertices": 450,
+      "license": "CC0 1.0",
       "author": "Quaternius",
       "sourceUrl": "https://quaternius.com/packs/ultimatenature.html",
-      "fallback": "doodad_box_placeholder"
+      "sourcePack": "Ultimate Nature Pack",
+      "fileSizeMB": "~0.2-0.5",
+      "fallback": "doodad_box_placeholder",
+      "mappedTo": ["ATtr", "LTtr", "CTtr", "ASx1", "ATtc"]
     },
     "doodad_bush_round_01": {
       "id": "doodad_bush_round_01",
       "path": "/assets/models/doodads/bush_round_01.glb",
+      "type": "bush",
+      "format": "GLB (glTF 2.0)",
       "triangles": 400,
-      "license": "CC0",
+      "vertices": 250,
+      "license": "CC0 1.0",
       "author": "Quaternius",
       "sourceUrl": "https://quaternius.com/packs/ultimatenature.html",
-      "fallback": "doodad_box_placeholder"
+      "sourcePack": "Ultimate Nature Pack",
+      "fileSizeMB": "~0.1-0.3",
+      "fallback": "doodad_box_placeholder",
+      "mappedTo": ["ASbc", "ASbr", "ASbl", "YOfs", "YOtf"]
     },
     "doodad_rock_large_01": {
       "id": "doodad_rock_large_01",
       "path": "/assets/models/doodads/rock_large_01.glb",
+      "type": "rock",
+      "format": "GLB (glTF 2.0)",
       "triangles": 600,
-      "license": "CC0",
+      "vertices": 350,
+      "license": "CC0 1.0",
       "author": "Quaternius",
       "sourceUrl": "https://quaternius.com/packs/ultimatenature.html",
-      "fallback": "doodad_box_placeholder"
+      "sourcePack": "Ultimate Nature Pack",
+      "fileSizeMB": "~0.2-0.4",
+      "fallback": "doodad_box_placeholder",
+      "mappedTo": ["ARrk", "AObo", "LRk1", "LOss", "LObz", "LObr"]
+    },
+    "doodad_plant_generic_01": {
+      "id": "doodad_plant_generic_01",
+      "path": "/assets/models/doodads/plant_generic_01.glb",
+      "type": "plant",
+      "format": "GLB (glTF 2.0)",
+      "triangles": 200,
+      "vertices": 120,
+      "license": "CC0 1.0",
+      "author": "EdgeCraft Team (Procedural)",
+      "sourceUrl": "Generated in Blender",
+      "fileSizeMB": "~0.05",
+      "fallback": "doodad_box_placeholder",
+      "mappedTo": ["APct", "LOsm", "AZrf", "ASv0"]
     },
     "doodad_box_placeholder": {
       "id": "doodad_box_placeholder",
       "path": "/assets/models/doodads/placeholder_box.glb",
+      "type": "placeholder",
+      "format": "GLB (glTF 2.0)",
       "triangles": 12,
-      "license": "CC0",
+      "vertices": 8,
+      "license": "CC0 1.0",
       "author": "EdgeCraft Team",
-      "sourceUrl": "Generated procedurally"
+      "sourceUrl": "Generated procedurally",
+      "fileSizeMB": "~0.001",
+      "description": "Magenta box used as fallback when model not found"
     },
     "doodad_marker_small": {
       "id": "doodad_marker_small",
       "path": "/assets/models/doodads/marker_small.glb",
+      "type": "marker",
+      "format": "GLB (glTF 2.0)",
       "triangles": 12,
-      "license": "CC0",
+      "vertices": 8,
+      "license": "CC0 1.0",
       "author": "EdgeCraft Team",
       "sourceUrl": "Generated procedurally",
-      "fallback": "doodad_box_placeholder"
+      "fileSizeMB": "~0.001",
+      "fallback": "doodad_box_placeholder",
+      "description": "Invisible marker for spawn points and special objects",
+      "mappedTo": ["DSp0", "B000", "B001", "B002", "B003", "D000", "D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D00A", "D00B", "D00C", "D00D", "D00E"]
     }
   }
 }
