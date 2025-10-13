@@ -682,6 +682,114 @@ export class MPQParser {
   }
 
   /**
+   * Extract file from archive by block index
+   *
+   * This is useful for W3N campaigns where we don't know the filenames
+   * of embedded W3X archives, but can identify them by size/position.
+   */
+  public async extractFileByIndex(blockIndex: number): Promise<MPQFile | null> {
+    if (!this.archive) {
+      throw new Error('Archive not parsed. Call parse() first.');
+    }
+
+    // Get block entry directly by index
+    const blockEntry = this.archive.blockTable[blockIndex];
+    if (!blockEntry) {
+      return null;
+    }
+
+    // Check if file exists
+    const exists = (blockEntry.flags & 0x80000000) !== 0;
+    if (!exists) {
+      return null;
+    }
+
+    // Extract file data (same logic as extractFile but without filename)
+    const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
+    const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
+
+    console.log(
+      `[MPQParser] Extracting block ${blockIndex}: filePos=${blockEntry.filePos}, compressedSize=${blockEntry.compressedSize}, uncompressedSize=${blockEntry.uncompressedSize}, flags=0x${blockEntry.flags.toString(16)}, isCompressed=${isCompressed}, isEncrypted=${isEncrypted}`
+    );
+
+    // Read file data
+    let rawData = this.buffer.slice(
+      blockEntry.filePos,
+      blockEntry.filePos + blockEntry.compressedSize
+    );
+
+    // Note: Encrypted files require filename for key generation
+    // Since we don't have filename here, we can't decrypt
+    if (isEncrypted) {
+      console.warn(`[MPQParser] Block ${blockIndex} is encrypted, cannot decrypt without filename`);
+      return null;
+    }
+
+    let fileData: ArrayBuffer;
+
+    if (isCompressed) {
+      // Detect compression algorithm from first byte
+      const compressionAlgorithm = this.detectCompressionAlgorithm(rawData);
+      console.log(
+        `[MPQParser] Detected compression for block ${blockIndex}: 0x${compressionAlgorithm.toString(16)}`
+      );
+
+      if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
+        const compressedData = rawData.slice(1);
+        fileData = await this.lzmaDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+      } else if (
+        compressionAlgorithm === CompressionAlgorithm.ZLIB ||
+        compressionAlgorithm === CompressionAlgorithm.PKZIP
+      ) {
+        const compressedData = rawData.slice(1);
+        fileData = await this.zlibDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+      } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
+        const compressedData = rawData.slice(1);
+        fileData = await this.bzip2Decompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+      } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
+        // Check if this is multi-compression
+        const firstByte = rawData.byteLength > 0 ? new DataView(rawData).getUint8(0) : 0;
+
+        if (firstByte !== 0 && blockEntry.compressedSize < blockEntry.uncompressedSize) {
+          fileData = await this.decompressMultiAlgorithm(
+            rawData,
+            blockEntry.uncompressedSize,
+            firstByte
+          );
+        } else {
+          fileData = rawData;
+        }
+      } else {
+        throw new Error(
+          `Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`
+        );
+      }
+    } else {
+      fileData = rawData;
+    }
+
+    const file: MPQFile = {
+      name: `block_${blockIndex}`,
+      data: fileData,
+      compressedSize: blockEntry.compressedSize,
+      uncompressedSize: blockEntry.uncompressedSize,
+      isCompressed,
+      isEncrypted,
+    };
+
+    return file;
+  }
+
+  /**
    * Detect compression algorithm from compressed data
    *
    * In MPQ archives, the first byte of compressed data indicates
@@ -730,11 +838,40 @@ export class MPQParser {
       `[MPQParser] Multi-algorithm decompression with flags: 0x${compressionFlags.toString(16)}`
     );
 
+    // Log which algorithms are flagged
+    const flaggedAlgos: string[] = [];
+    if (compressionFlags & CompressionAlgorithm.HUFFMAN) flaggedAlgos.push('HUFFMAN(0x01)');
+    if (compressionFlags & CompressionAlgorithm.ZLIB) flaggedAlgos.push('ZLIB(0x02)');
+    if (compressionFlags & CompressionAlgorithm.PKZIP) flaggedAlgos.push('PKZIP(0x08)');
+    if (compressionFlags & CompressionAlgorithm.BZIP2) flaggedAlgos.push('BZIP2(0x10)');
+    if (compressionFlags & CompressionAlgorithm.LZMA) flaggedAlgos.push('LZMA(0x12)');
+    if (compressionFlags & CompressionAlgorithm.SPARSE) flaggedAlgos.push('SPARSE(0x20)');
+    if (compressionFlags & CompressionAlgorithm.ADPCM_MONO) flaggedAlgos.push('ADPCM_MONO(0x40)');
+    if (compressionFlags & CompressionAlgorithm.ADPCM_STEREO) flaggedAlgos.push('ADPCM_STEREO(0x80)');
+    console.log(`[MPQParser] Flagged algorithms: ${flaggedAlgos.join(' | ')}`);
+    console.log(`[MPQParser] Input data size: ${data.byteLength}, expected output: ${uncompressedSize}`);
+
+    // Read the first byte to check if it matches the flags
+    const firstByte = new Uint8Array(data)[0];
+    console.log(`[MPQParser] First byte of compressed data: 0x${firstByte?.toString(16)}`);
+
     // Skip the first byte (compression flags)
     let currentData = data.slice(1);
+    console.log(`[MPQParser] Data size after skipping flag byte: ${currentData.byteLength}`);
 
     // Apply compression algorithms in the order they were applied during compression
     // The order matters! Typically: Huffman -> ZLIB/PKZIP -> BZip2
+
+    // Check for unsupported compression types (SPARSE, ADPCM)
+    if (compressionFlags & (CompressionAlgorithm.SPARSE | CompressionAlgorithm.ADPCM_MONO | CompressionAlgorithm.ADPCM_STEREO)) {
+      const unsupportedTypes: string[] = [];
+      if (compressionFlags & CompressionAlgorithm.SPARSE) unsupportedTypes.push('SPARSE(0x20)');
+      if (compressionFlags & CompressionAlgorithm.ADPCM_MONO) unsupportedTypes.push('ADPCM_MONO(0x40)');
+      if (compressionFlags & CompressionAlgorithm.ADPCM_STEREO) unsupportedTypes.push('ADPCM_STEREO(0x80)');
+      console.warn(`[MPQParser] Multi-algo: Unsupported compression types detected: ${unsupportedTypes.join(', ')}`);
+      console.warn(`[MPQParser] Multi-algo: These are typically used for audio/video files. Falling back to StormJS...`);
+      throw new Error(`Unsupported compression types: ${unsupportedTypes.join(', ')} - requires StormJS fallback`);
+    }
 
     // Check HUFFMAN (0x01)
     if (compressionFlags & CompressionAlgorithm.HUFFMAN) {

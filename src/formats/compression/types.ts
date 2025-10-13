@@ -20,6 +20,12 @@ export enum CompressionAlgorithm {
   BZIP2 = 0x10,
   /** LZMA compression (SC2 and later) */
   LZMA = 0x12,
+  /** SPARSE/IMA ADPCM compression (Warcraft III) */
+  SPARSE = 0x20,
+  /** ADPCM Mono compression */
+  ADPCM_MONO = 0x40,
+  /** ADPCM Stereo compression */
+  ADPCM_STEREO = 0x80,
 }
 
 /**
