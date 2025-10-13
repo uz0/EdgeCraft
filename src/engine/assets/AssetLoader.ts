@@ -48,7 +48,7 @@ export class AssetLoader {
     try {
       const response = await fetch(this.manifestPath);
       if (!response.ok) {
-        throw new Error(\`Failed to load manifest: \${response.statusText}\`);
+        throw new Error(`Failed to load manifest: ${response.statusText}`);
       }
       this.manifest = await response.json();
       console.log('[AssetLoader] Manifest loaded:', {
@@ -72,7 +72,7 @@ export class AssetLoader {
 
     const asset = this.manifest.textures[id];
     if (!asset) {
-      console.warn(\`[AssetLoader] Texture not found: \${id}, using fallback\`);
+      console.warn(`[AssetLoader] Texture not found: ${id}, using fallback`);
       return this.createFallbackTexture();
     }
 
@@ -80,10 +80,10 @@ export class AssetLoader {
       const texture = new BABYLON.Texture(asset.path, this.scene);
       texture.name = id;
       this.loadedTextures.set(id, texture);
-      console.log(\`[AssetLoader] Loaded texture: \${id} from \${asset.path}\`);
+      console.log(`[AssetLoader] Loaded texture: ${id} from ${asset.path}`);
       return texture;
     } catch (error) {
-      console.error(\`[AssetLoader] Failed to load texture \${id}:\`, error);
+      console.error(`[AssetLoader] Failed to load texture ${id}:`, error);
       return this.createFallbackTexture();
     }
   }
@@ -95,16 +95,16 @@ export class AssetLoader {
 
     if (this.loadedModels.has(id)) {
       const cached = this.loadedModels.get(id)!;
-      return cached.clone(\`\${id}_instance_\${Date.now()}\`, null)!;
+      return cached.clone(`${id}_instance_${Date.now()}`, null)!;
     }
 
     const asset = this.manifest.models[id];
     if (!asset) {
       if (asset?.fallback) {
-        console.warn(\`[AssetLoader] Model not found: \${id}, trying fallback: \${asset.fallback}\`);
+        console.warn(`[AssetLoader] Model not found: ${id}, trying fallback: ${asset.fallback}`);
         return this.loadModel(asset.fallback);
       }
-      console.warn(\`[AssetLoader] Model not found: \${id}, using fallback box\`);
+      console.warn(`[AssetLoader] Model not found: ${id}, using fallback box`);
       return this.createFallbackBox();
     }
 
@@ -116,10 +116,10 @@ export class AssetLoader {
       const mesh = result.meshes[0] as BABYLON.Mesh;
       mesh.name = id;
       this.loadedModels.set(id, mesh);
-      console.log(\`[AssetLoader] Loaded model: \${id} from \${asset.path}\`);
-      return mesh.clone(\`\${id}_instance_\${Date.now()}\`, null)!;
+      console.log(`[AssetLoader] Loaded model: ${id} from ${asset.path}`);
+      return mesh.clone(`${id}_instance_${Date.now()}`, null)!;
     } catch (error) {
-      console.error(\`[AssetLoader] Failed to load model \${id}:\`, error);
+      console.error(`[AssetLoader] Failed to load model ${id}:`, error);
       return this.createFallbackBox();
     }
   }
@@ -130,8 +130,8 @@ export class AssetLoader {
   }
 
   private createFallbackBox(): BABYLON.Mesh {
-    const box = BABYLON.MeshBuilder.CreateBox(\`fallback_box_\${Date.now()}\`, { size: 1 }, this.scene);
-    const material = new BABYLON.StandardMaterial(\`fallback_mat_\${Date.now()}\`, this.scene);
+    const box = BABYLON.MeshBuilder.CreateBox(`fallback_box_${Date.now()}`, { size: 1 }, this.scene);
+    const material = new BABYLON.StandardMaterial(`fallback_mat_${Date.now()}`, this.scene);
     material.diffuseColor = new BABYLON.Color3(1, 0, 1);
     box.material = material;
     return box;
