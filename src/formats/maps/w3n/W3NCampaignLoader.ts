@@ -165,11 +165,16 @@ export class W3NCampaignLoader implements IMapLoader {
     let firstMapData: ArrayBuffer | null = null;
 
     for (const { block, index } of largeBlocks.slice(0, 10)) {
-      console.log(`[W3NCampaignLoader] Checking block ${index} (${block.compressedSize} bytes compressed)...`);
+      console.log(
+        `[W3NCampaignLoader] Checking block ${index} (${block.compressedSize} bytes compressed)...`
+      );
 
       try {
         // Read first 1KB to check for MPQ magic without extracting the whole file
-        const headerData = await reader.readRange(block.filePos, Math.min(1024, block.compressedSize));
+        const headerData = await reader.readRange(
+          block.filePos,
+          Math.min(1024, block.compressedSize)
+        );
         const view = new DataView(headerData.buffer, headerData.byteOffset, headerData.byteLength);
 
         // Check for MPQ magic at common offsets (0, 512, 1024)
@@ -182,15 +187,23 @@ export class W3NCampaignLoader implements IMapLoader {
           console.log(`[W3NCampaignLoader] ✅ Found MPQ magic in block ${index}! Extracting...`);
 
           // Extract the full file
-          const mapFile = await mpqParser.extractFileByIndexStream(index, reader, mpqResult.blockTable);
+          const mapFile = await mpqParser.extractFileByIndexStream(
+            index,
+            reader,
+            mpqResult.blockTable
+          );
 
           if (mapFile && mapFile.data.byteLength > 0) {
-            console.log(`[W3NCampaignLoader] ✅ Extracted ${mapFile.data.byteLength} bytes from block ${index}`);
+            console.log(
+              `[W3NCampaignLoader] ✅ Extracted ${mapFile.data.byteLength} bytes from block ${index}`
+            );
             firstMapData = mapFile.data;
             break;
           }
         } else {
-          console.log(`[W3NCampaignLoader] Block ${index} is not an MPQ (magic: 0x${magic0.toString(16)}, 0x${magic512.toString(16)})`);
+          console.log(
+            `[W3NCampaignLoader] Block ${index} is not an MPQ (magic: 0x${magic0.toString(16)}, 0x${magic512.toString(16)})`
+          );
         }
       } catch (error) {
         console.warn(`[W3NCampaignLoader] Failed to check block ${index}:`, error);

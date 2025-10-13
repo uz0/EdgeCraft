@@ -136,7 +136,9 @@ export class MapPreviewExtractor {
     file: File,
     format: 'w3x' | 'w3m' | 'w3n' | 'scm' | 'scx' | 'sc2map'
   ): Promise<{ success: boolean; dataUrl?: string; error?: string }> {
-    console.log(`[MapPreviewExtractor] 🔍 extractEmbedded START: file="${file.name}", format="${format}"`);
+    console.log(
+      `[MapPreviewExtractor] 🔍 extractEmbedded START: file="${file.name}", format="${format}"`
+    );
 
     const buffer = await file.arrayBuffer();
     console.log(`[MapPreviewExtractor] Buffer loaded: ${buffer.byteLength} bytes for ${file.name}`);
@@ -158,7 +160,7 @@ export class MapPreviewExtractor {
         console.log(`[MapPreviewExtractor] W3N: Parse result:`, {
           success: mpqResult.success,
           hasArchive: !!mpqResult.archive,
-          error: mpqResult.error
+          error: mpqResult.error,
         });
 
         if (mpqResult.success && mpqResult.archive) {
@@ -167,12 +169,15 @@ export class MapPreviewExtractor {
           console.log(`[MapPreviewExtractor] W3N has ${blockTable.length} files in block table`);
 
           // Log first few blocks for debugging
-          console.log(`[MapPreviewExtractor] W3N first 5 blocks:`, blockTable.slice(0, 5).map((b, i) => ({
-            index: i,
-            compressedSize: b.compressedSize,
-            uncompressedSize: b.uncompressedSize,
-            flags: `0x${b.flags.toString(16)}`
-          })));
+          console.log(
+            `[MapPreviewExtractor] W3N first 5 blocks:`,
+            blockTable.slice(0, 5).map((b, i) => ({
+              index: i,
+              compressedSize: b.compressedSize,
+              uncompressedSize: b.uncompressedSize,
+              flags: `0x${b.flags.toString(16)}`,
+            }))
+          );
 
           // Try to extract files that might be W3X maps
           // W3N campaigns typically have files at specific positions
@@ -183,11 +188,14 @@ export class MapPreviewExtractor {
             .sort((a, b) => b.block.compressedSize - a.block.compressedSize);
 
           console.log(`[MapPreviewExtractor] W3N found ${largeFiles.length} large files (>100KB)`);
-          console.log(`[MapPreviewExtractor] W3N top 5 large files:`, largeFiles.slice(0, 5).map(({ block, index }) => ({
-            index,
-            compressedSize: block.compressedSize,
-            uncompressedSize: block.uncompressedSize
-          })));
+          console.log(
+            `[MapPreviewExtractor] W3N top 5 large files:`,
+            largeFiles.slice(0, 5).map(({ block, index }) => ({
+              index,
+              compressedSize: block.compressedSize,
+              uncompressedSize: block.uncompressedSize,
+            }))
+          );
 
           for (const { index } of largeFiles.slice(0, 5)) {
             // Try first 5 large files
@@ -203,7 +211,9 @@ export class MapPreviewExtractor {
                 continue;
               }
 
-              console.log(`[MapPreviewExtractor] W3N: Extracted block ${index}: ${blockData.data.byteLength} bytes`);
+              console.log(
+                `[MapPreviewExtractor] W3N: Extracted block ${index}: ${blockData.data.byteLength} bytes`
+              );
 
               // Check if it's a valid MPQ (W3X) by looking for MPQ magic
               const view = new DataView(blockData.data);
@@ -214,7 +224,7 @@ export class MapPreviewExtractor {
               console.log(`[MapPreviewExtractor] W3N: Block ${index} magic numbers:`, {
                 '@0': `0x${magic0.toString(16)}`,
                 '@512': `0x${magic512.toString(16)}`,
-                '@1024': `0x${magic1024.toString(16)}`
+                '@1024': `0x${magic1024.toString(16)}`,
               });
 
               const hasMPQMagic =
@@ -233,25 +243,31 @@ export class MapPreviewExtractor {
                 console.log(`[MapPreviewExtractor] W3N: Nested parse result:`, {
                   success: nestedResult.success,
                   error: nestedResult.error,
-                  fileCount: nestedResult.archive?.blockTable.length
+                  fileCount: nestedResult.archive?.blockTable.length,
                 });
 
                 if (nestedResult.success) {
                   // Try to extract preview from nested W3X
-                  console.log(`[MapPreviewExtractor] W3N: Looking for preview files in nested W3X...`);
+                  console.log(
+                    `[MapPreviewExtractor] W3N: Looking for preview files in nested W3X...`
+                  );
 
                   for (const fileName of MapPreviewExtractor.W3X_PREVIEW_FILES) {
                     console.log(`[MapPreviewExtractor] W3N: Trying to extract ${fileName}...`);
                     const previewData = await nestedParser.extractFile(fileName);
 
                     if (previewData) {
-                      console.log(`[MapPreviewExtractor] W3N: ✅ Extracted ${fileName} (${previewData.data.byteLength} bytes)`);
+                      console.log(
+                        `[MapPreviewExtractor] W3N: ✅ Extracted ${fileName} (${previewData.data.byteLength} bytes)`
+                      );
 
                       console.log(`[MapPreviewExtractor] W3N: Decoding TGA...`);
                       const dataUrl = this.tgaDecoder.decodeToDataURL(previewData.data);
 
                       if (dataUrl) {
-                        console.log(`[MapPreviewExtractor] W3N: ✅ Successfully decoded TGA to data URL!`);
+                        console.log(
+                          `[MapPreviewExtractor] W3N: ✅ Successfully decoded TGA to data URL!`
+                        );
                         return { success: true, dataUrl };
                       } else {
                         console.log(`[MapPreviewExtractor] W3N: ❌ TGA decode returned null`);
@@ -261,19 +277,26 @@ export class MapPreviewExtractor {
                     }
                   }
 
-                  console.log(`[MapPreviewExtractor] W3N: ❌ No preview files found in nested W3X block ${index}`);
+                  console.log(
+                    `[MapPreviewExtractor] W3N: ❌ No preview files found in nested W3X block ${index}`
+                  );
                 }
               } else {
                 console.log(`[MapPreviewExtractor] W3N: Block ${index} is not an MPQ archive`);
               }
             } catch (error) {
               const errorMsg = error instanceof Error ? error.message : String(error);
-              console.error(`[MapPreviewExtractor] W3N: ❌ Failed to extract block ${index}:`, errorMsg);
+              console.error(
+                `[MapPreviewExtractor] W3N: ❌ Failed to extract block ${index}:`,
+                errorMsg
+              );
               // Continue to next file
             }
           }
 
-          console.log(`[MapPreviewExtractor] W3N: ❌ No valid W3X preview found after checking ${largeFiles.length} files`);
+          console.log(
+            `[MapPreviewExtractor] W3N: ❌ No valid W3X preview found after checking ${largeFiles.length} files`
+          );
         } else {
           console.log(`[MapPreviewExtractor] W3N: ❌ MPQ parse failed or no archive`);
         }

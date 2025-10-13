@@ -99,7 +99,9 @@ export class TGADecoder {
     const needsChunking = result.width > CANVAS_LIMIT || result.height > CANVAS_LIMIT;
 
     if (needsChunking) {
-      console.log(`[TGADecoder] Image too large (${result.width}x${result.height}), using direct downscaling`);
+      console.log(
+        `[TGADecoder] Image too large (${result.width}x${result.height}), using direct downscaling`
+      );
       // For very large images, downsample the pixel data directly before canvas rendering
       const downscaledData = this.downsamplePixelData(
         result.data,

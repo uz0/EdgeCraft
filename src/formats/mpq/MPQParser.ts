@@ -299,8 +299,10 @@ export class MPQParser {
         sectorSizeShift <= 16 && // Sector size shift should be reasonable
         hashTableSize < 1000000 && // Hash table size should be reasonable
         blockTableSize < 1000000 && // Block table size should be reasonable
-        hashTablePos >= 0 && hashTablePos < this.buffer.byteLength &&
-        blockTablePos >= 0 && blockTablePos < this.buffer.byteLength &&
+        hashTablePos >= 0 &&
+        hashTablePos < this.buffer.byteLength &&
+        blockTablePos >= 0 &&
+        blockTablePos < this.buffer.byteLength &&
         hashTablePos + hashTableSize * 16 <= this.buffer.byteLength &&
         blockTablePos + blockTableSize * 16 <= this.buffer.byteLength;
 
@@ -312,9 +314,7 @@ export class MPQParser {
       }
 
       // Found valid header!
-      console.log(
-        `[MPQParser] ✅ Found VALID MPQ header at offset ${headerOffset}`
-      );
+      console.log(`[MPQParser] ✅ Found VALID MPQ header at offset ${headerOffset}`);
       console.log(
         `[MPQParser] Header: archiveSize=${archiveSize}, formatVersion=${formatVersion}, hashTablePos=${hashTablePos}, blockTablePos=${blockTablePos}, hashTableSize=${hashTableSize}, blockTableSize=${blockTableSize}`
       );
@@ -715,7 +715,7 @@ export class MPQParser {
     );
 
     // Read file data
-    let rawData = this.buffer.slice(
+    const rawData = this.buffer.slice(
       blockEntry.filePos,
       blockEntry.filePos + blockEntry.compressedSize
     );
@@ -849,9 +849,12 @@ export class MPQParser {
     if (compressionFlags & CompressionAlgorithm.LZMA) flaggedAlgos.push('LZMA(0x12)');
     if (compressionFlags & CompressionAlgorithm.SPARSE) flaggedAlgos.push('SPARSE(0x20)');
     if (compressionFlags & CompressionAlgorithm.ADPCM_MONO) flaggedAlgos.push('ADPCM_MONO(0x40)');
-    if (compressionFlags & CompressionAlgorithm.ADPCM_STEREO) flaggedAlgos.push('ADPCM_STEREO(0x80)');
+    if (compressionFlags & CompressionAlgorithm.ADPCM_STEREO)
+      flaggedAlgos.push('ADPCM_STEREO(0x80)');
     console.log(`[MPQParser] Flagged algorithms: ${flaggedAlgos.join(' | ')}`);
-    console.log(`[MPQParser] Input data size: ${data.byteLength}, expected output: ${uncompressedSize}`);
+    console.log(
+      `[MPQParser] Input data size: ${data.byteLength}, expected output: ${uncompressedSize}`
+    );
 
     // Read the first byte to check if it matches the flags
     const firstByte = new Uint8Array(data)[0];
@@ -865,14 +868,27 @@ export class MPQParser {
     // The order matters! Typically: Huffman -> ZLIB/PKZIP -> BZip2
 
     // Check for unsupported compression types (SPARSE, ADPCM)
-    if (compressionFlags & (CompressionAlgorithm.SPARSE | CompressionAlgorithm.ADPCM_MONO | CompressionAlgorithm.ADPCM_STEREO)) {
+    if (
+      compressionFlags &
+      (CompressionAlgorithm.SPARSE |
+        CompressionAlgorithm.ADPCM_MONO |
+        CompressionAlgorithm.ADPCM_STEREO)
+    ) {
       const unsupportedTypes: string[] = [];
       if (compressionFlags & CompressionAlgorithm.SPARSE) unsupportedTypes.push('SPARSE(0x20)');
-      if (compressionFlags & CompressionAlgorithm.ADPCM_MONO) unsupportedTypes.push('ADPCM_MONO(0x40)');
-      if (compressionFlags & CompressionAlgorithm.ADPCM_STEREO) unsupportedTypes.push('ADPCM_STEREO(0x80)');
-      console.warn(`[MPQParser] Multi-algo: Unsupported compression types detected: ${unsupportedTypes.join(', ')}`);
-      console.warn(`[MPQParser] Multi-algo: These are typically used for audio/video files. Falling back to StormJS...`);
-      throw new Error(`Unsupported compression types: ${unsupportedTypes.join(', ')} - requires StormJS fallback`);
+      if (compressionFlags & CompressionAlgorithm.ADPCM_MONO)
+        unsupportedTypes.push('ADPCM_MONO(0x40)');
+      if (compressionFlags & CompressionAlgorithm.ADPCM_STEREO)
+        unsupportedTypes.push('ADPCM_STEREO(0x80)');
+      console.warn(
+        `[MPQParser] Multi-algo: Unsupported compression types detected: ${unsupportedTypes.join(', ')}`
+      );
+      console.warn(
+        `[MPQParser] Multi-algo: These are typically used for audio/video files. Falling back to StormJS...`
+      );
+      throw new Error(
+        `Unsupported compression types: ${unsupportedTypes.join(', ')} - requires StormJS fallback`
+      );
     }
 
     // Check HUFFMAN (0x01)
@@ -1073,7 +1089,9 @@ export class MPQParser {
         continue;
       }
 
-      console.log(`[MPQParser Stream] Found MPQ magic at offset ${offset}: 0x${magic.toString(16)}`);
+      console.log(
+        `[MPQParser Stream] Found MPQ magic at offset ${offset}: 0x${magic.toString(16)}`
+      );
 
       // Handle MPQ user data header
       let headerOffset = offset;
@@ -1159,7 +1177,9 @@ export class MPQParser {
       }
     }
 
-    console.log(`[MPQParser Stream] Raw hash table check: hasValidBlockIndices=${hasValidBlockIndices}`);
+    console.log(
+      `[MPQParser Stream] Raw hash table check: hasValidBlockIndices=${hasValidBlockIndices}`
+    );
 
     let view = rawView;
     if (!hasValidBlockIndices) {
@@ -1207,7 +1227,7 @@ export class MPQParser {
       // File position way too large = likely encrypted
       console.log('[MPQParser Stream] Block table appears encrypted, attempting decryption...');
       const decryptedData = this.decryptTable(data, '(block table)');
-      view = new DataView(decryptedData.buffer as ArrayBuffer);
+      view = new DataView(this.toArrayBuffer(decryptedData));
       console.log(`[MPQParser Stream] Decrypted first filePos: ${view.getUint32(0, true)}`);
     } else {
       console.log('[MPQParser Stream] Using raw (unencrypted) block table');
@@ -1257,7 +1277,10 @@ export class MPQParser {
       return fileList;
     } catch (error) {
       // Listfile not found or error - return common names as fallback
-      console.log('[MPQParser Stream] Error extracting (listfile), trying common map names:', error);
+      console.log(
+        '[MPQParser Stream] Error extracting (listfile), trying common map names:',
+        error
+      );
       return this.generateCommonMapNamesForStreaming();
     }
   }
@@ -1310,6 +1333,21 @@ export class MPQParser {
   }
 
   /**
+   * Safely extract ArrayBuffer from Uint8Array (handles SharedArrayBuffer)
+   */
+  private toArrayBuffer(data: Uint8Array): ArrayBuffer {
+    // If the underlying buffer is a SharedArrayBuffer, we need to copy it
+    const slice = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+    if (slice instanceof ArrayBuffer) {
+      return slice;
+    }
+    // SharedArrayBuffer - copy to ArrayBuffer
+    const copy = new Uint8Array(data.byteLength);
+    copy.set(data);
+    return copy.buffer;
+  }
+
+  /**
    * Extract file by block index from stream (for W3N nested archives)
    *
    * This reads and decompresses a file directly by its block table index,
@@ -1334,7 +1372,9 @@ export class MPQParser {
     // Check if file is encrypted (we can't decrypt without filename)
     const isEncrypted = (blockEntry.flags & 0x00010000) !== 0;
     if (isEncrypted) {
-      console.warn(`[MPQParser Stream] Block ${blockIndex} is encrypted, cannot decrypt without filename`);
+      console.warn(
+        `[MPQParser Stream] Block ${blockIndex} is encrypted, cannot decrypt without filename`
+      );
       return null;
     }
 
@@ -1346,34 +1386,55 @@ export class MPQParser {
     // Decompress if compressed
     let fileData: ArrayBuffer;
     if (isCompressed) {
-      const compressionAlgorithm = this.detectCompressionAlgorithm(rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength));
+      const compressionAlgorithm = this.detectCompressionAlgorithm(this.toArrayBuffer(rawData));
 
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
-        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
-        fileData = await this.lzmaDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
-      } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
-        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
-        fileData = await this.zlibDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
+        const compressedData = this.toArrayBuffer(
+          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+        );
+        fileData = await this.lzmaDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+      } else if (
+        compressionAlgorithm === CompressionAlgorithm.ZLIB ||
+        compressionAlgorithm === CompressionAlgorithm.PKZIP
+      ) {
+        const compressedData = this.toArrayBuffer(
+          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+        );
+        fileData = await this.zlibDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
       } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
-        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
-        fileData = await this.bzip2Decompressor.decompress(compressedData, blockEntry.uncompressedSize);
+        const compressedData = this.toArrayBuffer(
+          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+        );
+        fileData = await this.bzip2Decompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
       } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
         // Multi-algorithm compression (W3X style)
-        const firstByte = rawData.length > 0 ? new DataView(rawData.buffer, rawData.byteOffset).getUint8(0) : 0;
+        const firstByte =
+          rawData.length > 0 ? new DataView(rawData.buffer, rawData.byteOffset).getUint8(0) : 0;
         if (firstByte !== 0 && blockEntry.compressedSize < blockEntry.uncompressedSize) {
           fileData = await this.decompressMultiAlgorithm(
-            rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength),
+            this.toArrayBuffer(rawData),
             blockEntry.uncompressedSize,
             firstByte
           );
         } else {
-          fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+          fileData = this.toArrayBuffer(rawData);
         }
       } else {
-        throw new Error(`Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`);
+        throw new Error(
+          `Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`
+        );
       }
     } else {
-      fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+      fileData = this.toArrayBuffer(rawData);
     }
 
     return {
@@ -1431,7 +1492,10 @@ export class MPQParser {
     if (isEncrypted) {
       console.log(`[MPQParser Stream] Decrypting ${fileName}...`);
       const fileKey = this.hashString(fileName, 3);
-      const decryptedData = this.decryptFile(new Uint8Array(rawData.buffer, rawData.byteOffset, rawData.byteLength), fileKey);
+      const decryptedData = this.decryptFile(
+        new Uint8Array(rawData.buffer, rawData.byteOffset, rawData.byteLength),
+        fileKey
+      );
       rawData = new Uint8Array(decryptedData);
     }
 
@@ -1439,34 +1503,55 @@ export class MPQParser {
     let fileData: ArrayBuffer;
     if (isCompressed) {
       console.log(`[MPQParser Stream] Decompressing ${fileName}...`);
-      const compressionAlgorithm = this.detectCompressionAlgorithm(rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength));
+      const compressionAlgorithm = this.detectCompressionAlgorithm(this.toArrayBuffer(rawData));
 
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
-        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
-        fileData = await this.lzmaDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
-      } else if (compressionAlgorithm === CompressionAlgorithm.ZLIB || compressionAlgorithm === CompressionAlgorithm.PKZIP) {
-        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
-        fileData = await this.zlibDecompressor.decompress(compressedData, blockEntry.uncompressedSize);
+        const compressedData = this.toArrayBuffer(
+          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+        );
+        fileData = await this.lzmaDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
+      } else if (
+        compressionAlgorithm === CompressionAlgorithm.ZLIB ||
+        compressionAlgorithm === CompressionAlgorithm.PKZIP
+      ) {
+        const compressedData = this.toArrayBuffer(
+          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+        );
+        fileData = await this.zlibDecompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
       } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
-        const compressedData = rawData.buffer.slice(rawData.byteOffset + 1, rawData.byteOffset + rawData.byteLength);
-        fileData = await this.bzip2Decompressor.decompress(compressedData, blockEntry.uncompressedSize);
+        const compressedData = this.toArrayBuffer(
+          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+        );
+        fileData = await this.bzip2Decompressor.decompress(
+          compressedData,
+          blockEntry.uncompressedSize
+        );
       } else if (compressionAlgorithm === CompressionAlgorithm.NONE) {
         // Multi-algorithm compression (W3X style)
-        const firstByte = rawData.length > 0 ? new DataView(rawData.buffer, rawData.byteOffset).getUint8(0) : 0;
+        const firstByte =
+          rawData.length > 0 ? new DataView(rawData.buffer, rawData.byteOffset).getUint8(0) : 0;
         if (firstByte !== 0 && blockEntry.compressedSize < blockEntry.uncompressedSize) {
           fileData = await this.decompressMultiAlgorithm(
-            rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength),
+            this.toArrayBuffer(rawData),
             blockEntry.uncompressedSize,
             firstByte
           );
         } else {
-          fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+          fileData = this.toArrayBuffer(rawData);
         }
       } else {
-        throw new Error(`Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`);
+        throw new Error(
+          `Unsupported compression algorithm: 0x${compressionAlgorithm.toString(16)}`
+        );
       }
     } else {
-      fileData = rawData.buffer.slice(rawData.byteOffset, rawData.byteOffset + rawData.byteLength);
+      fileData = this.toArrayBuffer(rawData);
     }
 
     return {
