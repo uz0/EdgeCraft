@@ -39,11 +39,17 @@ export class W3UParser {
     // Read subversion (v8+)
     const subversion = this.readUint32();
 
+    console.log(`[W3UParser] Version ${version}, subversion ${subversion}`);
+
     // Read units
     const unitCount = this.readUint32();
     const units: W3UUnit[] = [];
+    let successCount = 0;
+    let failCount = 0;
 
     for (let i = 0; i < unitCount; i++) {
+      const unitStartOffset = this.offset;
+
       try {
         // Check if we have enough buffer left for at least the minimum unit data
         // Minimum: 4 (typeId) + 4 (variation) + 12 (position) + 4 (rotation) + 12 (scale) + 1 (flags) = 37 bytes
@@ -53,14 +59,38 @@ export class W3UParser {
           );
           break;
         }
-        units.push(this.readUnit());
+
+        const unit = this.readUnit(version, subversion);
+        units.push(unit);
+        successCount++;
       } catch (error) {
-        console.warn(`[W3UParser] Failed to parse unit ${i + 1}/${unitCount}:`, error);
-        // Skip this unit but continue parsing remaining units
-        // Try to advance offset by estimated unit size to recover
-        continue;
+        failCount++;
+
+        // Only log first 5 errors to avoid spam
+        if (failCount <= 5) {
+          console.warn(
+            `[W3UParser] Failed to parse unit ${i + 1}/${unitCount} at offset ${unitStartOffset}:`,
+            error
+          );
+        }
+
+        // Try to recover by skipping ahead
+        // Most units are 200-400 bytes, so skip 300 bytes and try to resync
+        this.offset = unitStartOffset + 300;
+
+        // If we've exceeded buffer, stop
+        if (this.offset >= this.view.byteLength) {
+          console.warn(
+            `[W3UParser] Exceeded buffer after parse error, stopping at unit ${i + 1}/${unitCount}`
+          );
+          break;
+        }
       }
     }
+
+    console.log(
+      `[W3UParser] Parsed ${successCount}/${unitCount} units successfully (${failCount} failures)`
+    );
 
     return {
       version,
@@ -71,8 +101,10 @@ export class W3UParser {
 
   /**
    * Read unit placement data
+   * @param _version - File version (reserved for future version-specific parsing)
+   * @param _subversion - File subversion (reserved for future version-specific parsing)
    */
-  private readUnit(): W3UUnit {
+  private readUnit(_version: number, _subversion: number): W3UUnit {
     // Type ID (4 chars)
     const typeId = this.read4CC();
 
@@ -97,6 +129,7 @@ export class W3UParser {
     };
 
     // Flags
+    this.checkBounds(1);
     const flags = this.view.getUint8(this.offset);
     this.offset += 1;
 
@@ -104,6 +137,7 @@ export class W3UParser {
     const owner = this.readUint32();
 
     // Unknown bytes
+    this.checkBounds(2);
     const unknown1 = this.view.getUint8(this.offset);
     this.offset += 1;
 
@@ -111,10 +145,12 @@ export class W3UParser {
     this.offset += 1;
 
     // Hit points (-1 = default)
+    this.checkBounds(4);
     const hitPoints = this.view.getInt32(this.offset, true);
     this.offset += 4;
 
     // Mana points (-1 = default)
+    this.checkBounds(4);
     const manaPoints = this.view.getInt32(this.offset, true);
     this.offset += 4;
 
@@ -263,6 +299,7 @@ export class W3UParser {
    * Helper: Read 4-character code
    */
   private read4CC(): string {
+    this.checkBounds(4);
     const chars = String.fromCharCode(
       this.view.getUint8(this.offset),
       this.view.getUint8(this.offset + 1),
@@ -277,6 +314,7 @@ export class W3UParser {
    * Helper: Read uint32
    */
   private readUint32(): number {
+    this.checkBounds(4);
     const value = this.view.getUint32(this.offset, true);
     this.offset += 4;
     return value;
@@ -286,8 +324,20 @@ export class W3UParser {
    * Helper: Read float32
    */
   private readFloat32(): number {
+    this.checkBounds(4);
     const value = this.view.getFloat32(this.offset, true);
     this.offset += 4;
     return value;
+  }
+
+  /**
+   * Helper: Check if we have enough bytes remaining
+   */
+  private checkBounds(bytes: number): void {
+    if (this.offset + bytes > this.view.byteLength) {
+      throw new RangeError(
+        `Offset ${this.offset} + ${bytes} exceeds buffer length ${this.view.byteLength}`
+      );
+    }
   }
 }
