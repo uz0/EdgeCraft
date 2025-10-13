@@ -243,18 +243,23 @@ const MapCard: React.FC<MapCardProps> = ({ map, progress, previewLoadingState, o
       <div className="map-card-thumbnail">
         {map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '' ? (
           <img src={map.thumbnailUrl} alt={map.name} />
+        ) : previewLoadingState === 'loading' ? (
+          <div className="map-card-skeleton">
+            <div className="skeleton-shimmer" />
+            <div className="skeleton-content">
+              <div className="spinner-small" />
+              <span className="skeleton-text">Generating preview...</span>
+            </div>
+          </div>
         ) : (
           <div className="map-card-placeholder">
             <span className="format-badge">{formatLabel[map.format]}</span>
           </div>
         )}
 
-        {(progress?.status === 'loading' || previewLoadingState === 'loading') && (
+        {progress?.status === 'loading' && (
           <div className="map-card-loading">
             <div className="spinner" />
-            {previewLoadingState === 'loading' && (
-              <span className="loading-text">Loading preview...</span>
-            )}
           </div>
         )}
       </div>

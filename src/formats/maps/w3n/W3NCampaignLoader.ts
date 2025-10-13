@@ -285,44 +285,137 @@ export class W3NCampaignLoader implements IMapLoader {
   ): Promise<Array<{ data: ArrayBuffer; index: number }>> {
     const maps: Array<{ data: ArrayBuffer; index: number }> = [];
 
-    // Try to extract (listfile) to get list of all files
-    const listFile = await mpqParser.extractFile('(listfile)');
-    let fileList: string[] = [];
+    // Step 1: Try filename-based extraction (fast path)
+    try {
+      const listFile = await mpqParser.extractFile('(listfile)');
+      let fileList: string[] = [];
 
-    if (listFile) {
-      // Parse listfile (text file with one filename per line)
-      const decoder = new TextDecoder('utf-8');
-      const listContent = decoder.decode(listFile.data);
-      fileList = listContent
-        .split(/[\r\n]+/)
-        .map((f) => f.trim())
-        .filter((f) => f.length > 0);
-    } else {
-      // Fallback: try common campaign map naming patterns
-      fileList = this.generateCommonMapNames();
+      if (listFile) {
+        // Parse listfile (text file with one filename per line)
+        const decoder = new TextDecoder('utf-8');
+        const listContent = decoder.decode(listFile.data);
+        fileList = listContent
+          .split(/[\r\n]+/)
+          .map((f) => f.trim())
+          .filter((f) => f.length > 0);
+      } else {
+        // Fallback: try common campaign map naming patterns
+        fileList = this.generateCommonMapNames();
+      }
+
+      // Filter for .w3x and .w3m files
+      const mapFiles = fileList.filter((f) => {
+        const lower = f.toLowerCase();
+        return lower.endsWith('.w3x') || lower.endsWith('.w3m');
+      });
+
+      // Extract each map
+      let index = 0;
+      for (const mapFile of mapFiles) {
+        try {
+          const mapData = await mpqParser.extractFile(mapFile);
+          if (mapData && mapData.data.byteLength > 0) {
+            console.log(
+              `[W3NCampaignLoader] ✅ Extracted ${mapFile} (${mapData.data.byteLength} bytes)`
+            );
+            maps.push({
+              data: mapData.data,
+              index,
+            });
+            index++;
+          }
+        } catch (error) {
+          console.warn(
+            `[W3NCampaignLoader] Failed to extract map ${mapFile}:`,
+            error instanceof Error ? error.message : error
+          );
+          // Continue trying other maps
+        }
+      }
+    } catch (error) {
+      console.warn(
+        '[W3NCampaignLoader] Filename-based extraction failed:',
+        error instanceof Error ? error.message : error
+      );
     }
 
-    // Filter for .w3x and .w3m files
-    const mapFiles = fileList.filter((f) => {
-      const lower = f.toLowerCase();
-      return lower.endsWith('.w3x') || lower.endsWith('.w3m');
-    });
+    // Step 2: If filename-based extraction failed, use block scanning (robust fallback)
+    if (maps.length === 0) {
+      console.log(
+        '[W3NCampaignLoader] No maps found via filenames, trying block scanning fallback...'
+      );
+      return await this.extractEmbeddedMapsByBlockScan(mpqParser);
+    }
 
-    // Extract each map
-    let index = 0;
-    for (const mapFile of mapFiles) {
+    return maps;
+  }
+
+  /**
+   * Extract embedded maps by scanning block table (robust fallback)
+   * This is used when filename-based extraction fails
+   */
+  private async extractEmbeddedMapsByBlockScan(
+    mpqParser: MPQParser
+  ): Promise<Array<{ data: ArrayBuffer; index: number }>> {
+    const maps: Array<{ data: ArrayBuffer; index: number }> = [];
+
+    // Get the MPQ archive from parser
+    const archive = mpqParser.getArchive();
+    if (!archive || !archive.blockTable) {
+      console.error('[W3NCampaignLoader] No block table available for scanning');
+      return maps;
+    }
+
+    console.log(
+      `[W3NCampaignLoader] Scanning ${archive.blockTable.length} blocks for embedded W3X files...`
+    );
+
+    // Find large blocks (>100KB) that are likely W3X maps
+    const largeBlocks = archive.blockTable
+      .map((block, index) => ({ block, index }))
+      .filter(({ block }) => {
+        const exists = (block.flags & 0x80000000) !== 0;
+        const compressedSize = block.compressedSize || 0;
+        const isLarge = compressedSize > 100000; // >100KB
+        return exists && isLarge;
+      })
+      .sort((a, b) => b.block.compressedSize - a.block.compressedSize);
+
+    console.log(`[W3NCampaignLoader] Found ${largeBlocks.length} large blocks (>100KB)`);
+
+    // Try to extract the top candidates
+    for (const { index } of largeBlocks.slice(0, 10)) {
       try {
-        const mapData = await mpqParser.extractFile(mapFile);
+        console.log(`[W3NCampaignLoader] Checking block ${index}...`);
+
+        // Extract the file by index
+        const mapData = await mpqParser.extractFileByIndex(index);
+
         if (mapData && mapData.data.byteLength > 0) {
-          maps.push({
-            data: mapData.data,
-            index,
-          });
-          index++;
+          // Check for MPQ magic to confirm it's a W3X map
+          const view = new DataView(mapData.data.slice(0, Math.min(1024, mapData.data.byteLength)));
+          const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
+          const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
+
+          if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
+            console.log(
+              `[W3NCampaignLoader] ✅ Found embedded W3X in block ${index} (${mapData.data.byteLength} bytes)`
+            );
+            maps.push({
+              data: mapData.data,
+              index: maps.length, // Use sequential index for result
+            });
+
+            // Only extract the first map for Phase 1
+            break;
+          }
         }
       } catch (error) {
-        console.warn(`Failed to extract map ${mapFile}:`, error);
-        // Continue trying other maps
+        console.warn(
+          `[W3NCampaignLoader] Failed to extract block ${index}:`,
+          error instanceof Error ? error.message : error
+        );
+        continue;
       }
     }
 

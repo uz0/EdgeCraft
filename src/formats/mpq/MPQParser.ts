@@ -63,6 +63,14 @@ export class MPQParser {
   }
 
   /**
+   * Get the parsed MPQ archive
+   * @returns The parsed archive, or undefined if not yet parsed
+   */
+  public getArchive(): MPQArchive | undefined {
+    return this.archive;
+  }
+
+  /**
    * Parse MPQ archive
    */
   public parse(): MPQParseResult {
