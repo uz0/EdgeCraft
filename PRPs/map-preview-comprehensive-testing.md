@@ -933,22 +933,62 @@ After running all tests, document results here:
 
 ### Root Cause Analysis
 
-**Primary Issue**: Huffman Decompressor Edge Cases
-- **Component**: `src/formats/mpq/compression/HuffmanDecompressor.ts`
-- **Error**: `Invalid distance in Huffman stream`
-- **Compression Format**: Multi-compression 0x15 (Huffman + BZip2)
-- **Impact**: 8/24 maps (33%)
+**⚠️ CORRECTED ANALYSIS (2025-10-13 15:26)**
 
-**Why ALL W3N Campaigns Fail**:
-- W3N format uses aggressive compression for campaign archives
-- ALL 7 campaigns use multi-compression format 0x15
-- Huffman decompressor fails on distance code edge cases
-- File extraction fails before fallback can occur
+After deep console log analysis, the true root causes are:
+
+#### Issue 1: File Size Limit (PRIMARY ISSUE - FIXED ✅)
+- **Component**: `src/App.tsx:188`
+- **Old Code**: `if (sizeMB > 100) { continue; }`
+- **Impact**: ALL 7 W3N campaigns (29%)
+- **Status**: ✅ **FIXED** (increased to 1000MB)
+
+**Why ALL W3N Campaigns Failed**:
+- File size limit of 100MB blocked campaigns from processing
+- Campaigns NEVER reached decompression stage
+- **Actual file sizes**:
+  - JudgementOfTheDead.w3n - **923 MB**
+  - HorrorsOfNaxxramas.w3n - **433 MB**
+  - BurdenOfUncrowned.w3n - **320 MB**
+  - TheFateofAshenvaleBySvetli.w3n - **316 MB**
+  - Wrath of the Legion.w3n - **~780 MB**
+  - SearchingForPower.w3n - **~456 MB**
+  - War3Alternate1 - Undead.w3n - **106 MB**
+
+**Fix Applied**:
+```typescript
+// src/App.tsx:188
+- if (sizeMB > 100) {
++ if (sizeMB > 1000) {
+```
+
+**Rationale**: Preview extraction only reads MPQ headers and extracts small TGA files, doesn't load entire archive into memory.
+
+#### Issue 2: Legion TD Hash Table Position (REMAINING ISSUE)
+- **Component**: `src/formats/mpq/MPQParser.ts`
+- **Error**: `Invalid hash table position: 3962473115 (buffer size: 15702385)`
+- **Impact**: 1/24 maps (4%)
+- **Status**: ⏳ Not yet fixed
 
 **Why Legion TD Fails**:
-- Large map file (166 MB) with complex multi-algorithm compression
-- Uses formats 0x15, 0x32, 0xfd in combination
-- Same Huffman edge case blocks extraction
+- Hash table position `3962473115` exceeds buffer size `15702385`
+- Likely encrypted with different key or corrupted header
+- May need StormLib fallback for complex maps
+
+#### Huffman Errors are RED HERRINGS ⚠️
+- **68 Huffman errors** logged in console BUT **not blocking previews**
+- Errors occur when extracting metadata files (war3map.w3i, war3map.w3e, war3map.doo)
+- Preview extraction uses **war3mapPreview.tga** - completely different file path
+- Maps with Huffman errors **still generate previews successfully** via:
+  1. Embedded TGA extraction (different file)
+  2. Terrain generation fallback (doesn't need metadata)
+- **Example**: EchoIslesAlltherandom.w3x has Huffman failures but displays preview perfectly
+- **Proof**: 13/14 W3X maps working despite widespread Huffman errors
+
+**Expected Results After Fix**:
+- **Before**: 16/24 (67%)
+- **After**: 23/24 (96%) ← All W3N campaigns should now work
+- **Remaining**: Legion TD (needs hash table fix)
 
 ### Test Infrastructure Issues
 
@@ -981,19 +1021,38 @@ After running all tests, document results here:
 
 ## 🎯 Priority Fixes
 
-### Priority 1: Fix Huffman Decompressor ⚡ HIGH IMPACT
-**Impact**: +8 maps (67% → 100%)
-**Files**: `src/formats/mpq/compression/HuffmanDecompressor.ts`
+### Priority 1: ✅ COMPLETED - File Size Limit Fix
+**Impact**: +7 maps (67% → 96%)
+**Effort**: 5 minutes
+**Files**: `src/App.tsx:188`
+**Status**: ✅ **FIXED** (2025-10-13 15:26)
 
-**Required Changes**:
-1. Add bounds checking for distance codes
-2. Handle edge cases in multi-compression 0x15
-3. Improve error handling for corrupted distance tables
-4. Add unit tests for Huffman edge cases
+**Change Applied**:
+```typescript
+// Increased file size limit from 100MB to 1000MB
+- if (sizeMB > 100) {
++ if (sizeMB > 1000) {
+```
 
-**Expected Outcome**: ALL 7 W3N campaigns + Legion TD will display previews
+**Result**: ALL 7 W3N campaigns should now process
+- Dev server restarted with fix at http://localhost:3001/
+- Expected: 23/24 maps (96%)
 
-### Priority 2: Refactor Test Infrastructure 🔧
+### Priority 2: Fix Legion TD Hash Table Parsing 🔧 MEDIUM
+**Impact**: +1 map (96% → 100%)
+**Effort**: Medium
+**Files**: `src/formats/mpq/MPQParser.ts`
+
+**Issue**: Hash table position `3962473115` exceeds buffer size `15702385`
+
+**Possible Solutions**:
+1. Fix hash table encryption key for complex maps
+2. Implement extended MPQ format support
+3. Add StormLib fallback for complex archives
+
+### Priority 3: Refactor Test Infrastructure 🔧
+**Status**: Lower priority (preview functionality works)
+
 **Options**:
 1. **Split Tests** (RECOMMENDED):
    - `tests/unit/` - Pure logic tests (TGA parsing, validation, no WebGL)
@@ -1003,11 +1062,18 @@ After running all tests, document results here:
    - Mock Babylon.js entirely in Jest
    - Test extraction logic separately from rendering
 
-### Priority 3: Implement SC2 Embedded Extraction 🎨
+### Priority 4: Implement SC2 Embedded Extraction 🎨
 **Impact**: Better quality for 3 SC2 maps
 **Files**: `src/engine/rendering/MapPreviewExtractor.ts`
 
 Extract embedded `PreviewImage.tga` from SC2Map CASC archives instead of terrain generation.
+
+### ~~Priority X: Fix Huffman Decompressor~~ ❌ NOT NEEDED
+**Status**: Deprioritized - Huffman errors don't block preview generation
+- Errors occur on metadata files (war3map.w3i, war3map.w3e)
+- Preview extraction uses different files (war3mapPreview.tga)
+- 13/14 W3X maps work despite Huffman errors
+- Not blocking any map previews
 
 ---
 

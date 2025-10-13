@@ -177,13 +177,15 @@ const App: React.FC = () => {
       console.log('Starting preview generation for', maps.length, 'maps...');
       const mapDataMap = new Map<string, RawMapData>();
 
-      // Load and parse maps (skip very large ones >100MB for preview generation)
+      // Load and parse maps (skip very large ones >1000MB for preview generation)
       for (const map of maps) {
         if (cancelled) return; // Check cancellation between iterations
         try {
-          // Skip very large maps (>100MB) to avoid long load times
+          // Skip very large maps (>1000MB) to avoid long load times
+          // Note: Preview extraction only reads MPQ headers and extracts small TGA files,
+          // so we can handle large campaign files without loading entire archives
           const sizeMB = map.sizeBytes / (1024 * 1024);
-          if (sizeMB > 100) {
+          if (sizeMB > 1000) {
             console.log(`Skipping preview for large map ${map.name} (${sizeMB.toFixed(1)}MB)`);
             continue;
           }
