@@ -213,17 +213,21 @@ export class DoodadRenderer {
       return;
     }
 
+    // W3X to Babylon.js coordinate mapping:
+    // W3X: X=right, Y=forward, Z=up
+    // Babylon: X=right, Y=up, Z=forward
+    // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
     const instance: DoodadInstance = {
       id: placement.id,
       typeId: placement.typeId,
       variation: placement.variation ?? 0,
       position: new BABYLON.Vector3(
-        placement.position.x,
-        placement.position.y,
-        placement.position.z
+        placement.position.x, // X remains the same
+        placement.position.z, // Height (W3X Z -> Babylon Y)
+        -placement.position.y // Forward direction (W3X Y -> -Babylon Z, negated)
       ),
       rotation: placement.rotation,
-      scale: new BABYLON.Vector3(placement.scale.x, placement.scale.y, placement.scale.z),
+      scale: new BABYLON.Vector3(placement.scale.x, placement.scale.z, placement.scale.y),
     };
 
     this.instances.set(instance.id, instance);

@@ -318,7 +318,7 @@
 /* Viewer View */
 .viewer-view {
   width: 100%;
-  height: calc(100vh - 250px);
+  height: calc(100vh - 180px); /* Increased from 250px to show more canvas */
   display: flex;
   flex-direction: column;
   position: relative;

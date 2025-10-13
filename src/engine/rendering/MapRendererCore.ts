@@ -465,11 +465,15 @@ export class MapRendererCore {
         const instance = box.createInstance(
           `unit_${unit.typeId}_${unit.position.x}_${unit.position.z}`
         );
+        // W3X to Babylon.js coordinate mapping:
+        // W3X: X=right, Y=forward, Z=up
+        // Babylon: X=right, Y=up, Z=forward
+        // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
         instance.position = new BABYLON.Vector3(
           unit.position.x,
-          unit.position.z + 1,
-          unit.position.y
-        ); // +1 to sit above terrain
+          unit.position.z + 1, // Height + 1 to sit above terrain
+          -unit.position.y // Negate Y to convert to Babylon Z
+        );
         instance.rotation.y = unit.rotation;
         // Handle optional scale (default to 1,1,1 if undefined)
         const scale = unit.scale ?? { x: 1, y: 1, z: 1 };
