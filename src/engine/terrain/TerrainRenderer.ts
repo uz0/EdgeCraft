@@ -111,8 +111,12 @@ void main(void) {
                     color4 * splat.a;
 
   // Simple directional lighting
+  // lightDirection points FROM light source, so use -lightDirection for surface normal dot product
   float diffuseLight = max(dot(vNormal, -lightDirection), 0.0);
-  finalColor *= 0.4 + diffuseLight * 0.6; // Ambient + diffuse
+
+  // Increase ambient component for better visibility in RTS game
+  // 0.7 ambient + 0.8 * diffuse gives good visibility even in shadows
+  finalColor *= 0.7 + diffuseLight * 0.8;
 
   gl_FragColor = vec4(finalColor, 1.0);
 }
@@ -390,7 +394,9 @@ void main(void) {
       'cameraPosition',
       this.scene.activeCamera?.position ?? BABYLON.Vector3.Zero()
     );
-    shaderMaterial.setVector3('lightDirection', new BABYLON.Vector3(0.5, -1, 0.5).normalize());
+    // Light direction matches DirectionalLight in MapRendererCore
+    // Points from upper-left downward: (-0.5, -1, -0.5) normalized
+    shaderMaterial.setVector3('lightDirection', new BABYLON.Vector3(-0.5, -1, -0.5).normalize());
     shaderMaterial.setVector4('textureScales', new BABYLON.Vector4(16, 16, 16, 16)); // Texture tiling
 
     // Apply material to mesh (cast to Material to avoid type incompatibility)

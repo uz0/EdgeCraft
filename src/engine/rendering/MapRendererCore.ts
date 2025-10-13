@@ -668,13 +668,13 @@ export class MapRendererCore {
       // alpha: -Math.PI/2 = facing "north" (negative Z direction)
       // beta: 0.3 radians (~17 degrees from vertical) for slight angle, not flat top-down
       // radius: Distance from target
-      // target: Center of map at ground level
+      // target: Center of map at mid-height (terrain is 0-100, so target Y=50)
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
         -Math.PI / 2, // Facing north
         0.3, // Slight angle from top (17 degrees) - was Math.PI/4 (45 degrees)
         Math.max(width, height) * 1.2, // Zoom out to see whole map - was width * 0.8
-        new BABYLON.Vector3(width / 2, 0, height / 2), // Target center at ground level
+        new BABYLON.Vector3(width / 2, 50, height / 2), // Target center at mid-height (terrain 0-100)
         this.scene
       );
 
