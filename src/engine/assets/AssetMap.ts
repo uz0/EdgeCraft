@@ -11,12 +11,14 @@ export const W3X_TERRAIN_MAP: Record<string, string> = {
   // Ashenvale tileset (A)
   Agrs: 'terrain_grass_light', // Light grass
   Adrt: 'terrain_dirt_brown', // Dirt
+  Adrd: 'terrain_dirt_desert', // Dark red/desert dirt
   Arok: 'terrain_rock_gray', // Rock
   Agrd: 'terrain_grass_dirt_mix', // Grassy dirt
   Avin: 'terrain_vines', // Vines
   Adrg: 'terrain_grass_dark', // Dark grass
   Arck: 'terrain_rock_rough', // Rough rock
   Alsh: 'terrain_leaves', // Leaves
+  Alvd: 'terrain_volcanic_ash', // Volcanic/lava rock
 
   // Barrens tileset (B)
   Bdrt: 'terrain_dirt_desert', // Desert dirt
