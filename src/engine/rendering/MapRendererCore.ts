@@ -204,8 +204,9 @@ export class MapRendererCore {
       console.log(
         `[DEBUG] Camera position: (${cam.position.x.toFixed(2)}, ${cam.position.y.toFixed(2)}, ${cam.position.z.toFixed(2)})`
       );
-      if ('target' in cam) {
-        const target = (cam as any).target;
+      // Check if camera has a target (ArcRotateCamera)
+      if ('target' in cam && cam.target instanceof BABYLON.Vector3) {
+        const target = cam.target;
         console.log(
           `[DEBUG] Camera target: (${target.x.toFixed(2)}, ${target.y.toFixed(2)}, ${target.z.toFixed(2)})`
         );
@@ -219,7 +220,7 @@ export class MapRendererCore {
 
     for (const mesh of this.scene.meshes) {
       // Group by name prefix
-      const prefix = mesh.name.split('_')[0];
+      const prefix = mesh.name.split('_')[0] ?? 'unknown';
       meshGroups.set(prefix, (meshGroups.get(prefix) ?? 0) + 1);
 
       if (mesh.isVisible) {
