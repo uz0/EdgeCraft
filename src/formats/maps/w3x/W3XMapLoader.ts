@@ -256,24 +256,39 @@ export class W3XMapLoader implements IMapLoader {
       };
     }
 
-    // Map tileset ID to texture path
-    // For now, use a placeholder path based on tileset name
-    // TODO: Load actual tileset textures from game data
-    const tilesetPath = `/textures/tilesets/${w3e.tileset.toLowerCase()}.png`;
+    // Map groundTextureIds to terrain textures (multi-texture splatmap)
+    // Each tile in textureIndices (0-N) maps to groundTextureIds[index]
+    const groundTextureIds = w3e.groundTextureIds ?? [];
 
-    console.log(`[W3XMapLoader] Tileset: ${w3e.tileset}, path: ${tilesetPath}`);
+    console.log(
+      `[W3XMapLoader] Tileset: ${w3e.tileset}, ` +
+        `groundTextureIds: [${groundTextureIds.join(', ')}], ` +
+        `tile count: ${w3e.width}x${w3e.height}=${w3e.width * w3e.height}`
+    );
+
+    // Create texture array from groundTextureIds
+    // All textures share the same blendMap (textureIndices array indicates which texture per tile)
+    const textures = groundTextureIds.map((textureId) => ({
+      id: textureId,
+      blendMap: textureIndices, // Shared: each value is index into groundTextureIds
+    }));
+
+    // Fallback to single tileset letter if no groundTextureIds (shouldn't happen in modern maps)
+    if (textures.length === 0) {
+      console.warn(
+        `[W3XMapLoader] No groundTextureIds found, falling back to tileset letter: ${w3e.tileset}`
+      );
+      textures.push({
+        id: w3e.tileset,
+        blendMap: textureIndices,
+      });
+    }
 
     return {
       width: w3e.width,
       height: w3e.height,
       heightmap,
-      textures: [
-        {
-          id: w3e.tileset,
-          path: tilesetPath,
-          blendMap: textureIndices,
-        },
-      ],
+      textures,
       water,
     };
   }

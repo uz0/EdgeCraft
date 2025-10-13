@@ -335,31 +335,67 @@ export class MapRendererCore {
       terrain.height
     );
 
-    // Extract texture ID from terrain data
-    const textureId = terrain.textures.length > 0 ? terrain.textures[0]?.id : undefined;
+    // Check if we have multi-texture terrain (W3X maps with groundTextureIds)
+    const hasMultiTexture =
+      terrain.textures.length > 1 && terrain.textures[0]?.blendMap !== undefined;
 
-    console.log(
-      `[MapRendererCore] Loading terrain heightmap: ${terrain.width}x${terrain.height}, ` +
-        `heightmap data URL length: ${heightmapUrl.length}, textureId: ${textureId ?? 'none'}`
-    );
+    if (hasMultiTexture) {
+      // Multi-texture splatmap rendering (W3X maps with 4-8 textures)
+      const textureIds = terrain.textures.map((t) => t.id);
+      const blendMap = terrain.textures[0]?.blendMap;
 
-    const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
-      width: terrain.width,
-      height: terrain.height,
-      subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-      maxHeight: 100, // Default max height
-      textureId,
-    });
+      if (!blendMap) {
+        throw new Error('[MapRendererCore] BlendMap is required for multi-texture terrain');
+      }
 
-    if ('error' in result) {
-      console.error(`[MapRendererCore] Terrain loading failed: ${result.error}`);
-      throw new Error(`Terrain loading failed: ${result.error}`);
+      console.log(
+        `[MapRendererCore] Loading multi-texture terrain: ${terrain.width}x${terrain.height}, ` +
+          `textures: [${textureIds.join(', ')}], ` +
+          `blendMap size: ${blendMap.length}`
+      );
+
+      const result = await this.terrainRenderer.loadHeightmapMultiTexture(heightmapUrl, {
+        width: terrain.width,
+        height: terrain.height,
+        subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
+        maxHeight: 100, // Default max height
+        textureIds,
+        blendMap,
+      });
+
+      if ('error' in result) {
+        console.error('[MapRendererCore] Failed to load multi-texture terrain:', result.error);
+        throw new Error(`Multi-texture terrain loading failed: ${result.error}`);
+      }
+
+      console.log('[MapRendererCore] Multi-texture terrain loaded successfully');
+    } else {
+      // Single texture rendering (fallback or simple maps)
+      const textureId = terrain.textures.length > 0 ? terrain.textures[0]?.id : undefined;
+
+      console.log(
+        `[MapRendererCore] Loading single-texture terrain: ${terrain.width}x${terrain.height}, ` +
+          `heightmap data URL length: ${heightmapUrl.length}, textureId: ${textureId ?? 'none'}`
+      );
+
+      const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
+        width: terrain.width,
+        height: terrain.height,
+        subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
+        maxHeight: 100, // Default max height
+        textureId,
+      });
+
+      if ('error' in result) {
+        console.error(`[MapRendererCore] Terrain loading failed: ${result.error}`);
+        throw new Error(`Terrain loading failed: ${result.error}`);
+      }
+
+      console.log(
+        `[MapRendererCore] Terrain rendered successfully: ${terrain.width}x${terrain.height}, ` +
+          `mesh: ${result.mesh?.name ?? 'unknown'}`
+      );
     }
-
-    console.log(
-      `[MapRendererCore] Terrain rendered successfully: ${terrain.width}x${terrain.height}, ` +
-        `mesh: ${result.mesh?.name ?? 'unknown'}`
-    );
   }
 
   /**
