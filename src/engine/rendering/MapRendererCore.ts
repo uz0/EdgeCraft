@@ -73,6 +73,8 @@ export class MapRendererCore {
   private unitRenderer: InstancedUnitRenderer | null = null;
   private doodadRenderer: DoodadRenderer | null = null;
   private camera: BABYLON.Camera | null = null;
+  private ambientLight: BABYLON.HemisphericLight | null = null;
+  private sunLight: BABYLON.DirectionalLight | null = null;
 
   private currentMap: RawMapData | null = null;
 
@@ -611,26 +613,33 @@ export class MapRendererCore {
   private applyEnvironment(environment: RawMapData['info']['environment']): void {
     const { tileset, fog } = environment;
 
+    // Remove all existing lights to prevent accumulation
+    const existingLights = this.scene.lights.slice(); // Copy array to avoid modification during iteration
+    existingLights.forEach((light) => {
+      console.log(`[MapRendererCore] Disposing existing light: ${light.name}`);
+      light.dispose();
+    });
+
     // Ambient light - fills in shadows
-    const ambientLight = new BABYLON.HemisphericLight(
+    this.ambientLight = new BABYLON.HemisphericLight(
       'ambient',
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
-    ambientLight.intensity = 0.8; // Moderate ambient light
+    this.ambientLight.intensity = 0.8; // Moderate ambient light
 
     // Directional light - main light source from above for RTS visibility
-    const sunLight = new BABYLON.DirectionalLight(
+    this.sunLight = new BABYLON.DirectionalLight(
       'sun',
       new BABYLON.Vector3(-0.5, -1, -0.5), // From upper-left, pointing down
       this.scene
     );
-    sunLight.intensity = 1.2; // Strong directional light for clear visibility
-    sunLight.diffuse = new BABYLON.Color3(1, 0.98, 0.9); // Slightly warm sunlight
-    sunLight.specular = new BABYLON.Color3(0.3, 0.3, 0.3); // Reduced specular for less shine
+    this.sunLight.intensity = 1.2; // Strong directional light for clear visibility
+    this.sunLight.diffuse = new BABYLON.Color3(1, 0.98, 0.9); // Slightly warm sunlight
+    this.sunLight.specular = new BABYLON.Color3(0.3, 0.3, 0.3); // Reduced specular for less shine
 
     console.log(
-      `[MapRendererCore] Lighting created: ambient=${ambientLight.intensity}, sun=${sunLight.intensity}`
+      `[MapRendererCore] Lighting created: ambient=${this.ambientLight.intensity}, sun=${this.sunLight.intensity}`
     );
 
     // Fog (if specified)
@@ -805,6 +814,16 @@ export class MapRendererCore {
     if (this.camera != null) {
       this.camera.dispose();
       this.camera = null;
+    }
+
+    if (this.ambientLight != null) {
+      this.ambientLight.dispose();
+      this.ambientLight = null;
+    }
+
+    if (this.sunLight != null) {
+      this.sunLight.dispose();
+      this.sunLight = null;
     }
 
     this.assetLoader.dispose();

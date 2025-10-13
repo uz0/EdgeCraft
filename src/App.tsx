@@ -79,11 +79,15 @@ const App: React.FC = () => {
     const scene = new BABYLON.Scene(engine);
     sceneRef.current = scene;
 
-    // Expose engine and scene to window for E2E tests
+    // Expose engine and scene to window for E2E tests and debugging
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__testBabylonEngine = engine;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__testBabylonScene = scene;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).scene = scene;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).engine = engine;
 
     // Basic lighting
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
