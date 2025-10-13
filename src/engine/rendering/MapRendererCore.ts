@@ -241,14 +241,16 @@ export class MapRendererCore {
     console.log('\n[DEBUG] Sample visible meshes (first 10):');
     for (let i = 0; i < Math.min(10, visibleMeshes.length); i++) {
       const mesh = visibleMeshes[i];
-      const mat = mesh.material;
-      console.log(
-        `  [${i}] ${mesh.name}: ` +
-          `pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), ` +
-          `scale=(${mesh.scaling.x.toFixed(2)}, ${mesh.scaling.y.toFixed(2)}, ${mesh.scaling.z.toFixed(2)}), ` +
-          `material=${mat?.name ?? 'none'}, ` +
-          `vertices=${mesh.getTotalVertices()}`
-      );
+      if (mesh) {
+        const mat = mesh.material;
+        console.log(
+          `  [${i}] ${mesh.name}: ` +
+            `pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), ` +
+            `scale=(${mesh.scaling.x.toFixed(2)}, ${mesh.scaling.y.toFixed(2)}, ${mesh.scaling.z.toFixed(2)}), ` +
+            `material=${mat?.name ?? 'none'}, ` +
+            `vertices=${mesh.getTotalVertices()}`
+        );
+      }
     }
 
     // Terrain-specific debug
@@ -291,9 +293,11 @@ export class MapRendererCore {
       console.log('[DEBUG] First 5 unit meshes:');
       for (let i = 0; i < Math.min(5, unitMeshes.length); i++) {
         const mesh = unitMeshes[i];
-        console.log(
-          `  [${i}] ${mesh.name}: pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), visible=${mesh.isVisible}`
-        );
+        if (mesh) {
+          console.log(
+            `  [${i}] ${mesh.name}: pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), visible=${mesh.isVisible}`
+          );
+        }
       }
     }
 
@@ -306,9 +310,11 @@ export class MapRendererCore {
       console.log('[DEBUG] First 5 doodad meshes:');
       for (let i = 0; i < Math.min(5, doodadMeshes.length); i++) {
         const mesh = doodadMeshes[i];
-        console.log(
-          `  [${i}] ${mesh.name}: pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), visible=${mesh.isVisible}`
-        );
+        if (mesh) {
+          console.log(
+            `  [${i}] ${mesh.name}: pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), visible=${mesh.isVisible}`
+          );
+        }
       }
     }
 
