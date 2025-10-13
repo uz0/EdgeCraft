@@ -184,6 +184,135 @@ export class MapRendererCore {
     }
 
     console.log('Map rendering complete');
+
+    // Step 7: Debug scene inspection
+    this.debugSceneInspection();
+  }
+
+  /**
+   * Debug: Inspect all scene meshes and log their properties
+   */
+  private debugSceneInspection(): void {
+    console.log('\n========== SCENE DEBUG INSPECTION ==========');
+
+    // Scene info
+    console.log(`[DEBUG] Scene meshes: ${this.scene.meshes.length} total`);
+    console.log(`[DEBUG] Active camera: ${this.scene.activeCamera?.name ?? 'none'}`);
+
+    if (this.scene.activeCamera) {
+      const cam = this.scene.activeCamera;
+      console.log(
+        `[DEBUG] Camera position: (${cam.position.x.toFixed(2)}, ${cam.position.y.toFixed(2)}, ${cam.position.z.toFixed(2)})`
+      );
+      if ('target' in cam) {
+        const target = (cam as any).target;
+        console.log(
+          `[DEBUG] Camera target: (${target.x.toFixed(2)}, ${target.y.toFixed(2)}, ${target.z.toFixed(2)})`
+        );
+      }
+    }
+
+    // Group meshes by type
+    const meshGroups = new Map<string, number>();
+    const visibleMeshes: BABYLON.AbstractMesh[] = [];
+    const invisibleMeshes: BABYLON.AbstractMesh[] = [];
+
+    for (const mesh of this.scene.meshes) {
+      // Group by name prefix
+      const prefix = mesh.name.split('_')[0];
+      meshGroups.set(prefix, (meshGroups.get(prefix) ?? 0) + 1);
+
+      if (mesh.isVisible) {
+        visibleMeshes.push(mesh);
+      } else {
+        invisibleMeshes.push(mesh);
+      }
+    }
+
+    console.log('\n[DEBUG] Mesh groups:');
+    for (const [prefix, count] of meshGroups) {
+      console.log(`  - ${prefix}: ${count} meshes`);
+    }
+
+    console.log(`\n[DEBUG] Visible meshes: ${visibleMeshes.length}/${this.scene.meshes.length}`);
+    console.log(`[DEBUG] Invisible meshes: ${invisibleMeshes.length}/${this.scene.meshes.length}`);
+
+    // Log first 10 visible meshes in detail
+    console.log('\n[DEBUG] Sample visible meshes (first 10):');
+    for (let i = 0; i < Math.min(10, visibleMeshes.length); i++) {
+      const mesh = visibleMeshes[i];
+      const mat = mesh.material;
+      console.log(
+        `  [${i}] ${mesh.name}: ` +
+          `pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), ` +
+          `scale=(${mesh.scaling.x.toFixed(2)}, ${mesh.scaling.y.toFixed(2)}, ${mesh.scaling.z.toFixed(2)}), ` +
+          `material=${mat?.name ?? 'none'}, ` +
+          `vertices=${mesh.getTotalVertices()}`
+      );
+    }
+
+    // Terrain-specific debug
+    const terrainMesh = this.scene.getMeshByName('terrain');
+    if (terrainMesh) {
+      console.log('\n[DEBUG] TERRAIN MESH:');
+      console.log(`  Name: ${terrainMesh.name}`);
+      console.log(
+        `  Position: (${terrainMesh.position.x}, ${terrainMesh.position.y}, ${terrainMesh.position.z})`
+      );
+      console.log(
+        `  Scaling: (${terrainMesh.scaling.x}, ${terrainMesh.scaling.y}, ${terrainMesh.scaling.z})`
+      );
+      console.log(`  Visible: ${terrainMesh.isVisible}`);
+      console.log(`  Vertices: ${terrainMesh.getTotalVertices()}`);
+      console.log(`  Material: ${terrainMesh.material?.name ?? 'none'}`);
+
+      if (terrainMesh.material) {
+        const mat = terrainMesh.material as BABYLON.StandardMaterial;
+        console.log(`  Material diffuseColor: ${mat.diffuseColor?.toString() ?? 'none'}`);
+        console.log(`  Material diffuseTexture: ${mat.diffuseTexture?.name ?? 'none'}`);
+        console.log(`  Material alpha: ${mat.alpha}`);
+      }
+
+      const bbox = terrainMesh.getBoundingInfo().boundingBox;
+      console.log(
+        `  BoundingBox min: (${bbox.minimumWorld.x.toFixed(1)}, ${bbox.minimumWorld.y.toFixed(1)}, ${bbox.minimumWorld.z.toFixed(1)})`
+      );
+      console.log(
+        `  BoundingBox max: (${bbox.maximumWorld.x.toFixed(1)}, ${bbox.maximumWorld.y.toFixed(1)}, ${bbox.maximumWorld.z.toFixed(1)})`
+      );
+    } else {
+      console.log('\n[DEBUG] TERRAIN MESH: NOT FOUND!');
+    }
+
+    // Unit meshes debug
+    const unitMeshes = this.scene.meshes.filter((m) => m.name.startsWith('unit_'));
+    console.log(`\n[DEBUG] Unit meshes: ${unitMeshes.length} total`);
+    if (unitMeshes.length > 0) {
+      console.log('[DEBUG] First 5 unit meshes:');
+      for (let i = 0; i < Math.min(5, unitMeshes.length); i++) {
+        const mesh = unitMeshes[i];
+        console.log(
+          `  [${i}] ${mesh.name}: pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), visible=${mesh.isVisible}`
+        );
+      }
+    }
+
+    // Doodad meshes debug
+    const doodadMeshes = this.scene.meshes.filter(
+      (m) => m.name.includes('doodad') || m.name.includes('tree') || m.name.includes('rock')
+    );
+    console.log(`\n[DEBUG] Doodad meshes: ${doodadMeshes.length} total`);
+    if (doodadMeshes.length > 0) {
+      console.log('[DEBUG] First 5 doodad meshes:');
+      for (let i = 0; i < Math.min(5, doodadMeshes.length); i++) {
+        const mesh = doodadMeshes[i];
+        console.log(
+          `  [${i}] ${mesh.name}: pos=(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)}), visible=${mesh.isVisible}`
+        );
+      }
+    }
+
+    console.log('\n========== END SCENE DEBUG ==========\n');
   }
 
   /**
