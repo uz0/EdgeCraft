@@ -69,28 +69,145 @@ export class TGADecoder {
   /**
    * Decode TGA and convert to data URL
    * @param buffer - TGA file ArrayBuffer
+   * @param maxSize - Maximum width/height (default: 512, safe for previews)
    * @returns Data URL (base64 PNG)
    */
-  public decodeToDataURL(buffer: ArrayBuffer): string | null {
+  public decodeToDataURL(buffer: ArrayBuffer, maxSize: number = 512): string | null {
     const result = this.decode(buffer);
 
     if (!result.success || !result.data || !result.width || !result.height) {
       return null;
     }
 
-    // Create canvas and draw ImageData
+    // Calculate target dimensions (always scale to safe size for previews)
+    let targetWidth = result.width;
+    let targetHeight = result.height;
+    const maxDim = Math.max(result.width, result.height);
+
+    if (maxDim > maxSize) {
+      const scale = maxSize / maxDim;
+      targetWidth = Math.floor(result.width * scale);
+      targetHeight = Math.floor(result.height * scale);
+      console.log(
+        `[TGADecoder] Scaling ${result.width}x${result.height} -> ${targetWidth}x${targetHeight}`
+      );
+    }
+
+    // For large images, use chunked downscaling to avoid canvas size limits
+    // Process in chunks if original is too large
+    const CANVAS_LIMIT = 8192; // Increased limit - W3N campaigns have ~9000px TGAs
+    const needsChunking = result.width > CANVAS_LIMIT || result.height > CANVAS_LIMIT;
+
+    if (needsChunking) {
+      console.log(`[TGADecoder] Image too large (${result.width}x${result.height}), using direct downscaling`);
+      // For very large images, downsample the pixel data directly before canvas rendering
+      const downscaledData = this.downsamplePixelData(
+        result.data,
+        result.width,
+        result.height,
+        targetWidth,
+        targetHeight
+      );
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      const imageData = ctx.createImageData(targetWidth, targetHeight);
+      imageData.data.set(downscaledData);
+      ctx.putImageData(imageData, 0, 0);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    // For normal-sized images, use standard canvas scaling
     const canvas = document.createElement('canvas');
-    canvas.width = result.width;
-    canvas.height = result.height;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const imageData = ctx.createImageData(result.width, result.height);
-    imageData.data.set(result.data);
-    ctx.putImageData(imageData, 0, 0);
+    // If no scaling needed, use putImageData directly
+    if (targetWidth === result.width && targetHeight === result.height) {
+      const imageData = ctx.createImageData(result.width, result.height);
+      imageData.data.set(result.data);
+      ctx.putImageData(imageData, 0, 0);
+    } else {
+      // Create temp canvas for scaling
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = result.width;
+      tempCanvas.height = result.height;
+      const tempCtx = tempCanvas.getContext('2d');
+      if (!tempCtx) return null;
+
+      const imageData = tempCtx.createImageData(result.width, result.height);
+      imageData.data.set(result.data);
+      tempCtx.putImageData(imageData, 0, 0);
+
+      // Scale to target size
+      ctx.drawImage(tempCanvas, 0, 0, result.width, result.height, 0, 0, targetWidth, targetHeight);
+    }
 
     return canvas.toDataURL('image/png');
+  }
+
+  /**
+   * Downsample pixel data directly (bilinear interpolation)
+   * Used for very large images to avoid canvas size limits
+   */
+  private downsamplePixelData(
+    sourceData: Uint8ClampedArray,
+    sourceWidth: number,
+    sourceHeight: number,
+    targetWidth: number,
+    targetHeight: number
+  ): Uint8ClampedArray {
+    const targetData = new Uint8ClampedArray(targetWidth * targetHeight * 4);
+    const xRatio = sourceWidth / targetWidth;
+    const yRatio = sourceHeight / targetHeight;
+
+    for (let ty = 0; ty < targetHeight; ty++) {
+      for (let tx = 0; tx < targetWidth; tx++) {
+        // Find source position (bilinear sampling)
+        const sx = tx * xRatio;
+        const sy = ty * yRatio;
+        const sx0 = Math.floor(sx);
+        const sy0 = Math.floor(sy);
+        const sx1 = Math.min(sx0 + 1, sourceWidth - 1);
+        const sy1 = Math.min(sy0 + 1, sourceHeight - 1);
+
+        // Sample 4 pixels
+        const idx00 = (sy0 * sourceWidth + sx0) * 4;
+        const idx10 = (sy0 * sourceWidth + sx1) * 4;
+        const idx01 = (sy1 * sourceWidth + sx0) * 4;
+        const idx11 = (sy1 * sourceWidth + sx1) * 4;
+
+        // Bilinear weights
+        const wx = sx - sx0;
+        const wy = sy - sy0;
+
+        const targetIdx = (ty * targetWidth + tx) * 4;
+
+        // Interpolate each channel
+        for (let c = 0; c < 4; c++) {
+          const v00 = sourceData[idx00 + c] ?? 0;
+          const v10 = sourceData[idx10 + c] ?? 0;
+          const v01 = sourceData[idx01 + c] ?? 0;
+          const v11 = sourceData[idx11 + c] ?? 0;
+
+          const v0 = v00 * (1 - wx) + v10 * wx;
+          const v1 = v01 * (1 - wx) + v11 * wx;
+          const v = v0 * (1 - wy) + v1 * wy;
+
+          targetData[targetIdx + c] = Math.round(v);
+        }
+      }
+    }
+
+    return targetData;
   }
 
   private readHeader(view: DataView): TGAHeader {
