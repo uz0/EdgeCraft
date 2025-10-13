@@ -6,7 +6,7 @@ This document lists all third-party assets used in EdgeCraft, along with their l
 
 ---
 
-## 🎨 Terrain Textures
+## 🎨 Terrain Textures (57 files)
 
 ### Polyhaven (CC0 Public Domain)
 
@@ -15,187 +15,205 @@ This document lists all third-party assets used in EdgeCraft, along with their l
 - **License**: CC0 1.0 Universal (Public Domain)
 - **Attribution**: Not required, but appreciated
 
-#### Assets Used:
+#### Primary Assets Used:
 
-1. **Sparse Grass** (`grass_light.jpg`)
-   - **Source**: https://polyhaven.com/a/sparse_grass
-   - **Author**: Polyhaven Team
-   - **Resolution**: 2K (2048x2048)
-   - **Files**: Diffuse, Normal (GL), Roughness
-   - **License**: CC0 1.0
-   - **Use**: W3X grass terrain (Ashenvale, Lordaeron tilesets)
+1. **Sparse Grass** → `terrain_grass_light`
+   - Source: https://polyhaven.com/a/sparse_grass
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X light grass terrain (Ashenvale, Lordaeron)
 
-2. **Dirt Floor** (`dirt_brown.jpg`)
-   - **Source**: https://polyhaven.com/a/dirt_floor
-   - **Author**: Polyhaven Team
-   - **Resolution**: 2K (2048x2048)
-   - **Files**: Diffuse, Normal (GL), Roughness
-   - **License**: CC0 1.0
-   - **Use**: W3X dirt terrain (all tilesets)
+2. **Dirt Floor** → `terrain_dirt_brown`
+   - Source: https://polyhaven.com/a/dirt_floor
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X dirt terrain (all tilesets)
 
-3. **Rock Surface** (`rock_gray.jpg`)
-   - **Source**: https://polyhaven.com/a/rock_surface
-   - **Author**: Polyhaven Team
-   - **Resolution**: 2K (2048x2048)
-   - **Files**: Diffuse, Normal (GL), Roughness
-   - **License**: CC0 1.0
-   - **Use**: W3X rock/cliff terrain (Ashenvale, Barrens, Lordaeron)
+3. **Rock Surface** → `terrain_rock_gray`
+   - Source: https://polyhaven.com/a/rock_surface
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X rock/cliff terrain (Ashenvale, Barrens, Lordaeron)
 
-**Total Texture Assets**: 3 base textures (9 files with PBR maps)
+4. **Coast Sand Rocks** → `terrain_grass_dirt_mix`
+   - Source: https://polyhaven.com/a/coast_sand_rocks_02
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X mixed terrain (grass/dirt transition)
+
+5. **Bark Willow** → `terrain_vines`
+   - Source: https://polyhaven.com/a/bark_willow_02
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X organic/vine terrain
+
+6. **Rock 06** → `terrain_rock_rough`
+   - Source: https://polyhaven.com/a/rock_06
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X rough rock terrain
+
+7. **Forest Leaves 02** → `terrain_leaves`
+   - Source: https://polyhaven.com/a/forest_leaves_02
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X forest floor
+
+8. **Aerial Grass Rock** → `terrain_grass_green`
+   - Source: https://polyhaven.com/a/aerial_grass_rock
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X green grass (Lordaeron summer)
+
+9. **Brown Mud 03** → `terrain_sand_desert`
+   - Source: https://polyhaven.com/a/brown_mud_03
+   - Files: Diffuse, Normal (GL), Roughness
+   - Use: W3X desert sand (Barrens)
+
+10. **Snow 02** → `terrain_snow_clean`
+    - Source: https://polyhaven.com/a/snow_02
+    - Files: Diffuse, Normal (GL), Roughness
+    - Use: W3X snow terrain (Icecrown)
+
+11. **Metal Plate** → `terrain_metal_platform`
+    - Source: https://polyhaven.com/a/metal_plate
+    - Files: Diffuse, Normal (GL), Roughness
+    - Use: SC2 metallic platform terrain
+
+#### Derived/Duplicated Textures (Phase 2 Alpha Quality):
+
+The following textures reuse existing assets for coverage. They can be replaced with unique textures in Phase 3:
+
+- `terrain_grass_dark` ← reuses `terrain_grass_light`
+- `terrain_ice` ← reuses `terrain_rock_gray`
+- `terrain_dirt_desert` ← reuses `terrain_dirt_brown`
+- `terrain_dirt_frozen` ← reuses `terrain_dirt_brown`
+- `terrain_rock_desert` ← reuses `terrain_rock_gray`
+- `terrain_blight_purple` ← reuses `terrain_dirt_brown`
+- `terrain_volcanic_ash` ← reuses `terrain_rock_gray`
+- `terrain_lava` ← reuses `terrain_rock_gray`
+
+**Total Terrain Texture Assets**: 19 terrain types (57 files with PBR maps)
 
 ---
 
-## 🌳 3D Models (Doodads)
+## 🌳 3D Models - Doodads (33 files)
 
-### Quaternius (CC0 Public Domain)
+### EdgeCraft Procedural Models (CC0 Public Domain)
 
-**Quaternius** provides low-poly, game-ready 3D model packs under CC0 license.
-- **Website**: https://quaternius.com
-- **Itch.io**: https://quaternius.itch.io
+All doodad models are procedurally generated using EdgeCraft's custom glTF 2.0 generator.
+- **Generator**: `scripts/generate-all-doodads.py`
 - **License**: CC0 1.0 Universal (Public Domain)
-- **Attribution**: Not required, but appreciated
+- **Author**: EdgeCraft Project
+- **Format**: GLB (glTF 2.0 Binary)
+- **Triangles**: 5-50 per model (optimized for performance)
+- **Materials**: PBR metallic-roughness
 
-#### Assets Used:
+#### Trees (8 models):
+1. `tree_oak_01` - Oak tree (temperate forest)
+2. `tree_pine_01` - Pine tree (northern/mountain)
+3. `tree_palm_01` - Palm tree (tropical)
+4. `tree_dead_01` - Dead tree (wasteland)
+5. `tree_mushroom_01` - Mushroom tree (fantasy)
+6. `shrub_small_01` - Small shrub
+7. `bush_round_01` - Round bush/hedge
+8. `grass_tufts_01` - Grass tufts
 
-**Pack**: Ultimate Nature Pack
-- **Download**: https://quaternius.com/packs/ultimatenature.html
-- **Alternative**: https://quaternius.itch.io/150-lowpoly-nature-models
-- **License**: CC0 1.0
-- **Format**: FBX (converted to GLB for EdgeCraft)
-- **Poly Count**: 200-2,000 triangles per model
+#### Rocks (6 models):
+9. `rock_large_01` - Large boulder
+10. `rock_cluster_01` - Rock cluster
+11. `rock_small_01` - Small stones
+12. `rock_cliff_01` - Cliff face
+13. `rock_crystal_01` - Crystal formation (fantasy)
+14. `rock_desert_01` - Desert rock
 
-**Models**:
+#### Structures (8 models):
+15. `crate_wood_01` - Wooden crate
+16. `barrel_01` - Barrel
+17. `fence_01` - Fence section
+18. `ruins_01` - Ruined building
+19. `pillar_stone_01` - Stone pillar
+20. `torch_01` - Torch/lamp post
+21. `signpost_01` - Signpost
+22. `bridge_01` - Bridge section
 
-1. **Tree Oak** (`tree_oak_01.glb`)
-   - **Original File**: `Tree.fbx` or `TreeOak.fbx`
-   - **License**: CC0 1.0
-   - **Use**: W3X tree doodads (ATtr, LTtr, CTtr variants)
-   - **Instances in 3P Sentinel**: ~150-300
+#### Environment (8 models):
+23. `flowers_01` - Flower patches
+24. `vines_01` - Vine growth
+25. `lily_water_01` - Water lily
+26. `mushrooms_01` - Mushrooms
+27. `bones_01` - Bones/skull
+28. `campfire_01` - Campfire
+29. `well_01` - Well
+30. `rubble_01` - Ruins/rubble
 
-2. **Bush Round** (`bush_round_01.glb`)
-   - **Original File**: `Bush.fbx` or `Shrub.fbx`
-   - **License**: CC0 1.0
-   - **Use**: W3X bush/shrub doodads (ASbc, ASbr variants)
-   - **Instances in 3P Sentinel**: ~50-100
+#### Special (3 models):
+31. `placeholder_box` - Magenta fallback for missing models
+32. `marker_small` - Yellow marker for invisible objects
+33. `plant_generic_01` - Generic plant/vegetation
 
-3. **Rock Large** (`rock_large_01.glb`)
-   - **Original File**: `Rock.fbx` or `Boulder.fbx`
-   - **License**: CC0 1.0
-   - **Use**: W3X rock/boulder doodads (ARrk, AObo, LRk1 variants)
-   - **Instances in 3P Sentinel**: ~30-80
-
-**Total 3D Assets**: 3 doodad models
-
----
-
-## 📜 License Summary
-
-| Asset Type | Count | Source | License | Attribution Required? |
-|------------|-------|--------|---------|----------------------|
-| Textures (PBR) | 3 sets (9 files) | Polyhaven | CC0 1.0 | No |
-| 3D Models (GLB) | 3 models | Quaternius | CC0 1.0 | No |
-
-**Total File Size**: ~15-25 MB (textures: ~12-18 MB, models: ~3-7 MB)
-
----
-
-## 🔗 Full License Texts
-
-### CC0 1.0 Universal (Public Domain Dedication)
-
-```
-CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
-LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
-ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
-REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
-PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
-THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-HEREUNDER.
-
-Statement of Purpose
-
-The laws of most jurisdictions throughout the world automatically confer
-exclusive Copyright and Related Rights (defined below) upon the creator
-and subsequent owner(s) (each and all, an "owner") of an original work of
-authorship and/or a database (each, a "Work").
-
-Certain owners wish to permanently relinquish those rights to a Work for
-the purpose of contributing to a commons of creative, cultural and
-scientific works ("Commons") that the public can reliably and without fear
-of later claims of infringement build upon, modify, incorporate in other
-works, reuse and redistribute as freely as possible in any form whatsoever
-and for any purposes, including without limitation commercial purposes.
-These owners may contribute to the Commons to promote the ideal of a free
-culture and the further production of creative, cultural and scientific
-works, or to gain reputation or greater distribution for their Work in
-part through the use and efforts of others.
-
-For these and/or other purposes and motivations, and without any
-expectation of additional consideration or compensation, the person
-associating CC0 with a Work (the "Affirmer"), to the extent that he or she
-is an owner of Copyright and Related Rights in the Work, voluntarily
-elects to apply CC0 to the Work and publicly distribute the Work under its
-terms, with knowledge of his or her Copyright and Related Rights in the
-Work and the meaning and intended legal effect of CC0 on those rights.
-```
-
-**Full license**: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+**Total 3D Model Assets**: 33 doodad models (trees, rocks, structures, environment)
 
 ---
 
-## 🛡️ EdgeCraft Legal Compliance
+## 📊 Asset Summary
 
-**Clean-Room Implementation**: EdgeCraft is a 100% original game engine implementation that:
-- ✅ **Does NOT** contain any Blizzard Entertainment assets
-- ✅ **Does NOT** copy Blizzard code or algorithms
-- ✅ **ONLY** parses publicly documented file formats (W3X, SC2Map)
-- ✅ **Uses** 100% legal, free-license alternative assets
+| Category | Count | Total Size | License |
+|----------|-------|-----------|---------|
+| Terrain Textures | 57 files (19 types) | ~100 MB | CC0 1.0 |
+| Doodad Models | 33 files | ~50 KB | CC0 1.0 |
+| **TOTAL** | **90 assets** | **~100 MB** | **100% CC0** |
 
-**Asset Validation**: All assets pass EdgeCraft's Legal Compliance Pipeline (PRP 1.7):
-- SHA-256 hash verification (no Blizzard asset fingerprints)
-- Metadata scanning (no embedded Blizzard copyright claims)
-- Visual similarity analysis (assets are distinct from Blizzard originals)
-- License validation (CC0/MIT/Public Domain only)
+---
 
-**Source Files**: Asset provenance documented in `public/assets/manifest.json`
+## 📜 CC0 1.0 Universal License
+
+All assets are released under **CC0 1.0 Universal (Public Domain)**. This means:
+
+✅ **You can:**
+- Use commercially
+- Modify and remix
+- Distribute
+- Use without attribution (though appreciated)
+
+❌ **No trademark/patent rights** are granted.
+
+**Full License**: https://creativecommons.org/publicdomain/zero/1.0/
+
+---
+
+## 🔒 Legal Compliance
+
+### Clean-Room Implementation
+
+EdgeCraft implements support for Blizzard file formats (W3X, SC2, W3N, MDX, M3) through **clean-room reverse engineering**:
+
+1. **No Decompilation**: File format specifications were derived from:
+   - Community-maintained documentation (w3x.co, SC2Mapster)
+   - Hex editor analysis of map files
+   - Black-box functional testing
+
+2. **No Blizzard Code**: Zero lines of Blizzard Entertainment source code were used.
+
+3. **No Blizzard Assets**: All textures, models, and sounds are original or CC0/MIT licensed.
+
+### Copyright Notices
+
+- **Blizzard Entertainment**: Warcraft III, StarCraft II, and related trademarks are property of Blizzard Entertainment, Inc. EdgeCraft is NOT affiliated with, endorsed by, or sponsored by Blizzard Entertainment.
+
+- **Polyhaven**: Textures sourced from Polyhaven are in the Public Domain (CC0 1.0). No attribution required, but credit given.
+
+### Asset Validation
+
+All assets are automatically validated by CI/CD:
+- **SHA-256 hashing**: Prevents accidental inclusion of copyrighted files
+- **License verification**: Ensures all assets are CC0/MIT/Public Domain
+- **Visual similarity checks**: (Future) Prevents Blizzard lookalikes
+
+**Validation Script**: `scripts/validate-assets.cjs`
 
 ---
 
 ## 🙏 Acknowledgments
 
-Special thanks to:
-- **Polyhaven Team** - For providing world-class PBR textures to the public domain
-- **Quaternius** - For creating and sharing beautiful low-poly 3D model packs
-- **Creative Commons** - For the CC0 license enabling free culture
-
-These creators enable projects like EdgeCraft to exist legally and ethically. Please support them by:
-- Visiting their websites and exploring their full catalogs
-- Sharing their work with other creators
-- Contributing to their communities
-- Donating if you find their work valuable
+- **Polyhaven Community** - For providing world-class CC0 textures
+- **glTF Working Group** - For the glTF 2.0 specification
+- **Babylon.js Team** - For the 3D rendering engine
+- **Open Source Community** - For tools, libraries, and documentation
 
 ---
 
-## 📊 Asset Coverage (Phase 1 MVP)
-
-**3P Sentinel 01 v3.06.w3x** (test map):
-- **Terrain Coverage**: ~80% (grass, dirt, rock are most common in Ashenvale)
-- **Doodad Coverage**: ~45% (tree, bush, rock represent top 3 doodad types)
-- **Visual Quality**: Production-ready (4/5 rating)
-
-**Future Phases**:
-- **Phase 2**: Full Ashenvale tileset (12 textures) + 96 doodad types (80-100% coverage)
-- **Phase 3**: All W3/SC2 tilesets (300+ doodad types, 100% universal coverage)
-
-See `PRPs/phase2-rendering/2.12-legal-asset-library.md` for roadmap.
-
----
-
-**Last Updated**: 2025-01-XX (PRP 2.12 Phase 1 MVP)
-**Maintained By**: EdgeCraft Development Team
-**Questions?**: See `public/assets/README.md` or PRP 2.12
-
----
-
-**Legal Disclaimer**: EdgeCraft is an independent project not affiliated with, endorsed by, or sponsored by Blizzard Entertainment, Inc. Warcraft, StarCraft, and all related marks are trademarks of Blizzard Entertainment, Inc. EdgeCraft uses only legally obtained, free-license assets from public sources.
+**Last Updated**: 2025-01-13
+**EdgeCraft Version**: PRP 2.12 (Full Implementation)
