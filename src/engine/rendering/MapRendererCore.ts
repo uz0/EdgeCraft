@@ -354,9 +354,11 @@ export class MapRendererCore {
           `blendMap size: ${blendMap.length}`
       );
 
+      // W3X world coordinates: 128 units per tile
+      const TILE_SIZE = 128;
       const result = await this.terrainRenderer.loadHeightmapMultiTexture(heightmapUrl, {
-        width: terrain.width,
-        height: terrain.height,
+        width: terrain.width * TILE_SIZE,
+        height: terrain.height * TILE_SIZE,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
         maxHeight: 100, // Default max height
         textureIds,
@@ -378,9 +380,11 @@ export class MapRendererCore {
           `heightmap data URL length: ${heightmapUrl.length}, textureId: ${textureId ?? 'none'}`
       );
 
+      // W3X world coordinates: 128 units per tile
+      const TILE_SIZE = 128;
       const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
-        width: terrain.width,
-        height: terrain.height,
+        width: terrain.width * TILE_SIZE,
+        height: terrain.height * TILE_SIZE,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
         maxHeight: 100, // Default max height
         textureId,
@@ -663,6 +667,11 @@ export class MapRendererCore {
   private setupCamera(dimensions: RawMapData['info']['dimensions']): void {
     const { width, height } = dimensions;
 
+    // W3X world coordinates: 128 units per tile
+    const TILE_SIZE = 128;
+    const worldWidth = width * TILE_SIZE;
+    const worldHeight = height * TILE_SIZE;
+
     if (this.config.cameraMode === 'rts') {
       // RTS camera with classic perspective (like Warcraft 3)
       // alpha: -Math.PI/2 = facing "north" (negative Z direction)
@@ -673,13 +682,13 @@ export class MapRendererCore {
         'rtsCamera',
         -Math.PI / 2, // Facing north
         Math.PI / 5, // 36° from vertical (classic RTS angle like WC3)
-        Math.max(width, height) * 0.8, // Closer zoom for better detail
-        new BABYLON.Vector3(width / 2, 50, height / 2), // Target center at mid-height (terrain 0-100)
+        Math.max(worldWidth, worldHeight) * 0.8, // Closer zoom for better detail
+        new BABYLON.Vector3(worldWidth / 2, 50, worldHeight / 2), // Target center at mid-height (terrain 0-100)
         this.scene
       );
 
-      camera.lowerRadiusLimit = Math.max(width, height) * 0.3;
-      camera.upperRadiusLimit = Math.max(width, height) * 2.0;
+      camera.lowerRadiusLimit = Math.max(worldWidth, worldHeight) * 0.3;
+      camera.upperRadiusLimit = Math.max(worldWidth, worldHeight) * 2.0;
       camera.lowerBetaLimit = 0.2; // Don't allow too steep
       camera.upperBetaLimit = Math.PI / 2.2; // Don't allow below horizon
 
@@ -689,10 +698,10 @@ export class MapRendererCore {
       // Free camera
       const camera = new BABYLON.UniversalCamera(
         'freeCamera',
-        new BABYLON.Vector3(width / 2, 50, height / 2),
+        new BABYLON.Vector3(worldWidth / 2, 50, worldHeight / 2),
         this.scene
       );
-      camera.setTarget(new BABYLON.Vector3(width / 2, 0, height / 2));
+      camera.setTarget(new BABYLON.Vector3(worldWidth / 2, 0, worldHeight / 2));
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
       this.camera = camera;
     }
@@ -729,13 +738,14 @@ export class MapRendererCore {
       }
     }
 
-    // Minimap system (initialize with map dimensions)
+    // Minimap system (initialize with map dimensions in world coordinates)
     if (systems.minimap != null) {
+      const TILE_SIZE = 128;
       systems.minimap.setMapBounds({
         minX: 0,
-        maxX: mapData.info.dimensions.width,
+        maxX: mapData.info.dimensions.width * TILE_SIZE,
         minZ: 0,
-        maxZ: mapData.info.dimensions.height,
+        maxZ: mapData.info.dimensions.height * TILE_SIZE,
       });
       console.log('Minimap bounds updated');
     }
