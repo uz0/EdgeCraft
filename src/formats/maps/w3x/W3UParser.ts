@@ -118,14 +118,6 @@ export class W3UParser {
     const variation = this.readUint32();
     if (DEBUG) console.log(`[W3UParser:readUnit] Variation: ${variation}, offset: ${this.offset}`);
 
-    // Skin ID (added in Reforged 1.32+, but version number not incremented)
-    // Version 8+ always has this field
-    let skinId: string | undefined;
-    if (_version >= 8) {
-      skinId = this.read4CC();
-      if (DEBUG) console.log(`[W3UParser:readUnit] SkinID: ${skinId}, offset: ${this.offset}`);
-    }
-
     // Position
     const position: Vector3 = {
       x: this.readFloat32(),
@@ -364,7 +356,6 @@ export class W3UParser {
     return {
       typeId,
       variation,
-      skinId,
       position,
       rotation,
       scale,

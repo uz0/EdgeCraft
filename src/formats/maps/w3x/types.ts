@@ -259,7 +259,6 @@ export interface W3UUnits {
 export interface W3UUnit {
   typeId: string; // 4 chars
   variation: number;
-  skinId?: string; // 4 chars (Reforged 1.32+, version 8+)
   position: Vector3;
   rotation: number;
   scale: Vector3;
