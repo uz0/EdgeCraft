@@ -9,6 +9,8 @@
   padding: 2rem;
   text-align: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 10; /* Keep header above canvas */
 }
 
 .app-header h1 {
@@ -318,10 +320,11 @@
 /* Viewer View */
 .viewer-view {
   width: 100%;
-  height: calc(100vh - 180px); /* Increased from 250px to show more canvas */
+  flex: 1; /* Take remaining space */
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
 }
 
 .viewer-controls {
@@ -375,16 +378,11 @@
 }
 
 .babylon-canvas {
-  position: absolute;
-  top: 60px; /* Height of viewer-controls */
-  left: 0;
-  right: 0;
-  bottom: 0;
+  flex: 1; /* Take remaining space after viewer-controls */
   width: 100%;
-  height: calc(100% - 60px);
   background: #1a1a1a;
   outline: none;
-  z-index: 1;
+  display: block;
 }
 
 .loading-overlay {

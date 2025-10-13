@@ -605,15 +605,27 @@ export class MapRendererCore {
   private applyEnvironment(environment: RawMapData['info']['environment']): void {
     const { tileset, fog } = environment;
 
-    // Ambient light - INCREASED INTENSITY for better visibility
+    // Ambient light - fills in shadows
     const ambientLight = new BABYLON.HemisphericLight(
       'ambient',
       new BABYLON.Vector3(0, 1, 0),
       this.scene
     );
-    ambientLight.intensity = 1.5; // Increased from 0.6 to make terrain/doodads more visible
+    ambientLight.intensity = 0.8; // Moderate ambient light
 
-    console.log(`[MapRendererCore] Ambient light created: intensity=${ambientLight.intensity}`);
+    // Directional light - main light source from above for RTS visibility
+    const sunLight = new BABYLON.DirectionalLight(
+      'sun',
+      new BABYLON.Vector3(-0.5, -1, -0.5), // From upper-left, pointing down
+      this.scene
+    );
+    sunLight.intensity = 1.2; // Strong directional light for clear visibility
+    sunLight.diffuse = new BABYLON.Color3(1, 0.98, 0.9); // Slightly warm sunlight
+    sunLight.specular = new BABYLON.Color3(0.3, 0.3, 0.3); // Reduced specular for less shine
+
+    console.log(
+      `[MapRendererCore] Lighting created: ambient=${ambientLight.intensity}, sun=${sunLight.intensity}`
+    );
 
     // Fog (if specified)
     if (fog != null) {
@@ -652,21 +664,24 @@ export class MapRendererCore {
     const { width, height } = dimensions;
 
     if (this.config.cameraMode === 'rts') {
-      // RTS camera with bounds
-      // Set camera target Y to 50 (mid-height of typical terrain with maxHeight=100)
+      // RTS camera with top-down perspective
+      // alpha: -Math.PI/2 = facing "north" (negative Z direction)
+      // beta: 0.3 radians (~17 degrees from vertical) for slight angle, not flat top-down
+      // radius: Distance from target
+      // target: Center of map at ground level
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
-        -Math.PI / 2,
-        Math.PI / 4,
-        width * 0.8,
-        new BABYLON.Vector3(width / 2, 50, height / 2),
+        -Math.PI / 2, // Facing north
+        0.3, // Slight angle from top (17 degrees) - was Math.PI/4 (45 degrees)
+        Math.max(width, height) * 1.2, // Zoom out to see whole map - was width * 0.8
+        new BABYLON.Vector3(width / 2, 0, height / 2), // Target center at ground level
         this.scene
       );
 
-      camera.lowerRadiusLimit = width * 0.3;
-      camera.upperRadiusLimit = width * 1.5;
-      camera.lowerBetaLimit = 0.1;
-      camera.upperBetaLimit = Math.PI / 2.2;
+      camera.lowerRadiusLimit = Math.max(width, height) * 0.5;
+      camera.upperRadiusLimit = Math.max(width, height) * 2.5;
+      camera.lowerBetaLimit = 0.1; // Prevent going flat
+      camera.upperBetaLimit = Math.PI / 2.5; // Prevent going too low
 
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
       this.camera = camera;
