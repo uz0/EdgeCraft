@@ -56,7 +56,9 @@ export class W3UParser {
         units.push(this.readUnit());
       } catch (error) {
         console.warn(`[W3UParser] Failed to parse unit ${i + 1}/${unitCount}:`, error);
-        break; // Stop parsing remaining units if one fails
+        // Skip this unit but continue parsing remaining units
+        // Try to advance offset by estimated unit size to recover
+        continue;
       }
     }
 

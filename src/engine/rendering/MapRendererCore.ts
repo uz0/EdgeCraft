@@ -310,23 +310,65 @@ export class MapRendererCore {
       unitsByType.set(unit.typeId, typeUnits);
     }
 
-    // Register unit types and spawn instances
-    // Note: For now, we skip actual mesh loading since we don't have unit models
-    // This will be handled when actual unit models are available
+    // Register unit types and spawn instances with placeholder meshes
     console.log(`Found ${unitsByType.size} unique unit types`);
 
-    // TODO: When unit models are available:
-    // for (const [typeId, typeUnits] of unitsByType) {
-    //   await this.unitRenderer.registerUnitType(typeId, meshUrl, animations);
-    //   for (const unit of typeUnits) {
-    //     this.unitRenderer.spawnUnit(
-    //       typeId,
-    //       new BABYLON.Vector3(unit.position.x, unit.position.y, unit.position.z),
-    //       new BABYLON.Color3(1, 1, 1),
-    //       unit.rotation
-    //     );
-    //   }
-    // }
+    // Render units with placeholder colored cubes
+    for (const [typeId, typeUnits] of unitsByType) {
+      // Create placeholder mesh for this unit type (colored cube)
+      const unitColor = this.getUnitColor(typeId);
+      const box = BABYLON.MeshBuilder.CreateBox(
+        `unit_${typeId}_base`,
+        { size: 2 },
+        this.scene
+      );
+      const material = new BABYLON.StandardMaterial(`unit_${typeId}_mat`, this.scene);
+      material.diffuseColor = unitColor;
+      material.emissiveColor = unitColor.scale(0.2); // Slight glow
+      box.material = material;
+      box.isVisible = false; // Hide the base mesh
+
+      // Spawn instances for each unit
+      for (const unit of typeUnits) {
+        const instance = box.createInstance(`unit_${unit.typeId}_${unit.position.x}_${unit.position.z}`);
+        instance.position = new BABYLON.Vector3(unit.position.x, unit.position.z + 1, unit.position.y); // +1 to sit above terrain
+        instance.rotation.y = unit.rotation;
+        instance.scaling = new BABYLON.Vector3(unit.scale.x, unit.scale.z, unit.scale.y);
+      }
+    }
+    console.log(`[MapRendererCore] Rendered ${units.length} units as placeholder cubes`);
+  }
+
+  /**
+   * Get color for unit type (deterministic based on typeId)
+   */
+  private getUnitColor(typeId: string): BABYLON.Color3 {
+    // Hash the typeId to get a consistent color
+    let hash = 0;
+    for (let i = 0; i < typeId.length; i++) {
+      hash = typeId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = (hash % 360) / 360;
+    const s = 0.7;
+    const l = 0.6;
+
+    // Convert HSL to RGB
+    const hue2rgb = (p: number, q: number, t: number): number => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const r = hue2rgb(p, q, h + 1/3);
+    const g = hue2rgb(p, q, h);
+    const b = hue2rgb(p, q, h - 1/3);
+
+    return new BABYLON.Color3(r, g, b)
   }
 
   /**
