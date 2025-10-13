@@ -27,7 +27,12 @@ const App: React.FC = () => {
   const rendererRef = useRef<MapRendererCore | null>(null);
 
   // Use the map previews hook
-  const { previews, isLoading: previewsLoading, generatePreviews } = useMapPreviews();
+  const {
+    previews,
+    loadingStates,
+    isLoading: previewsLoading,
+    generatePreviews,
+  } = useMapPreviews();
 
   // Hardcoded map list (matching actual /maps folder)
   const MAP_LIST = [
@@ -177,33 +182,29 @@ const App: React.FC = () => {
       console.log('Starting preview generation for', maps.length, 'maps...');
       const mapDataMap = new Map<string, RawMapData>();
 
-      // Load and parse maps (skip very large ones >1000MB for preview generation)
-      for (const map of maps) {
-        if (cancelled) return; // Check cancellation between iterations
+      // Load and parse maps in parallel batches (4 at a time) for faster loading
+      const BATCH_SIZE = 4;
+      const loadMap = async (map: MapMetadata): Promise<void> => {
+        if (cancelled) return;
+
         try {
           // Skip very large maps (>1000MB) to avoid long load times
-          // Note: Preview extraction only reads MPQ headers and extracts small TGA files,
-          // so we can handle large campaign files without loading entire archives
           const sizeMB = map.sizeBytes / (1024 * 1024);
           if (sizeMB > 1000) {
             console.log(`Skipping preview for large map ${map.name} (${sizeMB.toFixed(1)}MB)`);
-            continue;
+            return;
           }
 
           console.log(`Loading ${map.name} for preview generation...`);
 
           // Fetch map file
-          console.log(`[App] Fetching map file: /maps/${encodeURIComponent(map.name)}`);
           const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
           if (!response.ok) {
             console.error(
               `[App] ❌ Failed to fetch ${map.name}: ${response.status} ${response.statusText}`
             );
-            continue;
+            return;
           }
-          console.log(
-            `[App] ✅ Fetched ${map.name}, size: ${response.headers.get('content-length')} bytes`
-          );
 
           const blob = await response.blob();
           const file = new File([blob], map.name);
@@ -219,7 +220,6 @@ const App: React.FC = () => {
             mapData = await loader.parse(file);
           } else if (map.format === 'w3n') {
             const loader = new W3NCampaignLoader();
-            // parse() returns the first map from the campaign
             mapData = await loader.parse(file);
           } else if (map.format === 'sc2map') {
             const loader = new SC2MapLoader();
@@ -232,6 +232,13 @@ const App: React.FC = () => {
         } catch (err) {
           console.error(`Failed to load ${map.name} for preview:`, err);
         }
+      };
+
+      // Process maps in batches
+      for (let i = 0; i < maps.length; i += BATCH_SIZE) {
+        if (cancelled) return;
+        const batch = maps.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map(loadMap));
       }
 
       // Generate previews
@@ -363,6 +370,7 @@ const App: React.FC = () => {
                   void handleMapSelect(map);
                 }}
                 isLoading={isLoading || previewsLoading}
+                previewLoadingStates={loadingStates}
               />
             ) : (
               <MapPreviewReport maps={mapsWithPreviews} />

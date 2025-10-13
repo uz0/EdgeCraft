@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { MapLoadProgress } from '../formats/maps/BatchMapLoader';
+import type { PreviewLoadingState } from '../hooks/useMapPreviews';
 import './MapGallery.css';
 
 export interface MapMetadata {
@@ -32,6 +33,9 @@ export interface MapGalleryProps {
   /** Loading progress (if batch loading) */
   loadProgress?: Map<string, MapLoadProgress>;
 
+  /** Preview loading states (per map) */
+  previewLoadingStates?: Map<string, PreviewLoadingState>;
+
   /** Is batch loading in progress */
   isLoading?: boolean;
 }
@@ -44,6 +48,7 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
   maps,
   onMapSelect,
   loadProgress,
+  previewLoadingStates,
   isLoading = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -183,6 +188,7 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
             key={map.id}
             map={map}
             progress={loadProgress?.get(map.id)}
+            previewLoadingState={previewLoadingStates?.get(map.id)}
             onClick={() => onMapSelect(map)}
           />
         ))}
@@ -204,10 +210,11 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
 interface MapCardProps {
   map: MapMetadata;
   progress?: MapLoadProgress;
+  previewLoadingState?: PreviewLoadingState;
   onClick: () => void;
 }
 
-const MapCard: React.FC<MapCardProps> = ({ map, progress, onClick }) => {
+const MapCard: React.FC<MapCardProps> = ({ map, progress, previewLoadingState, onClick }) => {
   const formatSizeDisplay = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
     return mb < 1 ? `${(bytes / 1024).toFixed(0)} KB` : `${mb.toFixed(1)} MB`;
@@ -242,9 +249,12 @@ const MapCard: React.FC<MapCardProps> = ({ map, progress, onClick }) => {
           </div>
         )}
 
-        {progress?.status === 'loading' && (
+        {(progress?.status === 'loading' || previewLoadingState === 'loading') && (
           <div className="map-card-loading">
             <div className="spinner" />
+            {previewLoadingState === 'loading' && (
+              <span className="loading-text">Loading preview...</span>
+            )}
           </div>
         )}
       </div>

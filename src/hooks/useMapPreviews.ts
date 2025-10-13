@@ -25,9 +25,14 @@ export interface PreviewProgress {
   currentMap?: string;
 }
 
+export type PreviewLoadingState = 'idle' | 'loading' | 'success' | 'error';
+
 export interface UseMapPreviewsResult {
   /** Map ID → Data URL */
   previews: Map<string, string>;
+
+  /** Map ID → Loading state */
+  loadingStates: Map<string, PreviewLoadingState>;
 
   /** Loading state */
   isLoading: boolean;
@@ -41,6 +46,9 @@ export interface UseMapPreviewsResult {
   /** Generate previews for maps */
   generatePreviews: (maps: MapMetadata[], mapDataMap: Map<string, RawMapData>) => Promise<void>;
 
+  /** Generate a single preview on demand */
+  generateSinglePreview: (map: MapMetadata, mapData: RawMapData) => Promise<void>;
+
   /** Clear cache */
   clearCache: () => Promise<void>;
 }
@@ -50,6 +58,7 @@ export interface UseMapPreviewsResult {
  */
 export function useMapPreviews(): UseMapPreviewsResult {
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
+  const [loadingStates, setLoadingStates] = useState<Map<string, PreviewLoadingState>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<PreviewProgress>({ current: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
@@ -81,58 +90,138 @@ export function useMapPreviews(): UseMapPreviewsResult {
       setProgress({ current: 0, total: maps.length });
 
       const newPreviews = new Map<string, string>();
+      const newStates = new Map<string, PreviewLoadingState>();
 
       try {
-        for (let i = 0; i < maps.length; i++) {
-          const map = maps[i];
-          if (!map) continue;
+        // Process maps in parallel batches of 4 for faster loading
+        const BATCH_SIZE = 4;
+        let completed = 0;
 
-          setProgress({ current: i, total: maps.length, currentMap: map.name });
+        const processBatch = async (batch: MapMetadata[]): Promise<void> => {
+          await Promise.all(
+            batch.map(async (map) => {
+              if (!map) return;
 
-          // Check cache first
-          const cachedPreview = await cacheRef.current.get(map.id);
+              // Set loading state
+              newStates.set(map.id, 'loading');
+              setLoadingStates(new Map(newStates));
 
-          if (cachedPreview) {
-            console.log(`Using cached preview for ${map.name}`);
-            newPreviews.set(map.id, cachedPreview);
-            continue;
-          }
+              try {
+                // Check cache first
+                const cachedPreview = await cacheRef.current!.get(map.id);
 
-          // Not cached - extract or generate
-          const mapData = mapDataMap.get(map.id);
+                if (cachedPreview) {
+                  console.log(`Using cached preview for ${map.name}`);
+                  newPreviews.set(map.id, cachedPreview);
+                  newStates.set(map.id, 'success');
+                  setPreviews(new Map(newPreviews));
+                  setLoadingStates(new Map(newStates));
+                  return;
+                }
 
-          if (!mapData) {
-            console.warn(`No map data found for ${map.id}`);
-            continue;
-          }
+                // Not cached - extract or generate
+                const mapData = mapDataMap.get(map.id);
 
-          console.log(`Generating preview for ${map.name}...`);
-          const result = await extractorRef.current.extract(map.file, mapData);
+                if (!mapData) {
+                  console.warn(`No map data found for ${map.id}`);
+                  newStates.set(map.id, 'error');
+                  setLoadingStates(new Map(newStates));
+                  return;
+                }
 
-          if (result.success && result.dataUrl) {
-            console.log(
-              `Preview ${result.source} for ${map.name} (${result.extractTimeMs.toFixed(0)}ms)`
-            );
+                console.log(`Generating preview for ${map.name}...`);
+                const result = await extractorRef.current!.extract(map.file, mapData);
 
-            newPreviews.set(map.id, result.dataUrl);
+                if (result.success && result.dataUrl) {
+                  console.log(
+                    `Preview ${result.source} for ${map.name} (${result.extractTimeMs.toFixed(0)}ms)`
+                  );
 
-            // Cache for future use
-            await cacheRef.current.set(map.id, result.dataUrl);
-          } else {
-            console.error(`Failed to generate preview for ${map.name}:`, result.error);
-          }
+                  newPreviews.set(map.id, result.dataUrl);
+                  newStates.set(map.id, 'success');
+                  setPreviews(new Map(newPreviews));
+
+                  // Cache for future use
+                  await cacheRef.current!.set(map.id, result.dataUrl);
+                } else {
+                  console.error(`Failed to generate preview for ${map.name}:`, result.error);
+                  newStates.set(map.id, 'error');
+                }
+
+                setLoadingStates(new Map(newStates));
+              } catch (err) {
+                console.error(`Error generating preview for ${map.name}:`, err);
+                newStates.set(map.id, 'error');
+                setLoadingStates(new Map(newStates));
+              } finally {
+                completed++;
+                setProgress({ current: completed, total: maps.length, currentMap: map.name });
+              }
+            })
+          );
+        };
+
+        // Process all maps in batches
+        for (let i = 0; i < maps.length; i += BATCH_SIZE) {
+          const batch = maps.slice(i, i + BATCH_SIZE);
+          await processBatch(batch);
         }
 
-        console.log('[useMapPreviews] Setting previews Map, size:', newPreviews.size);
-        console.log('[useMapPreviews] Preview keys:', Array.from(newPreviews.keys()));
-        setPreviews(newPreviews);
-        setProgress({ current: maps.length, total: maps.length });
+        console.log('[useMapPreviews] Preview generation complete, size:', newPreviews.size);
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         setError(errorMsg);
         console.error('Preview generation failed:', errorMsg);
       } finally {
         setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const generateSinglePreview = useCallback(
+    async (map: MapMetadata, mapData: RawMapData): Promise<void> => {
+      if (!extractorRef.current || !cacheRef.current) {
+        console.error('Preview system not initialized');
+        return;
+      }
+
+      // Set loading state
+      setLoadingStates((prev) => new Map(prev).set(map.id, 'loading'));
+
+      try {
+        // Check cache first
+        const cachedPreview = await cacheRef.current.get(map.id);
+
+        if (cachedPreview) {
+          console.log(`Using cached preview for ${map.name}`);
+          setPreviews((prev) => new Map(prev).set(map.id, cachedPreview));
+          setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
+          return;
+        }
+
+        // Not cached - extract or generate
+        console.log(`Generating preview for ${map.name}...`);
+        const result = await extractorRef.current.extract(map.file, mapData);
+
+        if (result.success && result.dataUrl) {
+          console.log(
+            `Preview ${result.source} for ${map.name} (${result.extractTimeMs.toFixed(0)}ms)`
+          );
+
+          const dataUrl = result.dataUrl; // Type narrowing
+          setPreviews((prev) => new Map(prev).set(map.id, dataUrl));
+          setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
+
+          // Cache for future use
+          await cacheRef.current.set(map.id, dataUrl);
+        } else {
+          console.error(`Failed to generate preview for ${map.name}:`, result.error);
+          setLoadingStates((prev) => new Map(prev).set(map.id, 'error'));
+        }
+      } catch (err) {
+        console.error(`Error generating preview for ${map.name}:`, err);
+        setLoadingStates((prev) => new Map(prev).set(map.id, 'error'));
       }
     },
     []
@@ -148,10 +237,12 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
   return {
     previews,
+    loadingStates,
     isLoading,
     progress,
     error,
     generatePreviews,
+    generateSinglePreview,
     clearCache,
   };
 }

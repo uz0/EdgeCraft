@@ -73,14 +73,30 @@ export class W3NCampaignLoader implements IMapLoader {
       if (w3fData) {
         const w3fParser = new W3FCampaignInfoParser(w3fData.data);
         campaignInfo = w3fParser.parse();
+        console.log('[W3NCampaignLoader] ✅ Campaign info parsed successfully');
       }
     } catch (error) {
       // Campaign info is optional, continue without it
-      console.warn('Failed to parse campaign info:', error);
+      // This is common with corrupted campaigns or unusual compression
+      console.warn(
+        '[W3NCampaignLoader] Failed to parse campaign info (non-critical):',
+        error instanceof Error ? error.message : error
+      );
     }
 
     // Extract embedded maps
-    const embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
+    let embeddedMaps: Array<{ data: ArrayBuffer; index: number }> = [];
+    try {
+      embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
+    } catch (error) {
+      console.error(
+        '[W3NCampaignLoader] Failed to extract embedded maps:',
+        error instanceof Error ? error.message : error
+      );
+      throw new Error(
+        `Failed to extract embedded maps: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
 
     if (embeddedMaps.length === 0) {
       throw new Error('No maps found in campaign archive');
@@ -88,7 +104,18 @@ export class W3NCampaignLoader implements IMapLoader {
 
     // Parse first map using W3XMapLoader
     const firstMap = embeddedMaps[0]!; // Safe: we checked length > 0 above
-    const mapData = await this.w3xLoader.parse(firstMap.data);
+    let mapData: RawMapData;
+    try {
+      mapData = await this.w3xLoader.parse(firstMap.data);
+    } catch (error) {
+      console.error(
+        '[W3NCampaignLoader] Failed to parse first map:',
+        error instanceof Error ? error.message : error
+      );
+      throw new Error(
+        `Failed to parse first map: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
 
     // Override format to 'w3n' and add campaign info to description
     const result: RawMapData = {
@@ -145,7 +172,20 @@ export class W3NCampaignLoader implements IMapLoader {
     // This is more reliable than filename-based extraction since W3N campaigns
     // have unpredictable internal filenames
     if (!mpqResult.blockTable) {
-      throw new Error('Block table not available from streaming parse');
+      console.warn(
+        '[W3NCampaignLoader] Block table not available from streaming parse, trying in-memory fallback...'
+      );
+      // Fallback to in-memory parsing for this file
+      // This can happen with corrupted or unusual MPQ structures
+      try {
+        return await this.parseInMemory(file);
+      } catch (fallbackError) {
+        throw new Error(
+          `Block table not available from streaming parse, and in-memory fallback failed: ${
+            fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+          }`
+        );
+      }
     }
 
     console.log('[W3NCampaignLoader] Searching for embedded W3X files by size and MPQ magic...');
@@ -175,7 +215,13 @@ export class W3NCampaignLoader implements IMapLoader {
           block.filePos,
           Math.min(1024, block.compressedSize)
         );
-        const view = new DataView(headerData.buffer, headerData.byteOffset, headerData.byteLength);
+
+        // Create a fresh ArrayBuffer copy to avoid DataView offset issues
+        const safeBuffer = headerData.buffer.slice(
+          headerData.byteOffset,
+          headerData.byteOffset + headerData.byteLength
+        );
+        const view = new DataView(safeBuffer);
 
         // Check for MPQ magic at common offsets (0, 512, 1024)
         const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
