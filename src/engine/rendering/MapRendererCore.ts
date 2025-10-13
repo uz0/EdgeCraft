@@ -664,24 +664,24 @@ export class MapRendererCore {
     const { width, height } = dimensions;
 
     if (this.config.cameraMode === 'rts') {
-      // RTS camera with top-down perspective
+      // RTS camera with classic perspective (like Warcraft 3)
       // alpha: -Math.PI/2 = facing "north" (negative Z direction)
-      // beta: 0.3 radians (~17 degrees from vertical) for slight angle, not flat top-down
+      // beta: Math.PI/5 (~36 degrees from vertical) for classic RTS angle
       // radius: Distance from target
       // target: Center of map at mid-height (terrain is 0-100, so target Y=50)
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
         -Math.PI / 2, // Facing north
-        0.3, // Slight angle from top (17 degrees) - was Math.PI/4 (45 degrees)
-        Math.max(width, height) * 1.2, // Zoom out to see whole map - was width * 0.8
+        Math.PI / 5, // 36° from vertical (classic RTS angle like WC3)
+        Math.max(width, height) * 0.8, // Closer zoom for better detail
         new BABYLON.Vector3(width / 2, 50, height / 2), // Target center at mid-height (terrain 0-100)
         this.scene
       );
 
-      camera.lowerRadiusLimit = Math.max(width, height) * 0.5;
-      camera.upperRadiusLimit = Math.max(width, height) * 2.5;
-      camera.lowerBetaLimit = 0.1; // Prevent going flat
-      camera.upperBetaLimit = Math.PI / 2.5; // Prevent going too low
+      camera.lowerRadiusLimit = Math.max(width, height) * 0.3;
+      camera.upperRadiusLimit = Math.max(width, height) * 2.0;
+      camera.lowerBetaLimit = 0.2; // Don't allow too steep
+      camera.upperBetaLimit = Math.PI / 2.2; // Don't allow below horizon
 
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
       this.camera = camera;
