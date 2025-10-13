@@ -14,20 +14,20 @@ TEXTURE_SOURCES = {
     "rock_gray": "https://polyhaven.com/a/rock_surface",
     "grass_dirt_mix": "https://polyhaven.com/a/coast_sand_rocks_02",
     "vines": "https://polyhaven.com/a/bark_willow_02",
-    "grass_dark": "https://polyhaven.com/a/moss",
+    "grass_dark": "https://polyhaven.com/a/leafy_grass",  # UPDATED: unique texture
     "rock_rough": "https://polyhaven.com/a/rock_06",
     "leaves": "https://polyhaven.com/a/forest_leaves_02",
-    "dirt_desert": "https://polyhaven.com/a/sandy_desert_soil",
+    "dirt_desert": "https://polyhaven.com/a/red_sand",  # UPDATED: unique texture
     "sand_desert": "https://polyhaven.com/a/brown_mud_03",
-    "rock_desert": "https://polyhaven.com/a/sandstone_blocks",
+    "rock_desert": "https://polyhaven.com/a/volcanic_rock_tiles",  # UPDATED: unique texture
     "grass_green": "https://polyhaven.com/a/aerial_grass_rock",
     "snow_clean": "https://polyhaven.com/a/snow_02",
-    "ice": "https://polyhaven.com/a/ice_02",
-    "dirt_frozen": "https://polyhaven.com/a/snow_field",
+    "ice": "https://polyhaven.com/a/snow_04",  # UPDATED: unique texture
+    "dirt_frozen": "https://polyhaven.com/a/sandy_gravel_02",  # UPDATED: unique texture
     "metal_platform": "https://polyhaven.com/a/metal_plate",
-    "blight_purple": "https://polyhaven.com/a/mud_cracked_dry",
-    "volcanic_ash": "https://polyhaven.com/a/volcanic_rock",
-    "lava": "https://polyhaven.com/a/lava_rock",
+    "blight_purple": "https://polyhaven.com/a/brown_mud_03",  # UPDATED: unique texture
+    "volcanic_ash": "https://polyhaven.com/a/volcanic_herringbone_01",  # UPDATED: unique texture
+    "lava": "https://polyhaven.com/a/rock_08",  # UPDATED: unique texture
 }
 
 # Doodad descriptions
@@ -69,6 +69,17 @@ DOODAD_DESCRIPTIONS = {
     "placeholder_box": ("special", "Placeholder for missing models"),
     "marker_small": ("special", "Invisible marker/spawn point"),
     "plant_generic_01": ("plant", "Generic plant"),
+}
+
+# Kenney.nl models (26/33)
+KENNEY_MODELS = {
+    "tree_oak_01", "tree_pine_01", "tree_palm_01", "tree_dead_01",
+    "tree_mushroom_01", "shrub_small_01", "bush_round_01", "grass_tufts_01",
+    "rock_large_01", "rock_cluster_01", "rock_small_01", "rock_cliff_01",
+    "rock_crystal_01", "rock_desert_01",
+    "fence_01", "ruins_01", "pillar_stone_01", "signpost_01", "bridge_01",
+    "flowers_01", "vines_01", "lily_water_01", "mushrooms_01", "rubble_01",
+    "plant_generic_01"
 }
 
 def get_file_size_mb(filepath):
@@ -139,6 +150,14 @@ def generate_manifest():
         file_size_kb = os.path.getsize(model_file) / 1024
         triangles = int(file_size_kb * 5)  # Rough estimate
 
+        # Determine author and source (Kenney or EdgeCraft procedural)
+        if filename in KENNEY_MODELS:
+            author = "Kenney"
+            source_url = "https://kenney.nl/assets/nature-kit"
+        else:
+            author = "EdgeCraft (Procedural)"
+            source_url = "https://github.com/edgecraft/edgecraft"
+
         manifest["models"][f"doodad_{filename}"] = {
             "id": f"doodad_{filename}",
             "path": f"/assets/models/doodads/{model_file.name}",
@@ -147,8 +166,8 @@ def generate_manifest():
             "format": "GLB (glTF 2.0)",
             "triangles": triangles,
             "license": "CC0 1.0",
-            "author": "EdgeCraft (Procedural)",
-            "sourceUrl": "https://github.com/edgecraft/edgecraft",
+            "author": author,
+            "sourceUrl": source_url,
             "fileSizeKB": round(file_size_kb, 2)
         }
 

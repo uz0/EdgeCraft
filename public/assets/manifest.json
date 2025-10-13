@@ -17,8 +17,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/mud_cracked_dry",
-      "fileSizeMB": 3.76
+      "sourceUrl": "https://polyhaven.com/a/brown_mud_03",
+      "fileSizeMB": 2.03
     },
     "terrain_blight_purple_normal": {
       "id": "terrain_blight_purple_normal",
@@ -28,8 +28,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/mud_cracked_dry",
-      "fileSizeMB": 4.75
+      "sourceUrl": "https://polyhaven.com/a/brown_mud_03",
+      "fileSizeMB": 3.56
     },
     "terrain_blight_purple_roughness": {
       "id": "terrain_blight_purple_roughness",
@@ -39,8 +39,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/mud_cracked_dry",
-      "fileSizeMB": 1.72
+      "sourceUrl": "https://polyhaven.com/a/brown_mud_03",
+      "fileSizeMB": 1.11
     },
     "terrain_dirt_brown": {
       "id": "terrain_dirt_brown",
@@ -83,8 +83,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/sandy_desert_soil",
-      "fileSizeMB": 3.76
+      "sourceUrl": "https://polyhaven.com/a/red_sand",
+      "fileSizeMB": 2.18
     },
     "terrain_dirt_desert_normal": {
       "id": "terrain_dirt_desert_normal",
@@ -94,8 +94,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/sandy_desert_soil",
-      "fileSizeMB": 4.75
+      "sourceUrl": "https://polyhaven.com/a/red_sand",
+      "fileSizeMB": 4.34
     },
     "terrain_dirt_desert_roughness": {
       "id": "terrain_dirt_desert_roughness",
@@ -105,8 +105,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/sandy_desert_soil",
-      "fileSizeMB": 1.72
+      "sourceUrl": "https://polyhaven.com/a/red_sand",
+      "fileSizeMB": 2.17
     },
     "terrain_dirt_frozen": {
       "id": "terrain_dirt_frozen",
@@ -116,8 +116,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/snow_field",
-      "fileSizeMB": 3.76
+      "sourceUrl": "https://polyhaven.com/a/sandy_gravel_02",
+      "fileSizeMB": 3.91
     },
     "terrain_dirt_frozen_normal": {
       "id": "terrain_dirt_frozen_normal",
@@ -127,8 +127,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/snow_field",
-      "fileSizeMB": 4.75
+      "sourceUrl": "https://polyhaven.com/a/sandy_gravel_02",
+      "fileSizeMB": 5.07
     },
     "terrain_dirt_frozen_roughness": {
       "id": "terrain_dirt_frozen_roughness",
@@ -138,8 +138,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/snow_field",
-      "fileSizeMB": 1.72
+      "sourceUrl": "https://polyhaven.com/a/sandy_gravel_02",
+      "fileSizeMB": 1.65
     },
     "terrain_grass_dark": {
       "id": "terrain_grass_dark",
@@ -149,8 +149,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/moss",
-      "fileSizeMB": 3.56
+      "sourceUrl": "https://polyhaven.com/a/leafy_grass",
+      "fileSizeMB": 4.55
     },
     "terrain_grass_dark_normal": {
       "id": "terrain_grass_dark_normal",
@@ -160,8 +160,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/moss",
-      "fileSizeMB": 5.62
+      "sourceUrl": "https://polyhaven.com/a/leafy_grass",
+      "fileSizeMB": 5.77
     },
     "terrain_grass_dark_roughness": {
       "id": "terrain_grass_dark_roughness",
@@ -171,8 +171,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/moss",
-      "fileSizeMB": 1.65
+      "sourceUrl": "https://polyhaven.com/a/leafy_grass",
+      "fileSizeMB": 2.17
     },
     "terrain_grass_dirt_mix": {
       "id": "terrain_grass_dirt_mix",
@@ -281,8 +281,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/ice_02",
-      "fileSizeMB": 3.58
+      "sourceUrl": "https://polyhaven.com/a/snow_04",
+      "fileSizeMB": 2.0
     },
     "terrain_ice_normal": {
       "id": "terrain_ice_normal",
@@ -292,8 +292,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/ice_02",
-      "fileSizeMB": 4.49
+      "sourceUrl": "https://polyhaven.com/a/snow_04",
+      "fileSizeMB": 5.55
     },
     "terrain_ice_roughness": {
       "id": "terrain_ice_roughness",
@@ -303,8 +303,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/ice_02",
-      "fileSizeMB": 2.33
+      "sourceUrl": "https://polyhaven.com/a/snow_04",
+      "fileSizeMB": 0.79
     },
     "terrain_lava": {
       "id": "terrain_lava",
@@ -314,8 +314,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/lava_rock",
-      "fileSizeMB": 3.58
+      "sourceUrl": "https://polyhaven.com/a/rock_08",
+      "fileSizeMB": 2.51
     },
     "terrain_lava_normal": {
       "id": "terrain_lava_normal",
@@ -325,8 +325,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/lava_rock",
-      "fileSizeMB": 4.49
+      "sourceUrl": "https://polyhaven.com/a/rock_08",
+      "fileSizeMB": 3.25
     },
     "terrain_lava_roughness": {
       "id": "terrain_lava_roughness",
@@ -336,8 +336,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/lava_rock",
-      "fileSizeMB": 2.33
+      "sourceUrl": "https://polyhaven.com/a/rock_08",
+      "fileSizeMB": 1.19
     },
     "terrain_leaves": {
       "id": "terrain_leaves",
@@ -413,8 +413,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/sandstone_blocks",
-      "fileSizeMB": 3.58
+      "sourceUrl": "https://polyhaven.com/a/volcanic_rock_tiles",
+      "fileSizeMB": 2.95
     },
     "terrain_rock_desert_normal": {
       "id": "terrain_rock_desert_normal",
@@ -424,8 +424,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/sandstone_blocks",
-      "fileSizeMB": 4.49
+      "sourceUrl": "https://polyhaven.com/a/volcanic_rock_tiles",
+      "fileSizeMB": 4.15
     },
     "terrain_rock_desert_roughness": {
       "id": "terrain_rock_desert_roughness",
@@ -435,8 +435,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/sandstone_blocks",
-      "fileSizeMB": 2.33
+      "sourceUrl": "https://polyhaven.com/a/volcanic_rock_tiles",
+      "fileSizeMB": 0.75
     },
     "terrain_rock_gray": {
       "id": "terrain_rock_gray",
@@ -611,8 +611,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/volcanic_rock",
-      "fileSizeMB": 3.58
+      "sourceUrl": "https://polyhaven.com/a/volcanic_herringbone_01",
+      "fileSizeMB": 2.96
     },
     "terrain_volcanic_ash_normal": {
       "id": "terrain_volcanic_ash_normal",
@@ -622,8 +622,8 @@
       "format": "JPG (OpenGL)",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/volcanic_rock",
-      "fileSizeMB": 4.49
+      "sourceUrl": "https://polyhaven.com/a/volcanic_herringbone_01",
+      "fileSizeMB": 4.37
     },
     "terrain_volcanic_ash_roughness": {
       "id": "terrain_volcanic_ash_roughness",
@@ -633,8 +633,8 @@
       "format": "JPG",
       "license": "CC0 1.0",
       "author": "Poly Haven Team",
-      "sourceUrl": "https://polyhaven.com/a/volcanic_rock",
-      "fileSizeMB": 2.33
+      "sourceUrl": "https://polyhaven.com/a/volcanic_herringbone_01",
+      "fileSizeMB": 1.11
     }
   },
   "models": {
@@ -668,11 +668,11 @@
       "type": "structure",
       "description": "Bridge section",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 76,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.14
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 15.32
     },
     "doodad_bush_round_01": {
       "id": "doodad_bush_round_01",
@@ -680,11 +680,11 @@
       "type": "tree",
       "description": "Round bush/hedge",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 22,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 4.5
     },
     "doodad_campfire_01": {
       "id": "doodad_campfire_01",
@@ -716,11 +716,11 @@
       "type": "structure",
       "description": "Fence section",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 27,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.13
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 5.58
     },
     "doodad_flowers_01": {
       "id": "doodad_flowers_01",
@@ -728,11 +728,11 @@
       "type": "environment",
       "description": "Flower patches",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 34,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.14
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 6.95
     },
     "doodad_grass_tufts_01": {
       "id": "doodad_grass_tufts_01",
@@ -740,11 +740,11 @@
       "type": "tree",
       "description": "Grass tufts",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 56,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.16
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 11.23
     },
     "doodad_lily_water_01": {
       "id": "doodad_lily_water_01",
@@ -752,11 +752,11 @@
       "type": "environment",
       "description": "Water lily",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 39,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 7.86
     },
     "doodad_marker_small": {
       "id": "doodad_marker_small",
@@ -776,11 +776,11 @@
       "type": "environment",
       "description": "Mushrooms",
       "format": "GLB (glTF 2.0)",
-      "triangles": 9,
+      "triangles": 73,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.88
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 14.61
     },
     "doodad_pillar_stone_01": {
       "id": "doodad_pillar_stone_01",
@@ -788,11 +788,11 @@
       "type": "structure",
       "description": "Stone pillar",
       "format": "GLB (glTF 2.0)",
-      "triangles": 9,
+      "triangles": 97,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.88
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 19.55
     },
     "doodad_placeholder_box": {
       "id": "doodad_placeholder_box",
@@ -812,11 +812,11 @@
       "type": "plant",
       "description": "Generic plant",
       "format": "GLB (glTF 2.0)",
-      "triangles": 8,
+      "triangles": 90,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.65
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 18.07
     },
     "doodad_rock_cliff_01": {
       "id": "doodad_rock_cliff_01",
@@ -824,11 +824,11 @@
       "type": "rock",
       "description": "Cliff face",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 11,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 2.3
     },
     "doodad_rock_cluster_01": {
       "id": "doodad_rock_cluster_01",
@@ -836,11 +836,11 @@
       "type": "rock",
       "description": "Rock cluster",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 13,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.16
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 2.71
     },
     "doodad_rock_crystal_01": {
       "id": "doodad_rock_crystal_01",
@@ -848,11 +848,11 @@
       "type": "rock",
       "description": "Crystal formation",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 25,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 5.19
     },
     "doodad_rock_desert_01": {
       "id": "doodad_rock_desert_01",
@@ -860,11 +860,11 @@
       "type": "rock",
       "description": "Desert rock",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 26,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 5.35
     },
     "doodad_rock_large_01": {
       "id": "doodad_rock_large_01",
@@ -872,11 +872,11 @@
       "type": "rock",
       "description": "Large boulder",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 17,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 3.48
     },
     "doodad_rock_small_01": {
       "id": "doodad_rock_small_01",
@@ -884,11 +884,11 @@
       "type": "rock",
       "description": "Small stones",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 25,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.14
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 5.19
     },
     "doodad_rubble_01": {
       "id": "doodad_rubble_01",
@@ -896,11 +896,11 @@
       "type": "environment",
       "description": "Ruins/rubble",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 13,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.14
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 2.72
     },
     "doodad_ruins_01": {
       "id": "doodad_ruins_01",
@@ -908,11 +908,11 @@
       "type": "structure",
       "description": "Ruined building",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 26,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.13
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 5.3
     },
     "doodad_shrub_small_01": {
       "id": "doodad_shrub_small_01",
@@ -920,11 +920,11 @@
       "type": "tree",
       "description": "Small shrub",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 68,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.15
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 13.66
     },
     "doodad_signpost_01": {
       "id": "doodad_signpost_01",
@@ -932,11 +932,11 @@
       "type": "structure",
       "description": "Signpost",
       "format": "GLB (glTF 2.0)",
-      "triangles": 8,
+      "triangles": 135,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.64
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 27.0
     },
     "doodad_torch_01": {
       "id": "doodad_torch_01",
@@ -956,11 +956,11 @@
       "type": "tree",
       "description": "Dead tree (wasteland)",
       "format": "GLB (glTF 2.0)",
-      "triangles": 8,
+      "triangles": 49,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.64
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 9.89
     },
     "doodad_tree_mushroom_01": {
       "id": "doodad_tree_mushroom_01",
@@ -968,11 +968,11 @@
       "type": "tree",
       "description": "Mushroom tree (fantasy)",
       "format": "GLB (glTF 2.0)",
-      "triangles": 9,
+      "triangles": 31,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.89
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 6.35
     },
     "doodad_tree_oak_01": {
       "id": "doodad_tree_oak_01",
@@ -980,11 +980,11 @@
       "type": "tree",
       "description": "Oak tree (temperate forest)",
       "format": "GLB (glTF 2.0)",
-      "triangles": 9,
+      "triangles": 71,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.87
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 14.3
     },
     "doodad_tree_palm_01": {
       "id": "doodad_tree_palm_01",
@@ -992,11 +992,11 @@
       "type": "tree",
       "description": "Palm tree (tropical)",
       "format": "GLB (glTF 2.0)",
-      "triangles": 8,
+      "triangles": 66,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.64
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 13.3
     },
     "doodad_tree_pine_01": {
       "id": "doodad_tree_pine_01",
@@ -1004,11 +1004,11 @@
       "type": "tree",
       "description": "Pine tree (northern/mountain)",
       "format": "GLB (glTF 2.0)",
-      "triangles": 8,
+      "triangles": 53,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.64
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 10.67
     },
     "doodad_vines_01": {
       "id": "doodad_vines_01",
@@ -1016,11 +1016,11 @@
       "type": "environment",
       "description": "Vine growth",
       "format": "GLB (glTF 2.0)",
-      "triangles": 5,
+      "triangles": 22,
       "license": "CC0 1.0",
-      "author": "EdgeCraft (Procedural)",
-      "sourceUrl": "https://github.com/edgecraft/edgecraft",
-      "fileSizeKB": 1.13
+      "author": "Kenney",
+      "sourceUrl": "https://kenney.nl/assets/nature-kit",
+      "fileSizeKB": 4.5
     },
     "doodad_well_01": {
       "id": "doodad_well_01",
