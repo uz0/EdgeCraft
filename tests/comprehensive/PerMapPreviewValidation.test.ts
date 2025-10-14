@@ -21,20 +21,26 @@ import {
 
 // Skip tests if running in CI without WebGL support
 const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-const testFn = isCI ? describe.skip : describe;
 
-testFn('Per-Map Preview Validation - ALL 24 Maps', () => {
-  let extractor: MapPreviewExtractor;
-
-  beforeAll(() => {
-    extractor = new MapPreviewExtractor();
+if (isCI) {
+  describe.skip('Per-Map Preview Validation - ALL 24 Maps (skipped in CI)', () => {
+    it('requires WebGL support', () => {
+      // Placeholder test
+    });
   });
+} else {
+  describe('Per-Map Preview Validation - ALL 24 Maps', () => {
+    let extractor: MapPreviewExtractor;
 
-  afterAll(() => {
-    if (extractor) {
-      extractor.dispose();
-    }
-  });
+    beforeAll(() => {
+      extractor = new MapPreviewExtractor();
+    });
+
+    afterAll(() => {
+      if (extractor) {
+        extractor.dispose();
+      }
+    });
 
   // ============================================================================
   // W3X MAPS (14 total)
@@ -245,4 +251,5 @@ testFn('Per-Map Preview Validation - ALL 24 Maps', () => {
       console.log(`  - Terrain Generated: ${generatedCount}`);
     });
   });
-});
+  });
+}

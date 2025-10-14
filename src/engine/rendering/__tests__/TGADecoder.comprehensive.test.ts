@@ -32,11 +32,7 @@ describe('TGADecoder - Comprehensive Unit Tests', () => {
    * - Pixel Depth (1 byte) = 24 or 32
    * - Image Descriptor (1 byte) = 0x20 (top-left origin)
    */
-  const createTGAHeader = (
-    width: number,
-    height: number,
-    pixelDepth: 24 | 32
-  ): ArrayBuffer => {
+  const createTGAHeader = (width: number, height: number, pixelDepth: 24 | 32): ArrayBuffer => {
     const header = new Uint8Array(18);
 
     header[0] = 0; // ID Length
@@ -80,7 +76,6 @@ describe('TGADecoder - Comprehensive Unit Tests', () => {
   // ========================================================================
 
   describe('TGA Header Validation', () => {
-
     it('should validate correct TGA header (24-bit)', () => {
       const header = createTGAHeader(256, 256, 24);
       const tgaData = new ArrayBuffer(18 + 256 * 256 * 3);
@@ -133,10 +128,7 @@ describe('TGADecoder - Comprehensive Unit Tests', () => {
       testCases.forEach(({ width, height }) => {
         const header = createTGAHeader(width, height, 32);
         const pixelData = new Uint8Array(width * height * 4).fill(255);
-        const tgaData = new Uint8Array([
-          ...new Uint8Array(header),
-          ...pixelData,
-        ]);
+        const tgaData = new Uint8Array([...new Uint8Array(header), ...pixelData]);
 
         const result = decoder.decodeToDataURL(tgaData.buffer);
 
@@ -225,9 +217,9 @@ describe('TGADecoder - Comprehensive Unit Tests', () => {
         // Fill with gradient pattern
         for (let i = 0; i < pixelCount; i++) {
           const idx = i * 4;
-          pixelData[idx] = (i % 256); // B
-          pixelData[idx + 1] = ((i * 2) % 256); // G
-          pixelData[idx + 2] = ((i * 3) % 256); // R
+          pixelData[idx] = i % 256; // B
+          pixelData[idx + 1] = (i * 2) % 256; // G
+          pixelData[idx + 2] = (i * 3) % 256; // R
           pixelData[idx + 3] = 255; // A
         }
 

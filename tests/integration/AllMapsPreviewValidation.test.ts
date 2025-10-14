@@ -19,21 +19,27 @@ jest.setTimeout(60000); // 60 seconds per test
 
 // Skip tests if running in CI without WebGL support
 const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-const testFn = isCI ? describe.skip : describe;
 
-testFn('Integration: All Maps Preview Validation', () => {
-  const mapsDir = path.join(__dirname, '../../maps');
-  let extractor: MapPreviewExtractor;
-
-  beforeAll(() => {
-    extractor = new MapPreviewExtractor();
+if (isCI) {
+  describe.skip('Integration: All Maps Preview Validation (skipped in CI)', () => {
+    it('requires WebGL support', () => {
+      // Placeholder test
+    });
   });
+} else {
+  describe('Integration: All Maps Preview Validation', () => {
+    const mapsDir = path.join(__dirname, '../../maps');
+    let extractor: MapPreviewExtractor;
 
-  afterAll(() => {
-    if (extractor) {
-      extractor.dispose();
-    }
-  });
+    beforeAll(() => {
+      extractor = new MapPreviewExtractor();
+    });
+
+    afterAll(() => {
+      if (extractor) {
+        extractor.dispose();
+      }
+    });
 
   // ========================================================================
   // HELPER FUNCTIONS
@@ -473,4 +479,5 @@ testFn('Integration: All Maps Preview Validation', () => {
       console.log('='.repeat(50) + '\n');
     });
   });
-});
+  });
+}
