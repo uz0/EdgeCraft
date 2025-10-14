@@ -73,7 +73,7 @@ void main(void) {
 }
     `;
 
-    // Fragment shader
+    // Fragment shader - Extended to support 8 textures
     const fragmentShader = `
 precision highp float;
 
@@ -85,30 +85,45 @@ varying vec3 vWorldPosition;
 // Uniforms
 uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
-uniform vec4 textureScales;
+uniform vec4 textureScales1; // Tiling for textures 0-3
+uniform vec4 textureScales2; // Tiling for textures 4-7
 
-// Textures
+// Textures (8 total)
 uniform sampler2D diffuse1;
 uniform sampler2D diffuse2;
 uniform sampler2D diffuse3;
 uniform sampler2D diffuse4;
-uniform sampler2D splatmap;
+uniform sampler2D diffuse5;
+uniform sampler2D diffuse6;
+uniform sampler2D diffuse7;
+uniform sampler2D diffuse8;
+uniform sampler2D splatmap1; // RGBA = weights for textures 0-3
+uniform sampler2D splatmap2; // RGBA = weights for textures 4-7
 
 void main(void) {
-  // Sample splatmap for blend weights
-  vec4 splat = texture2D(splatmap, vUV);
+  // Sample splatmaps for blend weights
+  vec4 splat1 = texture2D(splatmap1, vUV); // Textures 0-3
+  vec4 splat2 = texture2D(splatmap2, vUV); // Textures 4-7
 
   // Sample diffuse textures with individual tiling
-  vec3 color1 = texture2D(diffuse1, vUV * textureScales.x).rgb;
-  vec3 color2 = texture2D(diffuse2, vUV * textureScales.y).rgb;
-  vec3 color3 = texture2D(diffuse3, vUV * textureScales.z).rgb;
-  vec3 color4 = texture2D(diffuse4, vUV * textureScales.w).rgb;
+  vec3 color1 = texture2D(diffuse1, vUV * textureScales1.x).rgb;
+  vec3 color2 = texture2D(diffuse2, vUV * textureScales1.y).rgb;
+  vec3 color3 = texture2D(diffuse3, vUV * textureScales1.z).rgb;
+  vec3 color4 = texture2D(diffuse4, vUV * textureScales1.w).rgb;
+  vec3 color5 = texture2D(diffuse5, vUV * textureScales2.x).rgb;
+  vec3 color6 = texture2D(diffuse6, vUV * textureScales2.y).rgb;
+  vec3 color7 = texture2D(diffuse7, vUV * textureScales2.z).rgb;
+  vec3 color8 = texture2D(diffuse8, vUV * textureScales2.w).rgb;
 
-  // Blend textures using splatmap
-  vec3 finalColor = color1 * splat.r +
-                    color2 * splat.g +
-                    color3 * splat.b +
-                    color4 * splat.a;
+  // Blend textures using splatmaps
+  vec3 finalColor = color1 * splat1.r +
+                    color2 * splat1.g +
+                    color3 * splat1.b +
+                    color4 * splat1.a +
+                    color5 * splat2.r +
+                    color6 * splat2.g +
+                    color7 * splat2.b +
+                    color8 * splat2.a;
 
   // Simple directional lighting
   // lightDirection points FROM light source, so use -lightDirection for surface normal dot product
@@ -343,43 +358,62 @@ void main(void) {
     const { textureIds, blendMap } = options;
 
     console.log(
-      `[TerrainRenderer] Applying multi-texture material with ${textureIds.length} textures:`,
-      textureIds
+      `[TerrainRenderer] 🔍 MATERIAL DEBUG - Applying multi-texture material`
+    );
+    console.log(
+      `[TerrainRenderer] 🔍 Total textures requested: ${textureIds.length}`
+    );
+    console.log(
+      `[TerrainRenderer] 🔍 Texture IDs: [${textureIds.join(', ')}]`
     );
 
-    // Load up to 4 textures (shader supports 4)
+    // Load up to 8 textures (shader now supports 8)
     const textures: BABYLON.Texture[] = [];
-    for (let i = 0; i < Math.min(4, textureIds.length); i++) {
+    for (let i = 0; i < Math.min(8, textureIds.length); i++) {
       try {
-        const mappedId = mapAssetID('w3x', 'terrain', textureIds[i] ?? '');
+        const textureId = textureIds[i] ?? '';
+        const mappedId = mapAssetID('w3x', 'terrain', textureId);
         const texture = this.assetLoader.loadTexture(mappedId);
         texture.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
         texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
         textures.push(texture);
-        console.log(`[TerrainRenderer] Loaded texture ${i + 1}: ${textureIds[i]} -> ${mappedId}`);
+        console.log(
+          `[TerrainRenderer] ✅ Loaded texture slot ${i}: "${textureId}" -> "${mappedId}"`
+        );
       } catch (error) {
-        console.warn(`[TerrainRenderer] Failed to load texture ${textureIds[i]}, using fallback`);
+        const textureId = textureIds[i] ?? '';
+        console.error(
+          `[TerrainRenderer] ❌ Failed to load texture slot ${i}: "${textureId}"`,
+          error
+        );
         // Create fallback colored texture
         const fallbackTexture = new BABYLON.Texture(
           this.createFallbackTextureDataUrl(i),
           this.scene
         );
         textures.push(fallbackTexture);
+        console.log(
+          `[TerrainRenderer] 🔶 Using fallback color for slot ${i}`
+        );
       }
     }
 
-    // Pad with fallback textures if less than 4
-    while (textures.length < 4) {
+    // Pad with fallback textures if less than 8
+    while (textures.length < 8) {
       textures.push(
         new BABYLON.Texture(this.createFallbackTextureDataUrl(textures.length), this.scene)
       );
     }
 
-    // Create splatmap texture from blendMap
+    // Create splatmap textures from blendMap
     // Use tile dimensions, not world dimensions (splatmap is 1 pixel per tile)
     const splatWidth = options.splatmapWidth ?? options.width;
     const splatHeight = options.splatmapHeight ?? options.height;
-    const splatmapTexture = this.createSplatmapTexture(blendMap, splatWidth, splatHeight);
+    const { splatmap1, splatmap2 } = this.createDualSplatmapTextures(
+      blendMap,
+      splatWidth,
+      splatHeight
+    );
 
     // Create custom shader material
     const shaderMaterial = new BABYLON.ShaderMaterial(
@@ -397,18 +431,35 @@ void main(void) {
           'view',
           'cameraPosition',
           'lightDirection',
-          'textureScales',
+          'textureScales1',
+          'textureScales2',
         ],
-        samplers: ['diffuse1', 'diffuse2', 'diffuse3', 'diffuse4', 'splatmap'],
+        samplers: [
+          'diffuse1',
+          'diffuse2',
+          'diffuse3',
+          'diffuse4',
+          'diffuse5',
+          'diffuse6',
+          'diffuse7',
+          'diffuse8',
+          'splatmap1',
+          'splatmap2',
+        ],
       }
     );
 
-    // Set textures (non-null assertion safe because we padded to 4 textures above)
+    // Set textures (non-null assertion safe because we padded to 8 textures above)
     shaderMaterial.setTexture('diffuse1', textures[0]!);
     shaderMaterial.setTexture('diffuse2', textures[1]!);
     shaderMaterial.setTexture('diffuse3', textures[2]!);
     shaderMaterial.setTexture('diffuse4', textures[3]!);
-    shaderMaterial.setTexture('splatmap', splatmapTexture);
+    shaderMaterial.setTexture('diffuse5', textures[4]!);
+    shaderMaterial.setTexture('diffuse6', textures[5]!);
+    shaderMaterial.setTexture('diffuse7', textures[6]!);
+    shaderMaterial.setTexture('diffuse8', textures[7]!);
+    shaderMaterial.setTexture('splatmap1', splatmap1);
+    shaderMaterial.setTexture('splatmap2', splatmap2);
 
     // Set uniforms
     shaderMaterial.setVector3(
@@ -418,7 +469,8 @@ void main(void) {
     // Light direction matches DirectionalLight in MapRendererCore
     // Points from upper-left downward: (-0.5, -1, -0.5) normalized
     shaderMaterial.setVector3('lightDirection', new BABYLON.Vector3(-0.5, -1, -0.5).normalize());
-    shaderMaterial.setVector4('textureScales', new BABYLON.Vector4(16, 16, 16, 16)); // Texture tiling
+    shaderMaterial.setVector4('textureScales1', new BABYLON.Vector4(16, 16, 16, 16)); // Tiling for textures 0-3
+    shaderMaterial.setVector4('textureScales2', new BABYLON.Vector4(16, 16, 16, 16)); // Tiling for textures 4-7
 
     // Apply material to mesh (cast to Material to avoid type incompatibility)
     // ShaderMaterial is a valid Material but has different method signatures
@@ -434,34 +486,69 @@ void main(void) {
   }
 
   /**
-   * Create splatmap texture from blend map (discrete tile indices -> RGBA weights)
+   * Create dual splatmap textures from blend map (supports 8 textures)
+   * Splatmap1: RGBA = weights for textures 0-3
+   * Splatmap2: RGBA = weights for textures 4-7
    */
-  private createSplatmapTexture(
+  private createDualSplatmapTextures(
     blendMap: Uint8Array,
     width: number,
     height: number
-  ): BABYLON.Texture {
-    // Create RGBA texture data
-    // Each pixel represents blend weights for 4 textures (R, G, B, A)
-    const splatmapSize = width * height * 4; // RGBA
-    const splatmapData = new Uint8Array(splatmapSize);
-
+  ): { splatmap1: BABYLON.Texture; splatmap2: BABYLON.Texture } {
+    // DEBUG: Analyze blendMap indices
+    const indexCounts = new Map<number, number>();
+    let minIdx = Infinity;
+    let maxIdx = -Infinity;
     for (let i = 0; i < blendMap.length; i++) {
-      const textureIndex = blendMap[i] ?? 0; // 0-3 (or 0-7 for 8 textures)
-      const pixelOffset = i * 4;
-
-      // Set RGBA weights: 255 for selected texture, 0 for others
-      // This gives hard edges (no blending). For smooth blending, we'd need to
-      // interpolate with neighboring tiles.
-      splatmapData[pixelOffset + 0] = textureIndex === 0 ? 255 : 0; // R
-      splatmapData[pixelOffset + 1] = textureIndex === 1 ? 255 : 0; // G
-      splatmapData[pixelOffset + 2] = textureIndex === 2 ? 255 : 0; // B
-      splatmapData[pixelOffset + 3] = textureIndex === 3 ? 255 : 0; // A
+      const idx = blendMap[i] ?? 0;
+      indexCounts.set(idx, (indexCounts.get(idx) ?? 0) + 1);
+      minIdx = Math.min(minIdx, idx);
+      maxIdx = Math.max(maxIdx, idx);
     }
 
-    // Create texture from raw data
-    const texture = BABYLON.RawTexture.CreateRGBATexture(
-      splatmapData,
+    console.log(
+      `[TerrainRenderer] 🔍 SPLATMAP DEBUG - Creating dual ${width}x${height} splatmaps from ${blendMap.length} tiles`
+    );
+    console.log(
+      `[TerrainRenderer] 🔍 BlendMap index range: min=${minIdx}, max=${maxIdx}, unique=${indexCounts.size}`
+    );
+    console.log(
+      `[TerrainRenderer] 🔍 Index distribution:`,
+      Array.from(indexCounts.entries())
+        .sort((a, b) => a[0] - b[0])
+        .map(([idx, count]) => `  idx${idx}=${count} (${((count / blendMap.length) * 100).toFixed(1)}%)`)
+        .join('\n')
+    );
+
+    // Create RGBA texture data for both splatmaps
+    const splatmapSize = width * height * 4; // RGBA
+    const splatmap1Data = new Uint8Array(splatmapSize); // Textures 0-3
+    const splatmap2Data = new Uint8Array(splatmapSize); // Textures 4-7
+
+    for (let i = 0; i < blendMap.length; i++) {
+      const textureIndex = blendMap[i] ?? 0; // 0-7
+      const pixelOffset = i * 4;
+
+      if (textureIndex < 4) {
+        // Textures 0-3 go into splatmap1
+        splatmap1Data[pixelOffset + 0] = textureIndex === 0 ? 255 : 0; // R
+        splatmap1Data[pixelOffset + 1] = textureIndex === 1 ? 255 : 0; // G
+        splatmap1Data[pixelOffset + 2] = textureIndex === 2 ? 255 : 0; // B
+        splatmap1Data[pixelOffset + 3] = textureIndex === 3 ? 255 : 0; // A
+        // Splatmap2 is all zeros for this tile
+      } else {
+        // Textures 4-7 go into splatmap2
+        splatmap2Data[pixelOffset + 0] = textureIndex === 4 ? 255 : 0; // R
+        splatmap2Data[pixelOffset + 1] = textureIndex === 5 ? 255 : 0; // G
+        splatmap2Data[pixelOffset + 2] = textureIndex === 6 ? 255 : 0; // B
+        splatmap2Data[pixelOffset + 3] = textureIndex === 7 ? 255 : 0; // A
+        // Splatmap1 is all zeros for this tile
+      }
+    }
+
+    // Create textures from raw data
+    const splatmap1 = BABYLON.RawTexture.CreateRGBATexture(
+      splatmap1Data,
       width,
       height,
       this.scene,
@@ -470,8 +557,31 @@ void main(void) {
       BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
     );
 
-    console.log(`[TerrainRenderer] Created splatmap texture: ${width}x${height}`);
-    return texture;
+    const splatmap2 = BABYLON.RawTexture.CreateRGBATexture(
+      splatmap2Data,
+      width,
+      height,
+      this.scene,
+      false, // generateMipMaps
+      false, // invertY
+      BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
+    );
+
+    console.log(`[TerrainRenderer] ✅ Created dual splatmap textures: ${width}x${height}`);
+    console.log(
+      `[TerrainRenderer] ✅ Splatmap1 (textures 0-3): ${Array.from(indexCounts.entries())
+        .filter(([idx]) => idx < 4)
+        .map(([idx, count]) => `idx${idx}=${count}`)
+        .join(', ')}`
+    );
+    console.log(
+      `[TerrainRenderer] ✅ Splatmap2 (textures 4-7): ${Array.from(indexCounts.entries())
+        .filter(([idx]) => idx >= 4)
+        .map(([idx, count]) => `idx${idx}=${count}`)
+        .join(', ')}`
+    );
+
+    return { splatmap1, splatmap2 };
   }
 
   /**
@@ -485,12 +595,16 @@ void main(void) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
 
-    // Different colors for different indices
+    // Different colors for different indices (8 textures total)
     const colors = [
-      '#5a8a5a', // Green (grass)
-      '#8a7a5a', // Brown (dirt)
-      '#6a6a6a', // Gray (rock)
-      '#4a6a8a', // Blue (water)
+      '#5a8a5a', // 0: Green (grass)
+      '#8a7a5a', // 1: Brown (dirt)
+      '#6a6a6a', // 2: Gray (rock)
+      '#4a6a8a', // 3: Blue (water)
+      '#9a6a4a', // 4: Orange-brown (clay)
+      '#4a8a4a', // 5: Dark green (forest)
+      '#8a8a6a', // 6: Tan (sand)
+      '#7a5a4a', // 7: Dark brown (mud)
     ];
     ctx.fillStyle = colors[index] ?? colors[0] ?? '#5a8a5a';
     ctx.fillRect(0, 0, 64, 64);

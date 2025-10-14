@@ -260,11 +260,40 @@ export class W3XMapLoader implements IMapLoader {
     // Each tile in textureIndices (0-N) maps to groundTextureIds[index]
     const groundTextureIds = w3e.groundTextureIds ?? [];
 
+    // DEBUG: Analyze texture index distribution
+    const textureIndexCounts = new Map<number, number>();
+    let minIndex = Infinity;
+    let maxIndex = -Infinity;
+    for (let i = 0; i < textureIndices.length; i++) {
+      const idx = textureIndices[i] ?? 0;
+      textureIndexCounts.set(idx, (textureIndexCounts.get(idx) ?? 0) + 1);
+      minIndex = Math.min(minIndex, idx);
+      maxIndex = Math.max(maxIndex, idx);
+    }
+
     console.log(
-      `[W3XMapLoader] Tileset: ${w3e.tileset}, ` +
+      `[W3XMapLoader] 🔍 TERRAIN DEBUG - Tileset: ${w3e.tileset}, ` +
         `groundTextureIds: [${groundTextureIds.join(', ')}], ` +
         `tile count: ${w3e.width}x${w3e.height}=${w3e.width * w3e.height}`
     );
+    console.log(
+      `[W3XMapLoader] 🔍 Texture index range: min=${minIndex}, max=${maxIndex}, ` +
+        `unique indices used: ${textureIndexCounts.size}`
+    );
+    console.log(
+      `[W3XMapLoader] 🔍 Texture index distribution:`,
+      Array.from(textureIndexCounts.entries())
+        .sort((a, b) => a[0] - b[0])
+        .map(([idx, count]) => `  idx${idx}=${count} tiles (${((count / textureIndices.length) * 100).toFixed(1)}%)`)
+        .join('\n')
+    );
+
+    // Validate that all indices are within bounds
+    if (maxIndex >= groundTextureIds.length) {
+      console.error(
+        `[W3XMapLoader] ❌ ERROR: Texture index ${maxIndex} exceeds groundTextureIds length ${groundTextureIds.length}!`
+      );
+    }
 
     // Create texture array from groundTextureIds
     // All textures share the same blendMap (textureIndices array indicates which texture per tile)
