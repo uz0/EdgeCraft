@@ -7,6 +7,13 @@ import type { TerrainOptions, TerrainLoadResult, TerrainLoadStatus } from './typ
 import type { AssetLoader } from '../assets/AssetLoader';
 import { mapAssetID } from '../assets/AssetMap';
 
+// Extend Window interface for debug mode
+declare global {
+  interface Window {
+    terrainDebugMode?: number;
+  }
+}
+
 /**
  * Terrain renderer for creating and managing heightmap-based terrain
  *
@@ -482,7 +489,7 @@ void main(void) {
 
     // Debug mode: 0=normal, 1=splatmap1, 2=splatmap2, 3=UVs
     // Can be changed via: window.terrainDebugMode = 1 (then reload map)
-    const debugMode = (window as any).terrainDebugMode ?? 0;
+    const debugMode = window.terrainDebugMode ?? 0;
     shaderMaterial.setFloat('debugMode', debugMode);
 
     if (debugMode > 0) {
