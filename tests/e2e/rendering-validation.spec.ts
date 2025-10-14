@@ -140,7 +140,11 @@ test.describe('Rendering Validation', () => {
 
       return {
         name: terrainMesh.name,
-        position: { x: terrainMesh.position.x, y: terrainMesh.position.y, z: terrainMesh.position.z },
+        position: {
+          x: terrainMesh.position.x,
+          y: terrainMesh.position.y,
+          z: terrainMesh.position.z,
+        },
         vertices: terrainMesh.getTotalVertices(),
         visible: terrainMesh.isVisible,
         hasMaterial: terrainMesh.material != null,

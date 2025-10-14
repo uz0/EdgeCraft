@@ -284,7 +284,10 @@ export class W3XMapLoader implements IMapLoader {
       `[W3XMapLoader] 🔍 Texture index distribution:`,
       Array.from(textureIndexCounts.entries())
         .sort((a, b) => a[0] - b[0])
-        .map(([idx, count]) => `  idx${idx}=${count} tiles (${((count / textureIndices.length) * 100).toFixed(1)}%)`)
+        .map(
+          ([idx, count]) =>
+            `  idx${idx}=${count} tiles (${((count / textureIndices.length) * 100).toFixed(1)}%)`
+        )
         .join('\n')
     );
 

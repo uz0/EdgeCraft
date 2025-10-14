@@ -58,11 +58,12 @@ test('quick rendering validation', async ({ page }) => {
       lights: {
         count: scene.lights?.length || 0,
         names: scene.lights?.map((l: any) => l.name) || [],
-        details: scene.lights?.map((l: any) => ({
-          name: l.name,
-          type: l.getClassName(),
-          intensity: l.intensity,
-        })) || [],
+        details:
+          scene.lights?.map((l: any) => ({
+            name: l.name,
+            type: l.getClassName(),
+            intensity: l.intensity,
+          })) || [],
       },
 
       // Fix 3: Camera

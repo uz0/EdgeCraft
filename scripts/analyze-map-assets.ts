@@ -33,24 +33,24 @@ interface AssetRequirements {
  */
 function getTilesetName(char: string): string {
   const tilesets: Record<string, string> = {
-    'A': 'Ashenvale (Night Elf Forest)',
-    'B': 'Barrens (Desert Wasteland)',
-    'C': 'Felwood (Corrupted Forest)',
-    'D': 'Dungeon (Underground)',
-    'F': 'Lordaeron Fall (Autumn)',
-    'G': 'Underground (Cave)',
-    'I': 'Icecrown (Frozen Wasteland)',
-    'J': 'Dalaran (City Ruins)',
-    'K': 'Black Citadel (Undead)',
-    'L': 'Lordaeron Summer (Plains)',
-    'N': 'Northrend (Snow)',
-    'O': 'Outland (Alien Wasteland)',
-    'Q': 'Village Fall (Autumn Village)',
-    'V': 'Village (Human Village)',
-    'W': 'Lordaeron Winter (Snow Plains)',
-    'X': 'Dalaran (City)',
-    'Y': 'Cityscape (Urban)',
-    'Z': 'Sunken Ruins (Underwater)',
+    A: 'Ashenvale (Night Elf Forest)',
+    B: 'Barrens (Desert Wasteland)',
+    C: 'Felwood (Corrupted Forest)',
+    D: 'Dungeon (Underground)',
+    F: 'Lordaeron Fall (Autumn)',
+    G: 'Underground (Cave)',
+    I: 'Icecrown (Frozen Wasteland)',
+    J: 'Dalaran (City Ruins)',
+    K: 'Black Citadel (Undead)',
+    L: 'Lordaeron Summer (Plains)',
+    N: 'Northrend (Snow)',
+    O: 'Outland (Alien Wasteland)',
+    Q: 'Village Fall (Autumn Village)',
+    V: 'Village (Human Village)',
+    W: 'Lordaeron Winter (Snow Plains)',
+    X: 'Dalaran (City)',
+    Y: 'Cityscape (Urban)',
+    Z: 'Sunken Ruins (Underwater)',
   };
   return tilesets[char] || `Unknown (${char})`;
 }
@@ -75,13 +75,13 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
   }
 
   // Parse MPQ archive
-  const mpqBuffer = mapBuffer.slice(mpqOffset).buffer as ArrayBuffer;
+  const mpqBuffer = mapBuffer.slice(mpqOffset).buffer;
   const mpq = new MPQParser(mpqBuffer);
   const archive = mpq.parse();
   console.log(`   MPQ Files: ${archive.fileCount}`);
 
   // Extract war3map.w3i (map info)
-  const w3iFile = archive.files.find(f => f.name?.toLowerCase() === 'war3map.w3i');
+  const w3iFile = archive.files.find((f) => f.name?.toLowerCase() === 'war3map.w3i');
   if (!w3iFile) {
     throw new Error('war3map.w3i not found in MPQ archive');
   }
@@ -95,7 +95,7 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
   console.log(`   Players: ${mapInfo.playerCount}`);
 
   // Extract war3map.w3e (terrain)
-  const w3eFile = archive.files.find(f => f.name?.toLowerCase() === 'war3map.w3e');
+  const w3eFile = archive.files.find((f) => f.name?.toLowerCase() === 'war3map.w3e');
   if (!w3eFile) {
     throw new Error('war3map.w3e not found in MPQ archive');
   }
@@ -130,7 +130,7 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
   }
 
   // Extract war3map.doo (doodads)
-  const dooFile = archive.files.find(f => f.name?.toLowerCase() === 'war3map.doo');
+  const dooFile = archive.files.find((f) => f.name?.toLowerCase() === 'war3map.doo');
   let doodadTypes: { id: string; count: number }[] = [];
   let totalDoodads = 0;
 
@@ -152,7 +152,9 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
       .map(([id, count]) => ({ id, count }))
       .sort((a, b) => b.count - a.count);
 
-    console.log(`\n🌳 Doodads (${totalDoodads.toLocaleString()} total, ${doodadTypes.length} unique types):`);
+    console.log(
+      `\n🌳 Doodads (${totalDoodads.toLocaleString()} total, ${doodadTypes.length} unique types):`
+    );
 
     // Show top 20 most common doodads
     const topDoodads = doodadTypes.slice(0, 20);
@@ -192,14 +194,14 @@ function generateAssetManifest(requirements: AssetRequirements): string {
       name: requirements.tilesetName,
     },
     assets: {
-      terrainTextures: requirements.terrainTextures.map(t => ({
+      terrainTextures: requirements.terrainTextures.map((t) => ({
         w3xId: t.id,
         usage: t.count,
         required: true,
         assetPath: null, // To be filled in
         license: null, // To be filled in
       })),
-      doodadModels: requirements.doodadTypes.map(d => ({
+      doodadModels: requirements.doodadTypes.map((d) => ({
         w3xId: d.id,
         usage: d.count,
         required: true,
@@ -247,7 +249,6 @@ async function main() {
     console.log(`   Terrain Textures: ${requirements.terrainTextures.length} unique`);
     console.log(`   Doodad Types: ${requirements.doodadTypes.length} unique`);
     console.log(`   Total Doodads: ${requirements.totalDoodads.toLocaleString()}`);
-
   } catch (error) {
     console.error(`❌ Error analyzing map:`, error);
     process.exit(1);

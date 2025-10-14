@@ -357,15 +357,9 @@ void main(void) {
   ): void {
     const { textureIds, blendMap } = options;
 
-    console.log(
-      `[TerrainRenderer] 🔍 MATERIAL DEBUG - Applying multi-texture material`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 Total textures requested: ${textureIds.length}`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 Texture IDs: [${textureIds.join(', ')}]`
-    );
+    console.log(`[TerrainRenderer] 🔍 MATERIAL DEBUG - Applying multi-texture material`);
+    console.log(`[TerrainRenderer] 🔍 Total textures requested: ${textureIds.length}`);
+    console.log(`[TerrainRenderer] 🔍 Texture IDs: [${textureIds.join(', ')}]`);
 
     // Load up to 8 textures (shader now supports 8)
     const textures: BABYLON.Texture[] = [];
@@ -392,9 +386,7 @@ void main(void) {
           this.scene
         );
         textures.push(fallbackTexture);
-        console.log(
-          `[TerrainRenderer] 🔶 Using fallback color for slot ${i}`
-        );
+        console.log(`[TerrainRenderer] 🔶 Using fallback color for slot ${i}`);
       }
     }
 
@@ -516,7 +508,10 @@ void main(void) {
       `[TerrainRenderer] 🔍 Index distribution:`,
       Array.from(indexCounts.entries())
         .sort((a, b) => a[0] - b[0])
-        .map(([idx, count]) => `  idx${idx}=${count} (${((count / blendMap.length) * 100).toFixed(1)}%)`)
+        .map(
+          ([idx, count]) =>
+            `  idx${idx}=${count} (${((count / blendMap.length) * 100).toFixed(1)}%)`
+        )
         .join('\n')
     );
 
