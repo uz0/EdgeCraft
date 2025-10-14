@@ -1306,6 +1306,16 @@ export class MPQParser {
       offset += 16;
     }
 
+    // Log first few entries for debugging
+    console.log(`[MPQParser Stream] Parsed ${blockTable.length} block entries`);
+    for (let i = 0; i < Math.min(5, blockTable.length); i++) {
+      const entry = blockTable[i];
+      const exists = (entry?.flags ?? 0 & 0x80000000) !== 0;
+      console.log(
+        `  Block ${i}: filePos=${entry?.filePos}, compressedSize=${entry?.compressedSize}, exists=${exists}`
+      );
+    }
+
     return blockTable;
   }
 
@@ -1440,7 +1450,12 @@ export class MPQParser {
 
     const isCompressed = (blockEntry.flags & 0x00000200) !== 0;
 
+    console.log(
+      `[MPQParser Stream] Extracting block ${blockIndex}: filePos=${blockEntry.filePos}, compressedSize=${blockEntry.compressedSize}, uncompressedSize=${blockEntry.uncompressedSize}`
+    );
+
     // Read file data from archive
+    // Note: For W3N files, filePos is expected to be an absolute file position
     const rawData = await reader.readRange(blockEntry.filePos, blockEntry.compressedSize);
 
     // Decompress if compressed
