@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { MapGallery, type MapMetadata } from './ui/MapGallery';
 import { MapPreviewReport } from './ui/MapPreviewReport';
 import { MapRendererCore } from './engine/rendering/MapRendererCore';
@@ -96,6 +96,16 @@ const App: React.FC = () => {
     const scene = new BABYLON.Scene(engine);
     sceneRef.current = scene;
 
+    // Expose engine and scene to window for E2E tests and debugging
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).__testBabylonEngine = engine;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).__testBabylonScene = scene;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).scene = scene;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).engine = engine;
+
     // Basic lighting
     const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 0.7;
@@ -143,6 +153,62 @@ const App: React.FC = () => {
       engine.dispose();
     };
   }, []);
+
+  // Handle map selection (defined before useEffects that use it)
+  const handleMapSelect = useCallback(async (map: MapMetadata): Promise<void> => {
+    if (!rendererRef.current) {
+      setError('Renderer not initialized');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setLoadingProgress(`Loading ${map.name}...`);
+    setShowGallery(false);
+
+    try {
+      // Fetch map file from /maps folder
+      console.log('[handleMapSelect] Fetching:', `/maps/${encodeURIComponent(map.name)}`);
+      const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch map: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      console.log('[handleMapSelect] Blob size:', blob.size, 'bytes');
+      const file = new File([blob], map.name);
+      console.log('[handleMapSelect] File created:', file.name, file.size, 'bytes');
+
+      // Determine file extension
+      const ext = `.${map.format}`;
+      console.log('[handleMapSelect] Extension:', ext);
+
+      setLoadingProgress('Parsing map data...');
+
+      // Load and render map
+      const result = await rendererRef.current.loadMap(file, ext);
+
+      if (result.success) {
+        setCurrentMap(map);
+        setLoadingProgress('');
+        console.log('✅ Map loaded successfully:', map.name);
+
+        // Resize canvas now that it's visible
+        if (engineRef.current && !engineRef.current.isDisposed) {
+          engineRef.current.resize();
+          console.log('[APP] Canvas resized after map load');
+        }
+      } else {
+        throw new Error('Failed to load map');
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(`Failed to load map: ${errorMsg}`);
+      setShowGallery(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []); // Empty deps - uses refs and setters which are stable
 
   // Load map list on mount
   useEffect(() => {
@@ -264,51 +330,51 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maps]);
 
-  // Handle map selection
-  const handleMapSelect = async (map: MapMetadata): Promise<void> => {
-    if (!rendererRef.current) {
-      setError('Renderer not initialized');
-      return;
-    }
+  // Expose handleMapSelect for E2E tests
+  useEffect(() => {
+    console.log('[APP] Exposing handleMapSelect on window for E2E tests');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).__handleMapSelect = handleMapSelect;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).__testReady = true;
 
-    setIsLoading(true);
-    setError(null);
-    setLoadingProgress(`Loading ${map.name}...`);
-    setShowGallery(false);
+    return () => {
+      console.log('[APP] Removing handleMapSelect from window');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      delete (window as any).__handleMapSelect;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      delete (window as any).__testReady;
+    };
+  }, [handleMapSelect]); // Only depend on handleMapSelect (stable with useCallback)
 
-    try {
-      // Fetch map file from /maps folder
-      const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch map: ${response.statusText}`);
-      }
+  // Register event listener for test:loadMap events (E2E testing)
+  useEffect(() => {
+    const handleTestLoadMap = (event: Event): void => {
+      const customEvent = event as CustomEvent<{ name: string; path: string; format: string }>;
+      console.log('[APP] test:loadMap event received:', customEvent.detail);
 
-      const blob = await response.blob();
-      const file = new File([blob], map.name);
-
-      // Determine file extension
-      const ext = `.${map.format}`;
-
-      setLoadingProgress('Parsing map data...');
-
-      // Load and render map
-      const result = await rendererRef.current.loadMap(file, ext);
-
-      if (result.success) {
-        setCurrentMap(map);
-        setLoadingProgress('');
-        console.log('✅ Map loaded successfully:', map.name);
+      // Find the map by name
+      const map = maps.find((m) => m.name === customEvent.detail.name);
+      if (map) {
+        console.log('[APP] Loading map from event:', map.name);
+        void handleMapSelect(map);
       } else {
-        throw new Error('Failed to load map');
+        console.error('[APP] Map not found:', customEvent.detail.name);
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setError(`Failed to load map: ${errorMsg}`);
-      setShowGallery(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    console.log('[APP] Registering test:loadMap event listener');
+    window.addEventListener('test:loadMap', handleTestLoadMap);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    (window as any).__testLoadMapListenerRegistered = true;
+
+    return () => {
+      console.log('[APP] Removing test:loadMap event listener');
+      window.removeEventListener('test:loadMap', handleTestLoadMap);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      delete (window as any).__testLoadMapListenerRegistered;
+    };
+  }, [maps, handleMapSelect]);
 
   // Handle back to gallery
   const handleBackToGallery = (): void => {
@@ -399,8 +465,6 @@ const App: React.FC = () => {
               )}
             </div>
 
-            <canvas ref={canvasRef} className="babylon-canvas" />
-
             {isLoading && (
               <div className="loading-overlay">
                 <div className="loading-spinner" />
@@ -416,6 +480,13 @@ const App: React.FC = () => {
             )}
           </section>
         )}
+
+        {/* Canvas always rendered for Babylon.js initialization */}
+        <canvas
+          ref={canvasRef}
+          className="babylon-canvas"
+          style={{ display: showGallery ? 'none' : 'block' }}
+        />
       </main>
 
       <footer className="app-footer">

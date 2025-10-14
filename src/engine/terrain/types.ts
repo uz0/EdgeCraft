@@ -6,9 +6,9 @@
  * Terrain options for heightmap-based terrain
  */
 export interface TerrainOptions {
-  /** Width of terrain */
+  /** Width of terrain in world units */
   width: number;
-  /** Height of terrain */
+  /** Height of terrain in world units */
   height: number;
   /** Number of subdivisions (affects detail and performance) */
   subdivisions: number;
@@ -16,10 +16,16 @@ export interface TerrainOptions {
   minHeight?: number;
   /** Maximum height of terrain */
   maxHeight: number;
-  /** Texture URLs for terrain materials */
+  /** Texture URLs for terrain materials (deprecated, use textureId instead) */
   textures?: string[];
+  /** Texture ID from map data (e.g., 'Ashenvale', 'Agrs') */
+  textureId?: string;
   /** Enable wireframe mode */
   wireframe?: boolean;
+  /** Width of splatmap in tiles (for multi-texture terrain) */
+  splatmapWidth?: number;
+  /** Height of splatmap in tiles (for multi-texture terrain) */
+  splatmapHeight?: number;
 }
 
 /**

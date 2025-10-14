@@ -2,13 +2,23 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  setupFiles: ['<rootDir>/jest.setup.js'],
+  setupFiles: ['<rootDir>/jest.setup.cjs'],
   setupFilesAfterEnv: ['@testing-library/jest-dom', '<rootDir>/jest.setup.ts'],
 
   roots: ['<rootDir>/src', '<rootDir>/tests'],
 
+  // Exclude E2E tests (Playwright) and WebGL-dependent integration tests from Jest
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/e2e/',
+    '/tests/e2e-fixtures/',
+    'tests/integration', // Skip WebGL-dependent tests (no leading slash)
+    'comprehensive\\.test\\.(ts|tsx)$', // Skip all comprehensive tests
+    'MapPreview.*\\.test\\.(ts|tsx)$', // Skip MapPreview tests (require Babylon.js WebGL)
+  ],
+
   transformIgnorePatterns: [
-    'node_modules/(?!@babylonjs)',
+    'node_modules/(?!@babylonjs|node-pkware)',
   ],
 
   testMatch: [

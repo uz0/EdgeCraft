@@ -39,6 +39,8 @@
 
 import * as BABYLON from '@babylonjs/core';
 import type { DoodadPlacement } from '../../formats/maps/types';
+import type { AssetLoader } from '../assets/AssetLoader';
+import { mapAssetID } from '../assets/AssetMap';
 
 /**
  * Doodad renderer configuration
@@ -55,6 +57,12 @@ export interface DoodadRendererConfig {
 
   /** Maximum doodads to render */
   maxDoodads?: number;
+
+  /** Map width in world units (e.g., 89 tiles * 128 = 11392) */
+  mapWidth?: number;
+
+  /** Map height in world units (e.g., 116 tiles * 128 = 14848) */
+  mapHeight?: number;
 }
 
 /**
@@ -119,52 +127,75 @@ export interface DoodadRenderStats {
  */
 export class DoodadRenderer {
   private scene: BABYLON.Scene;
+  private assetLoader: AssetLoader;
   private config: Required<DoodadRendererConfig>;
 
   private doodadTypes: Map<string, DoodadType> = new Map();
   private instances: Map<string, DoodadInstance> = new Map();
   private instanceBuffers: Map<string, Float32Array> = new Map();
+  private maxDoodadsWarningLogged = false;
 
-  constructor(scene: BABYLON.Scene, config?: DoodadRendererConfig) {
+  constructor(scene: BABYLON.Scene, assetLoader: AssetLoader, config?: DoodadRendererConfig) {
     this.scene = scene;
+    this.assetLoader = assetLoader;
     this.config = {
       enableInstancing: config?.enableInstancing ?? true,
       enableLOD: config?.enableLOD ?? true,
       lodDistance: config?.lodDistance ?? 100,
-      maxDoodads: config?.maxDoodads ?? 2000,
+      maxDoodads: config?.maxDoodads ?? 10000, // Increased from 2000 to handle large maps
+      mapWidth: config?.mapWidth ?? 0, // Default to 0 (no offset)
+      mapHeight: config?.mapHeight ?? 0, // Default to 0 (no offset)
     };
   }
 
   /**
    * Load doodad type (model)
-   * @param typeId - Doodad type identifier
-   * @param _modelPath - Path to model file (MDX/M3) - unused until format parsers ready
-   * @param variations - Optional variation model paths
+   * @param typeId - Doodad type identifier (e.g., 'ATtr', 'ARrk')
+   * @param _modelPath - Path to model file (unused, uses AssetMap instead)
+   * @param variations - Optional variation model paths (unused for now)
    */
-  public loadDoodadType(typeId: string, _modelPath: string, variations?: string[]): void {
-    // For now, use placeholder meshes
-    // TODO: Load actual MDX/M3 models when format parsers ready
+  public async loadDoodadType(
+    typeId: string,
+    _modelPath: string,
+    variations?: string[]
+  ): Promise<void> {
+    try {
+      // Map the doodad type ID to our asset ID
+      const mappedId = mapAssetID('w3x', 'doodad', typeId);
+      console.log(`[DoodadRenderer] Mapped doodad ID: ${typeId} -> ${mappedId}`);
 
-    const baseMesh = this.createPlaceholderMesh(typeId);
-    baseMesh.setEnabled(false); // Use as template only
+      // Load the model from AssetLoader
+      const baseMesh = await this.assetLoader.loadModel(mappedId);
+      baseMesh.setEnabled(false); // Use as template only
 
-    const variationMeshes: BABYLON.Mesh[] = [];
-    if (variations) {
-      for (let i = 0; i < variations.length; i++) {
-        const varMesh = this.createPlaceholderMesh(`${typeId}_var${i}`);
-        varMesh.setEnabled(false);
-        variationMeshes.push(varMesh);
+      const variationMeshes: BABYLON.Mesh[] = [];
+      if (variations && variations.length > 0) {
+        // For now, skip variations - will implement in Phase 2
+        console.log(`[DoodadRenderer] Skipping ${variations.length} variations for ${typeId}`);
       }
+
+      this.doodadTypes.set(typeId, {
+        typeId,
+        mesh: baseMesh,
+        variations: variationMeshes.length > 0 ? variationMeshes : undefined,
+        boundingRadius: 5, // TODO: Calculate from mesh bounds
+      });
+
+      console.log(`[DoodadRenderer] Loaded doodad type: ${typeId} (mapped to ${mappedId})`);
+    } catch (error) {
+      console.warn(`[DoodadRenderer] Failed to load doodad type ${typeId}, using fallback`, error);
+
+      // Fallback to placeholder mesh
+      const baseMesh = this.createPlaceholderMesh(typeId);
+      baseMesh.setEnabled(false);
+
+      this.doodadTypes.set(typeId, {
+        typeId,
+        mesh: baseMesh,
+        variations: undefined,
+        boundingRadius: 5,
+      });
     }
-
-    this.doodadTypes.set(typeId, {
-      typeId,
-      mesh: baseMesh,
-      variations: variationMeshes.length > 0 ? variationMeshes : undefined,
-      boundingRadius: 5, // Placeholder
-    });
-
-    console.log(`Loaded doodad type: ${typeId}`);
   }
 
   /**
@@ -173,14 +204,39 @@ export class DoodadRenderer {
    */
   public addDoodad(placement: DoodadPlacement): void {
     if (this.instances.size >= this.config.maxDoodads) {
-      console.warn(`Max doodads reached (${this.config.maxDoodads})`);
+      if (!this.maxDoodadsWarningLogged) {
+        console.warn(
+          `Max doodads reached (${this.config.maxDoodads}), ignoring additional doodads`
+        );
+        this.maxDoodadsWarningLogged = true;
+      }
       return;
     }
 
-    // Load type if not loaded
+    // Type should already be loaded - if not, log a warning
     if (!this.doodadTypes.has(placement.typeId)) {
-      // Auto-load with placeholder
-      void this.loadDoodadType(placement.typeId, '');
+      console.warn(
+        `[DoodadRenderer] Doodad type ${placement.typeId} not loaded, skipping instance`
+      );
+      return;
+    }
+
+    // W3X to Babylon.js coordinate mapping:
+    // W3X: X=right, Y=forward, Z=up
+    // Babylon: X=right, Y=up, Z=forward
+    // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
+    //
+    // IMPORTANT: W3X uses absolute world coordinates (0 to mapWidth/mapHeight),
+    // but Babylon.js CreateGroundFromHeightMap centers terrain at origin (0, 0, 0).
+    // Therefore, we must subtract half the map dimensions to align entities with terrain.
+
+    // Debug: log first instance to verify offset calculation
+    if (this.instances.size === 0) {
+      console.log(
+        `[DoodadRenderer] 🔍 COORDINATE DEBUG - First doodad:`,
+        `mapWidth=${this.config.mapWidth}, mapHeight=${this.config.mapHeight},`,
+        `raw W3X pos=(${placement.position.x.toFixed(1)}, ${placement.position.y.toFixed(1)}, ${placement.position.z.toFixed(1)})`
+      );
     }
 
     const instance: DoodadInstance = {
@@ -188,13 +244,21 @@ export class DoodadRenderer {
       typeId: placement.typeId,
       variation: placement.variation ?? 0,
       position: new BABYLON.Vector3(
-        placement.position.x,
-        placement.position.y,
-        placement.position.z
+        placement.position.x, // W3X is already centered - no offset needed
+        placement.position.z, // Height (W3X Z -> Babylon Y)
+        -placement.position.y // Just negate Y for Z axis flip
       ),
       rotation: placement.rotation,
-      scale: new BABYLON.Vector3(placement.scale.x, placement.scale.y, placement.scale.z),
+      scale: new BABYLON.Vector3(placement.scale.x, placement.scale.z, placement.scale.y),
     };
+
+    // Debug: log first instance result
+    if (this.instances.size === 0) {
+      console.log(
+        `[DoodadRenderer] 🔍 COORDINATE DEBUG - After offset:`,
+        `Babylon pos=(${instance.position.x.toFixed(1)}, ${instance.position.y.toFixed(1)}, ${instance.position.z.toFixed(1)})`
+      );
+    }
 
     this.instances.set(instance.id, instance);
   }
@@ -289,36 +353,24 @@ export class DoodadRenderer {
 
   /**
    * Create placeholder mesh for testing
+   * NOTE: Using simple boxes for ALL doodads to maximize performance
+   * Creating unique shapes/materials for each type tanks FPS from 60 to 4
    */
   private createPlaceholderMesh(name: string): BABYLON.Mesh {
-    // Randomize shape for visual variety
-    const shapes = ['box', 'cylinder', 'cone', 'sphere'];
-    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    // Use larger box size (5 instead of 2) for better visibility at RTS zoom levels
+    const mesh = BABYLON.MeshBuilder.CreateBox(name, { size: 5 }, this.scene);
 
-    let mesh: BABYLON.Mesh;
-
-    if (shape === 'box') {
-      mesh = BABYLON.MeshBuilder.CreateBox(name, { size: 3 }, this.scene);
-    } else if (shape === 'cylinder') {
-      mesh = BABYLON.MeshBuilder.CreateCylinder(name, { height: 5, diameter: 2 }, this.scene);
-    } else if (shape === 'cone') {
-      mesh = BABYLON.MeshBuilder.CreateCylinder(
-        name,
-        { height: 6, diameterTop: 0, diameterBottom: 3 },
-        this.scene
-      );
-    } else {
-      mesh = BABYLON.MeshBuilder.CreateSphere(name, { diameter: 3 }, this.scene);
+    // Use a shared material for all doodads (better performance)
+    if (!this.scene.getMaterialByName('doodad_shared_material')) {
+      const material = new BABYLON.StandardMaterial('doodad_shared_material', this.scene);
+      // Brighter color for visibility (white with slight tint)
+      material.diffuseColor = new BABYLON.Color3(0.9, 0.9, 0.9);
+      material.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+      // Enable back-face culling
+      material.backFaceCulling = true;
     }
 
-    // Random color
-    const material = new BABYLON.StandardMaterial(`${name}_mat`, this.scene);
-    material.diffuseColor = new BABYLON.Color3(
-      Math.random() * 0.5 + 0.2, // 0.2-0.7
-      Math.random() * 0.5 + 0.3, // 0.3-0.8
-      Math.random() * 0.3 + 0.1 // 0.1-0.4
-    );
-    mesh.material = material;
+    mesh.material = this.scene.getMaterialByName('doodad_shared_material');
 
     return mesh;
   }
