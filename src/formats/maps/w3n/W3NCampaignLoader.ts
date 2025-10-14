@@ -408,7 +408,7 @@ export class W3NCampaignLoader implements IMapLoader {
         const block = archive.blockTable[hash.blockIndex];
 
         // Block doesn't exist
-        if ((block.flags & 0x80000000) === 0) return false;
+        if (!block || (block.flags & 0x80000000) === 0) return false;
 
         // Skip very small files (<10KB - too small for a map)
         const size = block.uncompressedSize || block.compressedSize || 0;
@@ -425,8 +425,8 @@ export class W3NCampaignLoader implements IMapLoader {
       }))
       // Sort by uncompressed size (larger files more likely to be maps)
       .sort((a, b) => {
-        const sizeA = a.block.uncompressedSize || a.block.compressedSize || 0;
-        const sizeB = b.block.uncompressedSize || b.block.compressedSize || 0;
+        const sizeA = a.block?.uncompressedSize || a.block?.compressedSize || 0;
+        const sizeB = b.block?.uncompressedSize || b.block?.compressedSize || 0;
         return sizeB - sizeA;
       });
 
@@ -445,6 +445,8 @@ export class W3NCampaignLoader implements IMapLoader {
       checked++;
 
       try {
+        if (!block) continue; // Skip if block is undefined
+
         const size = block.uncompressedSize || block.compressedSize || 0;
         console.log(
           `[W3NCampaignLoader] 🔍 [${checked}/${Math.min(50, validEntries.length)}] Checking block ${blockIndex} (${(size / 1024).toFixed(1)}KB)...`

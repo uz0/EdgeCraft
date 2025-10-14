@@ -297,18 +297,12 @@ export class MPQParser {
       const sectorSizeShift = this.view.getUint16(headerOffset + 14, true);
       const blockSize = 512 * Math.pow(2, sectorSizeShift);
 
-      // Read raw table positions from header
-      const rawHashTablePos = this.view.getUint32(headerOffset + 16, true);
-      const rawBlockTablePos = this.view.getUint32(headerOffset + 20, true);
+      // Read table positions from header
+      // Note: Table positions in MPQ headers are ALWAYS relative to the MPQ header start
+      const hashTablePos = this.view.getUint32(headerOffset + 16, true) + headerOffset;
+      const blockTablePos = this.view.getUint32(headerOffset + 20, true) + headerOffset;
       const hashTableSize = this.view.getUint32(headerOffset + 24, true);
       const blockTableSize = this.view.getUint32(headerOffset + 28, true);
-
-      // For embedded MPQ files (like W3N campaigns), the table positions in the header
-      // may already be absolute file positions rather than relative to MPQ start.
-      // Check if the raw positions look absolute (already >= headerOffset).
-      // If they are smaller than headerOffset, they're relative and we need to add the offset.
-      const hashTablePos = rawHashTablePos >= headerOffset ? rawHashTablePos : rawHashTablePos + headerOffset;
-      const blockTablePos = rawBlockTablePos >= headerOffset ? rawBlockTablePos : rawBlockTablePos + headerOffset;
 
       // Validate header values are reasonable
       const isValid =
@@ -1165,20 +1159,14 @@ export class MPQParser {
       const sectorSizeShift = view.getUint16(headerOffset + 14, true);
       const blockSize = 512 * Math.pow(2, sectorSizeShift);
 
-      // Read raw table positions from header
-      const rawHashTablePos = view.getUint32(headerOffset + 16, true);
-      const rawBlockTablePos = view.getUint32(headerOffset + 20, true);
+      // Read table positions from header
+      // Note: Table positions in MPQ headers are ALWAYS relative to the MPQ header start
+      const hashTablePos = view.getUint32(headerOffset + 16, true) + headerOffset;
+      const blockTablePos = view.getUint32(headerOffset + 20, true) + headerOffset;
       const hashTableSize = view.getUint32(headerOffset + 24, true);
       const blockTableSize = view.getUint32(headerOffset + 28, true);
 
-      // For embedded MPQ files (like W3N campaigns), the table positions in the header
-      // may already be absolute file positions rather than relative to MPQ start.
-      // Check if the raw positions look absolute (already > headerOffset).
-      // If they are smaller than headerOffset, they're relative and we need to add the offset.
-      const hashTablePos = rawHashTablePos >= headerOffset ? rawHashTablePos : rawHashTablePos + headerOffset;
-      const blockTablePos = rawBlockTablePos >= headerOffset ? rawBlockTablePos : rawBlockTablePos + headerOffset;
-
-      console.log(`[MPQParser Stream] Table positions: hash=${hashTablePos} (raw=${rawHashTablePos}), block=${blockTablePos} (raw=${rawBlockTablePos}), headerOffset=${headerOffset}`);
+      console.log(`[MPQParser Stream] Table positions: hash=${hashTablePos}, block=${blockTablePos}, headerOffset=${headerOffset}`);
 
       // Validate header values
       // Note: In streaming mode, we can't check if table positions are within data.byteLength
