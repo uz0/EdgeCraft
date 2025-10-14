@@ -441,6 +441,17 @@ export class W3NCampaignLoader implements IMapLoader {
         const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
         const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
 
+        // Log extracted data preview for debugging
+        const previewBytes = Array.from(
+          new Uint8Array(mapData.data.slice(0, Math.min(16, mapData.data.byteLength)))
+        )
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join(' ');
+
+        console.log(
+          `[W3NCampaignLoader] 📊 Block ${blockIndex}: extracted ${(mapData.data.byteLength / 1024).toFixed(1)}KB, magic0=0x${magic0.toString(16)}, magic512=0x${magic512.toString(16)}, first 16 bytes: ${previewBytes}`
+        );
+
         if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
           console.log(
             `[W3NCampaignLoader] ✅ Found embedded W3X in block ${blockIndex} (${(mapData.data.byteLength / 1024).toFixed(1)}KB)!`
@@ -452,6 +463,10 @@ export class W3NCampaignLoader implements IMapLoader {
 
           // Only extract the first map for Phase 1
           break;
+        } else {
+          console.log(
+            `[W3NCampaignLoader] ❌ Block ${blockIndex}: Not a W3X map (MPQ magic not found)`
+          );
         }
       } catch (error) {
         // Only log decompression errors for debugging, don't clutter console with ADPCM warnings
