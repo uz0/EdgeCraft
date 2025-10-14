@@ -73,14 +73,30 @@ export class W3NCampaignLoader implements IMapLoader {
       if (w3fData) {
         const w3fParser = new W3FCampaignInfoParser(w3fData.data);
         campaignInfo = w3fParser.parse();
+        console.log('[W3NCampaignLoader] ✅ Campaign info parsed successfully');
       }
     } catch (error) {
       // Campaign info is optional, continue without it
-      console.warn('Failed to parse campaign info:', error);
+      // This is common with corrupted campaigns or unusual compression
+      console.warn(
+        '[W3NCampaignLoader] Failed to parse campaign info (non-critical):',
+        error instanceof Error ? error.message : error
+      );
     }
 
     // Extract embedded maps
-    const embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
+    let embeddedMaps: Array<{ data: ArrayBuffer; index: number }> = [];
+    try {
+      embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
+    } catch (error) {
+      console.error(
+        '[W3NCampaignLoader] Failed to extract embedded maps:',
+        error instanceof Error ? error.message : error
+      );
+      throw new Error(
+        `Failed to extract embedded maps: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
 
     if (embeddedMaps.length === 0) {
       throw new Error('No maps found in campaign archive');
@@ -88,7 +104,18 @@ export class W3NCampaignLoader implements IMapLoader {
 
     // Parse first map using W3XMapLoader
     const firstMap = embeddedMaps[0]!; // Safe: we checked length > 0 above
-    const mapData = await this.w3xLoader.parse(firstMap.data);
+    let mapData: RawMapData;
+    try {
+      mapData = await this.w3xLoader.parse(firstMap.data);
+    } catch (error) {
+      console.error(
+        '[W3NCampaignLoader] Failed to parse first map:',
+        error instanceof Error ? error.message : error
+      );
+      throw new Error(
+        `Failed to parse first map: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
 
     // Override format to 'w3n' and add campaign info to description
     const result: RawMapData = {
@@ -125,58 +152,150 @@ export class W3NCampaignLoader implements IMapLoader {
     const mpqParser = new MPQParser(new ArrayBuffer(0));
 
     // Parse MPQ archive using streaming
+    // NOTE: We DON'T use extractFiles because W3N campaigns have unpredictable filenames
+    // Instead, we'll iterate the block table after parsing to find embedded W3X files
     const mpqResult = await mpqParser.parseStream(reader, {
-      extractFiles: ['war3campaign.w3f', '*.w3x', '*.w3m'], // Only extract what we need
       onProgress: (stage, progress) => {
         console.log(`${stage}: ${progress.toFixed(1)}%`);
       },
     });
 
     if (!mpqResult.success) {
-      throw new Error(`Failed to parse campaign MPQ archive: ${mpqResult.error}`);
+      console.warn(`[W3NCampaignLoader] Parse had issues: ${mpqResult.error}, but continuing...`);
+      // Don't throw - we can still work with partial results if we have map files
     }
 
     console.log(`Campaign parsed in ${mpqResult.parseTimeMs?.toFixed(0)}ms`);
+    console.log(`[W3NCampaignLoader] Block table entries: ${mpqResult.blockTable?.length || 0}`);
 
-    // Extract campaign info (optional - for metadata)
-    let campaignInfo: W3FCampaignInfo | undefined;
-    try {
-      const w3fData = mpqResult.files.find((f) => f.name === 'war3campaign.w3f');
-      if (w3fData) {
-        const w3fParser = new W3FCampaignInfoParser(w3fData.data);
-        campaignInfo = w3fParser.parse();
+    // Find embedded W3X files by iterating block table and checking for MPQ magic
+    // This is more reliable than filename-based extraction since W3N campaigns
+    // have unpredictable internal filenames
+    if (!mpqResult.blockTable) {
+      console.warn(
+        '[W3NCampaignLoader] Block table not available from streaming parse, trying in-memory fallback...'
+      );
+      // Fallback to in-memory parsing for this file
+      // This can happen with corrupted or unusual MPQ structures
+      try {
+        return await this.parseInMemory(file);
+      } catch (fallbackError) {
+        throw new Error(
+          `Block table not available from streaming parse, and in-memory fallback failed: ${
+            fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+          }`
+        );
       }
-    } catch (error) {
-      // Campaign info is optional, continue without it
-      console.warn('Failed to parse campaign info:', error);
     }
 
-    // Find first map file (w3x or w3m)
-    const firstMapFile = mpqResult.files.find((f) => {
-      const lower = f.name.toLowerCase();
-      return lower.endsWith('.w3x') || lower.endsWith('.w3m');
-    });
+    console.log('[W3NCampaignLoader] Searching for embedded W3X files by size and MPQ magic...');
 
-    if (!firstMapFile) {
-      throw new Error('No maps found in campaign archive');
+    // Find large files (>100KB compressed) that are likely W3X maps
+    const largeBlocks = mpqResult.blockTable
+      .map((block, index) => ({ block, index }))
+      .filter(({ block }) => {
+        const exists = (block.flags & 0x80000000) !== 0;
+        const isLarge = block.compressedSize > 100000; // >100KB
+        return exists && isLarge;
+      })
+      .sort((a, b) => b.block.compressedSize - a.block.compressedSize);
+
+    console.log(`[W3NCampaignLoader] Found ${largeBlocks.length} large blocks (>100KB)`);
+
+    let firstMapData: ArrayBuffer | null = null;
+
+    // Check up to 30 largest blocks to find a valid W3X map
+    for (const { block, index } of largeBlocks.slice(0, 30)) {
+      console.log(
+        `[W3NCampaignLoader] Checking block ${index} (${block.compressedSize} bytes compressed)...`
+      );
+
+      try {
+        // Read first 1KB to check for MPQ magic without extracting the whole file
+        const headerData = await reader.readRange(
+          block.filePos,
+          Math.min(1024, block.compressedSize)
+        );
+
+        // Create a fresh ArrayBuffer copy to avoid DataView offset issues
+        const safeBuffer = headerData.buffer.slice(
+          headerData.byteOffset,
+          headerData.byteOffset + headerData.byteLength
+        );
+        const view = new DataView(safeBuffer);
+
+        // Check for MPQ magic at common offsets (0, 512, 1024)
+        const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
+        const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
+
+        const hasMPQMagic = magic0 === 0x1a51504d || magic512 === 0x1a51504d;
+
+        if (hasMPQMagic) {
+          console.log(`[W3NCampaignLoader] ✅ Found MPQ magic in block ${index}! Extracting...`);
+
+          // Extract the full file
+          const mapFile = await mpqParser.extractFileByIndexStream(
+            index,
+            reader,
+            mpqResult.blockTable
+          );
+
+          if (mapFile && mapFile.data.byteLength > 0) {
+            console.log(
+              `[W3NCampaignLoader] ✅ Extracted ${mapFile.data.byteLength} bytes from block ${index}`
+            );
+
+            // Validate this is an actual W3X map before accepting it
+            try {
+              const testParser = new MPQParser(mapFile.data);
+              const parseResult = testParser.parse();
+              const archive = parseResult.archive;
+
+              if (archive && archive.blockTable && archive.blockTable.length > 5) {
+                console.log(
+                  `[W3NCampaignLoader] ✅ Validated: block ${index} has ${archive.blockTable.length} files (likely a real W3X map)`
+                );
+                firstMapData = mapFile.data;
+                break;
+              } else {
+                console.log(
+                  `[W3NCampaignLoader] ⚠️ Block ${index}: MPQ has too few files (${archive?.blockTable?.length ?? 0}), likely not a map - continuing scan...`
+                );
+                // Continue to next block
+              }
+            } catch (validationError) {
+              console.log(
+                `[W3NCampaignLoader] ⚠️ Block ${index}: MPQ validation failed - ${validationError instanceof Error ? validationError.message : String(validationError)} - continuing scan...`
+              );
+              // Continue to next block
+            }
+          }
+        } else {
+          console.log(
+            `[W3NCampaignLoader] Block ${index} is not an MPQ (magic: 0x${magic0.toString(16)}, 0x${magic512.toString(16)})`
+          );
+        }
+      } catch (error) {
+        console.warn(`[W3NCampaignLoader] Failed to check block ${index}:`, error);
+        continue;
+      }
+    }
+
+    if (!firstMapData) {
+      throw new Error('No embedded W3X maps found in campaign archive');
     }
 
     // Parse first map using W3XMapLoader
-    const mapData = await this.w3xLoader.parse(firstMapFile.data);
+    console.log(`[W3NCampaignLoader] Parsing extracted W3X map...`);
+    const mapData = await this.w3xLoader.parse(firstMapData);
 
-    // Override format to 'w3n' and add campaign info to description
+    // Override format to 'w3n'
     const result: RawMapData = {
       ...mapData,
       format: 'w3n',
     };
 
-    // Add campaign info to map metadata if available
-    if (campaignInfo) {
-      result.info = {
-        ...result.info,
-        description: this.buildDescription(campaignInfo, result.info.description, 0),
-      };
-    }
+    console.log(`[W3NCampaignLoader] ✅ Successfully loaded map: ${result.info.name}`);
 
     return result;
   }
@@ -190,45 +309,229 @@ export class W3NCampaignLoader implements IMapLoader {
   ): Promise<Array<{ data: ArrayBuffer; index: number }>> {
     const maps: Array<{ data: ArrayBuffer; index: number }> = [];
 
-    // Try to extract (listfile) to get list of all files
-    const listFile = await mpqParser.extractFile('(listfile)');
-    let fileList: string[] = [];
+    // Step 1: Try filename-based extraction (fast path)
+    try {
+      const listFile = await mpqParser.extractFile('(listfile)');
+      let fileList: string[] = [];
 
-    if (listFile) {
-      // Parse listfile (text file with one filename per line)
-      const decoder = new TextDecoder('utf-8');
-      const listContent = decoder.decode(listFile.data);
-      fileList = listContent
-        .split(/[\r\n]+/)
-        .map((f) => f.trim())
-        .filter((f) => f.length > 0);
-    } else {
-      // Fallback: try common campaign map naming patterns
-      fileList = this.generateCommonMapNames();
+      if (listFile) {
+        // Parse listfile (text file with one filename per line)
+        const decoder = new TextDecoder('utf-8');
+        const listContent = decoder.decode(listFile.data);
+        fileList = listContent
+          .split(/[\r\n]+/)
+          .map((f) => f.trim())
+          .filter((f) => f.length > 0);
+      } else {
+        // Fallback: try common campaign map naming patterns
+        fileList = this.generateCommonMapNames();
+      }
+
+      // Filter for .w3x and .w3m files
+      const mapFiles = fileList.filter((f) => {
+        const lower = f.toLowerCase();
+        return lower.endsWith('.w3x') || lower.endsWith('.w3m');
+      });
+
+      // Extract each map
+      let index = 0;
+      for (const mapFile of mapFiles) {
+        try {
+          const mapData = await mpqParser.extractFile(mapFile);
+          if (mapData && mapData.data.byteLength > 0) {
+            console.log(
+              `[W3NCampaignLoader] ✅ Extracted ${mapFile} (${mapData.data.byteLength} bytes)`
+            );
+            maps.push({
+              data: mapData.data,
+              index,
+            });
+            index++;
+          }
+        } catch (error) {
+          console.warn(
+            `[W3NCampaignLoader] Failed to extract map ${mapFile}:`,
+            error instanceof Error ? error.message : error
+          );
+          // Continue trying other maps
+        }
+      }
+    } catch (error) {
+      console.warn(
+        '[W3NCampaignLoader] Filename-based extraction failed:',
+        error instanceof Error ? error.message : error
+      );
     }
 
-    // Filter for .w3x and .w3m files
-    const mapFiles = fileList.filter((f) => {
-      const lower = f.toLowerCase();
-      return lower.endsWith('.w3x') || lower.endsWith('.w3m');
-    });
+    // Step 2: If filename-based extraction failed, use block scanning (robust fallback)
+    if (maps.length === 0) {
+      console.log(
+        '[W3NCampaignLoader] No maps found via filenames, trying block scanning fallback...'
+      );
+      return await this.extractEmbeddedMapsByBlockScan(mpqParser);
+    }
 
-    // Extract each map
-    let index = 0;
-    for (const mapFile of mapFiles) {
+    return maps;
+  }
+
+  /**
+   * Extract embedded maps by scanning hash table (robust fallback)
+   * This is used when filename-based extraction fails
+   * Uses hash table to intelligently find W3X files instead of blind block scanning
+   */
+  private async extractEmbeddedMapsByBlockScan(
+    mpqParser: MPQParser
+  ): Promise<Array<{ data: ArrayBuffer; index: number }>> {
+    const maps: Array<{ data: ArrayBuffer; index: number }> = [];
+
+    // Get the MPQ archive from parser
+    const archive = mpqParser.getArchive();
+    if (!archive || !archive.blockTable || !archive.hashTable) {
+      console.error('[W3NCampaignLoader] No archive tables available for scanning');
+      return maps;
+    }
+
+    console.log(
+      `[W3NCampaignLoader] 🔍 Scanning hash table (${archive.hashTable.length} entries) for embedded W3X files...`
+    );
+
+    // Collect all non-empty hash entries that point to valid blocks
+    const validEntries = archive.hashTable
+      .map((hash, hashIndex) => ({ hash, hashIndex }))
+      .filter(({ hash }) => {
+        // Empty hash entry
+        if (hash.blockIndex === 0xffffffff) return false;
+
+        // Invalid block index
+        if (hash.blockIndex >= archive.blockTable.length) return false;
+
+        const block = archive.blockTable[hash.blockIndex];
+
+        // Block doesn't exist
+        if (!block || (block.flags & 0x80000000) === 0) return false;
+
+        // Skip very small files (<10KB - too small for a map)
+        const size = block.uncompressedSize || block.compressedSize || 0;
+        if (size < 10000) return false;
+
+        // Skip extremely large files (>50MB - too large for embedded maps, likely videos)
+        if (size > 50000000) return false;
+
+        return true;
+      })
+      .map(({ hash }) => ({
+        blockIndex: hash.blockIndex,
+        block: archive.blockTable[hash.blockIndex],
+      }))
+      // Sort by uncompressed size (larger files more likely to be maps)
+      .sort((a, b) => {
+        const sizeA = a.block?.uncompressedSize || a.block?.compressedSize || 0;
+        const sizeB = b.block?.uncompressedSize || b.block?.compressedSize || 0;
+        return sizeB - sizeA;
+      });
+
+    console.log(
+      `[W3NCampaignLoader] 📋 Found ${validEntries.length} valid hash entries (10KB-50MB) to scan`
+    );
+
+    // Try to extract candidates
+    let checked = 0;
+    for (const { blockIndex, block } of validEntries) {
+      // Limit scanning to avoid performance issues
+      if (checked >= 50) {
+        console.log('[W3NCampaignLoader] ⚠️ Reached scan limit (50 blocks), stopping');
+        break;
+      }
+      checked++;
+
       try {
-        const mapData = await mpqParser.extractFile(mapFile);
-        if (mapData && mapData.data.byteLength > 0) {
-          maps.push({
-            data: mapData.data,
-            index,
-          });
-          index++;
+        if (!block) continue; // Skip if block is undefined
+
+        const size = block.uncompressedSize || block.compressedSize || 0;
+        console.log(
+          `[W3NCampaignLoader] 🔍 [${checked}/${Math.min(50, validEntries.length)}] Checking block ${blockIndex} (${(size / 1024).toFixed(1)}KB)...`
+        );
+
+        // Extract the file by index
+        const mapData = await mpqParser.extractFileByIndex(blockIndex);
+
+        if (!mapData || mapData.data.byteLength === 0) {
+          console.log(
+            `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: extraction failed or returned 0 bytes`
+          );
+          continue;
+        }
+
+        // Check for MPQ magic (0x1A51504D = "MPQ\x1a")
+        const view = new DataView(mapData.data.slice(0, Math.min(1024, mapData.data.byteLength)));
+        const magic0 = view.byteLength >= 4 ? view.getUint32(0, true) : 0;
+        const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
+
+        // Log extracted data preview for debugging
+        const previewBytes = Array.from(
+          new Uint8Array(mapData.data.slice(0, Math.min(16, mapData.data.byteLength)))
+        )
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join(' ');
+
+        console.log(
+          `[W3NCampaignLoader] 📊 Block ${blockIndex}: extracted ${(mapData.data.byteLength / 1024).toFixed(1)}KB, magic0=0x${magic0.toString(16)}, magic512=0x${magic512.toString(16)}, first 16 bytes: ${previewBytes}`
+        );
+
+        if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
+          console.log(
+            `[W3NCampaignLoader] ✅ Found MPQ magic in block ${blockIndex} (${(mapData.data.byteLength / 1024).toFixed(1)}KB)!`
+          );
+
+          // Validate this is an actual W3X map by checking for required files
+          try {
+            const testParser = new MPQParser(mapData.data);
+            const parseResult = testParser.parse();
+            const archive = parseResult.archive;
+
+            // Check if this MPQ has typical W3X map files
+            if (archive && archive.blockTable && archive.blockTable.length > 5) {
+              console.log(
+                `[W3NCampaignLoader] ✅ Validated: block ${blockIndex} has ${archive.blockTable.length} files (likely a real W3X map)`
+              );
+              maps.push({
+                data: mapData.data,
+                index: maps.length,
+              });
+
+              // Only extract the first VALID map for Phase 1
+              break;
+            } else {
+              console.log(
+                `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: MPQ has too few files (${archive?.blockTable?.length ?? 0}), likely not a map - continuing scan...`
+              );
+            }
+          } catch (validationError) {
+            console.log(
+              `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: MPQ validation failed - ${validationError instanceof Error ? validationError.message : String(validationError)} - continuing scan...`
+            );
+          }
+        } else {
+          console.log(
+            `[W3NCampaignLoader] ❌ Block ${blockIndex}: Not a W3X map (MPQ magic not found)`
+          );
         }
       } catch (error) {
-        console.warn(`Failed to extract map ${mapFile}:`, error);
-        // Continue trying other maps
+        // Only log decompression errors for debugging, don't clutter console with ADPCM warnings
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        if (!errorMsg.includes('ADPCM') && !errorMsg.includes('SPARSE')) {
+          console.log(`[W3NCampaignLoader] ⚠️ Block ${blockIndex} extraction failed: ${errorMsg}`);
+        }
+        continue;
       }
+    }
+
+    if (maps.length === 0) {
+      console.error(
+        `[W3NCampaignLoader] ❌ No valid W3X maps found after scanning ${checked} blocks`
+      );
+    } else {
+      console.log(`[W3NCampaignLoader] ✅ Successfully extracted ${maps.length} map(s)`);
     }
 
     return maps;
