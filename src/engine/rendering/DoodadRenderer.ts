@@ -57,6 +57,12 @@ export interface DoodadRendererConfig {
 
   /** Maximum doodads to render */
   maxDoodads?: number;
+
+  /** Map width in world units (e.g., 89 tiles * 128 = 11392) */
+  mapWidth?: number;
+
+  /** Map height in world units (e.g., 116 tiles * 128 = 14848) */
+  mapHeight?: number;
 }
 
 /**
@@ -137,6 +143,8 @@ export class DoodadRenderer {
       enableLOD: config?.enableLOD ?? true,
       lodDistance: config?.lodDistance ?? 100,
       maxDoodads: config?.maxDoodads ?? 10000, // Increased from 2000 to handle large maps
+      mapWidth: config?.mapWidth ?? 0, // Default to 0 (no offset)
+      mapHeight: config?.mapHeight ?? 0, // Default to 0 (no offset)
     };
   }
 
@@ -217,14 +225,18 @@ export class DoodadRenderer {
     // W3X: X=right, Y=forward, Z=up
     // Babylon: X=right, Y=up, Z=forward
     // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
+    //
+    // IMPORTANT: W3X uses absolute world coordinates (0 to mapWidth/mapHeight),
+    // but Babylon.js CreateGroundFromHeightMap centers terrain at origin (0, 0, 0).
+    // Therefore, we must subtract half the map dimensions to align entities with terrain.
     const instance: DoodadInstance = {
       id: placement.id,
       typeId: placement.typeId,
       variation: placement.variation ?? 0,
       position: new BABYLON.Vector3(
-        placement.position.x, // X remains the same
+        placement.position.x - this.config.mapWidth / 2, // Center X (offset from corner to center)
         placement.position.z, // Height (W3X Z -> Babylon Y)
-        -placement.position.y // Forward direction (W3X Y -> -Babylon Z, negated)
+        -(placement.position.y - this.config.mapHeight / 2) // Center Z and negate
       ),
       rotation: placement.rotation,
       scale: new BABYLON.Vector3(placement.scale.x, placement.scale.z, placement.scale.y),

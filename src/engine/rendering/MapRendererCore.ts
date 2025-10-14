@@ -533,10 +533,16 @@ export class MapRendererCore {
         // W3X: X=right, Y=forward, Z=up
         // Babylon: X=right, Y=up, Z=forward
         // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
+        //
+        // IMPORTANT: W3X uses absolute world coordinates (0 to mapWidth/mapHeight),
+        // but Babylon.js CreateGroundFromHeightMap centers terrain at origin (0, 0, 0).
+        // Therefore, we must subtract half the map dimensions to align entities with terrain.
+        const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
+        const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
         instance.position = new BABYLON.Vector3(
-          unit.position.x,
+          unit.position.x - mapWidth / 2, // Center X (offset from corner to center)
           unit.position.z + 1, // Height + 1 to sit above terrain
-          -unit.position.y // Negate Y to convert to Babylon Z
+          -(unit.position.y - mapHeight / 2) // Center Z and negate
         );
         instance.rotation.y = unit.rotation;
         // Handle optional scale (default to 1,1,1 if undefined)
@@ -591,11 +597,17 @@ export class MapRendererCore {
     // Set maxDoodads to actual doodad count + 10% buffer for safety
     const maxDoodads = Math.ceil(doodads.length * 1.1);
 
+    // Calculate map dimensions for coordinate conversion
+    const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
+    const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
+
     this.doodadRenderer = new DoodadRenderer(this.scene, this.assetLoader, {
       enableInstancing: true,
       enableLOD: true,
       lodDistance: 100,
       maxDoodads,
+      mapWidth, // Pass map dimensions for coordinate centering
+      mapHeight,
     });
 
     console.log(`Rendering ${doodads.length} doodads (limit: ${maxDoodads})...`);
