@@ -134,7 +134,7 @@ export class MapRendererCore {
       await this.renderMap(mapData);
       const renderTimeMs = performance.now() - renderStart;
 
-      this.currentMap = mapData;
+      // Note: currentMap is set inside renderMap() before rendering entities
 
       console.log(
         `Map rendered successfully in ${renderTimeMs.toFixed(2)}ms (total: ${(loadTimeMs + renderTimeMs).toFixed(2)}ms)`
@@ -165,6 +165,10 @@ export class MapRendererCore {
   private async renderMap(mapData: RawMapData): Promise<void> {
     // Dispose previous map
     this.dispose();
+
+    // CRITICAL: Set currentMap BEFORE rendering entities
+    // Units and doodads need access to mapData.info.dimensions for coordinate conversion
+    this.currentMap = mapData;
 
     // Step 1: Initialize terrain
     await this.renderTerrain(mapData.terrain);
