@@ -7,11 +7,13 @@ export default {
 
   roots: ['<rootDir>/src', '<rootDir>/tests'],
 
-  // Exclude E2E tests (Playwright) from Jest
+  // Exclude E2E tests (Playwright) and WebGL-dependent integration tests from Jest
   testPathIgnorePatterns: [
     '/node_modules/',
     '/tests/e2e/',
     '/tests/e2e-fixtures/',
+    '/tests/integration/', // Skip WebGL-dependent tests (require GPU/browser context)
+    '/__tests__/.*\\.comprehensive\\.test\\.ts$', // Skip comprehensive tests requiring Babylon.js WebGL
   ],
 
   transformIgnorePatterns: [
