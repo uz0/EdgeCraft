@@ -454,15 +454,37 @@ export class W3NCampaignLoader implements IMapLoader {
 
         if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
           console.log(
-            `[W3NCampaignLoader] ✅ Found embedded W3X in block ${blockIndex} (${(mapData.data.byteLength / 1024).toFixed(1)}KB)!`
+            `[W3NCampaignLoader] ✅ Found MPQ magic in block ${blockIndex} (${(mapData.data.byteLength / 1024).toFixed(1)}KB)!`
           );
-          maps.push({
-            data: mapData.data,
-            index: maps.length, // Use sequential index for result
-          });
 
-          // Only extract the first map for Phase 1
-          break;
+          // Validate this is an actual W3X map by checking for required files
+          try {
+            const testParser = new MPQParser();
+            await testParser.parseInMemory(mapData.data);
+            const archive = testParser.getArchive();
+
+            // Check if this MPQ has typical W3X map files
+            if (archive && archive.blockTable && archive.blockTable.length > 5) {
+              console.log(
+                `[W3NCampaignLoader] ✅ Validated: block ${blockIndex} has ${archive.blockTable.length} files (likely a real W3X map)`
+              );
+              maps.push({
+                data: mapData.data,
+                index: maps.length,
+              });
+
+              // Only extract the first VALID map for Phase 1
+              break;
+            } else {
+              console.log(
+                `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: MPQ has too few files (${archive?.blockTable?.length ?? 0}), likely not a map - continuing scan...`
+              );
+            }
+          } catch (validationError) {
+            console.log(
+              `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: MPQ validation failed - ${validationError instanceof Error ? validationError.message : String(validationError)} - continuing scan...`
+            );
+          }
         } else {
           console.log(
             `[W3NCampaignLoader] ❌ Block ${blockIndex}: Not a W3X map (MPQ magic not found)`
