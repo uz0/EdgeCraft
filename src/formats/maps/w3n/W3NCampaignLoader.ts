@@ -247,9 +247,9 @@ export class W3NCampaignLoader implements IMapLoader {
 
             // Validate this is an actual W3X map before accepting it
             try {
-              const testParser = new MPQParser();
-              await testParser.parseInMemory(mapFile.data);
-              const archive = testParser.getArchive();
+              const testParser = new MPQParser(mapFile.data);
+              const parseResult = testParser.parse();
+              const archive = parseResult.archive;
 
               if (archive && archive.blockTable && archive.blockTable.length > 5) {
                 console.log(
@@ -483,9 +483,9 @@ export class W3NCampaignLoader implements IMapLoader {
 
           // Validate this is an actual W3X map by checking for required files
           try {
-            const testParser = new MPQParser();
-            await testParser.parseInMemory(mapData.data);
-            const archive = testParser.getArchive();
+            const testParser = new MPQParser(mapData.data);
+            const parseResult = testParser.parse();
+            const archive = parseResult.archive;
 
             // Check if this MPQ has typical W3X map files
             if (archive && archive.blockTable && archive.blockTable.length > 5) {
