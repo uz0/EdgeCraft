@@ -39,26 +39,36 @@ const PREVIEW_STANDARDS = {
   },
 };
 
-describe('Chrome DevTools MCP - All Map Preview Combinations', () => {
-  beforeAll(async () => {
-    console.log('\n🧪 Starting Chrome DevTools MCP Comprehensive Validation\n');
-    console.log(`URL: ${BASE_URL}`);
-    console.log(`Total maps: 24`);
-    console.log(`Total test scenarios: 144+ (24 maps × 6 scenarios)\n`);
+// Skip tests if running in CI or without Chrome DevTools MCP
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
-    // Navigate to gallery
-    try {
-      await mcp__chrome_devtools__navigate_page({ url: BASE_URL });
-      await mcp__chrome_devtools__wait_for({ text: 'Map Gallery', timeout: 10000 });
-      console.log('✅ Gallery loaded successfully\n');
-    } catch (error) {
-      console.error('⚠️ Failed to load gallery, tests will be skipped');
-    }
+if (isCI) {
+  describe.skip('Chrome DevTools MCP - All Map Preview Combinations (skipped in CI)', () => {
+    it('requires Chrome DevTools MCP and running dev server', () => {
+      // Placeholder test
+    });
   });
+} else {
+  describe('Chrome DevTools MCP - All Map Preview Combinations', () => {
+    beforeAll(async () => {
+      console.log('\n🧪 Starting Chrome DevTools MCP Comprehensive Validation\n');
+      console.log(`URL: ${BASE_URL}`);
+      console.log(`Total maps: 24`);
+      console.log(`Total test scenarios: 144+ (24 maps × 6 scenarios)\n`);
 
-  afterAll(() => {
-    console.log('\n✅ Chrome DevTools MCP validation complete\n');
-  });
+      // Navigate to gallery
+      try {
+        await mcp__chrome_devtools__navigate_page({ url: BASE_URL });
+        await mcp__chrome_devtools__wait_for({ text: 'Map Gallery', timeout: 10000 });
+        console.log('✅ Gallery loaded successfully\n');
+      } catch (error) {
+        console.error('⚠️ Failed to load gallery, tests will be skipped');
+      }
+    });
+
+    afterAll(() => {
+      console.log('\n✅ Chrome DevTools MCP validation complete\n');
+    });
 
   // ============================================================================
   // TEST SUITE 1: Per-Map Visual Validation (24 maps)
@@ -625,4 +635,5 @@ describe('Chrome DevTools MCP - All Map Preview Combinations', () => {
       expect(recommendations).toHaveLength(3);
     });
   });
-});
+  });
+}
