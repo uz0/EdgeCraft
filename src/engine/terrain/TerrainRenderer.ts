@@ -555,6 +555,14 @@ void main(void) {
     const splatmap1Data = new Uint8Array(splatmapSize); // Textures 0-3
     const splatmap2Data = new Uint8Array(splatmapSize); // Textures 4-7
 
+    // DEBUG: Sample first 5 blendMap values
+    console.log(
+      `[TerrainRenderer] 🔍 First 10 blendMap values: [${Array.from(blendMap.slice(0, 10)).join(', ')}]`
+    );
+
+    let nonZeroSplatmap1Count = 0;
+    let nonZeroSplatmap2Count = 0;
+
     for (let i = 0; i < blendMap.length; i++) {
       const textureIndex = blendMap[i] ?? 0; // 0-7
       const pixelOffset = i * 4;
@@ -565,6 +573,9 @@ void main(void) {
         splatmap1Data[pixelOffset + 1] = textureIndex === 1 ? 255 : 0; // G
         splatmap1Data[pixelOffset + 2] = textureIndex === 2 ? 255 : 0; // B
         splatmap1Data[pixelOffset + 3] = textureIndex === 3 ? 255 : 0; // A
+        if (textureIndex === 0 || textureIndex === 1 || textureIndex === 2 || textureIndex === 3) {
+          nonZeroSplatmap1Count++;
+        }
         // Splatmap2 is all zeros for this tile
       } else {
         // Textures 4-7 go into splatmap2
@@ -572,9 +583,27 @@ void main(void) {
         splatmap2Data[pixelOffset + 1] = textureIndex === 5 ? 255 : 0; // G
         splatmap2Data[pixelOffset + 2] = textureIndex === 6 ? 255 : 0; // B
         splatmap2Data[pixelOffset + 3] = textureIndex === 7 ? 255 : 0; // A
+        if (textureIndex >= 4) {
+          nonZeroSplatmap2Count++;
+        }
         // Splatmap1 is all zeros for this tile
       }
     }
+
+    console.log(
+      `[TerrainRenderer] 🔍 Splatmap1 non-zero pixels: ${nonZeroSplatmap1Count}/${blendMap.length}`
+    );
+    console.log(
+      `[TerrainRenderer] 🔍 Splatmap2 non-zero pixels: ${nonZeroSplatmap2Count}/${blendMap.length}`
+    );
+
+    // DEBUG: Sample first 20 bytes of splatmap1Data
+    console.log(
+      `[TerrainRenderer] 🔍 First 20 bytes of splatmap1Data: [${Array.from(splatmap1Data.slice(0, 20)).join(', ')}]`
+    );
+    console.log(
+      `[TerrainRenderer] 🔍 First 20 bytes of splatmap2Data: [${Array.from(splatmap2Data.slice(0, 20)).join(', ')}]`
+    );
 
     // Create textures from raw data
     const splatmap1 = BABYLON.RawTexture.CreateRGBATexture(

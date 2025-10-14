@@ -19,8 +19,8 @@ async function quickTest() {
   });
 
   try {
-    console.log('📂 Loading http://localhost:3001/...');
-    await page.goto('http://localhost:3001/', {
+    console.log('📂 Loading http://localhost:3003/...');
+    await page.goto('http://localhost:3003/', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     });

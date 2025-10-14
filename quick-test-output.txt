@@ -1,6 +1,6 @@
 🔍 Quick Map Load Test
 
-📂 Loading http://localhost:3001/...
+📂 Loading http://localhost:3003/...
 [BROWSER] [vite] connecting...
 [BROWSER] [vite] connected.
 [BROWSER] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
@@ -9,7 +9,7 @@
 [BROWSER] 🎮 Edge Craft Development Mode
 [BROWSER] Version: 0.1.0
 [BROWSER] Environment: development
-[BROWSER] BJS - [12:40:42]: Babylon.js v7.54.3 - WebGL2 - Parallel shader compilation
+[BROWSER] BJS - [13:13:16]: Babylon.js v7.54.3 - WebGL2 - Parallel shader compilation
 [BROWSER] Quality Preset Manager initialized
 [BROWSER] MapRendererCore initialized
 [BROWSER] [APP] Exposing handleMapSelect on window for E2E tests
@@ -606,6 +606,11 @@
   idx4=1523 (14.8%)
   idx5=584 (5.7%)
   idx6=1 (0.0%)
+[BROWSER] [TerrainRenderer] 🔍 First 10 blendMap values: JSHandle@array
+[BROWSER] [TerrainRenderer] 🔍 Splatmap1 non-zero pixels: 8216/10324
+[BROWSER] [TerrainRenderer] 🔍 Splatmap2 non-zero pixels: 2108/10324
+[BROWSER] [TerrainRenderer] 🔍 First 20 bytes of splatmap1Data: JSHandle@array
+[BROWSER] [TerrainRenderer] 🔍 First 20 bytes of splatmap2Data: JSHandle@array
 [BROWSER] [TerrainRenderer] ✅ Created dual splatmap textures: 89x116
 [BROWSER] [TerrainRenderer] ✅ Splatmap1 (textures 0-3): idx0=4400, idx2=1388, idx3=497, idx1=1931
 [BROWSER] [TerrainRenderer] ✅ Splatmap2 (textures 4-7): idx4=1523, idx6=1, idx5=584
@@ -614,9 +619,9 @@
 [BROWSER] Rendering 2 units...
 [BROWSER] Found 2 unique unit types
 [BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - First unit: raw W3X pos=(853.1, -4367.8, 267.0), mapWidth=11392, mapHeight=14848
-[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: Babylon pos=(-4842.9, 268.0, 11791.8)
+[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: Babylon pos=(853.1, 268.0, 4367.8)
 [BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - First unit: raw W3X pos=(-4736.0, -7581.3, 336.4), mapWidth=11392, mapHeight=14848
-[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: Babylon pos=(-10432.0, 337.4, 15005.3)
+[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: Babylon pos=(-4736.0, 337.4, 7581.3)
 [BROWSER] [MapRendererCore] Rendered 2 units as placeholder cubes
 [BROWSER] [MapRendererCore] 🔍 COORDINATE DEBUG - Map dimensions: tiles=89x116, world units=11392x14848
 [BROWSER] Rendering 4245 doodads (limit: 4670)...
@@ -731,10 +736,10 @@
 [BROWSER] [DoodadRenderer] Loaded doodad type: ATtr (mapped to doodad_tree_oak_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: ASbc (mapped to doodad_bush_round_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: DSp0 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: ARrk (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DSp0 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: APct (mapped to doodad_plant_generic_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
@@ -747,12 +752,12 @@
 [BROWSER] [DoodadRenderer] Loaded doodad type: ATwf (mapped to doodad_tree_pine_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_torch_01 from /assets/models/doodads/torch_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: LTlt (mapped to doodad_torch_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOwr (mapped to doodad_ruins_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_signpost_01 from /assets/models/doodads/signpost_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: NWsd (mapped to doodad_signpost_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_tree_dead_01 from /assets/models/doodads/tree_dead_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: LTbs (mapped to doodad_tree_dead_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LOwr (mapped to doodad_ruins_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_fence_01 from /assets/models/doodads/fence_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: ZPfw (mapped to doodad_fence_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_tree_oak_01 from /assets/models/doodads/tree_oak_01.glb
@@ -771,12 +776,46 @@
 [BROWSER] [DoodadRenderer] Loaded doodad type: ASbr (mapped to doodad_bush_round_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: ASbl (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AObo (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOss (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOec (mapped to doodad_rock_large_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: APbs (mapped to doodad_bush_round_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: DSp9 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOf3 (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOsh (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTcr (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOsk (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LObz (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LObr (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOca (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: COhs (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOf2 (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOrb (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOsr (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ZZdt (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ZPsh (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOcg (mapped to doodad_rock_large_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: D000 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DSp9 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: B001 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
@@ -796,59 +835,25 @@
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: D001 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D004 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: D005 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D003 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D002 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: D007 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: D008 (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: D002 (mapped to doodad_marker_small)
-[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: D004 (mapped to doodad_marker_small)
-[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: D003 (mapped to doodad_marker_small)
-[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: D00A (mapped to doodad_marker_small)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: AObo (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: D00B (mapped to doodad_marker_small)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: YOec (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LOss (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LTcr (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: YOf3 (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LOsh (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: AOsk (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LObz (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LObr (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LOca (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: COhs (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: YOf2 (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LOrb (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: ZZdt (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: AOsr (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: ZPsh (mapped to doodad_rock_large_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: LOcg (mapped to doodad_rock_large_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: LOsm (mapped to doodad_plant_generic_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: AZrf (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D00B (mapped to doodad_marker_small)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: AWfs (mapped to doodad_plant_generic_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
@@ -862,9 +867,9 @@
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: DTg1 (mapped to doodad_plant_generic_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: YOfr (mapped to doodad_plant_generic_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: ASv3 (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOfr (mapped to doodad_plant_generic_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: ASr1 (mapped to doodad_plant_generic_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
@@ -878,13 +883,13 @@
 [BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: AOks (mapped to doodad_pillar_stone_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: NOfp (mapped to doodad_pillar_stone_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: Ytlc (mapped to doodad_pillar_stone_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: OTis (mapped to doodad_pillar_stone_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: LTs5 (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NOfp (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: Ytlc (mapped to doodad_pillar_stone_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: YTpb (mapped to doodad_pillar_stone_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
@@ -894,15 +899,15 @@
 [BROWSER] [AssetLoader] Loaded model: doodad_well_01 from /assets/models/doodads/well_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: LWw0 (mapped to doodad_well_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_tree_pine_01 from /assets/models/doodads/tree_pine_01.glb
-[BROWSER] [DoodadRenderer] Loaded doodad type: CTtc (mapped to doodad_tree_pine_01)
-[BROWSER] [AssetLoader] Loaded model: doodad_tree_pine_01 from /assets/models/doodads/tree_pine_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: CTtr (mapped to doodad_tree_pine_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: AOhs (mapped to doodad_ruins_01)
 [BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
 [BROWSER] [DoodadRenderer] Loaded doodad type: DRfc (mapped to doodad_ruins_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_pine_01 from /assets/models/doodads/tree_pine_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: CTtc (mapped to doodad_tree_pine_01)
 [BROWSER] [DoodadRenderer] 🔍 COORDINATE DEBUG - First doodad: mapWidth=11392, mapHeight=14848, raw W3X pos=(512.0, -7168.0, 155.3)
-[BROWSER] [DoodadRenderer] 🔍 COORDINATE DEBUG - After offset: Babylon pos=(-5184.0, 155.3, 14592.0)
+[BROWSER] [DoodadRenderer] 🔍 COORDINATE DEBUG - After offset: Babylon pos=(512.0, 155.3, 7168.0)
 [BROWSER] Created instance buffer for ATtr: 2385 instances
 [BROWSER] Created instance buffer for ASbc: 54 instances
 [BROWSER] Created instance buffer for ARrk: 287 instances
@@ -1019,8 +1024,8 @@
 [BROWSER]   - doodad: 300 meshes
 [BROWSER]   - tree: 18 meshes
 [BROWSER]   - grass: 21 meshes
-[BROWSER]   - marker: 20 meshes
 [BROWSER]   - cliff: 24 meshes
+[BROWSER]   - marker: 20 meshes
 [BROWSER]   - fence: 34 meshes
 [BROWSER]   - well: 2 meshes
 [BROWSER]   - bridge: 3 meshes
@@ -1032,14 +1037,14 @@
 [BROWSER] 
 [DEBUG] Sample visible meshes (first 10):
 [BROWSER]   [0] terrain: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=terrainSplatmap, vertices=1089
-[BROWSER]   [1] unit_rhe1_853.1107177734375_267.0105895996094: pos=(-4842.9, 268.0, 11791.8), scale=(1.00, 1.00, 1.00), material=unit_rhe1_mat, vertices=24
-[BROWSER]   [2] unit_earc_-4736.01904296875_336.4134216308594: pos=(-10432.0, 337.4, 15005.3), scale=(1.00, 1.00, 1.00), material=unit_earc_mat, vertices=24
-[BROWSER]   [3] fallback_box_1760442045482: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045482, vertices=24
-[BROWSER]   [4] fallback_box_1760442045485: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045485, vertices=24
-[BROWSER]   [5] fallback_box_1760442045485: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045485, vertices=24
-[BROWSER]   [6] fallback_box_1760442045486: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045486, vertices=24
-[BROWSER]   [7] fallback_box_1760442045487: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045488, vertices=24
-[BROWSER]   [8] fallback_box_1760442045489: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045490, vertices=24
+[BROWSER]   [1] unit_rhe1_853.1107177734375_267.0105895996094: pos=(853.1, 268.0, 4367.8), scale=(1.00, 1.00, 1.00), material=unit_rhe1_mat, vertices=24
+[BROWSER]   [2] unit_earc_-4736.01904296875_336.4134216308594: pos=(-4736.0, 337.4, 7581.3), scale=(1.00, 1.00, 1.00), material=unit_earc_mat, vertices=24
+[BROWSER]   [3] fallback_box_1760444000233: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760444000233, vertices=24
+[BROWSER]   [4] fallback_box_1760444000235: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760444000236, vertices=24
+[BROWSER]   [5] fallback_box_1760444000236: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760444000236, vertices=24
+[BROWSER]   [6] fallback_box_1760444000237: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760444000238, vertices=24
+[BROWSER]   [7] fallback_box_1760444000239: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760444000239, vertices=24
+[BROWSER]   [8] fallback_box_1760444000241: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760444000241, vertices=24
 [BROWSER]   [9] doodad_tree_oak_01: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, -1.00), material=none, vertices=0
 [BROWSER] 
 [DEBUG] TERRAIN MESH:
@@ -1058,21 +1063,21 @@
 [DEBUG] Unit meshes: 4 total
 [BROWSER] [DEBUG] First 5 unit meshes:
 [BROWSER]   [0] unit_rhe1_base: pos=(0.0, 0.0, 0.0), visible=false
-[BROWSER]   [1] unit_rhe1_853.1107177734375_267.0105895996094: pos=(-4842.9, 268.0, 11791.8), visible=true
+[BROWSER]   [1] unit_rhe1_853.1107177734375_267.0105895996094: pos=(853.1, 268.0, 4367.8), visible=true
 [BROWSER]   [2] unit_earc_base: pos=(0.0, 0.0, 0.0), visible=false
-[BROWSER]   [3] unit_earc_-4736.01904296875_336.4134216308594: pos=(-10432.0, 337.4, 15005.3), visible=true
+[BROWSER]   [3] unit_earc_-4736.01904296875_336.4134216308594: pos=(-4736.0, 337.4, 7581.3), visible=true
 [BROWSER] 
 [DEBUG] Doodad meshes: 342 total
 [BROWSER] [DEBUG] First 5 doodad meshes:
 [BROWSER]   [0] doodad_tree_oak_01: pos=(0.0, 0.0, 0.0), visible=true
 [BROWSER]   [1] tree_oak_primitive0: pos=(0.0, 0.0, 0.0), visible=true
 [BROWSER]   [2] tree_oak_primitive1: pos=(0.0, 0.0, 0.0), visible=true
-[BROWSER]   [3] doodad_tree_oak_01_instance_1760442045553: pos=(0.0, 0.0, 0.0), visible=true
-[BROWSER]   [4] doodad_tree_oak_01_instance_1760442045553.tree_oak.tree_oak_primitive0: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER]   [3] doodad_tree_oak_01_instance_1760444000303: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER]   [4] doodad_tree_oak_01_instance_1760444000303.tree_oak.tree_oak_primitive0: pos=(0.0, 0.0, 0.0), visible=true
 [BROWSER] 
 ========== END SCENE DEBUG ==========
 
-[BROWSER] Map rendered successfully in 358.70ms (total: 401.90ms)
+[BROWSER] Map rendered successfully in 497.50ms (total: 537.00ms)
 [BROWSER] ✅ Map loaded successfully: 3P Sentinel 01 v3.06.w3x
 [BROWSER] [APP] Canvas resized after map load
 
@@ -1087,3 +1092,13 @@
 ✅ Screenshot saved: test-screenshot.png
 
 Keeping browser open for 60 seconds...
+[BROWSER] [vite] hot updated: /src/App.tsx
+[BROWSER] [APP] Removing handleMapSelect from window
+[BROWSER] [APP] Removing test:loadMap event listener
+[BROWSER] BJS - [13:14:01]: Babylon.js v7.54.3 - WebGL2 - Parallel shader compilation
+[BROWSER] Quality Preset Manager initialized
+[BROWSER] MapRendererCore initialized
+[BROWSER] [APP] Exposing handleMapSelect on window for E2E tests
+[BROWSER] [APP] Registering test:loadMap event listener
+[BROWSER] [APP] Removing test:loadMap event listener
+[BROWSER] [APP] Registering test:loadMap event listener
