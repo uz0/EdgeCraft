@@ -213,14 +213,31 @@ export class W3EParser {
 
   /**
    * Extract texture indices for splatmap generation
+   *
+   * IMPORTANT: The groundTexture field in W3E is a packed byte (0-255) that encodes:
+   * - Upper 4 bits (>> 4): Texture ID (0-15) → index into groundTextureIds array
+   * - Lower 4 bits (& 0xF): Variation/rotation (0-15) → for visual randomness
+   *
+   * We only need the texture ID for splatmap rendering, so we extract the upper nibble.
+   *
+   * Example:
+   * - groundTexture=0x00 (0)  → textureId=0, variation=0
+   * - groundTexture=0x04 (4)  → textureId=0, variation=4
+   * - groundTexture=0x10 (16) → textureId=1, variation=0
+   * - groundTexture=0x61 (97) → textureId=6, variation=1
+   *
    * @param terrain - Parsed W3E terrain data
-   * @returns Uint8Array of texture indices
+   * @returns Uint8Array of texture indices (0-15, typically 0-7 for 8 textures)
    */
   public static getTextureIndices(terrain: W3ETerrain): Uint8Array {
     const textureIndices = new Uint8Array(terrain.groundTiles.length);
 
     for (let i = 0; i < terrain.groundTiles.length; i++) {
-      textureIndices[i] = terrain.groundTiles[i]?.groundTexture ?? 0;
+      const groundTexture = terrain.groundTiles[i]?.groundTexture ?? 0;
+
+      // Extract texture ID from upper 4 bits (0-15)
+      // This maps to groundTextureIds[textureId]
+      textureIndices[i] = groundTexture >> 4;
     }
 
     return textureIndices;
