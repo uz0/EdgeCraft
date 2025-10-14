@@ -18,67 +18,68 @@ describe('TGADecoder - Comprehensive Unit Tests', () => {
     decoder = new TGADecoder();
   });
 
+  /**
+   * Create mock TGA header
+   * TGA Header Structure (18 bytes):
+   * - ID Length (1 byte) = 0
+   * - Color Map Type (1 byte) = 0
+   * - Image Type (1 byte) = 2 (uncompressed RGB)
+   * - Color Map Spec (5 bytes) = [0,0,0,0,0]
+   * - X Origin (2 bytes) = 0
+   * - Y Origin (2 bytes) = 0
+   * - Width (2 bytes)
+   * - Height (2 bytes)
+   * - Pixel Depth (1 byte) = 24 or 32
+   * - Image Descriptor (1 byte) = 0x20 (top-left origin)
+   */
+  const createTGAHeader = (
+    width: number,
+    height: number,
+    pixelDepth: 24 | 32
+  ): ArrayBuffer => {
+    const header = new Uint8Array(18);
+
+    header[0] = 0; // ID Length
+    header[1] = 0; // Color Map Type
+    header[2] = 2; // Image Type (uncompressed RGB)
+
+    // Color Map Spec (5 bytes) - all zeros
+    header[3] = 0;
+    header[4] = 0;
+    header[5] = 0;
+    header[6] = 0;
+    header[7] = 0;
+
+    // X Origin (2 bytes, little-endian)
+    header[8] = 0;
+    header[9] = 0;
+
+    // Y Origin (2 bytes, little-endian)
+    header[10] = 0;
+    header[11] = 0;
+
+    // Width (2 bytes, little-endian)
+    header[12] = width & 0xff;
+    header[13] = (width >> 8) & 0xff;
+
+    // Height (2 bytes, little-endian)
+    header[14] = height & 0xff;
+    header[15] = (height >> 8) & 0xff;
+
+    // Pixel Depth
+    header[16] = pixelDepth;
+
+    // Image Descriptor (0x20 = top-left origin, 8-bit alpha for 32-bit)
+    header[17] = pixelDepth === 32 ? 0x28 : 0x20;
+
+    return header.buffer;
+  };
+
   // ========================================================================
   // TEST SUITE 1: TGA HEADER VALIDATION
   // ========================================================================
 
   describe('TGA Header Validation', () => {
-    /**
-     * Create mock TGA header
-     * TGA Header Structure (18 bytes):
-     * - ID Length (1 byte) = 0
-     * - Color Map Type (1 byte) = 0
-     * - Image Type (1 byte) = 2 (uncompressed RGB)
-     * - Color Map Spec (5 bytes) = [0,0,0,0,0]
-     * - X Origin (2 bytes) = 0
-     * - Y Origin (2 bytes) = 0
-     * - Width (2 bytes)
-     * - Height (2 bytes)
-     * - Pixel Depth (1 byte) = 24 or 32
-     * - Image Descriptor (1 byte) = 0x20 (top-left origin)
-     */
-    const createTGAHeader = (
-      width: number,
-      height: number,
-      pixelDepth: 24 | 32
-    ): ArrayBuffer => {
-      const header = new Uint8Array(18);
-
-      header[0] = 0; // ID Length
-      header[1] = 0; // Color Map Type
-      header[2] = 2; // Image Type (uncompressed RGB)
-
-      // Color Map Spec (5 bytes) - all zeros
-      header[3] = 0;
-      header[4] = 0;
-      header[5] = 0;
-      header[6] = 0;
-      header[7] = 0;
-
-      // X Origin (2 bytes, little-endian)
-      header[8] = 0;
-      header[9] = 0;
-
-      // Y Origin (2 bytes, little-endian)
-      header[10] = 0;
-      header[11] = 0;
-
-      // Width (2 bytes, little-endian)
-      header[12] = width & 0xff;
-      header[13] = (width >> 8) & 0xff;
-
-      // Height (2 bytes, little-endian)
-      header[14] = height & 0xff;
-      header[15] = (height >> 8) & 0xff;
-
-      // Pixel Depth
-      header[16] = pixelDepth;
-
-      // Image Descriptor (0x20 = top-left origin, 8-bit alpha for 32-bit)
-      header[17] = pixelDepth === 32 ? 0x28 : 0x20;
-
-      return header.buffer;
-    };
 
     it('should validate correct TGA header (24-bit)', () => {
       const header = createTGAHeader(256, 256, 24);

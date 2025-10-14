@@ -1166,7 +1166,9 @@ export class MPQParser {
       const hashTableSize = view.getUint32(headerOffset + 24, true);
       const blockTableSize = view.getUint32(headerOffset + 28, true);
 
-      console.log(`[MPQParser Stream] Table positions: hash=${hashTablePos}, block=${blockTablePos}, headerOffset=${headerOffset}`);
+      console.log(
+        `[MPQParser Stream] Table positions: hash=${hashTablePos}, block=${blockTablePos}, headerOffset=${headerOffset}`
+      );
 
       // Validate header values
       // Note: In streaming mode, we can't check if table positions are within data.byteLength

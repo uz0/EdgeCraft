@@ -103,9 +103,9 @@ describe('Live Gallery Validation - Current State', () => {
       }
     );
 
-    it('should have all W3X Sentinel maps working (8 maps)', () => {
+    it('should have all W3X Sentinel maps working (7 maps)', () => {
       const sentinelMaps = WORKING_MAPS.filter((m) => m.name.includes('Sentinel'));
-      expect(sentinelMaps.length).toBe(8); // All 7 Sentinel + 1 other
+      expect(sentinelMaps.length).toBe(7); // All 7 Sentinel maps
     });
 
     it('should have all SC2 maps working (3 maps)', () => {
@@ -157,13 +157,18 @@ describe('Live Gallery Validation - Current State', () => {
 
     it('should identify root cause: Multi-compression not fully supported', () => {
       const huffmanFailures = FAILING_MAPS.filter((m) => m.error.includes('Huffman'));
-      expect(huffmanFailures.length).toBe(8); // All 8 failures are Huffman-related
+      expect(huffmanFailures.length).toBe(7); // 7 W3N campaigns with Huffman failures
+
+      const multiCompressionFailures = FAILING_MAPS.filter((m) =>
+        m.error.includes('Multi-compression')
+      );
+      expect(multiCompressionFailures.length).toBe(8); // All 8 have multi-compression issues
 
       console.log('\n🐛 Root Cause Analysis:');
       console.log('  - ALL 8 failures are due to multi-compression issues');
-      console.log('  - Huffman decompression fails with "Invalid distance in Huffman stream"');
-      console.log('  - Affects ALL W3N campaigns (7 maps)');
-      console.log('  - Affects 1 large W3X map (Legion TD)');
+      console.log('  - 7 failures are Huffman decompression (all W3N campaigns)');
+      console.log('  - 1 failure is other multi-compression (Legion TD: flags 0x15, 0x32, 0xfd)');
+      console.log('  - Huffman fails with "Invalid distance in Huffman stream"');
     });
   });
 
