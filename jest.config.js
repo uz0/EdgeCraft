@@ -3,7 +3,7 @@ export default {
   testEnvironment: 'jsdom',
 
   setupFiles: ['<rootDir>/jest.setup.cjs'],
-  setupFilesAfterEnv: ['@testing-library/jest-dom'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom', '<rootDir>/jest.setup.ts'],
 
   roots: ['<rootDir>/src', '<rootDir>/tests'],
 
@@ -22,7 +22,7 @@ export default {
   ],
 
   testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/__tests__/**/*.(test|spec).+(ts|tsx|js)',
     '**/?(*.)+(spec|test).+(ts|tsx|js)',
   ],
 

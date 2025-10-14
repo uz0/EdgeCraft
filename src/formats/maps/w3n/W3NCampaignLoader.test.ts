@@ -116,6 +116,7 @@ describe('W3NCampaignLoader', () => {
           archive: {},
         }),
         extractFile: jest.fn().mockReturnValue(null),
+        getArchive: jest.fn().mockReturnValue(null),
       };
 
       (MPQParser as unknown as jest.Mock).mockImplementation(() => mockMPQParser);

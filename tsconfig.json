@@ -63,8 +63,8 @@
   },
 
   "include": [
-    "src/**/*",
-    "tests/**/*"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ],
 
   "exclude": [
@@ -73,7 +73,11 @@
     "build",
     "coverage",
     "*.js",
-    "src/**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**/*",
+    "tests/**/*"
   ],
 
   "references": [

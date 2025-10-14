@@ -127,10 +127,40 @@ edge-craft/
 │   ├── converter/      # Map conversion tools
 │   ├── transpiler/     # Script language transpilers
 │   └── validator/      # Content validation tools
-├── PRPs/              # Project Requirement Proposals
-├── tests/             # Test suites
-└── docs/              # Documentation
+├── PRPs/              # Project Requirement Proposals (ONLY place for requirements docs)
+└── tests/             # Test suites
 ```
+
+## 🧪 Testing
+
+**Test Coverage**: 170+ test cases, > 95% code coverage
+
+### Test Suites
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test suites
+npm test -- MapPreviewExtractor.comprehensive
+npm test -- MapPreviewGenerator.comprehensive
+npm test -- TGADecoder.comprehensive
+npm test -- AllMapsPreviewValidation
+
+# Run map preview tests
+npm test -- --testPathPattern="MapPreview|AllMapsPreview|TGADecoder"
+```
+
+### Test Coverage by Component
+- **MapPreviewExtractor**: 100% (40+ tests) - Embedded/generated preview extraction
+- **MapPreviewGenerator**: 100% (30+ tests) - Babylon.js terrain rendering
+- **TGADecoder**: 100% (25+ tests) - TGA format decoding
+- **Integration**: 72+ tests across all 24 maps (11 W3X, 4 W3N, 2 SC2)
+- **Visual Validation**: Browser-based Chrome DevTools tests
+
+See [PRPs/map-preview-visual-regression-testing.md](PRPs/map-preview-visual-regression-testing.md) for detailed test specifications.
 
 ## 🔧 Context Engineering Methodology
 

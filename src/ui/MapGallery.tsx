@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { MapLoadProgress } from '../formats/maps/BatchMapLoader';
+import type { PreviewLoadingState } from '../hooks/useMapPreviews';
 import './MapGallery.css';
 
 export interface MapMetadata {
@@ -32,6 +33,15 @@ export interface MapGalleryProps {
   /** Loading progress (if batch loading) */
   loadProgress?: Map<string, MapLoadProgress>;
 
+  /** Preview loading states (per map) */
+  previewLoadingStates?: Map<string, PreviewLoadingState>;
+
+  /** Preview loading messages (funny text per map) */
+  previewLoadingMessages?: Map<string, string>;
+
+  /** Callback to clear all previews */
+  onClearPreviews?: () => void;
+
   /** Is batch loading in progress */
   isLoading?: boolean;
 }
@@ -44,6 +54,9 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
   maps,
   onMapSelect,
   loadProgress,
+  previewLoadingStates,
+  previewLoadingMessages,
+  onClearPreviews,
   isLoading = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,8 +110,19 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
       {/* Header */}
       <div className="map-gallery-header">
         <h2>Map Gallery</h2>
-        <div className="map-count">
-          {filteredMaps.length} {filteredMaps.length === 1 ? 'map' : 'maps'}
+        <div className="map-gallery-header-actions">
+          <div className="map-count">
+            {filteredMaps.length} {filteredMaps.length === 1 ? 'map' : 'maps'}
+          </div>
+          {onClearPreviews && (
+            <button
+              className="btn-clear-previews"
+              onClick={onClearPreviews}
+              title="Clear all previews and reload"
+            >
+              🗑️ Reset Previews
+            </button>
+          )}
         </div>
       </div>
 
@@ -183,6 +207,8 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
             key={map.id}
             map={map}
             progress={loadProgress?.get(map.id)}
+            previewLoadingState={previewLoadingStates?.get(map.id)}
+            previewLoadingMessage={previewLoadingMessages?.get(map.id)}
             onClick={() => onMapSelect(map)}
           />
         ))}
@@ -204,10 +230,18 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
 interface MapCardProps {
   map: MapMetadata;
   progress?: MapLoadProgress;
+  previewLoadingState?: PreviewLoadingState;
+  previewLoadingMessage?: string;
   onClick: () => void;
 }
 
-const MapCard: React.FC<MapCardProps> = ({ map, progress, onClick }) => {
+const MapCard: React.FC<MapCardProps> = ({
+  map,
+  progress,
+  previewLoadingState,
+  previewLoadingMessage,
+  onClick,
+}) => {
   const formatSizeDisplay = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
     return mb < 1 ? `${(bytes / 1024).toFixed(0)} KB` : `${mb.toFixed(1)} MB`;
@@ -235,7 +269,17 @@ const MapCard: React.FC<MapCardProps> = ({ map, progress, onClick }) => {
       {/* Thumbnail */}
       <div className="map-card-thumbnail">
         {map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '' ? (
-          <img src={map.thumbnailUrl} alt={map.name} />
+          <img src={map.thumbnailUrl} alt={map.name} className="map-card-image-loaded" />
+        ) : previewLoadingState === 'loading' ? (
+          <div className="map-card-skeleton">
+            <div className="skeleton-shimmer" />
+            <div className="skeleton-content">
+              <div className="spinner-small" />
+              <span className="skeleton-text">
+                {previewLoadingMessage || 'Generating preview...'}
+              </span>
+            </div>
+          </div>
         ) : (
           <div className="map-card-placeholder">
             <span className="format-badge">{formatLabel[map.format]}</span>
