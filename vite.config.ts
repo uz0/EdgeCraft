@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => {
 
     // Development server
     server: {
-      port: parseInt(env.PORT) || 3001, // Changed from 3000 to bypass browser cache
+      port: env.PORT ? parseInt(env.PORT) : 3000, // Use PORT env var or default to 3000
       host: true,
       open: true,
 
