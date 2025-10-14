@@ -194,7 +194,7 @@ void main(void) {
               try {
                 // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
                 // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
-                // Entities are offset by -mapWidth/2 and -mapHeight/2 to align with this
+                // W3X entity coordinates are also centered, so no offset needed
                 console.log(
                   `[TerrainRenderer] Terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
                 );
@@ -333,7 +333,7 @@ void main(void) {
               try {
                 // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
                 // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
-                // Entities are offset by -mapWidth/2 and -mapHeight/2 to align with this
+                // W3X entity coordinates are also centered, so no offset needed
                 console.log(
                   `[TerrainRenderer] Multi-texture terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
                 );

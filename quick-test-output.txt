@@ -1,0 +1,1089 @@
+🔍 Quick Map Load Test
+
+📂 Loading http://localhost:3001/...
+[BROWSER] [vite] connecting...
+[BROWSER] [vite] connected.
+[BROWSER] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[BROWSER] 🔥🔥🔥 EDGE CRAFT - BUILD 2025-10-11-23:42 🔥🔥🔥
+[BROWSER] 🔥🔥🔥 MPQ HEADER CHECK v3.0 + SECTOR FIX v2.0 🔥🔥🔥
+[BROWSER] 🎮 Edge Craft Development Mode
+[BROWSER] Version: 0.1.0
+[BROWSER] Environment: development
+[BROWSER] BJS - [12:40:42]: Babylon.js v7.54.3 - WebGL2 - Parallel shader compilation
+[BROWSER] Quality Preset Manager initialized
+[BROWSER] MapRendererCore initialized
+[BROWSER] [APP] Exposing handleMapSelect on window for E2E tests
+[BROWSER] [APP] Registering test:loadMap event listener
+[BROWSER] [APP] Removing test:loadMap event listener
+[BROWSER] [APP] Registering test:loadMap event listener
+🗺️  Clicking first map...
+[BROWSER] [handleMapSelect] Fetching: /maps/3P%20Sentinel%2001%20v3.06.w3x
+⏳ Waiting 20 seconds for map to load...
+
+[BROWSER] [handleMapSelect] Blob size: 10850455 bytes
+[BROWSER] [handleMapSelect] File created: 3P Sentinel 01 v3.06.w3x 10850455 bytes
+[BROWSER] [handleMapSelect] Extension: .w3x
+[BROWSER] Loading asset manifest...
+[BROWSER] [AssetLoader] Manifest loaded: JSHandle@object
+[BROWSER] Loading map (.w3x)...
+[BROWSER] [W3XMapLoader] File size: 10850455, magic: "HM3W" (0x484d3357)
+[BROWSER] [W3XMapLoader] HM3W format detected, skipping 512-byte header
+[BROWSER] [W3XMapLoader] MPQ magic after header: "MPQ" (0x1a51504d)
+[BROWSER] [MPQParser] Searching for valid MPQ header in 10849943 byte buffer (limit: 4096)
+[BROWSER] [MPQParser] Found MPQ magic at offset 0: 0x1a51504d
+[BROWSER] [MPQParser] ✅ Found VALID MPQ header at offset 0
+[BROWSER] [MPQParser] Header: archiveSize=10849943, formatVersion=0, hashTablePos=10835047, blockTablePos=10843239, hashTableSize=512, blockTableSize=419
+[BROWSER] [MPQParser] Archive parsed: 512 hash entries, 419 blocks, 419 valid files
+[BROWSER] [MPQParser]   File 0: hashA=8fd26355, hashB=8e8f908f, block=158
+[BROWSER] [MPQParser]   File 1: hashA=b57fcdb5, hashB=fb40df29, block=41
+[BROWSER] [MPQParser]   File 2: hashA=a8ef0cd9, hashB=db88df1b, block=189
+[BROWSER] [MPQParser]   File 3: hashA=d5c1525, hashB=984253c3, block=236
+[BROWSER] [MPQParser]   File 4: hashA=9644f843, hashB=74e57a4f, block=12
+[BROWSER] [MPQParser]   File 5: hashA=f415b6fc, hashB=7329be15, block=324
+[BROWSER] [MPQParser]   File 6: hashA=9cf27ff3, hashB=7399efd5, block=228
+[BROWSER] [MPQParser]   File 7: hashA=e33c2827, hashB=65e17f3a, block=172
+[BROWSER] [MPQParser]   File 8: hashA=9fd4ee11, hashB=95511ff1, block=352
+[BROWSER] [MPQParser]   File 9: hashA=a9eacce6, hashB=56e493f5, block=408
+[BROWSER] [MPQParser]   File 10: hashA=8332d13b, hashB=fef51f58, block=50
+[BROWSER] [MPQParser]   File 11: hashA=686f12b1, hashB=c8640abb, block=17
+[BROWSER] [MPQParser]   File 12: hashA=6810ba62, hashB=bdc403b2, block=124
+[BROWSER] [MPQParser]   File 13: hashA=292b5a62, hashB=550aeef, block=312
+[BROWSER] [MPQParser]   File 14: hashA=98f76990, hashB=85a2321a, block=43
+[BROWSER] [MPQParser]   File 15: hashA=2e7b2ba4, hashB=6be37387, block=320
+[BROWSER] [MPQParser]   File 16: hashA=5c33ca35, hashB=329ac1ee, block=81
+[BROWSER] [MPQParser]   File 17: hashA=23e4b3c7, hashB=b71598fd, block=208
+[BROWSER] [MPQParser]   File 18: hashA=7fc1ee53, hashB=ab691b2, block=360
+[BROWSER] [MPQParser]   File 19: hashA=890600fd, hashB=beeb9633, block=9
+[BROWSER] [MPQParser]   File 20: hashA=86ebf099, hashB=213b4096, block=71
+[BROWSER] [MPQParser]   File 21: hashA=794905b7, hashB=eed46e74, block=88
+[BROWSER] [MPQParser]   File 22: hashA=a3795387, hashB=6195db5c, block=93
+[BROWSER] [MPQParser]   File 23: hashA=337c12ef, hashB=a732e8b3, block=297
+[BROWSER] [MPQParser]   File 24: hashA=839d92b4, hashB=9a4d1473, block=86
+[BROWSER] [MPQParser]   File 25: hashA=267991fd, hashB=d15cd4ca, block=46
+[BROWSER] [MPQParser]   File 26: hashA=47e480e9, hashB=e237e49d, block=244
+[BROWSER] [MPQParser]   File 27: hashA=57babe53, hashB=f3a91484, block=251
+[BROWSER] [MPQParser]   File 28: hashA=7d3974fa, hashB=625ba332, block=305
+[BROWSER] [MPQParser]   File 29: hashA=89cc0c9b, hashB=96a40fb6, block=335
+[BROWSER] [MPQParser]   File 30: hashA=5d2d6dbf, hashB=92689cd3, block=95
+[BROWSER] [MPQParser]   File 31: hashA=1503903, hashB=af1f847e, block=283
+[BROWSER] [MPQParser]   File 32: hashA=82f4b4c3, hashB=a6d5e089, block=74
+[BROWSER] [MPQParser]   File 33: hashA=8e20997d, hashB=38ed59f6, block=259
+[BROWSER] [MPQParser]   File 34: hashA=3355ae61, hashB=87f3fb94, block=302
+[BROWSER] [MPQParser]   File 35: hashA=cd5696f0, hashB=edd1c46d, block=29
+[BROWSER] [MPQParser]   File 36: hashA=662cac84, hashB=899bd471, block=91
+[BROWSER] [MPQParser]   File 37: hashA=99abc3e0, hashB=521995fe, block=151
+[BROWSER] [MPQParser]   File 38: hashA=fd6e8a0a, hashB=4de161e0, block=58
+[BROWSER] [MPQParser]   File 39: hashA=dcc36950, hashB=3f8004dc, block=75
+[BROWSER] [MPQParser]   File 40: hashA=f778f2e6, hashB=cdcc294f, block=10
+[BROWSER] [MPQParser]   File 41: hashA=c93f8071, hashB=569cc35a, block=31
+[BROWSER] [MPQParser]   File 42: hashA=fb0e240e, hashB=e1c45a06, block=116
+[BROWSER] [MPQParser]   File 43: hashA=1e51097f, hashB=984ed397, block=145
+[BROWSER] [MPQParser]   File 44: hashA=251caf4e, hashB=cc3b4865, block=137
+[BROWSER] [MPQParser]   File 45: hashA=8cba77f9, hashB=49c329be, block=215
+[BROWSER] [MPQParser]   File 46: hashA=c783e89a, hashB=9d525ade, block=142
+[BROWSER] [MPQParser]   File 47: hashA=f5362859, hashB=afac3799, block=175
+[BROWSER] [MPQParser]   File 48: hashA=f0ee0293, hashB=1a921f67, block=219
+[BROWSER] [MPQParser]   File 49: hashA=dce4c242, hashB=cb8b0084, block=316
+[BROWSER] [MPQParser]   File 50: hashA=2066da85, hashB=2376e2ca, block=333
+[BROWSER] [MPQParser]   File 51: hashA=8da2d2b3, hashB=3c7fd2e6, block=120
+[BROWSER] [MPQParser]   File 52: hashA=c573564e, hashB=d5367c68, block=153
+[BROWSER] [MPQParser]   File 53: hashA=d264a7c9, hashB=6a40b887, block=224
+[BROWSER] [MPQParser]   File 54: hashA=235a34f1, hashB=dc390d54, block=364
+[BROWSER] [MPQParser]   File 55: hashA=bca5fd89, hashB=bd993277, block=18
+[BROWSER] [MPQParser]   File 56: hashA=17488a5e, hashB=6f418a6a, block=370
+[BROWSER] [MPQParser]   File 57: hashA=b42b83b7, hashB=c713cf4, block=372
+[BROWSER] [MPQParser]   File 58: hashA=c6f48cfb, hashB=1fb59af8, block=261
+[BROWSER] [MPQParser]   File 59: hashA=a237eee0, hashB=2d4d6da9, block=292
+[BROWSER] [MPQParser]   File 60: hashA=8c50b44d, hashB=dd1db18b, block=59
+[BROWSER] [MPQParser]   File 61: hashA=74760673, hashB=19ae81af, block=267
+[BROWSER] [MPQParser]   File 62: hashA=2f16a2aa, hashB=9c042ba5, block=280
+[BROWSER] [MPQParser]   File 63: hashA=6496ec93, hashB=91ba7f52, block=365
+[BROWSER] [MPQParser]   File 64: hashA=f99d19b4, hashB=e122c32a, block=394
+[BROWSER] [MPQParser]   File 65: hashA=ca77d736, hashB=7d60bee, block=400
+[BROWSER] [MPQParser]   File 66: hashA=aed28210, hashB=b61baad4, block=97
+[BROWSER] [MPQParser]   File 67: hashA=7f36a812, hashB=8ffc8095, block=220
+[BROWSER] [MPQParser]   File 68: hashA=367826e6, hashB=d07bbf10, block=416
+[BROWSER] [MPQParser]   File 69: hashA=3061a374, hashB=da216762, block=117
+[BROWSER] [MPQParser]   File 70: hashA=302d8d5c, hashB=ece33546, block=28
+[BROWSER] [MPQParser]   File 71: hashA=4faa8503, hashB=5c4fda33, block=171
+[BROWSER] [MPQParser]   File 72: hashA=4f71f24a, hashB=915a6500, block=337
+[BROWSER] [MPQParser]   File 73: hashA=c7edb727, hashB=4cbe9093, block=260
+[BROWSER] [MPQParser]   File 74: hashA=638d4f8, hashB=34c8e578, block=13
+[BROWSER] [MPQParser]   File 75: hashA=e64a38be, hashB=cfc1d181, block=300
+[BROWSER] [MPQParser]   File 76: hashA=8066713a, hashB=6b136fea, block=401
+[BROWSER] [MPQParser]   File 77: hashA=7fc85857, hashB=e24fa4f3, block=24
+[BROWSER] [MPQParser]   File 78: hashA=44fd9128, hashB=9bfb23dc, block=289
+[BROWSER] [MPQParser]   File 79: hashA=d189ef1f, hashB=dc009a41, block=180
+[BROWSER] [MPQParser]   File 80: hashA=548e617f, hashB=b76f72b8, block=105
+[BROWSER] [MPQParser]   File 81: hashA=6c493773, hashB=cbb7e8eb, block=304
+[BROWSER] [MPQParser]   File 82: hashA=ec18cb96, hashB=9a4358b2, block=73
+[BROWSER] [MPQParser]   File 83: hashA=d6da7520, hashB=c82c8064, block=325
+[BROWSER] [MPQParser]   File 84: hashA=5ad5a2e3, hashB=ecbd104a, block=328
+[BROWSER] [MPQParser]   File 85: hashA=fd657910, hashB=4e9b98a7, block=417
+[BROWSER] [MPQParser]   File 86: hashA=b367717, hashB=1222a17b, block=177
+[BROWSER] [MPQParser]   File 87: hashA=e59ea34, hashB=ea826174, block=287
+[BROWSER] [MPQParser]   File 88: hashA=cfcfbca9, hashB=2e56e520, block=384
+[BROWSER] [MPQParser]   File 89: hashA=7c1cbb5d, hashB=c10a7191, block=388
+[BROWSER] [MPQParser]   File 90: hashA=9a0a537b, hashB=db7a1354, block=55
+[BROWSER] [MPQParser]   File 91: hashA=e8bcbdeb, hashB=2f2097f7, block=76
+[BROWSER] [MPQParser]   File 92: hashA=e4a8c499, hashB=efe892bd, block=78
+[BROWSER] [MPQParser]   File 93: hashA=fba5aabc, hashB=2ff95cb, block=16
+[BROWSER] [MPQParser]   File 94: hashA=d7301269, hashB=58d28ea2, block=26
+[BROWSER] [MPQParser]   File 95: hashA=8f921437, hashB=f532b7bc, block=48
+[BROWSER] [MPQParser]   File 96: hashA=6b5999cb, hashB=d2a80073, block=7
+[BROWSER] [MPQParser]   File 97: hashA=7352de1d, hashB=857034fa, block=83
+[BROWSER] [MPQParser]   File 98: hashA=9c85c659, hashB=6b8989d, block=147
+[BROWSER] [MPQParser]   File 99: hashA=15c4cb11, hashB=b88121ac, block=182
+[BROWSER] [MPQParser]   File 100: hashA=a3f00198, hashB=51359670, block=185
+[BROWSER] [MPQParser]   File 101: hashA=3356842, hashB=93f2c8c2, block=265
+[BROWSER] [MPQParser]   File 102: hashA=c4e6944d, hashB=dd899851, block=52
+[BROWSER] [MPQParser]   File 103: hashA=ba7403e, hashB=7657b773, block=272
+[BROWSER] [MPQParser]   File 104: hashA=78ae1876, hashB=9f2cc016, block=184
+[BROWSER] [MPQParser]   File 105: hashA=340f3887, hashB=47f5447a, block=130
+[BROWSER] [MPQParser]   File 106: hashA=773f4689, hashB=fdf7bdfb, block=218
+[BROWSER] [MPQParser]   File 107: hashA=bf33c8fd, hashB=3bbd45d, block=156
+[BROWSER] [MPQParser]   File 108: hashA=a191938e, hashB=7ee22a69, block=54
+[BROWSER] [MPQParser]   File 109: hashA=1ebcfa22, hashB=1c93f8b8, block=111
+[BROWSER] [MPQParser]   File 110: hashA=cf836cf, hashB=81f42112, block=273
+[BROWSER] [MPQParser]   File 111: hashA=b82d4fe7, hashB=7cbdeadc, block=278
+[BROWSER] [MPQParser]   File 112: hashA=a09a0534, hashB=2422b7e1, block=282
+[BROWSER] [MPQParser]   File 113: hashA=d4a7980b, hashB=aea68477, block=90
+[BROWSER] [MPQParser]   File 114: hashA=d493cf3, hashB=c4aa7dad, block=82
+[BROWSER] [MPQParser]   File 115: hashA=91bc4e73, hashB=40287fc0, block=146
+[BROWSER] [MPQParser]   File 116: hashA=1eed65ec, hashB=272dfe9a, block=101
+[BROWSER] [MPQParser]   File 117: hashA=5860d9c4, hashB=b7d02b4c, block=241
+[BROWSER] [MPQParser]   File 118: hashA=5a8b4aeb, hashB=4490be29, block=293
+[BROWSER] [MPQParser]   File 119: hashA=d365ee7e, hashB=c50997df, block=323
+[BROWSER] [MPQParser]   File 120: hashA=e570fa0f, hashB=d1906fe5, block=343
+[BROWSER] [MPQParser]   File 121: hashA=a6636300, hashB=7e27ed5f, block=291
+[BROWSER] [MPQParser]   File 122: hashA=f40bd85d, hashB=e2902714, block=303
+[BROWSER] [MPQParser]   File 123: hashA=589fb7c2, hashB=88df99a2, block=353
+[BROWSER] [MPQParser]   File 124: hashA=2fb48559, hashB=e5486040, block=363
+[BROWSER] [MPQParser]   File 125: hashA=e293cc6f, hashB=253616ed, block=221
+[BROWSER] [MPQParser]   File 126: hashA=877975e1, hashB=7f491c49, block=375
+[BROWSER] [MPQParser]   File 127: hashA=82bd7f54, hashB=ffd751cc, block=22
+[BROWSER] [MPQParser]   File 128: hashA=3f073d9f, hashB=706bcd0, block=376
+[BROWSER] [MPQParser]   File 129: hashA=f91fa5d0, hashB=2c56adff, block=380
+[BROWSER] [MPQParser]   File 130: hashA=a39cdc7d, hashB=7b8b18e0, block=393
+[BROWSER] [MPQParser]   File 131: hashA=f92d5c8b, hashB=8ec6da4c, block=398
+[BROWSER] [MPQParser]   File 132: hashA=ec1f95ad, hashB=36fb1b31, block=140
+[BROWSER] [MPQParser]   File 133: hashA=bb0ff663, hashB=b05f666e, block=330
+[BROWSER] [MPQParser]   File 134: hashA=7fa509e1, hashB=9f588435, block=122
+[BROWSER] [MPQParser]   File 135: hashA=b9404ae5, hashB=4debc2ab, block=257
+[BROWSER] [MPQParser]   File 136: hashA=fd9ca812, hashB=e93fb303, block=404
+[BROWSER] [MPQParser]   File 137: hashA=f7a2fa50, hashB=8207b1aa, block=412
+[BROWSER] [MPQParser]   File 138: hashA=e669b2e4, hashB=f332c497, block=30
+[BROWSER] [MPQParser]   File 139: hashA=27259dba, hashB=f2d950a, block=276
+[BROWSER] [MPQParser]   File 140: hashA=9a581445, hashB=d6b93ff6, block=3
+[BROWSER] [MPQParser]   File 141: hashA=7984, hashB=2292c444, block=165
+[BROWSER] [MPQParser]   File 142: hashA=16908a38, hashB=26b17769, block=336
+[BROWSER] [MPQParser]   File 143: hashA=fa91b73c, hashB=9ec914e2, block=205
+[BROWSER] [MPQParser]   File 144: hashA=e45da4e, hashB=3fbb2c09, block=2
+[BROWSER] [MPQParser]   File 145: hashA=cbcc071, hashB=555d9297, block=253
+[BROWSER] [MPQParser]   File 146: hashA=4a9ca504, hashB=cafc9547, block=313
+[BROWSER] [MPQParser]   File 147: hashA=3c216f4b, hashB=a9b99e35, block=132
+[BROWSER] [MPQParser]   File 148: hashA=274efffd, hashB=3228926, block=341
+[BROWSER] [MPQParser]   File 149: hashA=7a8c2f29, hashB=aca53110, block=371
+[BROWSER] [MPQParser]   File 150: hashA=4722e17, hashB=a18f3389, block=138
+[BROWSER] [MPQParser]   File 151: hashA=5295234a, hashB=7c2c6d32, block=42
+[BROWSER] [MPQParser]   File 152: hashA=cf1ad9c1, hashB=72947ab, block=294
+[BROWSER] [MPQParser]   File 153: hashA=1ddbf6e1, hashB=6c8395b8, block=345
+[BROWSER] [MPQParser]   File 154: hashA=f3710fc5, hashB=5bd94df3, block=395
+[BROWSER] [MPQParser]   File 155: hashA=905cb59a, hashB=dad7cbdf, block=326
+[BROWSER] [MPQParser]   File 156: hashA=5d107688, hashB=445c40a9, block=339
+[BROWSER] [MPQParser]   File 157: hashA=d9a6b03f, hashB=15ec4eea, block=256
+[BROWSER] [MPQParser]   File 158: hashA=62739ee9, hashB=5b5e7a5a, block=216
+[BROWSER] [MPQParser]   File 159: hashA=744afa4a, hashB=e0a4232, block=92
+[BROWSER] [MPQParser]   File 160: hashA=f26fc68, hashB=f017c5c7, block=354
+[BROWSER] [MPQParser]   File 161: hashA=66556d72, hashB=3f7b10a2, block=307
+[BROWSER] [MPQParser]   File 162: hashA=3dd423ff, hashB=fca2b1c2, block=125
+[BROWSER] [MPQParser]   File 163: hashA=1e817a71, hashB=8f2fc910, block=37
+[BROWSER] [MPQParser]   File 164: hashA=1486b25b, hashB=cbcae330, block=288
+[BROWSER] [MPQParser]   File 165: hashA=5c13f42c, hashB=b65ca881, block=369
+[BROWSER] [MPQParser]   File 166: hashA=599e8193, hashB=d9c98e9d, block=385
+[BROWSER] [MPQParser]   File 167: hashA=56aba438, hashB=f71e8c24, block=367
+[BROWSER] [MPQParser]   File 168: hashA=82445434, hashB=30d337bb, block=382
+[BROWSER] [MPQParser]   File 169: hashA=4dee6af9, hashB=ce1e1277, block=368
+[BROWSER] [MPQParser]   File 170: hashA=4802097f, hashB=868fa8ed, block=61
+[BROWSER] [MPQParser]   File 171: hashA=ae202d8e, hashB=dc1156d0, block=181
+[BROWSER] [MPQParser]   File 172: hashA=a2d38d51, hashB=4c6eec2d, block=150
+[BROWSER] [MPQParser]   File 173: hashA=933519fa, hashB=e10244c8, block=409
+[BROWSER] [MPQParser]   File 174: hashA=a61ba953, hashB=d3f687b0, block=63
+[BROWSER] [MPQParser]   File 175: hashA=a1ffcee1, hashB=72bd645b, block=176
+[BROWSER] [MPQParser]   File 176: hashA=e4a11a0c, hashB=cc83c530, block=247
+[BROWSER] [MPQParser]   File 177: hashA=8a4a7bcd, hashB=cf6f2e0f, block=38
+[BROWSER] [MPQParser]   File 178: hashA=e52e0217, hashB=28626c1d, block=51
+[BROWSER] [MPQParser]   File 179: hashA=dfb56b15, hashB=e556ab80, block=209
+[BROWSER] [MPQParser]   File 180: hashA=c0a7ed4, hashB=323db02b, block=310
+[BROWSER] [MPQParser]   File 181: hashA=3e670012, hashB=801b7b1f, block=317
+[BROWSER] [MPQParser]   File 182: hashA=7aa95b7a, hashB=de213daa, block=202
+[BROWSER] [MPQParser]   File 183: hashA=6c3bd2e7, hashB=6221ab53, block=162
+[BROWSER] [MPQParser]   File 184: hashA=fe77319e, hashB=5895d418, block=392
+[BROWSER] [MPQParser]   File 185: hashA=3d3f1309, hashB=895e855, block=405
+[BROWSER] [MPQParser]   File 186: hashA=51c4c30e, hashB=1261cb7b, block=4
+[BROWSER] [MPQParser]   File 187: hashA=84da2f07, hashB=927c4279, block=106
+[BROWSER] [MPQParser]   File 188: hashA=69bc9cf5, hashB=8b3220e1, block=149
+[BROWSER] [MPQParser]   File 189: hashA=240919b5, hashB=3ef1aeae, block=152
+[BROWSER] [MPQParser]   File 190: hashA=35324c60, hashB=5b05b225, block=115
+[BROWSER] [MPQParser]   File 191: hashA=66c420d4, hashB=c0b71f69, block=190
+[BROWSER] [MPQParser]   File 192: hashA=efc02ee4, hashB=3b3ae299, block=157
+[BROWSER] [MPQParser]   File 193: hashA=7c915535, hashB=5debd555, block=274
+[BROWSER] [MPQParser]   File 194: hashA=89b2be6a, hashB=4cd370f4, block=349
+[BROWSER] [MPQParser]   File 195: hashA=2454339e, hashB=e3256207, block=67
+[BROWSER] [MPQParser]   File 196: hashA=3c54d9b5, hashB=c1ebc4c8, block=129
+[BROWSER] [MPQParser]   File 197: hashA=38a79350, hashB=2f64195a, block=214
+[BROWSER] [MPQParser]   File 198: hashA=6c25558, hashB=b0819e8b, block=227
+[BROWSER] [MPQParser]   File 199: hashA=b06045b7, hashB=5cd76ea1, block=127
+[BROWSER] [MPQParser]   File 200: hashA=839c4375, hashB=6bcd6940, block=231
+[BROWSER] [MPQParser]   File 201: hashA=e1e4baf3, hashB=ddb4bdd0, block=234
+[BROWSER] [MPQParser]   File 202: hashA=95aa9a62, hashB=b336e478, block=275
+[BROWSER] [MPQParser]   File 203: hashA=6abed810, hashB=7bb998d1, block=284
+[BROWSER] [MPQParser]   File 204: hashA=a8bb93e4, hashB=f6e8cab3, block=397
+[BROWSER] [MPQParser]   File 205: hashA=ca353b5f, hashB=b2ede0fa, block=309
+[BROWSER] [MPQParser]   File 206: hashA=3fb28123, hashB=b9fd837b, block=87
+[BROWSER] [MPQParser]   File 207: hashA=ec9db130, hashB=83af2239, block=217
+[BROWSER] [MPQParser]   File 208: hashA=57a035e5, hashB=e89aadee, block=374
+[BROWSER] [MPQParser]   File 209: hashA=eb883b8e, hashB=ccbdb07e, block=315
+[BROWSER] [MPQParser]   File 210: hashA=e56e8e8d, hashB=c926c08, block=223
+[BROWSER] [MPQParser]   File 211: hashA=89e6b7c5, hashB=f8a8165, block=225
+[BROWSER] [MPQParser]   File 212: hashA=d7a864e2, hashB=4e94de9a, block=226
+[BROWSER] [MPQParser]   File 213: hashA=4ad69d79, hashB=e9f44c14, block=269
+[BROWSER] [MPQParser]   File 214: hashA=97951cca, hashB=f25f5e7c, block=62
+[BROWSER] [MPQParser]   File 215: hashA=5d5e09a9, hashB=6afa194d, block=211
+[BROWSER] [MPQParser]   File 216: hashA=378e339b, hashB=9b3639b6, block=314
+[BROWSER] [MPQParser]   File 217: hashA=96267d9, hashB=5b1ac53a, block=358
+[BROWSER] [MPQParser]   File 218: hashA=fc12ab7, hashB=827dbd53, block=359
+[BROWSER] [MPQParser]   File 219: hashA=9b19b6f2, hashB=f0d9ec35, block=166
+[BROWSER] [MPQParser]   File 220: hashA=47793b37, hashB=8de2b6ab, block=286
+[BROWSER] [MPQParser]   File 221: hashA=fe7b8b7d, hashB=7e491b7a, block=187
+[BROWSER] [MPQParser]   File 222: hashA=d018a1cb, hashB=60ed51fb, block=237
+[BROWSER] [MPQParser]   File 223: hashA=eae66357, hashB=27a674fc, block=250
+[BROWSER] [MPQParser]   File 224: hashA=a329fda0, hashB=d020c58d, block=383
+[BROWSER] [MPQParser]   File 225: hashA=90deab3d, hashB=30a95b3, block=334
+[BROWSER] [MPQParser]   File 226: hashA=9f9798ec, hashB=4d75d255, block=207
+[BROWSER] [MPQParser]   File 227: hashA=262529de, hashB=ff375918, block=163
+[BROWSER] [MPQParser]   File 228: hashA=edb50743, hashB=a47e6929, block=11
+[BROWSER] [MPQParser]   File 229: hashA=dca9a36f, hashB=89bda6a8, block=89
+[BROWSER] [MPQParser]   File 230: hashA=618c4bfb, hashB=3456a1cf, block=174
+[BROWSER] [MPQParser]   File 231: hashA=279ccba7, hashB=24386b61, block=210
+[BROWSER] [MPQParser]   File 232: hashA=4bb5f9b, hashB=2da39374, block=249
+[BROWSER] [MPQParser]   File 233: hashA=784dd736, hashB=7d5fc774, block=332
+[BROWSER] [MPQParser]   File 234: hashA=646579ef, hashB=e649e36a, block=49
+[BROWSER] [MPQParser]   File 235: hashA=c788e305, hashB=54867187, block=80
+[BROWSER] [MPQParser]   File 236: hashA=9338a843, hashB=78bdf7c8, block=123
+[BROWSER] [MPQParser]   File 237: hashA=cbd03b95, hashB=48c67843, block=329
+[BROWSER] [MPQParser]   File 238: hashA=96b73942, hashB=36650b81, block=107
+[BROWSER] [MPQParser]   File 239: hashA=1249965b, hashB=12a0a55c, block=47
+[BROWSER] [MPQParser]   File 240: hashA=cf714de0, hashB=9da6a231, block=199
+[BROWSER] [MPQParser]   File 241: hashA=175d4b13, hashB=288925d, block=331
+[BROWSER] [MPQParser]   File 242: hashA=b91d7c41, hashB=7ca864d1, block=355
+[BROWSER] [MPQParser]   File 243: hashA=3ecd336, hashB=a935c234, block=318
+[BROWSER] [MPQParser]   File 244: hashA=cb3c9637, hashB=72d0b4a4, block=15
+[BROWSER] [MPQParser]   File 245: hashA=ccce01d5, hashB=ffe77d2c, block=8
+[BROWSER] [MPQParser]   File 246: hashA=3edc11a3, hashB=27c3a225, block=154
+[BROWSER] [MPQParser]   File 247: hashA=418b669e, hashB=dc3aede9, block=135
+[BROWSER] [MPQParser]   File 248: hashA=f85a6c1d, hashB=b3ac715, block=161
+[BROWSER] [MPQParser]   File 249: hashA=4e55b9ba, hashB=a82d18f, block=66
+[BROWSER] [MPQParser]   File 250: hashA=af0f81d3, hashB=37ed5e54, block=160
+[BROWSER] [MPQParser]   File 251: hashA=a440344e, hashB=7555f360, block=279
+[BROWSER] [MPQParser]   File 252: hashA=713ef6c2, hashB=141c1431, block=70
+[BROWSER] [MPQParser]   File 253: hashA=c0a8373e, hashB=6c7cd96c, block=298
+[BROWSER] [MPQParser]   File 254: hashA=961a99bb, hashB=9adaeb0e, block=319
+[BROWSER] [MPQParser]   File 255: hashA=c335dce2, hashB=baab7f06, block=179
+[BROWSER] [MPQParser]   File 256: hashA=6dc77bf, hashB=4e24abd6, block=169
+[BROWSER] [MPQParser]   File 257: hashA=3860ab26, hashB=7a04738d, block=410
+[BROWSER] [MPQParser]   File 258: hashA=d7b587a1, hashB=fef7ee02, block=33
+[BROWSER] [MPQParser]   File 259: hashA=5964964e, hashB=d3913c3f, block=56
+[BROWSER] [MPQParser]   File 260: hashA=ba6a750d, hashB=a805c822, block=136
+[BROWSER] [MPQParser]   File 261: hashA=8a6b3ae6, hashB=3fe75565, block=386
+[BROWSER] [MPQParser]   File 262: hashA=c307c35d, hashB=3743b476, block=403
+[BROWSER] [MPQParser]   File 263: hashA=5f15327b, hashB=dea041b9, block=407
+[BROWSER] [MPQParser]   File 264: hashA=e9852fae, hashB=70d2a912, block=390
+[BROWSER] [MPQParser]   File 265: hashA=bf6ced33, hashB=30831b4b, block=144
+[BROWSER] [MPQParser]   File 266: hashA=7381f360, hashB=d6a39d3c, block=57
+[BROWSER] [MPQParser]   File 267: hashA=72b24245, hashB=67cb0b6c, block=85
+[BROWSER] [MPQParser]   File 268: hashA=e49c5f39, hashB=b096b321, block=206
+[BROWSER] [MPQParser]   File 269: hashA=48a661f4, hashB=327e50b9, block=238
+[BROWSER] [MPQParser]   File 270: hashA=cc79f31c, hashB=1d5cad4a, block=239
+[BROWSER] [MPQParser]   File 271: hashA=22fc3aed, hashB=f628b040, block=27
+[BROWSER] [MPQParser]   File 272: hashA=5646a45a, hashB=8025cfe5, block=104
+[BROWSER] [MPQParser]   File 273: hashA=d9c07533, hashB=ceb66014, block=379
+[BROWSER] [MPQParser]   File 274: hashA=1eefe221, hashB=5e5b42d0, block=201
+[BROWSER] [MPQParser]   File 275: hashA=bcc1f9bb, hashB=1a742b0e, block=414
+[BROWSER] [MPQParser]   File 276: hashA=570bec91, hashB=99a3f956, block=254
+[BROWSER] [MPQParser]   File 277: hashA=c1be456d, hashB=72549251, block=351
+[BROWSER] [MPQParser]   File 278: hashA=e6a032a1, hashB=b90e760c, block=290
+[BROWSER] [MPQParser]   File 279: hashA=4ae5ffba, hashB=102e4039, block=346
+[BROWSER] [MPQParser]   File 280: hashA=33763b2d, hashB=971c003c, block=65
+[BROWSER] [MPQParser]   File 281: hashA=d1a92733, hashB=5fa85b1f, block=306
+[BROWSER] [MPQParser]   File 282: hashA=79cbff3d, hashB=9adeaae5, block=277
+[BROWSER] [MPQParser]   File 283: hashA=760f70e2, hashB=f2dcb0a3, block=344
+[BROWSER] [MPQParser]   File 284: hashA=28bd1bba, hashB=41188312, block=121
+[BROWSER] [MPQParser]   File 285: hashA=e4ba2750, hashB=30fadc15, block=128
+[BROWSER] [MPQParser]   File 286: hashA=c7333039, hashB=da9ba720, block=133
+[BROWSER] [MPQParser]   File 287: hashA=96704729, hashB=959b4865, block=264
+[BROWSER] [MPQParser]   File 288: hashA=f07ceb1a, hashB=c8181d4b, block=413
+[BROWSER] [MPQParser]   File 289: hashA=9ae0b1a6, hashB=c2817b22, block=143
+[BROWSER] [MPQParser]   File 290: hashA=55f93ec5, hashB=39e889a9, block=193
+[BROWSER] [MPQParser]   File 291: hashA=86434d0b, hashB=f57e4b42, block=69
+[BROWSER] [MPQParser]   File 292: hashA=adc9f548, hashB=d7415d43, block=77
+[BROWSER] [MPQParser]   File 293: hashA=1624922a, hashB=591158db, block=102
+[BROWSER] [MPQParser]   File 294: hashA=865f57c5, hashB=e6f84b5f, block=139
+[BROWSER] [MPQParser]   File 295: hashA=6fd1d432, hashB=7d558c7f, block=255
+[BROWSER] [MPQParser]   File 296: hashA=82ce740b, hashB=7c474382, block=112
+[BROWSER] [MPQParser]   File 297: hashA=c19ea63f, hashB=e609222, block=98
+[BROWSER] [MPQParser]   File 298: hashA=f8c3b168, hashB=7018bae6, block=0
+[BROWSER] [MPQParser]   File 299: hashA=dc326f21, hashB=235e745f, block=194
+[BROWSER] [MPQParser]   File 300: hashA=95996737, hashB=b9c65397, block=246
+[BROWSER] [MPQParser]   File 301: hashA=9add0273, hashB=f93f73ed, block=118
+[BROWSER] [MPQParser]   File 302: hashA=26cbf001, hashB=1671c3ac, block=243
+[BROWSER] [MPQParser]   File 303: hashA=8a05bc23, hashB=1e1bfa4b, block=84
+[BROWSER] [MPQParser]   File 304: hashA=f9030a11, hashB=227d79dc, block=348
+[BROWSER] [MPQParser]   File 305: hashA=f3449a8d, hashB=9e87e12e, block=327
+[BROWSER] [MPQParser]   File 306: hashA=487dd990, hashB=e80cbe7e, block=342
+[BROWSER] [MPQParser]   File 307: hashA=70a343dd, hashB=92e72586, block=204
+[BROWSER] [MPQParser]   File 308: hashA=af65dd1d, hashB=7287aac2, block=266
+[BROWSER] [MPQParser]   File 309: hashA=ecb3d833, hashB=a025866d, block=44
+[BROWSER] [MPQParser]   File 310: hashA=fd57fa65, hashB=3f44c133, block=340
+[BROWSER] [MPQParser]   File 311: hashA=98288d67, hashB=c808713b, block=377
+[BROWSER] [MPQParser]   File 312: hashA=4a487187, hashB=3e84489, block=406
+[BROWSER] [MPQParser]   File 313: hashA=fc1690a0, hashB=779a3520, block=79
+[BROWSER] [MPQParser]   File 314: hashA=7024426f, hashB=4ec66880, block=235
+[BROWSER] [MPQParser]   File 315: hashA=4dfd626, hashB=4ae0a7de, block=40
+[BROWSER] [MPQParser]   File 316: hashA=dcf67e2a, hashB=9b57a2a5, block=178
+[BROWSER] [MPQParser]   File 317: hashA=a811c9c9, hashB=62a66758, block=248
+[BROWSER] [MPQParser]   File 318: hashA=3194c4cb, hashB=b27332bb, block=308
+[BROWSER] [MPQParser]   File 319: hashA=3a6f94fe, hashB=3149b83b, block=399
+[BROWSER] [MPQParser]   File 320: hashA=313725f8, hashB=cb925f6c, block=155
+[BROWSER] [MPQParser]   File 321: hashA=45db6682, hashB=26fdb4b3, block=366
+[BROWSER] [MPQParser]   File 322: hashA=6e3fbc5, hashB=31cb27b7, block=148
+[BROWSER] [MPQParser]   File 323: hashA=99fe7d5d, hashB=3fb95f3f, block=32
+[BROWSER] [MPQParser]   File 324: hashA=423d87f6, hashB=3e2b7ea1, block=281
+[BROWSER] [MPQParser]   File 325: hashA=3bca3208, hashB=a517b3d8, block=53
+[BROWSER] [MPQParser]   File 326: hashA=312777d, hashB=25cfd941, block=197
+[BROWSER] [MPQParser]   File 327: hashA=c6019bbf, hashB=d364ab0f, block=373
+[BROWSER] [MPQParser]   File 328: hashA=5d2dec43, hashB=b8187ef8, block=35
+[BROWSER] [MPQParser]   File 329: hashA=3358933f, hashB=763353cb, block=36
+[BROWSER] [MPQParser]   File 330: hashA=4cf7983d, hashB=b0164712, block=167
+[BROWSER] [MPQParser]   File 331: hashA=d29a1409, hashB=2d361967, block=173
+[BROWSER] [MPQParser]   File 332: hashA=f46cdb6c, hashB=b5319851, block=263
+[BROWSER] [MPQParser]   File 333: hashA=2693a87, hashB=7713343c, block=321
+[BROWSER] [MPQParser]   File 334: hashA=3242b8aa, hashB=b09b636b, block=295
+[BROWSER] [MPQParser]   File 335: hashA=294314c9, hashB=cf189add, block=357
+[BROWSER] [MPQParser]   File 336: hashA=674faf11, hashB=83aa0a3e, block=391
+[BROWSER] [MPQParser]   File 337: hashA=3553fc33, hashB=22c96551, block=20
+[BROWSER] [MPQParser]   File 338: hashA=dd949872, hashB=71d58abd, block=222
+[BROWSER] [MPQParser]   File 339: hashA=8ab8c40f, hashB=2a39e3c0, block=21
+[BROWSER] [MPQParser]   File 340: hashA=bdaf31f3, hashB=a7be3f18, block=96
+[BROWSER] [MPQParser]   File 341: hashA=bb875b89, hashB=aa829d75, block=192
+[BROWSER] [MPQParser]   File 342: hashA=4e533818, hashB=8e9466ee, block=126
+[BROWSER] [MPQParser]   File 343: hashA=eea0e95a, hashB=df602ebc, block=119
+[BROWSER] [MPQParser]   File 344: hashA=48c399fb, hashB=a72e3dbc, block=232
+[BROWSER] [MPQParser]   File 345: hashA=36f54231, hashB=c563b0, block=230
+[BROWSER] [MPQParser]   File 346: hashA=b51bd26b, hashB=7691479e, block=311
+[BROWSER] [MPQParser]   File 347: hashA=6a9d199b, hashB=f1b0182c, block=131
+[BROWSER] [MPQParser]   File 348: hashA=19313ce9, hashB=429a30c2, block=191
+[BROWSER] [MPQParser]   File 349: hashA=84335f9e, hashB=8ef3fb2e, block=322
+[BROWSER] [MPQParser]   File 350: hashA=e032385e, hashB=beaaa3e6, block=350
+[BROWSER] [MPQParser]   File 351: hashA=af2bd6cc, hashB=74898ad7, block=301
+[BROWSER] [MPQParser]   File 352: hashA=cbb92d54, hashB=66d5f08d, block=396
+[BROWSER] [MPQParser]   File 353: hashA=4117fadc, hashB=e6ebcd90, block=113
+[BROWSER] [MPQParser]   File 354: hashA=53825f5, hashB=48af1a, block=134
+[BROWSER] [MPQParser]   File 355: hashA=2c770c37, hashB=5ce9d8f, block=402
+[BROWSER] [MPQParser]   File 356: hashA=4fd4fdd4, hashB=a8f8b2c0, block=39
+[BROWSER] [MPQParser]   File 357: hashA=8999829b, hashB=ad02cb9, block=183
+[BROWSER] [MPQParser]   File 358: hashA=e23f15e5, hashB=8d7fbf0f, block=198
+[BROWSER] [MPQParser]   File 359: hashA=b898bbe3, hashB=c1c11d22, block=338
+[BROWSER] [MPQParser]   File 360: hashA=ac6559e8, hashB=27a2230b, block=245
+[BROWSER] [MPQParser]   File 361: hashA=c31bb82e, hashB=6e4920cd, block=25
+[BROWSER] [MPQParser]   File 362: hashA=93337b5a, hashB=f8bf14ef, block=23
+[BROWSER] [MPQParser]   File 363: hashA=19d93b08, hashB=f706384e, block=60
+[BROWSER] [MPQParser]   File 364: hashA=7bf68698, hashB=8630c41e, block=164
+[BROWSER] [MPQParser]   File 365: hashA=dcd5992c, hashB=35bc4937, block=109
+[BROWSER] [MPQParser]   File 366: hashA=817d056, hashB=c76f0b71, block=6
+[BROWSER] [MPQParser]   File 367: hashA=b5260c4, hashB=5d34151d, block=195
+[BROWSER] [MPQParser]   File 368: hashA=797ecf0a, hashB=93de911c, block=252
+[BROWSER] [MPQParser]   File 369: hashA=33e887b7, hashB=d135014a, block=1
+[BROWSER] [MPQParser]   File 370: hashA=4c65477, hashB=5b8ef193, block=108
+[BROWSER] [MPQParser]   File 371: hashA=14d96d8f, hashB=91c39d40, block=356
+[BROWSER] [MPQParser]   File 372: hashA=da6b6fb, hashB=5de4ae8f, block=378
+[BROWSER] [MPQParser]   File 373: hashA=b23bce12, hashB=69b22b5d, block=19
+[BROWSER] [MPQParser]   File 374: hashA=c5660c24, hashB=d9c1a570, block=233
+[BROWSER] [MPQParser]   File 375: hashA=d4647f23, hashB=91bb090b, block=100
+[BROWSER] [MPQParser]   File 376: hashA=2e64999d, hashB=3a6267bb, block=103
+[BROWSER] [MPQParser]   File 377: hashA=67addf17, hashB=c76d1198, block=203
+[BROWSER] [MPQParser]   File 378: hashA=a3d616df, hashB=807a50d3, block=229
+[BROWSER] [MPQParser]   File 379: hashA=da4f347, hashB=dbf2126, block=347
+[BROWSER] [MPQParser]   File 380: hashA=a4050f14, hashB=6cb6efc7, block=381
+[BROWSER] [MPQParser]   File 381: hashA=f1472d2a, hashB=6babea57, block=411
+[BROWSER] [MPQParser]   File 382: hashA=f3e0c50a, hashB=359cffbd, block=362
+[BROWSER] [MPQParser]   File 383: hashA=f93204d5, hashB=a2ecc362, block=415
+[BROWSER] [MPQParser]   File 384: hashA=d38437cb, hashB=7dfeaec, block=418
+[BROWSER] [MPQParser]   File 385: hashA=b21d6742, hashB=c784fddd, block=94
+[BROWSER] [MPQParser]   File 386: hashA=a936c0cc, hashB=d46fffd6, block=45
+[BROWSER] [MPQParser]   File 387: hashA=d90b5f17, hashB=f66b42d7, block=72
+[BROWSER] [MPQParser]   File 388: hashA=33d52134, hashB=cb350221, block=170
+[BROWSER] [MPQParser]   File 389: hashA=942f85a5, hashB=4761f27d, block=141
+[BROWSER] [MPQParser]   File 390: hashA=dc8dad8b, hashB=7ce2cf85, block=258
+[BROWSER] [MPQParser]   File 391: hashA=bc597e3c, hashB=f8a8f618, block=242
+[BROWSER] [MPQParser]   File 392: hashA=6baf1cdc, hashB=af00b5a4, block=68
+[BROWSER] [MPQParser]   File 393: hashA=c99707e7, hashB=95b8144e, block=5
+[BROWSER] [MPQParser]   File 394: hashA=1f38b393, hashB=9334fcab, block=34
+[BROWSER] [MPQParser]   File 395: hashA=b168ef19, hashB=53df534d, block=270
+[BROWSER] [MPQParser]   File 396: hashA=494f76ae, hashB=a6dca2, block=271
+[BROWSER] [MPQParser]   File 397: hashA=268552fd, hashB=736c30fe, block=361
+[BROWSER] [MPQParser]   File 398: hashA=5cf46c53, hashB=2d02d4a9, block=159
+[BROWSER] [MPQParser]   File 399: hashA=88f23e20, hashB=5c409713, block=213
+[BROWSER] [MPQParser]   File 400: hashA=d35db39a, hashB=84ffa844, block=299
+[BROWSER] [MPQParser]   File 401: hashA=5505713e, hashB=236c8f46, block=387
+[BROWSER] [MPQParser]   File 402: hashA=f54e6b5f, hashB=166945bf, block=14
+[BROWSER] [MPQParser]   File 403: hashA=c2b05743, hashB=6b361685, block=200
+[BROWSER] [MPQParser]   File 404: hashA=dd4f00d7, hashB=9674f819, block=285
+[BROWSER] [MPQParser]   File 405: hashA=57551b59, hashB=731e8377, block=389
+[BROWSER] [MPQParser]   File 406: hashA=91a99593, hashB=e6b69730, block=196
+[BROWSER] [MPQParser]   File 407: hashA=a44be778, hashB=9db7fbba, block=186
+[BROWSER] [MPQParser]   File 408: hashA=dc07696b, hashB=3781451e, block=268
+[BROWSER] [MPQParser]   File 409: hashA=d87caac8, hashB=7696ddd6, block=64
+[BROWSER] [MPQParser]   File 410: hashA=4e83fbb4, hashB=af2e6ffc, block=110
+[BROWSER] [MPQParser]   File 411: hashA=4b2e8b1c, hashB=1a4c62f9, block=114
+[BROWSER] [MPQParser]   File 412: hashA=7ff4fc15, hashB=2184d4f3, block=212
+[BROWSER] [MPQParser]   File 413: hashA=c6e78549, hashB=932fc175, block=240
+[BROWSER] [MPQParser]   File 414: hashA=9a60787d, hashB=d34b581e, block=168
+[BROWSER] [MPQParser]   File 415: hashA=23e2575a, hashB=5bfb1641, block=188
+[BROWSER] [MPQParser]   File 416: hashA=399d28b3, hashB=28d7fc99, block=99
+[BROWSER] [MPQParser]   File 417: hashA=aa6b9357, hashB=334213b6, block=262
+[BROWSER] [MPQParser]   File 418: hashA=249b85ec, hashB=9b71bfdb, block=296
+[BROWSER] [MPQParser] Finding "(listfile)": hashA=0xfd657910, hashB=0x4e9b98a7
+[BROWSER] [MPQParser] Hash table has 419 valid entries out of 512 total
+[BROWSER] [MPQParser] First 5 valid hash entries:
+[BROWSER]   [0] hashA=0x8fd26355, hashB=0x8e8f908f, blockIndex=158
+[BROWSER]   [1] hashA=0xb57fcdb5, hashB=0xfb40df29, blockIndex=41
+[BROWSER]   [2] hashA=0xa8ef0cd9, hashB=0xdb88df1b, blockIndex=189
+[BROWSER]   [3] hashA=0xd5c1525, hashB=0x984253c3, blockIndex=236
+[BROWSER]   [4] hashA=0x9644f843, hashB=0x74e57a4f, blockIndex=12
+[BROWSER] [MPQParser] Found "(listfile)" at blockIndex 417
+[BROWSER] [MPQParser] Decompressing file "(listfile)" (3477 bytes compressed -> 15089 bytes expected)
+[BROWSER] [MPQParser] First 16 bytes: 6e 44 16 fd 4f 07 55 13 e4 a7 19 43 10 44 38 a3
+[BROWSER] [MPQParser] Detected compression: 0x0
+[BROWSER] [MPQParser] 🔧 SECTOR FIX v2.0 ACTIVE
+[BROWSER] [MPQParser] Size mismatch (3477 != 15089), trying sector decompression...
+[BROWSER] [MPQParser] Sector decompression: 4 sectors, first offsets: 4246094958, 324339535, 1125754852, 2738373648, 2660834317
+[BROWSER] [MPQParser] Sector decompression failed, trying raw ZLIB: JSHandle@error
+[BROWSER] [MPQParser] Raw ZLIB also failed: incorrect header check
+[BROWSER] [MPQParser] Using raw data as fallback: 3477 bytes
+[BROWSER] [W3XMapLoader] Files in archive: JSHandle@array
+[BROWSER] [W3XMapLoader] Extracting war3map.w3i...
+[BROWSER] [MPQParser] Finding "war3map.w3i": hashA=0x33e887b7, hashB=0xd135014a
+[BROWSER] [MPQParser] Hash table has 419 valid entries out of 512 total
+[BROWSER] [MPQParser] First 5 valid hash entries:
+[BROWSER]   [0] hashA=0x8fd26355, hashB=0x8e8f908f, blockIndex=158
+[BROWSER]   [1] hashA=0xb57fcdb5, hashB=0xfb40df29, blockIndex=41
+[BROWSER]   [2] hashA=0xa8ef0cd9, hashB=0xdb88df1b, blockIndex=189
+[BROWSER]   [3] hashA=0xd5c1525, hashB=0x984253c3, blockIndex=236
+[BROWSER]   [4] hashA=0x9644f843, hashB=0x74e57a4f, blockIndex=12
+[BROWSER] [MPQParser] Found "war3map.w3i" at blockIndex 1
+[BROWSER] [MPQParser] Decompressing file "war3map.w3i" (409 bytes compressed -> 1172 bytes expected)
+[BROWSER] [MPQParser] First 16 bytes: 08 00 00 00 99 01 00 00 02 78 9c 7d 93 31 4b c3
+[BROWSER] [MPQParser] Detected compression: 0x8
+[BROWSER] [MPQParser] Multi-compression detected: outer=0x08, inner=0x2
+[BROWSER] [MPQParser] Multi-compression ZLIB: 409 -> 1172 bytes
+[BROWSER] [MPQParser] Decompressed first 16 bytes: 19 00 00 00 ee 07 00 00 ab 17 00 00 54 52 49 47
+[BROWSER] [W3XMapLoader] Got w3i data: 1172 bytes
+[BROWSER] [W3XMapLoader] Extracting war3map.w3e...
+[BROWSER] [MPQParser] Finding "war3map.w3e": hashA=0xf8c3b168, hashB=0x7018bae6
+[BROWSER] [MPQParser] Hash table has 419 valid entries out of 512 total
+[BROWSER] [MPQParser] First 5 valid hash entries:
+[BROWSER]   [0] hashA=0x8fd26355, hashB=0x8e8f908f, blockIndex=158
+[BROWSER]   [1] hashA=0xb57fcdb5, hashB=0xfb40df29, blockIndex=41
+[BROWSER]   [2] hashA=0xa8ef0cd9, hashB=0xdb88df1b, blockIndex=189
+[BROWSER]   [3] hashA=0xd5c1525, hashB=0x984253c3, blockIndex=236
+[BROWSER]   [4] hashA=0x9644f843, hashB=0x74e57a4f, blockIndex=12
+[BROWSER] [MPQParser] Found "war3map.w3e" at blockIndex 0
+[BROWSER] [MPQParser] Decompressing file "war3map.w3e" (38751 bytes compressed -> 87668 bytes expected)
+[BROWSER] [MPQParser] First 16 bytes: 5c 00 00 00 e4 06 00 00 ac 0e 00 00 70 16 00 00
+[BROWSER] [MPQParser] Detected compression: 0x0
+[BROWSER] [MPQParser] 🔧 SECTOR FIX v2.0 ACTIVE
+[BROWSER] [MPQParser] Size mismatch (38751 != 87668), trying sector decompression...
+[BROWSER] [MPQParser] Sector decompression: 22 sectors, first offsets: 92, 1764, 3756, 5744, 7762
+[BROWSER] [MPQParser] Decompressed 22 sectors: 87668 bytes total
+[BROWSER] [MPQParser] Sector decompression: 38751 -> 87668 bytes
+[BROWSER] [W3XMapLoader] Got w3e data: 87668 bytes
+[BROWSER] [MPQParser] Finding "war3map.doo": hashA=0xf778f2e6, hashB=0xcdcc294f
+[BROWSER] [MPQParser] Hash table has 419 valid entries out of 512 total
+[BROWSER] [MPQParser] First 5 valid hash entries:
+[BROWSER]   [0] hashA=0x8fd26355, hashB=0x8e8f908f, blockIndex=158
+[BROWSER]   [1] hashA=0xb57fcdb5, hashB=0xfb40df29, blockIndex=41
+[BROWSER]   [2] hashA=0xa8ef0cd9, hashB=0xdb88df1b, blockIndex=189
+[BROWSER]   [3] hashA=0xd5c1525, hashB=0x984253c3, blockIndex=236
+[BROWSER]   [4] hashA=0x9644f843, hashB=0x74e57a4f, blockIndex=12
+[BROWSER] [MPQParser] Found "war3map.doo" at blockIndex 10
+[BROWSER] [MPQParser] Decompressing file "war3map.doo" (81569 bytes compressed -> 212314 bytes expected)
+[BROWSER] [MPQParser] First 16 bytes: d4 00 00 00 f5 06 00 00 39 0d 00 00 b5 13 00 00
+[BROWSER] [MPQParser] Detected compression: 0x0
+[BROWSER] [MPQParser] 🔧 SECTOR FIX v2.0 ACTIVE
+[BROWSER] [MPQParser] Size mismatch (81569 != 212314), trying sector decompression...
+[BROWSER] [MPQParser] Sector decompression: 52 sectors, first offsets: 212, 1781, 3385, 5045, 6660
+[BROWSER] [MPQParser] Decompressed 52 sectors: 212314 bytes total
+[BROWSER] [MPQParser] Sector decompression: 81569 -> 212314 bytes
+[BROWSER] [MPQParser] Finding "war3mapUnits.doo": hashA=0xedb50743, hashB=0xa47e6929
+[BROWSER] [MPQParser] Hash table has 419 valid entries out of 512 total
+[BROWSER] [MPQParser] First 5 valid hash entries:
+[BROWSER]   [0] hashA=0x8fd26355, hashB=0x8e8f908f, blockIndex=158
+[BROWSER]   [1] hashA=0xb57fcdb5, hashB=0xfb40df29, blockIndex=41
+[BROWSER]   [2] hashA=0xa8ef0cd9, hashB=0xdb88df1b, blockIndex=189
+[BROWSER]   [3] hashA=0xd5c1525, hashB=0x984253c3, blockIndex=236
+[BROWSER]   [4] hashA=0x9644f843, hashB=0x74e57a4f, blockIndex=12
+[BROWSER] [MPQParser] Found "war3mapUnits.doo" at blockIndex 11
+[BROWSER] [MPQParser] Decompressing file "war3mapUnits.doo" (9289 bytes compressed -> 38770 bytes expected)
+[BROWSER] [MPQParser] First 16 bytes: 2c 00 00 00 2f 04 00 00 2a 08 00 00 f5 0b 00 00
+[BROWSER] [MPQParser] Detected compression: 0x0
+[BROWSER] [MPQParser] 🔧 SECTOR FIX v2.0 ACTIVE
+[BROWSER] [MPQParser] Size mismatch (9289 != 38770), trying sector decompression...
+[BROWSER] [MPQParser] Sector decompression: 10 sectors, first offsets: 44, 1071, 2090, 3061, 4013
+[BROWSER] [MPQParser] Decompressed 10 sectors: 38770 bytes total
+[BROWSER] [MPQParser] Sector decompression: 9289 -> 38770 bytes
+[BROWSER] [W3XMapLoader] Parsing war3map.w3i (1172 bytes)...
+[BROWSER] [W3IParser] Insufficient buffer for player 26/2303
+[BROWSER] [W3IParser] Insufficient buffer for upgrade 1/65536 at offset 1170
+[BROWSER] [W3XMapLoader] Successfully parsed map info
+[BROWSER] [W3XMapLoader] Parsing war3map.w3e (87668 bytes)...
+[BROWSER] [W3XMapLoader] Successfully parsed terrain: 89x116 (10324 tiles)
+[BROWSER] [W3XMapLoader] Parsing war3map.doo (212314 bytes)...
+[BROWSER] [W3XMapLoader] Successfully parsed 4245 doodads
+[BROWSER] [W3XMapLoader] Parsing war3mapUnits.doo (38770 bytes)...
+[BROWSER] [W3UParser] Version 8, subversion 11
+[BROWSER] [W3UParser] Failed to parse unit 2/342 at offset 135: JSHandle@error
+[BROWSER] [W3UParser] Failed to parse unit 3/342 at offset 435: JSHandle@error
+[BROWSER] [W3UParser] Failed to parse unit 4/342 at offset 735: JSHandle@error
+[BROWSER] [W3UParser] Failed to parse unit 5/342 at offset 1035: JSHandle@error
+[BROWSER] [W3UParser] Failed to parse unit 6/342 at offset 1335: JSHandle@error
+[BROWSER] [W3UParser] Exceeded buffer after parse error, stopping at unit 131/342
+[BROWSER] [W3UParser] Parsed 2/342 units successfully (129 failures)
+[BROWSER] [W3XMapLoader] Successfully parsed 2 units
+[BROWSER] [W3EParser] Heightmap created: 89x116 (10324 tiles), min=-4096.00, max=4316.50, zeros=1/10324 (0.0%), sample: [0.5, 4316.5, 0.0, -4096.0, 2083.3, 2083.3, 2083.3, 2083.3, 2083.3, 2083.3]
+[BROWSER] [W3XMapLoader] 🔍 TERRAIN DEBUG - Tileset: A, groundTextureIds: [Adrt, Adrd, Agrs, Arck, Agrd, Avin, Adrg, Alvd], tile count: 89x116=10324
+[BROWSER] [W3XMapLoader] 🔍 Texture index range: min=0, max=6, unique indices used: 7
+[BROWSER] [W3XMapLoader] 🔍 Texture index distribution:   idx0=4400 tiles (42.6%)
+  idx1=1931 tiles (18.7%)
+  idx2=1388 tiles (13.4%)
+  idx3=497 tiles (4.8%)
+  idx4=1523 tiles (14.8%)
+  idx5=584 tiles (5.7%)
+  idx6=1 tiles (0.0%)
+[BROWSER] Map loaded: TRIGSTR_673 (89x116)
+[BROWSER] Rendering map...
+[BROWSER] [AssetLoader] Disposing assets...
+[BROWSER] MapRendererCore disposed
+[BROWSER] [TerrainRenderer] Terrain splatmap shaders registered
+[BROWSER] [MapRendererCore] Heightmap stats: min=-4096, max=4316.5, total=10324
+[BROWSER] [MapRendererCore] Loading multi-texture terrain: 89x116, textures: [Adrt, Adrd, Agrs, Arck, Agrd, Avin, Adrg, Alvd], blendMap size: 10324, height range: [-4096.0, 4316.5]
+[BROWSER] [TerrainRenderer] Multi-texture terrain mesh positioned at origin: (0, 0, 0)
+[BROWSER] [TerrainRenderer] 🔍 MATERIAL DEBUG - Applying multi-texture material
+[BROWSER] [TerrainRenderer] 🔍 Total textures requested: 8
+[BROWSER] [TerrainRenderer] 🔍 Texture IDs: [Adrt, Adrd, Agrs, Arck, Agrd, Avin, Adrg, Alvd]
+[BROWSER] [AssetLoader] Loaded texture: terrain_dirt_brown from /assets/textures/terrain/dirt_brown.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 0: "Adrt" -> "terrain_dirt_brown"
+[BROWSER] [AssetLoader] Loaded texture: terrain_dirt_desert from /assets/textures/terrain/dirt_desert.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 1: "Adrd" -> "terrain_dirt_desert"
+[BROWSER] [AssetLoader] Loaded texture: terrain_grass_light from /assets/textures/terrain/grass_light.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 2: "Agrs" -> "terrain_grass_light"
+[BROWSER] [AssetLoader] Loaded texture: terrain_rock_rough from /assets/textures/terrain/rock_rough.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 3: "Arck" -> "terrain_rock_rough"
+[BROWSER] [AssetLoader] Loaded texture: terrain_grass_dirt_mix from /assets/textures/terrain/grass_dirt_mix.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 4: "Agrd" -> "terrain_grass_dirt_mix"
+[BROWSER] [AssetLoader] Loaded texture: terrain_vines from /assets/textures/terrain/vines.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 5: "Avin" -> "terrain_vines"
+[BROWSER] [AssetLoader] Loaded texture: terrain_grass_dark from /assets/textures/terrain/grass_dark.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 6: "Adrg" -> "terrain_grass_dark"
+[BROWSER] [AssetLoader] Loaded texture: terrain_volcanic_ash from /assets/textures/terrain/volcanic_ash.jpg
+[BROWSER] [TerrainRenderer] ✅ Loaded texture slot 7: "Alvd" -> "terrain_volcanic_ash"
+[BROWSER] [TerrainRenderer] 🔍 SPLATMAP DEBUG - Creating dual 89x116 splatmaps from 10324 tiles
+[BROWSER] [TerrainRenderer] 🔍 BlendMap index range: min=0, max=6, unique=7
+[BROWSER] [TerrainRenderer] 🔍 Index distribution:   idx0=4400 (42.6%)
+  idx1=1931 (18.7%)
+  idx2=1388 (13.4%)
+  idx3=497 (4.8%)
+  idx4=1523 (14.8%)
+  idx5=584 (5.7%)
+  idx6=1 (0.0%)
+[BROWSER] [TerrainRenderer] ✅ Created dual splatmap textures: 89x116
+[BROWSER] [TerrainRenderer] ✅ Splatmap1 (textures 0-3): idx0=4400, idx2=1388, idx3=497, idx1=1931
+[BROWSER] [TerrainRenderer] ✅ Splatmap2 (textures 4-7): idx4=1523, idx6=1, idx5=584
+[BROWSER] [TerrainRenderer] Multi-texture splatmap material applied successfully
+[BROWSER] [MapRendererCore] Multi-texture terrain loaded successfully
+[BROWSER] Rendering 2 units...
+[BROWSER] Found 2 unique unit types
+[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - First unit: raw W3X pos=(853.1, -4367.8, 267.0), mapWidth=11392, mapHeight=14848
+[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: Babylon pos=(-4842.9, 268.0, 11791.8)
+[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - First unit: raw W3X pos=(-4736.0, -7581.3, 336.4), mapWidth=11392, mapHeight=14848
+[BROWSER] [MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: Babylon pos=(-10432.0, 337.4, 15005.3)
+[BROWSER] [MapRendererCore] Rendered 2 units as placeholder cubes
+[BROWSER] [MapRendererCore] 🔍 COORDINATE DEBUG - Map dimensions: tiles=89x116, world units=11392x14848
+[BROWSER] Rendering 4245 doodads (limit: 4670)...
+[BROWSER] Loading 93 unique doodad types...
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ATtr -> doodad_tree_oak_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASbc -> doodad_bush_round_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ARrk -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: DSp0 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YOfs -> doodad_bush_round_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: APct -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YOtf -> doodad_bush_round_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASx1 -> doodad_tree_oak_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOsm -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASbr -> doodad_bush_round_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AZrf -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AObo -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOss -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOtr -> doodad_tree_oak_02
+[BROWSER] [AssetLoader] Model not found: doodad_tree_oak_02, using fallback box
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AWfs -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASv0 -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: DTg3 -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YOec -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ATtc -> doodad_tree_oak_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AOla -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: NOft -> doodad_well_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LWw0 -> doodad_well_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASbl -> doodad_bush_round_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: APms -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTcr -> doodad_rock_large_01
+[BROWSER] [AssetMap] No mapping for w3x:doodad:ATg4, using fallback
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ATg4 -> doodad_box_placeholder
+[BROWSER] [AssetLoader] Model not found: doodad_box_placeholder, using fallback box
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTe3 -> doodad_tree_oak_02
+[BROWSER] [AssetLoader] Model not found: doodad_tree_oak_02, using fallback box
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YOf3 -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOtz -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: APbs -> doodad_bush_round_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOsh -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AOsk -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTe1 -> doodad_tree_oak_02
+[BROWSER] [AssetLoader] Model not found: doodad_tree_oak_02, using fallback box
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LObz -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LObr -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOca -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AOlg -> doodad_bridge_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ATwf -> doodad_tree_pine_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: COlg -> doodad_tree_oak_02
+[BROWSER] [AssetLoader] Model not found: doodad_tree_oak_02, using fallback box
+[BROWSER] [DoodadRenderer] Mapped doodad ID: VOfs -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AOks -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: COhs -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: OTis -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTlt -> doodad_torch_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: DSp9 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: DTg1 -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASv3 -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTs5 -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D000 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: B001 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YOf2 -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: NOfp -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOrb -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YOfr -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOth -> doodad_tree_oak_02
+[BROWSER] [AssetLoader] Model not found: doodad_tree_oak_02, using fallback box
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AOsr -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASr1 -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOwr -> doodad_ruins_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: NWsd -> doodad_signpost_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: NWfb -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: NWfp -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: NWpa -> doodad_plant_generic_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ZZdt -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASx2 -> doodad_tree_oak_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: AOhs -> doodad_ruins_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: DRfc -> doodad_ruins_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: Ytlc -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ASx0 -> doodad_tree_oak_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: CTtc -> doodad_tree_pine_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YTpb -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTbs -> doodad_tree_dead_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ZPsh -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: ZPfw -> doodad_fence_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LTs8 -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: B002 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: B003 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: B000 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D00C -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: LOcg -> doodad_rock_large_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D00E -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D006 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D00D -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: YTlb -> doodad_pillar_stone_01
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D001 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D003 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D002 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D004 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D005 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D007 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D008 -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D00A -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: D00B -> doodad_marker_small
+[BROWSER] [DoodadRenderer] Mapped doodad ID: CTtr -> doodad_tree_pine_01
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOtr (mapped to doodad_tree_oak_02)
+[BROWSER] [DoodadRenderer] Loaded doodad type: ATg4 (mapped to doodad_box_placeholder)
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTe3 (mapped to doodad_tree_oak_02)
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTe1 (mapped to doodad_tree_oak_02)
+[BROWSER] [DoodadRenderer] Loaded doodad type: COlg (mapped to doodad_tree_oak_02)
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOth (mapped to doodad_tree_oak_02)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_oak_01 from /assets/models/doodads/tree_oak_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ATtr (mapped to doodad_tree_oak_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASbc (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DSp0 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ARrk (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: APct (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOla (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_well_01 from /assets/models/doodads/well_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NOft (mapped to doodad_well_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bridge_01 from /assets/models/doodads/bridge_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOlg (mapped to doodad_bridge_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_pine_01 from /assets/models/doodads/tree_pine_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ATwf (mapped to doodad_tree_pine_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_torch_01 from /assets/models/doodads/torch_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTlt (mapped to doodad_torch_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_signpost_01 from /assets/models/doodads/signpost_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NWsd (mapped to doodad_signpost_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_dead_01 from /assets/models/doodads/tree_dead_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTbs (mapped to doodad_tree_dead_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOwr (mapped to doodad_ruins_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_fence_01 from /assets/models/doodads/fence_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ZPfw (mapped to doodad_fence_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_oak_01 from /assets/models/doodads/tree_oak_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASx1 (mapped to doodad_tree_oak_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_oak_01 from /assets/models/doodads/tree_oak_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ATtc (mapped to doodad_tree_oak_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_oak_01 from /assets/models/doodads/tree_oak_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASx2 (mapped to doodad_tree_oak_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_oak_01 from /assets/models/doodads/tree_oak_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASx0 (mapped to doodad_tree_oak_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOfs (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOtf (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASbr (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASbl (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_bush_round_01 from /assets/models/doodads/bush_round_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: APbs (mapped to doodad_bush_round_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DSp9 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D000 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: B001 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: B002 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: B003 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: B000 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D00C (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D00E (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D006 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D00D (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D001 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D005 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D007 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D008 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D002 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D004 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D003 (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D00A (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AObo (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_marker_small from /assets/models/doodads/marker_small.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: D00B (mapped to doodad_marker_small)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOec (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOss (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTcr (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOf3 (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOsh (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOsk (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LObz (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LObr (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOca (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: COhs (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOf2 (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOrb (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ZZdt (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOsr (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ZPsh (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_rock_large_01 from /assets/models/doodads/rock_large_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOcg (mapped to doodad_rock_large_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOsm (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AZrf (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AWfs (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASv0 (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DTg3 (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: APms (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: VOfs (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DTg1 (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YOfr (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASv3 (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: ASr1 (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NWfb (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NWfp (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_plant_generic_01 from /assets/models/doodads/plant_generic_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NWpa (mapped to doodad_plant_generic_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LOtz (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOks (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: NOfp (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: Ytlc (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: OTis (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTs5 (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YTpb (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LTs8 (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_pillar_stone_01 from /assets/models/doodads/pillar_stone_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: YTlb (mapped to doodad_pillar_stone_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_well_01 from /assets/models/doodads/well_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: LWw0 (mapped to doodad_well_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_pine_01 from /assets/models/doodads/tree_pine_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: CTtc (mapped to doodad_tree_pine_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_tree_pine_01 from /assets/models/doodads/tree_pine_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: CTtr (mapped to doodad_tree_pine_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: AOhs (mapped to doodad_ruins_01)
+[BROWSER] [AssetLoader] Loaded model: doodad_ruins_01 from /assets/models/doodads/ruins_01.glb
+[BROWSER] [DoodadRenderer] Loaded doodad type: DRfc (mapped to doodad_ruins_01)
+[BROWSER] [DoodadRenderer] 🔍 COORDINATE DEBUG - First doodad: mapWidth=11392, mapHeight=14848, raw W3X pos=(512.0, -7168.0, 155.3)
+[BROWSER] [DoodadRenderer] 🔍 COORDINATE DEBUG - After offset: Babylon pos=(-5184.0, 155.3, 14592.0)
+[BROWSER] Created instance buffer for ATtr: 2385 instances
+[BROWSER] Created instance buffer for ASbc: 54 instances
+[BROWSER] Created instance buffer for ARrk: 287 instances
+[BROWSER] Created instance buffer for DSp0: 13 instances
+[BROWSER] Created instance buffer for YOfs: 7 instances
+[BROWSER] Created instance buffer for APct: 124 instances
+[BROWSER] Created instance buffer for YOtf: 82 instances
+[BROWSER] Created instance buffer for ASx1: 15 instances
+[BROWSER] Created instance buffer for LOsm: 34 instances
+[BROWSER] Created instance buffer for ASbr: 4 instances
+[BROWSER] Created instance buffer for AZrf: 8 instances
+[BROWSER] Created instance buffer for AObo: 8 instances
+[BROWSER] Created instance buffer for LOss: 16 instances
+[BROWSER] Created instance buffer for LOtr: 3 instances
+[BROWSER] Created instance buffer for AWfs: 54 instances
+[BROWSER] Created instance buffer for ASv0: 3 instances
+[BROWSER] Created instance buffer for DTg3: 1 instances
+[BROWSER] Created instance buffer for YOec: 10 instances
+[BROWSER] Created instance buffer for ATtc: 39 instances
+[BROWSER] Created instance buffer for AOla: 10 instances
+[BROWSER] Created instance buffer for NOft: 9 instances
+[BROWSER] Created instance buffer for LWw0: 35 instances
+[BROWSER] Created instance buffer for ASbl: 4 instances
+[BROWSER] Created instance buffer for APms: 167 instances
+[BROWSER] Created instance buffer for LTcr: 14 instances
+[BROWSER] Created instance buffer for ATg4: 1 instances
+[BROWSER] Created instance buffer for LTe3: 1 instances
+[BROWSER] Created instance buffer for YOf3: 6 instances
+[BROWSER] Created instance buffer for LOtz: 4 instances
+[BROWSER] Created instance buffer for APbs: 47 instances
+[BROWSER] Created instance buffer for LOsh: 27 instances
+[BROWSER] Created instance buffer for AOsk: 1 instances
+[BROWSER] Created instance buffer for LTe1: 1 instances
+[BROWSER] Created instance buffer for LObz: 2 instances
+[BROWSER] Created instance buffer for LObr: 12 instances
+[BROWSER] Created instance buffer for LOca: 2 instances
+[BROWSER] Created instance buffer for AOlg: 4 instances
+[BROWSER] Created instance buffer for ATwf: 8 instances
+[BROWSER] Created instance buffer for COlg: 1 instances
+[BROWSER] Created instance buffer for VOfs: 2 instances
+[BROWSER] Created instance buffer for AOks: 1 instances
+[BROWSER] Created instance buffer for COhs: 6 instances
+[BROWSER] Created instance buffer for OTis: 145 instances
+[BROWSER] Created instance buffer for LTlt: 3 instances
+[BROWSER] Created instance buffer for DSp9: 6 instances
+[BROWSER] Created instance buffer for DTg1: 1 instances
+[BROWSER] Created instance buffer for ASv3: 2 instances
+[BROWSER] Created instance buffer for LTs5: 1 instances
+[BROWSER] Created instance buffer for D000: 72 instances
+[BROWSER] Created instance buffer for B001: 1 instances
+[BROWSER] Created instance buffer for YOf2: 4 instances
+[BROWSER] Created instance buffer for NOfp: 4 instances
+[BROWSER] Created instance buffer for LOrb: 1 instances
+[BROWSER] Created instance buffer for YOfr: 2 instances
+[BROWSER] Created instance buffer for LOth: 5 instances
+[BROWSER] Created instance buffer for AOsr: 6 instances
+[BROWSER] Created instance buffer for ASr1: 1 instances
+[BROWSER] Created instance buffer for LOwr: 4 instances
+[BROWSER] Created instance buffer for NWsd: 1 instances
+[BROWSER] Created instance buffer for NWfb: 4 instances
+[BROWSER] Created instance buffer for NWfp: 7 instances
+[BROWSER] Created instance buffer for NWpa: 4 instances
+[BROWSER] Created instance buffer for ZZdt: 49 instances
+[BROWSER] Created instance buffer for ASx2: 31 instances
+[BROWSER] Created instance buffer for AOhs: 6 instances
+[BROWSER] Created instance buffer for DRfc: 4 instances
+[BROWSER] Created instance buffer for Ytlc: 25 instances
+[BROWSER] Created instance buffer for ASx0: 3 instances
+[BROWSER] Created instance buffer for CTtc: 17 instances
+[BROWSER] Created instance buffer for YTpb: 10 instances
+[BROWSER] Created instance buffer for LTbs: 2 instances
+[BROWSER] Created instance buffer for ZPsh: 4 instances
+[BROWSER] Created instance buffer for ZPfw: 5 instances
+[BROWSER] Created instance buffer for LTs8: 1 instances
+[BROWSER] Created instance buffer for B002: 1 instances
+[BROWSER] Created instance buffer for B003: 1 instances
+[BROWSER] Created instance buffer for B000: 1 instances
+[BROWSER] Created instance buffer for D00C: 4 instances
+[BROWSER] Created instance buffer for LOcg: 3 instances
+[BROWSER] Created instance buffer for D00E: 2 instances
+[BROWSER] Created instance buffer for D006: 2 instances
+[BROWSER] Created instance buffer for D00D: 2 instances
+[BROWSER] Created instance buffer for YTlb: 97 instances
+[BROWSER] Created instance buffer for D001: 3 instances
+[BROWSER] Created instance buffer for D003: 22 instances
+[BROWSER] Created instance buffer for D002: 1 instances
+[BROWSER] Created instance buffer for D004: 1 instances
+[BROWSER] Created instance buffer for D005: 142 instances
+[BROWSER] Created instance buffer for D007: 2 instances
+[BROWSER] Created instance buffer for D008: 1 instances
+[BROWSER] Created instance buffer for D00A: 1 instances
+[BROWSER] Created instance buffer for D00B: 1 instances
+[BROWSER] Created instance buffer for CTtr: 15 instances
+[BROWSER] Doodads rendered: 4245 instances, 93 types, 93 draw calls
+[BROWSER] [MapRendererCore] Disposing existing light: light
+[BROWSER] [MapRendererCore] Lighting created: ambient=0.8, sun=1.2
+[BROWSER] Environment applied: tileset=A.  , fog=true
+[BROWSER] [MapRendererCore] 📷 Camera Setup - Terrain height: [-5.2, 2502.0], center: 1248.4, range: 2507.3
+[BROWSER] [MapRendererCore] 📷 RTS Camera: radius=1122.9, target=(0, 1248.4, 0), limits=[336.9, 2807.2]
+[BROWSER] Camera initialized: mode=rts, target={X: 0 Y: 1248.411764705882 Z: 0}, radius=1122.8832373849027, alpha=-1.5707963267948966, beta=0.6283185307179586
+[BROWSER] Phase 2 systems integrated
+[BROWSER] Map rendering complete
+[BROWSER] 
+========== SCENE DEBUG INSPECTION ==========
+[BROWSER] [DEBUG] Scene meshes: 437 total
+[BROWSER] [DEBUG] Active camera: rtsCamera
+[BROWSER] [DEBUG] Camera position: (0.00, 2156.84, -660.01)
+[BROWSER] [DEBUG] Camera target: (0.00, 1248.41, 0.00)
+[BROWSER] 
+[DEBUG] Mesh groups:
+[BROWSER]   - terrain: 1 meshes
+[BROWSER]   - unit: 4 meshes
+[BROWSER]   - fallback: 6 meshes
+[BROWSER]   - doodad: 300 meshes
+[BROWSER]   - tree: 18 meshes
+[BROWSER]   - grass: 21 meshes
+[BROWSER]   - marker: 20 meshes
+[BROWSER]   - cliff: 24 meshes
+[BROWSER]   - fence: 34 meshes
+[BROWSER]   - well: 2 meshes
+[BROWSER]   - bridge: 3 meshes
+[BROWSER]   - torch: 1 meshes
+[BROWSER]   - gate: 3 meshes
+[BROWSER] 
+[DEBUG] Visible meshes: 435/437
+[BROWSER] [DEBUG] Invisible meshes: 2/437
+[BROWSER] 
+[DEBUG] Sample visible meshes (first 10):
+[BROWSER]   [0] terrain: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=terrainSplatmap, vertices=1089
+[BROWSER]   [1] unit_rhe1_853.1107177734375_267.0105895996094: pos=(-4842.9, 268.0, 11791.8), scale=(1.00, 1.00, 1.00), material=unit_rhe1_mat, vertices=24
+[BROWSER]   [2] unit_earc_-4736.01904296875_336.4134216308594: pos=(-10432.0, 337.4, 15005.3), scale=(1.00, 1.00, 1.00), material=unit_earc_mat, vertices=24
+[BROWSER]   [3] fallback_box_1760442045482: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045482, vertices=24
+[BROWSER]   [4] fallback_box_1760442045485: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045485, vertices=24
+[BROWSER]   [5] fallback_box_1760442045485: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045485, vertices=24
+[BROWSER]   [6] fallback_box_1760442045486: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045486, vertices=24
+[BROWSER]   [7] fallback_box_1760442045487: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045488, vertices=24
+[BROWSER]   [8] fallback_box_1760442045489: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, 1.00), material=fallback_mat_1760442045490, vertices=24
+[BROWSER]   [9] doodad_tree_oak_01: pos=(0.0, 0.0, 0.0), scale=(1.00, 1.00, -1.00), material=none, vertices=0
+[BROWSER] 
+[DEBUG] TERRAIN MESH:
+[BROWSER]   Name: terrain
+[BROWSER]   Position: (0, 0, 0)
+[BROWSER]   Scaling: (1, 1, 1)
+[BROWSER]   Visible: true
+[BROWSER]   Vertices: 1089
+[BROWSER]   Material: terrainSplatmap
+[BROWSER]   Material diffuseColor: none
+[BROWSER]   Material diffuseTexture: none
+[BROWSER]   Material alpha: 1
+[BROWSER]   BoundingBox min: (-5696.0, -5.2, -7424.0)
+[BROWSER]   BoundingBox max: (5696.0, 2502.0, 7424.0)
+[BROWSER] 
+[DEBUG] Unit meshes: 4 total
+[BROWSER] [DEBUG] First 5 unit meshes:
+[BROWSER]   [0] unit_rhe1_base: pos=(0.0, 0.0, 0.0), visible=false
+[BROWSER]   [1] unit_rhe1_853.1107177734375_267.0105895996094: pos=(-4842.9, 268.0, 11791.8), visible=true
+[BROWSER]   [2] unit_earc_base: pos=(0.0, 0.0, 0.0), visible=false
+[BROWSER]   [3] unit_earc_-4736.01904296875_336.4134216308594: pos=(-10432.0, 337.4, 15005.3), visible=true
+[BROWSER] 
+[DEBUG] Doodad meshes: 342 total
+[BROWSER] [DEBUG] First 5 doodad meshes:
+[BROWSER]   [0] doodad_tree_oak_01: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER]   [1] tree_oak_primitive0: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER]   [2] tree_oak_primitive1: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER]   [3] doodad_tree_oak_01_instance_1760442045553: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER]   [4] doodad_tree_oak_01_instance_1760442045553.tree_oak.tree_oak_primitive0: pos=(0.0, 0.0, 0.0), visible=true
+[BROWSER] 
+========== END SCENE DEBUG ==========
+
+[BROWSER] Map rendered successfully in 358.70ms (total: 401.90ms)
+[BROWSER] ✅ Map loaded successfully: 3P Sentinel 01 v3.06.w3x
+[BROWSER] [APP] Canvas resized after map load
+
+✅ Capturing scene state...
+
+========== SCENE STATE ==========
+{
+  "error": "No scene"
+}
+=================================
+
+✅ Screenshot saved: test-screenshot.png
+
+Keeping browser open for 60 seconds...

@@ -554,9 +554,9 @@ export class MapRendererCore {
         }
 
         instance.position = new BABYLON.Vector3(
-          unit.position.x - mapWidth / 2, // Center X (offset from corner to center)
+          unit.position.x, // W3X is already centered - no offset needed
           unit.position.z + 1, // Height + 1 to sit above terrain
-          -(unit.position.y - mapHeight / 2) // Center Z and negate
+          -unit.position.y // Just negate Y for Z axis flip
         );
 
         if (isFirstUnit) {

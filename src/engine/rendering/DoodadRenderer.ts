@@ -244,9 +244,9 @@ export class DoodadRenderer {
       typeId: placement.typeId,
       variation: placement.variation ?? 0,
       position: new BABYLON.Vector3(
-        placement.position.x - this.config.mapWidth / 2, // Center X (offset from corner to center)
+        placement.position.x, // W3X is already centered - no offset needed
         placement.position.z, // Height (W3X Z -> Babylon Y)
-        -(placement.position.y - this.config.mapHeight / 2) // Center Z and negate
+        -placement.position.y // Just negate Y for Z axis flip
       ),
       rotation: placement.rotation,
       scale: new BABYLON.Vector3(placement.scale.x, placement.scale.z, placement.scale.y),
