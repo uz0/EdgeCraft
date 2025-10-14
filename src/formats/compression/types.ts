@@ -10,14 +10,22 @@
 export enum CompressionAlgorithm {
   /** No compression */
   NONE = 0x00,
-  /** PKZIP/Deflate compression */
-  PKZIP = 0x08,
+  /** Huffman compression */
+  HUFFMAN = 0x01,
   /** Zlib compression */
   ZLIB = 0x02,
-  /** LZMA compression (SC2 and later) */
-  LZMA = 0x12,
+  /** PKZIP/Deflate compression */
+  PKZIP = 0x08,
   /** BZip2 compression */
   BZIP2 = 0x10,
+  /** LZMA compression (SC2 and later) */
+  LZMA = 0x12,
+  /** SPARSE/IMA ADPCM compression (Warcraft III) */
+  SPARSE = 0x20,
+  /** ADPCM Mono compression */
+  ADPCM_MONO = 0x40,
+  /** ADPCM Stereo compression */
+  ADPCM_STEREO = 0x80,
 }
 
 /**

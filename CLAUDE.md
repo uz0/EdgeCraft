@@ -1,13 +1,12 @@
 # Edge Craft - AI Development Guidelines
 
-## 🎯 Project Context
-**Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with **TypeScript, React, and Babylon.js**.
+## 🚨 **CRITICAL: THE THREE-FILE RULE** (MOST IMPORTANT)
 
----
+**⚠️ READ THIS FIRST - THIS RULE OVERRIDES EVERYTHING ELSE ⚠️**
 
-## ⚠️ CRITICAL: DOCUMENTATION DISCIPLINE
+### 🔴 ABSOLUTE RULE: ONLY 3 DOCUMENTATION TYPES ALLOWED
 
-### 🚨 THE THREE-FILE RULE (MANDATORY)
+**NO EXCEPTIONS. NO COMPROMISES. NO VIOLATIONS.**
 
 **ONLY 3 types of documentation are allowed in this repository:**
 
@@ -15,14 +14,36 @@
 2. **`README.md`** - Project overview, setup instructions, current status.
 3. **`PRPs/`** - Phase Requirement Proposals. The ONLY format for all project requirements.
 
-**❌ FORBIDDEN DOCUMENTATION:**
+### ❌ **ABSOLUTELY FORBIDDEN** (Delete Immediately)
+
+**Documentation Files:**
 - ❌ No `docs/` directory
-- ❌ No scattered `.md` files in root
-- ❌ No `ARCHITECTURE.md`, `TECHNICAL-SPEC.md`, `PLAN.md`, etc.
-- ❌ No "summary" or "index" files outside PRPs/
+- ❌ No scattered `.md` files anywhere except root (CLAUDE.md, README.md) and PRPs/
+- ❌ No `ARCHITECTURE.md`, `TECHNICAL-SPEC.md`, `PLAN.md`
+- ❌ No `tests/**/*.md` (test documentation goes in PRPs)
+- ❌ No `src/**/*.md` (implementation docs go in PRPs)
+- ❌ No "summary", "findings", "specification", "guide" files outside PRPs/
 - ❌ No duplicate documentation
 
-**✅ IF IT'S NOT IN A PRP, IT DOESN'T EXIST.**
+**❗ EXAMPLES OF VIOLATIONS (Delete These If Found):**
+```
+tests/MAP_PREVIEW_TEST_SUMMARY.md          ← DELETE
+tests/engine/rendering/VISUAL_VALIDATION_FINDINGS.md  ← DELETE
+tests/engine/rendering/README_MAP_PREVIEW_TESTS.md    ← DELETE
+tests/engine/rendering/MAP_PREVIEW_TEST_SPECIFICATION.md ← DELETE
+docs/                                       ← DELETE ENTIRE DIRECTORY
+ARCHITECTURE.md                             ← DELETE
+TECHNICAL_SPEC.md                           ← DELETE
+```
+
+**✅ CORRECT LOCATIONS:**
+```
+CLAUDE.md                                   ← Testing guidelines, workflows
+README.md                                   ← Current status, setup instructions
+PRPs/map-preview-visual-regression-testing.md  ← Test specifications, standards
+```
+
+### ✅ **IF IT'S NOT IN A PRP, IT DOESN'T EXIST.**
 
 **Why This Rule Exists:**
 - Prevents documentation drift and conflicts
@@ -30,6 +51,19 @@
 - Forces executable, actionable requirements
 - Enables automation and clear gates
 - Makes progress measurable
+- **Eliminates confusion about where to find information**
+
+**When You See Violations:**
+1. **STOP** - Do not continue work
+2. **Extract** valuable content from forbidden files
+3. **Move** content to appropriate PRP or CLAUDE.md
+4. **DELETE** all forbidden documentation files
+5. **Commit** with message: "Enforce Three-File Rule: consolidate documentation"
+
+---
+
+## 🎯 Project Context
+**Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with **TypeScript, React, and Babylon.js**.
 
 ---
 

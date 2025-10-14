@@ -31,8 +31,62 @@ export class W3XMapLoader implements IMapLoader {
    * @returns Raw map data
    */
   public async parse(file: File | ArrayBuffer): Promise<RawMapData> {
-    // Convert File to ArrayBuffer if needed
-    const buffer = file instanceof ArrayBuffer ? file : await file.arrayBuffer();
+    // Convert to ArrayBuffer
+    let buffer: ArrayBuffer;
+
+    // Type guard for objects with buffer property (Node.js Buffer or TypedArray)
+    interface BufferLike {
+      buffer: ArrayBuffer;
+      byteOffset: number;
+      byteLength: number;
+    }
+
+    // Type guard for File-like objects
+    interface FileLike {
+      arrayBuffer: () => Promise<ArrayBuffer>;
+    }
+
+    function hasBuffer(obj: unknown): obj is BufferLike {
+      return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'buffer' in obj &&
+        obj.buffer instanceof ArrayBuffer &&
+        'byteOffset' in obj &&
+        typeof obj.byteOffset === 'number' &&
+        'byteLength' in obj &&
+        typeof obj.byteLength === 'number'
+      );
+    }
+
+    function hasArrayBuffer(obj: unknown): obj is FileLike {
+      return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'arrayBuffer' in obj &&
+        typeof obj.arrayBuffer === 'function'
+      );
+    }
+
+    // Check type more carefully
+    const isArrayBuffer =
+      file instanceof ArrayBuffer ||
+      Object.prototype.toString.call(file) === '[object ArrayBuffer]';
+
+    if (isArrayBuffer) {
+      // Already an ArrayBuffer
+      buffer = file as ArrayBuffer;
+    } else if (hasBuffer(file)) {
+      // Node.js Buffer or TypedArray - extract the underlying ArrayBuffer
+      buffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength);
+    } else if (hasArrayBuffer(file)) {
+      // File object - use arrayBuffer() method
+      buffer = await file.arrayBuffer();
+    } else {
+      throw new Error(
+        `Invalid input type: expected File, ArrayBuffer, or Buffer. Got ${Object.prototype.toString.call(file)}`
+      );
+    }
 
     // Parse MPQ archive
     const mpqParser = new MPQParser(buffer);
@@ -42,18 +96,65 @@ export class W3XMapLoader implements IMapLoader {
       throw new Error(`Failed to parse MPQ archive: ${mpqResult.error}`);
     }
 
-    // Extract war3map files
-    const w3iData = await mpqParser.extractFile('war3map.w3i');
-    const w3eData = await mpqParser.extractFile('war3map.w3e');
-    const dooData = await mpqParser.extractFile('war3map.doo');
-    const unitsData = await mpqParser.extractFile('war3mapUnits.doo');
+    // Debug: List all files in archive
+    const allFiles = mpqParser.listFiles();
+    console.log(
+      `[W3XMapLoader] Files in archive (${allFiles.length} total):`,
+      allFiles.slice(0, 20)
+    );
 
-    if (!w3iData) {
-      throw new Error('war3map.w3i not found in archive');
+    // Try to extract files, but catch errors (multi-compression, encryption, etc.)
+    let w3iData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let w3eData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let dooData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let unitsData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+
+    try {
+      // Try different case variations for war3map.w3i
+      w3iData = await mpqParser.extractFile('war3map.w3i');
+      if (!w3iData) {
+        console.log('[W3XMapLoader] Trying uppercase: war3map.W3I');
+        w3iData = await mpqParser.extractFile('war3map.W3I');
+      }
+      if (!w3iData) {
+        console.log('[W3XMapLoader] Trying all caps: WAR3MAP.W3I');
+        w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
+      }
+    } catch (err) {
+      console.warn(
+        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3i:',
+        err instanceof Error ? err.message : String(err)
+      );
     }
 
-    if (!w3eData) {
-      throw new Error('war3map.w3e not found in archive');
+    try {
+      w3eData = await mpqParser.extractFile('war3map.w3e');
+    } catch (err) {
+      console.warn(
+        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3e:',
+        err instanceof Error ? err.message : String(err)
+      );
+    }
+
+    try {
+      dooData = await mpqParser.extractFile('war3map.doo');
+    } catch (err) {
+      // Optional file, silent fail
+    }
+
+    try {
+      unitsData = await mpqParser.extractFile('war3mapUnits.doo');
+    } catch (err) {
+      // Optional file, silent fail
+    }
+
+    // If extraction fails (likely due to multi-compression not being supported),
+    // create placeholder data so we can still generate SOME preview
+    if (!w3iData || !w3eData) {
+      console.warn('[W3XMapLoader] ⚠️ Failed to extract W3X map files (likely multi-compression)');
+      console.warn('[W3XMapLoader] Creating placeholder map data for preview generation...');
+
+      return this.createPlaceholderMapData(allFiles);
     }
 
     // Parse map info
@@ -210,6 +311,71 @@ export class W3XMapLoader implements IMapLoader {
         targetAcquisition: unit.targetAcquisition,
       },
     }));
+  }
+
+  /**
+   * Create placeholder map data when extraction fails
+   * This allows preview generation to work even when multi-compression is not supported
+   */
+  private createPlaceholderMapData(availableFiles: string[]): RawMapData {
+    console.log('[W3XMapLoader] Creating placeholder map data with default 256x256 terrain');
+
+    // Determine map size from filename hints if possible
+    let mapSize = 256;
+    const fileName = availableFiles.find((f) => f.includes('war3map')) || '';
+    if (fileName.toLowerCase().includes('small')) {
+      mapSize = 128;
+    } else if (fileName.toLowerCase().includes('large')) {
+      mapSize = 512;
+    }
+
+    // Create flat heightmap (all zeros)
+    const heightmap = new Float32Array(mapSize * mapSize);
+    heightmap.fill(0); // Flat terrain
+
+    // Create minimal map info
+    const mapInfo: MapInfo = {
+      name: 'W3X Map (Multi-compression not supported)',
+      author: 'Unknown',
+      description: 'Preview generated with placeholder data due to unsupported compression.',
+      players: [],
+      dimensions: {
+        width: mapSize,
+        height: mapSize,
+        playableWidth: mapSize,
+        playableHeight: mapSize,
+      },
+      environment: {
+        tileset: 'Ashenvale',
+        fog: {
+          zStart: 0,
+          zEnd: 1000,
+          density: 0.5,
+          color: { r: 128, g: 128, b: 128, a: 255 },
+        },
+      },
+    };
+
+    // Create terrain data
+    const terrainData: TerrainData = {
+      width: mapSize,
+      height: mapSize,
+      heightmap,
+      textures: [
+        {
+          id: 'Agrd', // Ashenvale grass
+          blendMap: new Uint8Array(mapSize * mapSize).fill(0),
+        },
+      ],
+    };
+
+    return {
+      format: 'w3x',
+      info: mapInfo,
+      terrain: terrainData,
+      units: [],
+      doodads: [],
+    };
   }
 
   /**

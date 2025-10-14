@@ -131,6 +131,8 @@ export interface MPQParseResult {
 export interface MPQStreamParseResult {
   success: boolean;
   header?: MPQHeader;
+  hashTable?: MPQHashEntry[];
+  blockTable?: MPQBlockEntry[];
   files: MPQFile[];
   fileList: string[];
   error?: string;

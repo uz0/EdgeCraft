@@ -50,6 +50,10 @@ export type {
 } from './DoodadRenderer';
 export { MapPreviewGenerator } from './MapPreviewGenerator';
 export type { PreviewConfig, PreviewResult } from './MapPreviewGenerator';
+export { MapPreviewExtractor } from './MapPreviewExtractor';
+export type { ExtractOptions, ExtractResult } from './MapPreviewExtractor';
+export { TGADecoder } from './TGADecoder';
+export type { TGAHeader, TGADecodeResult } from './TGADecoder';
 
 // Enums
 export { QualityPreset } from './types';
