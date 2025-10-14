@@ -331,7 +331,7 @@ export class MapRendererCore {
     this.terrainRenderer = new TerrainRenderer(this.scene, this.assetLoader);
 
     // Convert heightmap Float32Array to a data URL for TerrainRenderer
-    const heightmapUrl = this.createHeightmapDataUrl(
+    const { url: heightmapUrl, minHeight, maxHeight } = this.createHeightmapDataUrl(
       terrain.heightmap,
       terrain.width,
       terrain.height
@@ -353,7 +353,8 @@ export class MapRendererCore {
       console.log(
         `[MapRendererCore] Loading multi-texture terrain: ${terrain.width}x${terrain.height}, ` +
           `textures: [${textureIds.join(', ')}], ` +
-          `blendMap size: ${blendMap.length}`
+          `blendMap size: ${blendMap.length}, ` +
+          `height range: [${minHeight.toFixed(1)}, ${maxHeight.toFixed(1)}]`
       );
 
       // W3X world coordinates: 128 units per tile
@@ -364,7 +365,8 @@ export class MapRendererCore {
         splatmapWidth: terrain.width, // Tile dimensions for splatmap (1 pixel per tile)
         splatmapHeight: terrain.height,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-        maxHeight: 100, // Default max height
+        minHeight, // Use actual heightmap min
+        maxHeight, // Use actual heightmap max
         textureIds,
         blendMap,
       });
@@ -381,7 +383,8 @@ export class MapRendererCore {
 
       console.log(
         `[MapRendererCore] Loading single-texture terrain: ${terrain.width}x${terrain.height}, ` +
-          `heightmap data URL length: ${heightmapUrl.length}, textureId: ${textureId ?? 'none'}`
+          `heightmap data URL length: ${heightmapUrl.length}, textureId: ${textureId ?? 'none'}, ` +
+          `height range: [${minHeight.toFixed(1)}, ${maxHeight.toFixed(1)}]`
       );
 
       // W3X world coordinates: 128 units per tile
@@ -390,7 +393,8 @@ export class MapRendererCore {
         width: terrain.width * TILE_SIZE,
         height: terrain.height * TILE_SIZE,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-        maxHeight: 100, // Default max height
+        minHeight, // Use actual heightmap min
+        maxHeight, // Use actual heightmap max
         textureId,
       });
 
@@ -408,8 +412,13 @@ export class MapRendererCore {
 
   /**
    * Convert heightmap Float32Array to data URL
+   * @returns Object with url (data URL), minHeight, and maxHeight
    */
-  private createHeightmapDataUrl(heightmap: Float32Array, width: number, height: number): string {
+  private createHeightmapDataUrl(
+    heightmap: Float32Array,
+    width: number,
+    height: number
+  ): { url: string; minHeight: number; maxHeight: number} {
     // Create canvas to encode heightmap as image
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -467,7 +476,11 @@ export class MapRendererCore {
 
     ctx.putImageData(imageData, 0, 0);
 
-    return canvas.toDataURL('image/png');
+    return {
+      url: canvas.toDataURL('image/png'),
+      minHeight,
+      maxHeight,
+    };
   }
 
   /**
