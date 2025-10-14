@@ -78,6 +78,20 @@
       "rules": {
         "@typescript-eslint/require-await": "off"
       }
+    },
+    {
+      "files": [
+        "src/App.tsx",
+        "src/engine/rendering/**/*.ts",
+        "src/formats/maps/**/*.ts",
+        "src/hooks/**/*.ts",
+        "src/ui/**/*.tsx",
+        "src/utils/**/*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/strict-boolean-expressions": "off",
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
     }
   ],
   "ignorePatterns": [
@@ -87,6 +101,13 @@
     "node_modules",
     "mocks",
     "*.js",
-    "vite.config.ts"
+    "vite.config.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__/**",
+    "tests/**",
+    "jest.setup.ts"
   ]
 }

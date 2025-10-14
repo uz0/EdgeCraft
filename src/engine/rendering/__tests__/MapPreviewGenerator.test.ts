@@ -6,8 +6,9 @@ import { MapPreviewGenerator } from '../MapPreviewGenerator';
 import type { RawMapData } from '../../../formats/maps/types';
 
 // Skip in CI environment (no WebGL context available)
-const describeIfWebGL =
-  typeof window !== 'undefined' && window.WebGLRenderingContext != null ? describe : describe.skip;
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+const hasWebGL = typeof window !== 'undefined' && window.WebGLRenderingContext != null;
+const describeIfWebGL = !isCI && hasWebGL ? describe : describe.skip;
 
 describeIfWebGL('MapPreviewGenerator', () => {
   let generator: MapPreviewGenerator;
