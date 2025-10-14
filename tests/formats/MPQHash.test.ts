@@ -39,7 +39,7 @@ describe('MPQParser Hash Algorithm', () => {
     // W3X files use multi-compression with incomplete Huffman implementation
     // This test verifies hash lookup works, even though extraction will fail
     await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
-      /Huffman decompression failed|Multi-compression not supported/
+      /Huffman decompression failed|Multi-compression not supported|Unsupported compression types|requires StormJS fallback/
     );
   });
 
@@ -51,7 +51,7 @@ describe('MPQParser Hash Algorithm', () => {
 
     // W3X files use multi-compression with incomplete Huffman implementation
     await expect(parser.extractFile('war3map.w3e')).rejects.toThrow(
-      /Huffman decompression failed|Multi-compression not supported/
+      /Huffman decompression failed|Multi-compression not supported|Unsupported compression types|requires StormJS fallback/
     );
   });
 

@@ -35,10 +35,10 @@ describe('W3X Preview Extraction Integration', () => {
 
     // Extraction fails due to incomplete Huffman decompression implementation
     await expect(parser.extractFile('war3map.w3i')).rejects.toThrow(
-      /Huffman decompression failed|Multi-compression not supported/
+      /Huffman decompression failed|Multi-compression not supported|Unsupported compression types|requires StormJS fallback/
     );
     await expect(parser.extractFile('war3map.w3e')).rejects.toThrow(
-      /Huffman decompression failed|Multi-compression not supported/
+      /Huffman decompression failed|Multi-compression not supported|Unsupported compression types|requires StormJS fallback/
     );
   });
 

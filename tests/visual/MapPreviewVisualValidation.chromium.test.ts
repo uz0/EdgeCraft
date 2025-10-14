@@ -42,28 +42,38 @@ interface ElementHandle {
   screenshot(): Promise<Buffer>;
 }
 
-describe('Map Preview Visual Validation (Browser-Based)', () => {
-  let cdp: ChromeDevToolsClient;
-  const DEV_SERVER_URL = 'http://localhost:3000';
+// Skip tests if running in CI or without Chrome DevTools MCP
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
 
-  beforeAll(async () => {
-    // Initialize Chrome DevTools Protocol client
-    // This would connect to actual Chrome instance via MCP
-    cdp = await initializeChromeDevTools();
-
-    // Navigate to map gallery
-    await cdp.navigate(DEV_SERVER_URL);
-
-    // Wait for gallery to load
-    await cdp.waitForSelector('.map-gallery-grid', { timeout: 10000 });
+if (isCI) {
+  describe.skip('Map Preview Visual Validation (Browser-Based) (skipped in CI)', () => {
+    test('requires Chrome DevTools MCP and running dev server', () => {
+      // Placeholder test
+    });
   });
+} else {
+  describe('Map Preview Visual Validation (Browser-Based)', () => {
+    let cdp: ChromeDevToolsClient;
+    const DEV_SERVER_URL = 'http://localhost:3000';
 
-  afterAll(async () => {
-    // Cleanup
-    if (cdp) {
-      await cdp.cleanup();
-    }
-  });
+    beforeAll(async () => {
+      // Initialize Chrome DevTools Protocol client
+      // This would connect to actual Chrome instance via MCP
+      cdp = await initializeChromeDevTools();
+
+      // Navigate to map gallery
+      await cdp.navigate(DEV_SERVER_URL);
+
+      // Wait for gallery to load
+      await cdp.waitForSelector('.map-gallery-grid', { timeout: 10000 });
+    });
+
+    afterAll(async () => {
+      // Cleanup
+      if (cdp) {
+        await cdp.cleanup();
+      }
+    });
 
   // ========================================================================
   // TEST SUITE 1: ALL MAPS RENDERING VALIDATION
@@ -454,7 +464,8 @@ describe('Map Preview Visual Validation (Browser-Based)', () => {
       });
     });
   });
-});
+  });
+}
 
 // ========================================================================
 // HELPER FUNCTIONS
