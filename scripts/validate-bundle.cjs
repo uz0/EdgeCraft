@@ -3,6 +3,9 @@
 /**
  * Bundle size validation script
  * Ensures production builds stay within acceptable size limits
+ *
+ * Note: Only JS/CSS bundles count towards the limit. Assets like textures,
+ * models, and maps are loaded on-demand and don't impact initial page load.
  */
 
 const fs = require('fs');
@@ -11,7 +14,7 @@ const path = require('path');
 const MAX_SIZES = {
   js: 6000 * 1024,     // 6MB max for JS bundles (includes Babylon.js ~5MB)
   css: 50 * 1024,      // 50KB max for CSS (gzipped)
-  total: 6500 * 1024,  // 6.5MB total (Babylon.js 3D engine is large)
+  total: 6500 * 1024,  // 6.5MB total for JS + CSS only
 };
 
 function getFileSize(filePath) {
@@ -70,12 +73,14 @@ function main() {
 
   const assets = scanDistDirectory();
 
-  let totalSize = 0;
+  let bundleSize = 0; // Only JS/CSS counts towards bundle size
+  let totalAssetSize = 0; // All assets for informational purposes
   let hasViolations = false;
 
   console.log('JavaScript bundles:');
   assets.js.forEach(asset => {
-    totalSize += asset.size;
+    bundleSize += asset.size;
+    totalAssetSize += asset.size;
     const status = asset.size <= MAX_SIZES.js ? '✅' : '❌';
     console.log(`  ${status} ${asset.path}: ${formatSize(asset.size)}`);
     if (asset.size > MAX_SIZES.js) hasViolations = true;
@@ -83,25 +88,36 @@ function main() {
 
   console.log('\nCSS bundles:');
   assets.css.forEach(asset => {
-    totalSize += asset.size;
+    bundleSize += asset.size;
+    totalAssetSize += asset.size;
     const status = asset.size <= MAX_SIZES.css ? '✅' : '❌';
     console.log(`  ${status} ${asset.path}: ${formatSize(asset.size)}`);
     if (asset.size > MAX_SIZES.css) hasViolations = true;
   });
 
   if (assets.other.length > 0) {
-    console.log('\nOther assets:');
-    assets.other.forEach(asset => {
-      totalSize += asset.size;
+    console.log('\nOther assets (loaded on-demand, not counted in bundle):');
+    const displayLimit = 10;
+    const displayed = assets.other.slice(0, displayLimit);
+    displayed.forEach(asset => {
+      totalAssetSize += asset.size;
       console.log(`  ℹ️  ${asset.path}: ${formatSize(asset.size)}`);
     });
+
+    if (assets.other.length > displayLimit) {
+      const remaining = assets.other.slice(displayLimit);
+      const remainingSize = remaining.reduce((sum, a) => sum + a.size, 0);
+      totalAssetSize += remainingSize;
+      console.log(`  ℹ️  ... and ${remaining.length} more assets (${formatSize(remainingSize)} total)`);
+    }
   }
 
-  console.log(`\nTotal bundle size: ${formatSize(totalSize)}`);
+  console.log(`\nBundle size (JS + CSS): ${formatSize(bundleSize)}`);
   console.log(`Limit: ${formatSize(MAX_SIZES.total)}`);
+  console.log(`Total assets on disk: ${formatSize(totalAssetSize)}`);
 
-  if (totalSize > MAX_SIZES.total) {
-    console.error('\n❌ Total bundle size exceeds limit!');
+  if (bundleSize > MAX_SIZES.total) {
+    console.error('\n❌ Bundle size exceeds limit!');
     hasViolations = true;
   }
 

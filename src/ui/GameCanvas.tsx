@@ -8,6 +8,7 @@ import { EdgeCraftEngine } from '@/engine/core/Engine';
 import { RTSCamera } from '@/engine/camera/RTSCamera';
 import { TerrainRenderer } from '@/engine/terrain/TerrainRenderer';
 import { ShadowCasterManager } from '@/engine/rendering/ShadowCasterManager';
+import { AssetLoader } from '@/engine/assets/AssetLoader';
 
 /**
  * Game Canvas props
@@ -56,8 +57,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         enableEdgeScroll: true,
       });
 
+      // Create asset loader
+      const assetLoader = new AssetLoader(engine.scene);
+
       // Create terrain
-      const terrain = new TerrainRenderer(engine.scene);
+      const terrain = new TerrainRenderer(engine.scene, assetLoader);
       const terrainMesh = terrain.createFlatTerrain(200, 200, 32);
 
       // Initialize shadow system

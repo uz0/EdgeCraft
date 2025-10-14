@@ -39,13 +39,58 @@ export class W3UParser {
     // Read subversion (v8+)
     const subversion = this.readUint32();
 
+    console.log(`[W3UParser] Version ${version}, subversion ${subversion}`);
+
     // Read units
     const unitCount = this.readUint32();
     const units: W3UUnit[] = [];
+    let successCount = 0;
+    let failCount = 0;
 
     for (let i = 0; i < unitCount; i++) {
-      units.push(this.readUnit());
+      const unitStartOffset = this.offset;
+
+      try {
+        // Check if we have enough buffer left for at least the minimum unit data
+        // Minimum: 4 (typeId) + 4 (variation) + 12 (position) + 4 (rotation) + 12 (scale) + 1 (flags) = 37 bytes
+        if (this.offset + 37 > this.view.byteLength) {
+          console.warn(
+            `[W3UParser] Insufficient buffer for unit ${i + 1}/${unitCount}, stopping parse`
+          );
+          break;
+        }
+
+        const unit = this.readUnit(version, subversion);
+        units.push(unit);
+        successCount++;
+      } catch (error) {
+        failCount++;
+
+        // Only log first 5 errors to avoid spam
+        if (failCount <= 5) {
+          console.warn(
+            `[W3UParser] Failed to parse unit ${i + 1}/${unitCount} at offset ${unitStartOffset}:`,
+            error
+          );
+        }
+
+        // Try to recover by skipping ahead
+        // Most units are 200-400 bytes, so skip 300 bytes and try to resync
+        this.offset = unitStartOffset + 300;
+
+        // If we've exceeded buffer, stop
+        if (this.offset >= this.view.byteLength) {
+          console.warn(
+            `[W3UParser] Exceeded buffer after parse error, stopping at unit ${i + 1}/${unitCount}`
+          );
+          break;
+        }
+      }
     }
+
+    console.log(
+      `[W3UParser] Parsed ${successCount}/${unitCount} units successfully (${failCount} failures)`
+    );
 
     return {
       version,
@@ -56,13 +101,22 @@ export class W3UParser {
 
   /**
    * Read unit placement data
+   * @param _version - File version (reserved for future version-specific parsing)
+   * @param _subversion - File subversion (reserved for future version-specific parsing)
    */
-  private readUnit(): W3UUnit {
+  private readUnit(_version: number, _subversion: number): W3UUnit {
+    const startOffset = this.offset;
+    const DEBUG = false; // Enable for detailed logging
+
+    if (DEBUG) console.log(`[W3UParser:readUnit] Starting at offset ${startOffset}`);
+
     // Type ID (4 chars)
     const typeId = this.read4CC();
+    if (DEBUG) console.log(`[W3UParser:readUnit] TypeID: ${typeId}, offset: ${this.offset}`);
 
     // Variation
     const variation = this.readUint32();
+    if (DEBUG) console.log(`[W3UParser:readUnit] Variation: ${variation}, offset: ${this.offset}`);
 
     // Position
     const position: Vector3 = {
@@ -70,9 +124,14 @@ export class W3UParser {
       y: this.readFloat32(),
       z: this.readFloat32(),
     };
+    if (DEBUG)
+      console.log(
+        `[W3UParser:readUnit] Position: (${position.x}, ${position.y}, ${position.z}), offset: ${this.offset}`
+      );
 
     // Rotation (radians)
     const rotation = this.readFloat32();
+    if (DEBUG) console.log(`[W3UParser:readUnit] Rotation: ${rotation}, offset: ${this.offset}`);
 
     // Scale
     const scale: Vector3 = {
@@ -80,15 +139,24 @@ export class W3UParser {
       y: this.readFloat32(),
       z: this.readFloat32(),
     };
+    if (DEBUG)
+      console.log(
+        `[W3UParser:readUnit] Scale: (${scale.x}, ${scale.y}, ${scale.z}), offset: ${this.offset}`
+      );
 
     // Flags
+    this.checkBounds(1);
     const flags = this.view.getUint8(this.offset);
     this.offset += 1;
+    if (DEBUG)
+      console.log(`[W3UParser:readUnit] Flags: 0x${flags.toString(16)}, offset: ${this.offset}`);
 
     // Owner (player number)
     const owner = this.readUint32();
+    if (DEBUG) console.log(`[W3UParser:readUnit] Owner: ${owner}, offset: ${this.offset}`);
 
     // Unknown bytes
+    this.checkBounds(2);
     const unknown1 = this.view.getUint8(this.offset);
     this.offset += 1;
 
@@ -96,24 +164,47 @@ export class W3UParser {
     this.offset += 1;
 
     // Hit points (-1 = default)
+    this.checkBounds(4);
     const hitPoints = this.view.getInt32(this.offset, true);
     this.offset += 4;
 
     // Mana points (-1 = default)
+    this.checkBounds(4);
     const manaPoints = this.view.getInt32(this.offset, true);
     this.offset += 4;
 
     // Item table index (-1 = none)
     const itemTable = this.view.getInt32(this.offset, true);
     this.offset += 4;
+    if (DEBUG) console.log(`[W3UParser:readUnit] ItemTable: ${itemTable}, offset: ${this.offset}`);
 
     // Item sets
     const itemSetCount = this.readUint32();
+    if (DEBUG)
+      console.log(`[W3UParser:readUnit] ItemSetCount: ${itemSetCount}, offset: ${this.offset}`);
+
+    // Sanity check: item set count should be reasonable (< 100)
+    if (itemSetCount > 100) {
+      throw new Error(
+        `Unreasonable itemSetCount: ${itemSetCount} (likely corrupted data or version mismatch)`
+      );
+    }
+
     const itemSets: W3OItemSet[] = [];
 
     for (let i = 0; i < itemSetCount; i++) {
       const items: W3ODroppedItem[] = [];
       const itemCount = this.readUint32();
+
+      if (DEBUG)
+        console.log(
+          `[W3UParser:readUnit] ItemSet ${i}: itemCount=${itemCount}, offset: ${this.offset}`
+        );
+
+      // Sanity check: item count should be reasonable (< 50)
+      if (itemCount > 50) {
+        throw new Error(`Unreasonable itemCount in set ${i}: ${itemCount} (likely corrupted data)`);
+      }
 
       for (let j = 0; j < itemCount; j++) {
         items.push({
@@ -124,6 +215,8 @@ export class W3UParser {
 
       itemSets.push({ items });
     }
+
+    if (DEBUG) console.log(`[W3UParser:readUnit] Finished item sets, offset: ${this.offset}`);
 
     // Gold amount (for gold mines)
     const goldAmount = this.readUint32();
@@ -147,6 +240,18 @@ export class W3UParser {
 
     // Inventory items (for heroes)
     const inventoryItemCount = this.readUint32();
+    if (DEBUG)
+      console.log(
+        `[W3UParser:readUnit] InventoryItemCount: ${inventoryItemCount}, offset: ${this.offset}`
+      );
+
+    // Sanity check: inventory should be reasonable (< 20)
+    if (inventoryItemCount > 20) {
+      throw new Error(
+        `Unreasonable inventoryItemCount: ${inventoryItemCount} (likely corrupted data or version mismatch)`
+      );
+    }
+
     const inventoryItems: W3UInventoryItem[] = [];
 
     for (let i = 0; i < inventoryItemCount; i++) {
@@ -156,8 +261,22 @@ export class W3UParser {
       });
     }
 
+    if (DEBUG) console.log(`[W3UParser:readUnit] Finished inventory items, offset: ${this.offset}`);
+
     // Modified abilities
     const modifiedAbilityCount = this.readUint32();
+    if (DEBUG)
+      console.log(
+        `[W3UParser:readUnit] ModifiedAbilityCount: ${modifiedAbilityCount}, offset: ${this.offset}`
+      );
+
+    // Sanity check: abilities should be reasonable (< 50)
+    if (modifiedAbilityCount > 50) {
+      throw new Error(
+        `Unreasonable modifiedAbilityCount: ${modifiedAbilityCount} (likely corrupted data or version mismatch)`
+      );
+    }
+
     const modifiedAbilities: W3UModifiedAbility[] = [];
 
     for (let i = 0; i < modifiedAbilityCount; i++) {
@@ -167,6 +286,9 @@ export class W3UParser {
         level: this.readUint32(),
       });
     }
+
+    if (DEBUG)
+      console.log(`[W3UParser:readUnit] Finished modified abilities, offset: ${this.offset}`);
 
     // Random flag
     const randomFlag = this.readUint32();
@@ -191,11 +313,26 @@ export class W3UParser {
 
     // Random unit tables
     const randomUnitTableCount = this.readUint32();
+    if (DEBUG)
+      console.log(
+        `[W3UParser:readUnit] RandomUnitTableCount: ${randomUnitTableCount}, offset: ${this.offset}`
+      );
+
+    // Sanity check: random unit tables should be reasonable (< 50)
+    if (randomUnitTableCount > 50) {
+      throw new Error(
+        `Unreasonable randomUnitTableCount: ${randomUnitTableCount} (likely corrupted data or version mismatch)`
+      );
+    }
+
     const randomUnitTables: number[] = [];
 
     for (let i = 0; i < randomUnitTableCount; i++) {
       randomUnitTables.push(this.readUint32());
     }
+
+    if (DEBUG)
+      console.log(`[W3UParser:readUnit] Finished random unit tables, offset: ${this.offset}`);
 
     // Custom color
     const customColor = this.readUint32();
@@ -208,6 +345,13 @@ export class W3UParser {
 
     // Editor ID
     const editorId = this.readUint32();
+
+    if (DEBUG) {
+      const bytesConsumed = this.offset - startOffset;
+      console.log(
+        `[W3UParser:readUnit] Finished unit at offset ${this.offset} (consumed ${bytesConsumed} bytes)`
+      );
+    }
 
     return {
       typeId,
@@ -248,6 +392,7 @@ export class W3UParser {
    * Helper: Read 4-character code
    */
   private read4CC(): string {
+    this.checkBounds(4);
     const chars = String.fromCharCode(
       this.view.getUint8(this.offset),
       this.view.getUint8(this.offset + 1),
@@ -262,6 +407,7 @@ export class W3UParser {
    * Helper: Read uint32
    */
   private readUint32(): number {
+    this.checkBounds(4);
     const value = this.view.getUint32(this.offset, true);
     this.offset += 4;
     return value;
@@ -271,8 +417,20 @@ export class W3UParser {
    * Helper: Read float32
    */
   private readFloat32(): number {
+    this.checkBounds(4);
     const value = this.view.getFloat32(this.offset, true);
     this.offset += 4;
     return value;
+  }
+
+  /**
+   * Helper: Check if we have enough bytes remaining
+   */
+  private checkBounds(bytes: number): void {
+    if (this.offset + bytes > this.view.byteLength) {
+      throw new RangeError(
+        `Offset ${this.offset} + ${bytes} exceeds buffer length ${this.view.byteLength}`
+      );
+    }
   }
 }
