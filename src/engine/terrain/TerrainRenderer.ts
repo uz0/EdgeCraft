@@ -185,13 +185,11 @@ void main(void) {
             maxHeight: options.maxHeight,
             onReady: (mesh) => {
               try {
-                // Position terrain mesh so (0,0) in W3X coords = (0,0) in Babylon
-                // Babylon centers the terrain at origin, but we need it positioned
-                // so its corner is at origin to match unit/doodad coordinates
-                mesh.position.x = options.width / 2;
-                mesh.position.z = options.height / 2;
+                // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
+                // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
+                // Entities are offset by -mapWidth/2 and -mapHeight/2 to align with this
                 console.log(
-                  `[TerrainRenderer] Positioned terrain mesh at (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
+                  `[TerrainRenderer] Terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
                 );
 
                 this.applyMaterial(mesh, options);
@@ -326,13 +324,11 @@ void main(void) {
             maxHeight: options.maxHeight,
             onReady: (mesh) => {
               try {
-                // Position terrain mesh so (0,0) in W3X coords = (0,0) in Babylon
-                // Babylon centers the terrain at origin, but we need it positioned
-                // so its corner is at origin to match unit/doodad coordinates
-                mesh.position.x = options.width / 2;
-                mesh.position.z = options.height / 2;
+                // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
+                // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
+                // Entities are offset by -mapWidth/2 and -mapHeight/2 to align with this
                 console.log(
-                  `[TerrainRenderer] Positioned multi-texture terrain mesh at (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
+                  `[TerrainRenderer] Multi-texture terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
                 );
 
                 this.applyMultiTextureMaterial(mesh, options);

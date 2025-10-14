@@ -741,7 +741,7 @@ export class MapRendererCore {
         -Math.PI / 2, // Facing north
         Math.PI / 5, // 36° from vertical (classic RTS angle like WC3)
         baseRadius,
-        new BABYLON.Vector3(worldWidth / 2, terrainCenterY, worldHeight / 2), // Target at terrain center
+        new BABYLON.Vector3(0, terrainCenterY, 0), // Target at origin (centered terrain)
         this.scene
       );
 
@@ -755,23 +755,23 @@ export class MapRendererCore {
 
       console.log(
         `[MapRendererCore] 📷 RTS Camera: radius=${baseRadius.toFixed(1)}, ` +
-          `target=(${worldWidth / 2}, ${terrainCenterY.toFixed(1)}, ${worldHeight / 2}), ` +
+          `target=(0, ${terrainCenterY.toFixed(1)}, 0), ` +
           `limits=[${camera.lowerRadiusLimit.toFixed(1)}, ${camera.upperRadiusLimit.toFixed(1)}]`
       );
     } else if (this.config.cameraMode === 'free') {
       // Free camera
       const camera = new BABYLON.UniversalCamera(
         'freeCamera',
-        new BABYLON.Vector3(worldWidth / 2, terrainCenterY + 100, worldHeight / 2),
+        new BABYLON.Vector3(0, terrainCenterY + 100, 0),
         this.scene
       );
-      camera.setTarget(new BABYLON.Vector3(worldWidth / 2, terrainCenterY, worldHeight / 2));
+      camera.setTarget(new BABYLON.Vector3(0, terrainCenterY, 0));
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
       this.camera = camera;
 
       console.log(
-        `[MapRendererCore] 📷 Free Camera: position=(${worldWidth / 2}, ${(terrainCenterY + 100).toFixed(1)}, ${worldHeight / 2}), ` +
-          `target=(${worldWidth / 2}, ${terrainCenterY.toFixed(1)}, ${worldHeight / 2})`
+        `[MapRendererCore] 📷 Free Camera: position=(0, ${(terrainCenterY + 100).toFixed(1)}, 0), ` +
+          `target=(0, ${terrainCenterY.toFixed(1)}, 0)`
       );
     }
 
@@ -810,11 +810,13 @@ export class MapRendererCore {
     // Minimap system (initialize with map dimensions in world coordinates)
     if (systems.minimap != null) {
       const TILE_SIZE = 128;
+      const worldWidth = mapData.info.dimensions.width * TILE_SIZE;
+      const worldHeight = mapData.info.dimensions.height * TILE_SIZE;
       systems.minimap.setMapBounds({
-        minX: 0,
-        maxX: mapData.info.dimensions.width * TILE_SIZE,
-        minZ: 0,
-        maxZ: mapData.info.dimensions.height * TILE_SIZE,
+        minX: -worldWidth / 2,
+        maxX: worldWidth / 2,
+        minZ: -worldHeight / 2,
+        maxZ: worldHeight / 2,
       });
       console.log('Minimap bounds updated');
     }
