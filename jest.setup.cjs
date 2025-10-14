@@ -1,5 +1,8 @@
 // Jest setup file to configure globals for test environment
 
+// Set global flag for CI environment (used to skip WebGL-dependent tests)
+global.IS_CI_ENVIRONMENT = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
 // Add TextEncoder/TextDecoder for CopyrightValidator tests
 const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
@@ -56,7 +59,11 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
 // Mock WebGL context
 HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
   if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
-    return {
+    // Create a comprehensive WebGL mock with all methods as bound functions
+    const mockFn = () => {};
+    mockFn.bind = () => mockFn;
+
+    const ctx = {
       canvas: document.createElement('canvas'),
       drawingBufferWidth: 800,
       drawingBufferHeight: 600,
@@ -148,6 +155,10 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
       depthMask: jest.fn(),
       cullFace: jest.fn(),
       frontFace: jest.fn(),
+      // Ensure all methods have bind()
+      readPixels: jest.fn(),
+      finish: jest.fn(),
+      flush: jest.fn(),
       VERTEX_SHADER: 35633,
       FRAGMENT_SHADER: 35632,
       ARRAY_BUFFER: 34962,
@@ -163,6 +174,18 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
       DEPTH_ATTACHMENT: 36096,
       STENCIL_ATTACHMENT: 36128,
     };
+
+    // Wrap context in Proxy to ensure all methods have .bind()
+    return new Proxy(ctx, {
+      get(target, prop) {
+        const value = target[prop];
+        // If it's a function, ensure it has bind method
+        if (typeof value === 'function' && !value.bind) {
+          value.bind = () => value;
+        }
+        return value;
+      }
+    });
   }
   return null;
 });
