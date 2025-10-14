@@ -229,6 +229,16 @@ export class DoodadRenderer {
     // IMPORTANT: W3X uses absolute world coordinates (0 to mapWidth/mapHeight),
     // but Babylon.js CreateGroundFromHeightMap centers terrain at origin (0, 0, 0).
     // Therefore, we must subtract half the map dimensions to align entities with terrain.
+
+    // Debug: log first instance to verify offset calculation
+    if (this.instances.size === 0) {
+      console.log(
+        `[DoodadRenderer] 🔍 COORDINATE DEBUG - First doodad:`,
+        `mapWidth=${this.config.mapWidth}, mapHeight=${this.config.mapHeight},`,
+        `raw W3X pos=(${placement.position.x.toFixed(1)}, ${placement.position.y.toFixed(1)}, ${placement.position.z.toFixed(1)})`
+      );
+    }
+
     const instance: DoodadInstance = {
       id: placement.id,
       typeId: placement.typeId,
@@ -241,6 +251,14 @@ export class DoodadRenderer {
       rotation: placement.rotation,
       scale: new BABYLON.Vector3(placement.scale.x, placement.scale.z, placement.scale.y),
     };
+
+    // Debug: log first instance result
+    if (this.instances.size === 0) {
+      console.log(
+        `[DoodadRenderer] 🔍 COORDINATE DEBUG - After offset:`,
+        `Babylon pos=(${instance.position.x.toFixed(1)}, ${instance.position.y.toFixed(1)}, ${instance.position.z.toFixed(1)})`
+      );
+    }
 
     this.instances.set(instance.id, instance);
   }

@@ -525,6 +525,7 @@ export class MapRendererCore {
       box.isVisible = false; // Hide the base mesh
 
       // Spawn instances for each unit
+      let isFirstUnit = true;
       for (const unit of typeUnits) {
         const instance = box.createInstance(
           `unit_${unit.typeId}_${unit.position.x}_${unit.position.z}`
@@ -539,11 +540,29 @@ export class MapRendererCore {
         // Therefore, we must subtract half the map dimensions to align entities with terrain.
         const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
         const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
+
+        if (isFirstUnit) {
+          console.log(
+            `[MapRendererCore] 🔍 UNIT COORDINATE DEBUG - First unit: ` +
+              `raw W3X pos=(${unit.position.x.toFixed(1)}, ${unit.position.y.toFixed(1)}, ${unit.position.z.toFixed(1)}), ` +
+              `mapWidth=${mapWidth}, mapHeight=${mapHeight}`
+          );
+        }
+
         instance.position = new BABYLON.Vector3(
           unit.position.x - mapWidth / 2, // Center X (offset from corner to center)
           unit.position.z + 1, // Height + 1 to sit above terrain
           -(unit.position.y - mapHeight / 2) // Center Z and negate
         );
+
+        if (isFirstUnit) {
+          console.log(
+            `[MapRendererCore] 🔍 UNIT COORDINATE DEBUG - After offset: ` +
+              `Babylon pos=(${instance.position.x.toFixed(1)}, ${instance.position.y.toFixed(1)}, ${instance.position.z.toFixed(1)})`
+          );
+          isFirstUnit = false;
+        }
+
         instance.rotation.y = unit.rotation;
         // Handle optional scale (default to 1,1,1 if undefined)
         const scale = unit.scale ?? { x: 1, y: 1, z: 1 };
@@ -600,6 +619,12 @@ export class MapRendererCore {
     // Calculate map dimensions for coordinate conversion
     const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
     const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
+
+    console.log(
+      `[MapRendererCore] 🔍 COORDINATE DEBUG - Map dimensions: ` +
+        `tiles=${this.currentMap?.info.dimensions.width}x${this.currentMap?.info.dimensions.height}, ` +
+        `world units=${mapWidth}x${mapHeight}`
+    );
 
     this.doodadRenderer = new DoodadRenderer(this.scene, this.assetLoader, {
       enableInstancing: true,
