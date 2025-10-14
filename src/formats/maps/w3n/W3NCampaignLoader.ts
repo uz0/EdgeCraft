@@ -204,7 +204,8 @@ export class W3NCampaignLoader implements IMapLoader {
 
     let firstMapData: ArrayBuffer | null = null;
 
-    for (const { block, index } of largeBlocks.slice(0, 10)) {
+    // Check up to 30 largest blocks to find a valid W3X map
+    for (const { block, index } of largeBlocks.slice(0, 30)) {
       console.log(
         `[W3NCampaignLoader] Checking block ${index} (${block.compressedSize} bytes compressed)...`
       );
@@ -243,8 +244,31 @@ export class W3NCampaignLoader implements IMapLoader {
             console.log(
               `[W3NCampaignLoader] ✅ Extracted ${mapFile.data.byteLength} bytes from block ${index}`
             );
-            firstMapData = mapFile.data;
-            break;
+
+            // Validate this is an actual W3X map before accepting it
+            try {
+              const testParser = new MPQParser();
+              await testParser.parseInMemory(mapFile.data);
+              const archive = testParser.getArchive();
+
+              if (archive && archive.blockTable && archive.blockTable.length > 5) {
+                console.log(
+                  `[W3NCampaignLoader] ✅ Validated: block ${index} has ${archive.blockTable.length} files (likely a real W3X map)`
+                );
+                firstMapData = mapFile.data;
+                break;
+              } else {
+                console.log(
+                  `[W3NCampaignLoader] ⚠️ Block ${index}: MPQ has too few files (${archive?.blockTable?.length ?? 0}), likely not a map - continuing scan...`
+                );
+                // Continue to next block
+              }
+            } catch (validationError) {
+              console.log(
+                `[W3NCampaignLoader] ⚠️ Block ${index}: MPQ validation failed - ${validationError instanceof Error ? validationError.message : String(validationError)} - continuing scan...`
+              );
+              // Continue to next block
+            }
           }
         } else {
           console.log(
