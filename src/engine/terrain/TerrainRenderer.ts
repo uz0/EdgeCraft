@@ -238,7 +238,7 @@ void main(void) {
     this.material = new BABYLON.StandardMaterial('terrainMaterial', this.scene);
 
     // Try to load texture from AssetLoader if textureId is provided
-    if (options.textureId) {
+    if (options.textureId !== undefined && options.textureId !== null && options.textureId !== '') {
       try {
         // Map the terrain texture ID to our asset ID
         const mappedId = mapAssetID('w3x', 'terrain', options.textureId);

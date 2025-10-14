@@ -205,12 +205,15 @@ export function mapAssetID(
   const mappedID = mapping[originalID];
 
   // Return mapped ID or fallback
-  if (mappedID) {
+  if (mappedID !== undefined && mappedID !== null && mappedID !== '') {
     return mappedID;
   }
 
   console.warn(`[AssetMap] No mapping for ${format}:${assetType}:${originalID}, using fallback`);
-  return mapping['_fallback'] || 'doodad_box_placeholder';
+  const fallback = mapping['_fallback'];
+  return fallback !== undefined && fallback !== null && fallback !== ''
+    ? fallback
+    : 'doodad_box_placeholder';
 }
 
 /**

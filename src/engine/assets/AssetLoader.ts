@@ -97,7 +97,7 @@ export class AssetLoader {
     if (this.loadedModels.has(id)) {
       const cached = this.loadedModels.get(id)!;
       const cloned = cached.clone(`${id}_instance_${Date.now()}`, null);
-      return cloned || cached;
+      return cloned !== null ? cloned : cached;
     }
 
     const asset = this.manifest.models[id];
@@ -106,7 +106,7 @@ export class AssetLoader {
       return this.createFallbackBox();
     }
 
-    if (asset.fallback) {
+    if (asset.fallback !== undefined && asset.fallback !== null && asset.fallback !== '') {
       console.warn(`[AssetLoader] Model ${id} has fallback: ${asset.fallback}`);
     }
 
@@ -117,7 +117,7 @@ export class AssetLoader {
       const filename = asset.path.substring(lastSlash + 1);
 
       const result = await BABYLON.SceneLoader.ImportMeshAsync('', rootUrl, filename, this.scene);
-      if (!result.meshes || result.meshes.length === 0) {
+      if (result.meshes.length === 0) {
         throw new Error('No meshes imported');
       }
       const mesh = result.meshes[0] as BABYLON.Mesh;
@@ -125,7 +125,7 @@ export class AssetLoader {
       this.loadedModels.set(id, mesh);
       console.log(`[AssetLoader] Loaded model: ${id} from ${asset.path}`);
       const cloned = mesh.clone(`${id}_instance_${Date.now()}`, null);
-      return cloned || mesh;
+      return cloned !== null ? cloned : mesh;
     } catch (error) {
       console.error(`[AssetLoader] Failed to load model ${id}:`, error);
       return this.createFallbackBox();

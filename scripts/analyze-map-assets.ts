@@ -77,31 +77,35 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
   // Parse MPQ archive
   const mpqBuffer = mapBuffer.slice(mpqOffset).buffer;
   const mpq = new MPQParser(mpqBuffer);
-  const archive = mpq.parse();
-  console.log(`   MPQ Files: ${archive.fileCount}`);
+  const parseResult = mpq.parse();
+
+  if (!parseResult.success || !parseResult.archive) {
+    throw new Error(`Failed to parse MPQ: ${parseResult.error ?? 'Unknown error'}`);
+  }
+
+  const archive = parseResult.archive;
+  console.log(`   MPQ Files: ${archive.hashTable.length} hash entries`);
 
   // Extract war3map.w3i (map info)
-  const w3iFile = archive.files.find((f) => f.name?.toLowerCase() === 'war3map.w3i');
-  if (!w3iFile) {
+  const w3iFile = await mpq.extractFile('war3map.w3i');
+  if (w3iFile === null) {
     throw new Error('war3map.w3i not found in MPQ archive');
   }
-  const w3iData = mpq.extractFile(w3iFile);
-  const w3iParser = new W3IParser(w3iData);
+  const w3iParser = new W3IParser(w3iFile.data);
   const mapInfo = w3iParser.parse();
 
   console.log(`\n📏 Map Info:`);
   console.log(`   Name: ${mapInfo.name}`);
-  console.log(`   Size: ${mapInfo.width}x${mapInfo.height}`);
-  console.log(`   Players: ${mapInfo.playerCount}`);
+  console.log(`   Playable Size: ${mapInfo.playableWidth}x${mapInfo.playableHeight}`);
+  console.log(`   Players: ${mapInfo.players.length}`);
 
   // Extract war3map.w3e (terrain)
-  const w3eFile = archive.files.find((f) => f.name?.toLowerCase() === 'war3map.w3e');
-  if (!w3eFile) {
+  const w3eFile = await mpq.extractFile('war3map.w3e');
+  if (w3eFile === null) {
     throw new Error('war3map.w3e not found in MPQ archive');
   }
-  const w3eData = mpq.extractFile(w3eFile);
-  const w3eParser = new W3EParser(w3eData);
-  const terrain = w3eParser.parse(mapInfo.width, mapInfo.height);
+  const w3eParser = new W3EParser(w3eFile.data);
+  const terrain = w3eParser.parse();
 
   console.log(`\n🗺️  Terrain:`);
   console.log(`   Tileset: ${terrain.tileset} - ${getTilesetName(terrain.tileset)}`);
@@ -113,12 +117,13 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
   const textureUsage = new Map<number, number>();
   for (const tile of terrain.groundTiles) {
     const idx = tile.groundTexture;
-    textureUsage.set(idx, (textureUsage.get(idx) || 0) + 1);
+    const currentCount = textureUsage.get(idx) ?? 0;
+    textureUsage.set(idx, currentCount + 1);
   }
 
   const terrainTextures = Array.from(textureUsage.entries())
     .map(([idx, count]) => ({
-      id: terrain.groundTextureIds[idx] || `Unknown_${idx}`,
+      id: terrain.groundTextureIds[idx] ?? `Unknown_${idx}`,
       count,
     }))
     .sort((a, b) => b.count - a.count);
@@ -130,13 +135,12 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
   }
 
   // Extract war3map.doo (doodads)
-  const dooFile = archive.files.find((f) => f.name?.toLowerCase() === 'war3map.doo');
+  const dooFile = await mpq.extractFile('war3map.doo');
   let doodadTypes: { id: string; count: number }[] = [];
   let totalDoodads = 0;
 
-  if (dooFile) {
-    const dooData = mpq.extractFile(dooFile);
-    const dooParser = new W3DParser(dooData);
+  if (dooFile !== null) {
+    const dooParser = new W3DParser(dooFile.data);
     const doodads = dooParser.parse();
 
     totalDoodads = doodads.doodads.length;
@@ -145,7 +149,8 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
     const doodadUsage = new Map<string, number>();
     for (const doodad of doodads.doodads) {
       const id = doodad.typeId;
-      doodadUsage.set(id, (doodadUsage.get(id) || 0) + 1);
+      const currentCount = doodadUsage.get(id) ?? 0;
+      doodadUsage.set(id, currentCount + 1);
     }
 
     doodadTypes = Array.from(doodadUsage.entries())
@@ -172,7 +177,7 @@ async function analyzeMap(mapPath: string): Promise<AssetRequirements> {
 
   return {
     mapName: mapInfo.name,
-    mapSize: { width: mapInfo.width, height: mapInfo.height },
+    mapSize: { width: terrain.width, height: terrain.height },
     tileset: terrain.tileset,
     tilesetName: getTilesetName(terrain.tileset),
     terrainTextures,
@@ -223,7 +228,7 @@ function generateAssetManifest(requirements: AssetRequirements): string {
 /**
  * Main entry point
  */
-async function main() {
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const mapPath = args[0] || 'public/maps/3P Sentinel 01 v3.06.w3x';
 
@@ -255,4 +260,4 @@ async function main() {
   }
 }
 
-main();
+void main();
