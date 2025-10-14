@@ -248,11 +248,12 @@ export class MPQParser {
   }
 
   /**
-   * Read MPQ header
+   * Read MPQ header (searches for MPQ magic in first 4KB)
    */
   private readHeader(): MPQHeader | null {
-    // VERSION MARKER: MPQ Header debugging v3.0 (2025-10-11)
-    console.log('[MPQParser] 🔧 MPQ HEADER CHECK v3.0');
+    console.log(
+      `[MPQParser] Searching for valid MPQ header in ${this.buffer.byteLength} byte buffer (limit: 4096)`
+    );
 
     // Check buffer size
     if (this.buffer.byteLength < 32) {
@@ -262,39 +263,46 @@ export class MPQParser {
       return null;
     }
 
-    // Read first 16 bytes for debugging
-    const bytes = new Uint8Array(this.buffer.slice(0, Math.min(16, this.buffer.byteLength)));
-    console.log(
-      `[MPQParser] First 16 bytes: ${Array.from(bytes)
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join(' ')}`
-    );
+    // Search for MPQ magic in first 4KB (handles user data headers)
+    const searchLimit = Math.min(4096, this.buffer.byteLength - 32);
+    let headerOffset = 0;
 
-    // Check magic number (support both v1 and v2)
-    const magic = this.view.getUint32(0, true);
-    const magicBytes = String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!);
-    console.log(
-      `[MPQParser] Magic: 0x${magic.toString(16)} ("${magicBytes}"), expected 0x${MPQParser.MPQ_MAGIC_V1.toString(16)} or 0x${MPQParser.MPQ_MAGIC_V2.toString(16)}`
-    );
+    for (let offset = 0; offset <= searchLimit; offset += 512) {
+      const magic = this.view.getUint32(offset, true);
+      if (magic === MPQParser.MPQ_MAGIC_V1 || magic === MPQParser.MPQ_MAGIC_V2) {
+        headerOffset = offset;
+        console.log(`[MPQParser] Found MPQ magic at offset ${offset}: 0x${magic.toString(16)}`);
+        break;
+      }
+    }
 
+    // Verify we found a valid header
+    const magic = this.view.getUint32(headerOffset, true);
     if (magic !== MPQParser.MPQ_MAGIC_V1 && magic !== MPQParser.MPQ_MAGIC_V2) {
-      console.error(
-        `[MPQParser] ❌ Invalid MPQ magic number: 0x${magic.toString(16)} ("${magicBytes}")`
-      );
+      console.error(`[MPQParser] ❌ No valid MPQ header found in buffer`);
       return null;
     }
 
-    console.log('[MPQParser] ✅ Valid MPQ header detected');
+    console.log(`[MPQParser] ✅ Found VALID MPQ header at offset ${headerOffset}`);
 
-    return {
-      archiveSize: this.view.getUint32(8, true),
-      formatVersion: this.view.getUint16(12, true),
-      blockSize: 512 * Math.pow(2, this.view.getUint16(14, true)),
-      hashTablePos: this.view.getUint32(16, true),
-      blockTablePos: this.view.getUint32(20, true),
-      hashTableSize: this.view.getUint32(24, true),
-      blockTableSize: this.view.getUint32(28, true),
+    // Read header fields (all offsets relative to headerOffset)
+    const header: MPQHeader = {
+      archiveSize: this.view.getUint32(headerOffset + 8, true),
+      formatVersion: this.view.getUint16(headerOffset + 12, true),
+      blockSize: 512 * Math.pow(2, this.view.getUint16(headerOffset + 14, true)),
+      hashTablePos: this.view.getUint32(headerOffset + 16, true) + headerOffset,
+      blockTablePos: this.view.getUint32(headerOffset + 20, true) + headerOffset,
+      hashTableSize: this.view.getUint32(headerOffset + 24, true),
+      blockTableSize: this.view.getUint32(headerOffset + 28, true),
     };
+
+    console.log(
+      `[MPQParser] Header: archiveSize=${header.archiveSize}, formatVersion=${header.formatVersion}, ` +
+        `hashTablePos=${header.hashTablePos}, blockTablePos=${header.blockTablePos}, ` +
+        `hashTableSize=${header.hashTableSize}, blockTableSize=${header.blockTableSize}`
+    );
+
+    return header;
   }
 
   /**
