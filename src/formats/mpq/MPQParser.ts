@@ -608,10 +608,26 @@ export class MPQParser {
         `[MPQParser] Detected compression for ${filename}: 0x${compressionAlgorithm.toString(16)} (firstByte=${rawData.byteLength > 0 ? '0x' + new DataView(rawData).getUint8(0).toString(16) : 'empty'})`
       );
 
+      // Calculate offset to actual compressed data
+      // Multi-sector files have a sector offset table after the compression type byte
+      const isSingleUnit = (blockEntry.flags & 0x01000000) !== 0; // SINGLE_UNIT flag
+      let dataOffset = 1; // Skip compression type byte
+
+      if (!isSingleUnit) {
+        // Multi-sector file - has sector offset table
+        const blockSize = this.archive?.header.blockSize ?? 4096; // Default to 4096 if archive not yet parsed
+        const sectorCount = Math.ceil(blockEntry.uncompressedSize / blockSize);
+        const sectorTableSize = (sectorCount + 1) * 4; // Array of uint32 offsets
+        dataOffset += sectorTableSize;
+        console.log(
+          `[MPQParser] Multi-sector file: ${sectorCount} sectors, skipping ${sectorTableSize}-byte offset table`
+        );
+      }
+
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
-        // Skip first byte (compression type indicator) and decompress
+        // Skip compression type byte + sector table (if present) and decompress
         console.log(`[MPQParser] Decompressing ${filename} with LZMA...`);
-        const compressedData = rawData.slice(1);
+        const compressedData = rawData.slice(dataOffset);
         fileData = await this.lzmaDecompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
@@ -627,7 +643,7 @@ export class MPQParser {
         const algorithmName =
           compressionAlgorithm === CompressionAlgorithm.PKZIP ? 'PKZIP' : 'ZLIB';
         console.log(`[MPQParser] Decompressing ${filename} with ${algorithmName}...`);
-        const compressedData = rawData.slice(1);
+        const compressedData = rawData.slice(dataOffset);
         fileData = await this.zlibDecompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
@@ -638,7 +654,7 @@ export class MPQParser {
       } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
         // BZip2 compression
         console.log(`[MPQParser] Decompressing ${filename} with BZip2...`);
-        const compressedData = rawData.slice(1);
+        const compressedData = rawData.slice(dataOffset);
         fileData = await this.bzip2Decompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
@@ -744,8 +760,24 @@ export class MPQParser {
         `[MPQParser] Detected compression for block ${blockIndex}: 0x${compressionAlgorithm.toString(16)}`
       );
 
+      // Calculate offset to actual compressed data
+      // Multi-sector files have a sector offset table after the compression type byte
+      const isSingleUnit = (blockEntry.flags & 0x01000000) !== 0; // SINGLE_UNIT flag
+      let dataOffset = 1; // Skip compression type byte
+
+      if (!isSingleUnit) {
+        // Multi-sector file - has sector offset table
+        const blockSize = this.archive?.header.blockSize ?? 4096; // Default to 4096 if archive not yet parsed
+        const sectorCount = Math.ceil(blockEntry.uncompressedSize / blockSize);
+        const sectorTableSize = (sectorCount + 1) * 4; // Array of uint32 offsets
+        dataOffset += sectorTableSize;
+        console.log(
+          `[MPQParser] Multi-sector file: ${sectorCount} sectors, skipping ${sectorTableSize}-byte offset table`
+        );
+      }
+
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
-        const compressedData = rawData.slice(1);
+        const compressedData = rawData.slice(dataOffset);
         fileData = await this.lzmaDecompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
@@ -754,13 +786,13 @@ export class MPQParser {
         compressionAlgorithm === CompressionAlgorithm.ZLIB ||
         compressionAlgorithm === CompressionAlgorithm.PKZIP
       ) {
-        const compressedData = rawData.slice(1);
+        const compressedData = rawData.slice(dataOffset);
         fileData = await this.zlibDecompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
         );
       } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
-        const compressedData = rawData.slice(1);
+        const compressedData = rawData.slice(dataOffset);
         fileData = await this.bzip2Decompressor.decompress(
           compressedData,
           blockEntry.uncompressedSize
@@ -1396,9 +1428,26 @@ export class MPQParser {
     if (isCompressed) {
       const compressionAlgorithm = this.detectCompressionAlgorithm(this.toArrayBuffer(rawData));
 
+      // Calculate offset to actual compressed data
+      // Multi-sector files have a sector offset table after the compression type byte
+      const isSingleUnit = (blockEntry.flags & 0x01000000) !== 0; // SINGLE_UNIT flag
+      let dataOffset = 1; // Skip compression type byte
+
+      if (!isSingleUnit) {
+        // Multi-sector file - has sector offset table
+        const blockSize = this.archive?.header.blockSize ?? 4096; // Default to 4096 for streaming
+        const sectorCount = Math.ceil(blockEntry.uncompressedSize / blockSize);
+        const sectorTableSize = (sectorCount + 1) * 4; // Array of uint32 offsets
+        dataOffset += sectorTableSize;
+      }
+
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
         const compressedData = this.toArrayBuffer(
-          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+          new Uint8Array(
+            rawData.buffer,
+            rawData.byteOffset + dataOffset,
+            rawData.byteLength - dataOffset
+          )
         );
         fileData = await this.lzmaDecompressor.decompress(
           compressedData,
@@ -1409,7 +1458,11 @@ export class MPQParser {
         compressionAlgorithm === CompressionAlgorithm.PKZIP
       ) {
         const compressedData = this.toArrayBuffer(
-          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+          new Uint8Array(
+            rawData.buffer,
+            rawData.byteOffset + dataOffset,
+            rawData.byteLength - dataOffset
+          )
         );
         fileData = await this.zlibDecompressor.decompress(
           compressedData,
@@ -1417,7 +1470,11 @@ export class MPQParser {
         );
       } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
         const compressedData = this.toArrayBuffer(
-          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+          new Uint8Array(
+            rawData.buffer,
+            rawData.byteOffset + dataOffset,
+            rawData.byteLength - dataOffset
+          )
         );
         fileData = await this.bzip2Decompressor.decompress(
           compressedData,
@@ -1513,9 +1570,26 @@ export class MPQParser {
       console.log(`[MPQParser Stream] Decompressing ${fileName}...`);
       const compressionAlgorithm = this.detectCompressionAlgorithm(this.toArrayBuffer(rawData));
 
+      // Calculate offset to actual compressed data
+      // Multi-sector files have a sector offset table after the compression type byte
+      const isSingleUnit = (blockEntry.flags & 0x01000000) !== 0; // SINGLE_UNIT flag
+      let dataOffset = 1; // Skip compression type byte
+
+      if (!isSingleUnit) {
+        // Multi-sector file - has sector offset table
+        const blockSize = this.archive?.header.blockSize ?? 4096; // Default to 4096 for streaming
+        const sectorCount = Math.ceil(blockEntry.uncompressedSize / blockSize);
+        const sectorTableSize = (sectorCount + 1) * 4; // Array of uint32 offsets
+        dataOffset += sectorTableSize;
+      }
+
       if (compressionAlgorithm === CompressionAlgorithm.LZMA) {
         const compressedData = this.toArrayBuffer(
-          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+          new Uint8Array(
+            rawData.buffer,
+            rawData.byteOffset + dataOffset,
+            rawData.byteLength - dataOffset
+          )
         );
         fileData = await this.lzmaDecompressor.decompress(
           compressedData,
@@ -1526,7 +1600,11 @@ export class MPQParser {
         compressionAlgorithm === CompressionAlgorithm.PKZIP
       ) {
         const compressedData = this.toArrayBuffer(
-          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+          new Uint8Array(
+            rawData.buffer,
+            rawData.byteOffset + dataOffset,
+            rawData.byteLength - dataOffset
+          )
         );
         fileData = await this.zlibDecompressor.decompress(
           compressedData,
@@ -1534,7 +1612,11 @@ export class MPQParser {
         );
       } else if (compressionAlgorithm === CompressionAlgorithm.BZIP2) {
         const compressedData = this.toArrayBuffer(
-          new Uint8Array(rawData.buffer, rawData.byteOffset + 1, rawData.byteLength - 1)
+          new Uint8Array(
+            rawData.buffer,
+            rawData.byteOffset + dataOffset,
+            rawData.byteLength - dataOffset
+          )
         );
         fileData = await this.bzip2Decompressor.decompress(
           compressedData,
