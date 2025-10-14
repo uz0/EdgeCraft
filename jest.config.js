@@ -12,8 +12,9 @@ export default {
     '/node_modules/',
     '/tests/e2e/',
     '/tests/e2e-fixtures/',
-    '/tests/integration/', // Skip WebGL-dependent tests (require GPU/browser context)
-    '/__tests__/.*\\.comprehensive\\.test\\.ts$', // Skip comprehensive tests requiring Babylon.js WebGL
+    'tests/integration', // Skip WebGL-dependent tests (no leading slash)
+    'comprehensive\\.test\\.(ts|tsx)$', // Skip all comprehensive tests
+    'MapPreview.*\\.test\\.(ts|tsx)$', // Skip MapPreview tests (require Babylon.js WebGL)
   ],
 
   transformIgnorePatterns: [
