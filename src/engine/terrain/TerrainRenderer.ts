@@ -73,7 +73,7 @@ void main(void) {
 }
     `;
 
-    // Fragment shader - Extended to support 8 textures
+    // Fragment shader - Extended to support 8 textures with debug mode
     const fragmentShader = `
 precision highp float;
 
@@ -87,6 +87,7 @@ uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
 uniform vec4 textureScales1; // Tiling for textures 0-3
 uniform vec4 textureScales2; // Tiling for textures 4-7
+uniform float debugMode; // 0=normal, 1=splatmap1, 2=splatmap2, 3=UVs
 
 // Textures (8 total)
 uniform sampler2D diffuse1;
@@ -105,6 +106,24 @@ void main(void) {
   vec4 splat1 = texture2D(splatmap1, vUV); // Textures 0-3
   vec4 splat2 = texture2D(splatmap2, vUV); // Textures 4-7
 
+  // DEBUG MODES
+  if (debugMode > 0.5 && debugMode < 1.5) {
+    // Debug mode 1: Show splatmap1 channels as colors
+    gl_FragColor = vec4(splat1.rgb, 1.0);
+    return;
+  }
+  if (debugMode > 1.5 && debugMode < 2.5) {
+    // Debug mode 2: Show splatmap2 channels as colors
+    gl_FragColor = vec4(splat2.rgb, 1.0);
+    return;
+  }
+  if (debugMode > 2.5) {
+    // Debug mode 3: Show UVs as colors (red=U, green=V)
+    gl_FragColor = vec4(vUV.x, vUV.y, 0.0, 1.0);
+    return;
+  }
+
+  // NORMAL RENDERING
   // Sample diffuse textures with individual tiling
   vec3 color1 = texture2D(diffuse1, vUV * textureScales1.x).rgb;
   vec3 color2 = texture2D(diffuse2, vUV * textureScales1.y).rgb;
@@ -425,6 +444,7 @@ void main(void) {
           'lightDirection',
           'textureScales1',
           'textureScales2',
+          'debugMode',
         ],
         samplers: [
           'diffuse1',
@@ -463,6 +483,18 @@ void main(void) {
     shaderMaterial.setVector3('lightDirection', new BABYLON.Vector3(-0.5, -1, -0.5).normalize());
     shaderMaterial.setVector4('textureScales1', new BABYLON.Vector4(16, 16, 16, 16)); // Tiling for textures 0-3
     shaderMaterial.setVector4('textureScales2', new BABYLON.Vector4(16, 16, 16, 16)); // Tiling for textures 4-7
+
+    // Debug mode: 0=normal, 1=splatmap1, 2=splatmap2, 3=UVs
+    // Can be changed via: window.terrainDebugMode = 1 (then reload map)
+    const debugMode = (window as any).terrainDebugMode ?? 0;
+    shaderMaterial.setFloat('debugMode', debugMode);
+
+    if (debugMode > 0) {
+      console.log(
+        `[TerrainRenderer] 🐛 DEBUG MODE ENABLED: ${debugMode} ` +
+          `(0=normal, 1=splatmap1, 2=splatmap2, 3=UVs)`
+      );
+    }
 
     // Apply material to mesh (cast to Material to avoid type incompatibility)
     // ShaderMaterial is a valid Material but has different method signatures

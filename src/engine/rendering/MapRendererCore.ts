@@ -77,6 +77,7 @@ export class MapRendererCore {
   private sunLight: BABYLON.DirectionalLight | null = null;
 
   private currentMap: RawMapData | null = null;
+  private terrainHeightRange: { min: number; max: number } = { min: 0, max: 100 };
 
   constructor(config: MapRendererConfig) {
     this.scene = config.scene;
@@ -167,6 +168,12 @@ export class MapRendererCore {
 
     // Step 1: Initialize terrain
     await this.renderTerrain(mapData.terrain);
+
+    // Store terrain height range for camera setup
+    this.terrainHeightRange = {
+      min: this.terrainRenderer?.getMesh()?.getBoundingInfo().minimum.y ?? 0,
+      max: this.terrainRenderer?.getMesh()?.getBoundingInfo().maximum.y ?? 100,
+    };
 
     // Step 2: Initialize units
     this.renderUnits(mapData.units);
@@ -696,42 +703,64 @@ export class MapRendererCore {
     const worldWidth = width * TILE_SIZE;
     const worldHeight = height * TILE_SIZE;
 
+    // Calculate terrain center height (for camera target)
+    const terrainCenterY = (this.terrainHeightRange.min + this.terrainHeightRange.max) / 2;
+    const terrainHeight = this.terrainHeightRange.max - this.terrainHeightRange.min;
+
+    console.log(
+      `[MapRendererCore] 📷 Camera Setup - Terrain height: [${this.terrainHeightRange.min.toFixed(1)}, ${this.terrainHeightRange.max.toFixed(1)}], ` +
+        `center: ${terrainCenterY.toFixed(1)}, range: ${terrainHeight.toFixed(1)}`
+    );
+
     if (this.config.cameraMode === 'rts') {
       // RTS camera with classic perspective (like Warcraft 3)
       // alpha: -Math.PI/2 = facing "north" (negative Z direction)
       // beta: Math.PI/5 (~36 degrees from vertical) for classic RTS angle
-      // radius: Distance from target (in world units, terrain is 0-100 height)
-      // target: Center of map at mid-height (terrain is 0-100, so target Y=50)
+      // radius: Distance from target (scaled to terrain height)
+      // target: Center of map at terrain center height
 
-      // For world-space coordinates (tile * 128), we need much smaller radius
-      // Typical map 100x100 tiles = 12,800 world units, radius ~800-1200 for good view
+      // Calculate appropriate camera distance based on map size and terrain height
       const mapDiagonal = Math.sqrt(worldWidth * worldWidth + worldHeight * worldHeight);
+      const heightScaleFactor = Math.max(1, terrainHeight / 4000); // Scale radius if terrain is tall
+      const baseRadius = mapDiagonal * 0.06 * heightScaleFactor;
+
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
         -Math.PI / 2, // Facing north
         Math.PI / 5, // 36° from vertical (classic RTS angle like WC3)
-        mapDiagonal * 0.06, // Much closer for terrain at height 0-100
-        new BABYLON.Vector3(worldWidth / 2, 50, worldHeight / 2), // Target center at mid-height (terrain 0-100)
+        baseRadius,
+        new BABYLON.Vector3(worldWidth / 2, terrainCenterY, worldHeight / 2), // Target at terrain center
         this.scene
       );
 
-      camera.lowerRadiusLimit = mapDiagonal * 0.02;
-      camera.upperRadiusLimit = mapDiagonal * 0.15;
+      camera.lowerRadiusLimit = baseRadius * 0.3;
+      camera.upperRadiusLimit = baseRadius * 2.5;
       camera.lowerBetaLimit = 0.2; // Don't allow too steep
       camera.upperBetaLimit = Math.PI / 2.2; // Don't allow below horizon
 
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
       this.camera = camera;
+
+      console.log(
+        `[MapRendererCore] 📷 RTS Camera: radius=${baseRadius.toFixed(1)}, ` +
+          `target=(${worldWidth / 2}, ${terrainCenterY.toFixed(1)}, ${worldHeight / 2}), ` +
+          `limits=[${camera.lowerRadiusLimit.toFixed(1)}, ${camera.upperRadiusLimit.toFixed(1)}]`
+      );
     } else if (this.config.cameraMode === 'free') {
       // Free camera
       const camera = new BABYLON.UniversalCamera(
         'freeCamera',
-        new BABYLON.Vector3(worldWidth / 2, 50, worldHeight / 2),
+        new BABYLON.Vector3(worldWidth / 2, terrainCenterY + 100, worldHeight / 2),
         this.scene
       );
-      camera.setTarget(new BABYLON.Vector3(worldWidth / 2, 0, worldHeight / 2));
+      camera.setTarget(new BABYLON.Vector3(worldWidth / 2, terrainCenterY, worldHeight / 2));
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
       this.camera = camera;
+
+      console.log(
+        `[MapRendererCore] 📷 Free Camera: position=(${worldWidth / 2}, ${(terrainCenterY + 100).toFixed(1)}, ${worldHeight / 2}), ` +
+          `target=(${worldWidth / 2}, ${terrainCenterY.toFixed(1)}, ${worldHeight / 2})`
+      );
     }
 
     this.scene.activeCamera = this.camera;
