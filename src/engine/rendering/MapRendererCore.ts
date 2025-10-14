@@ -331,11 +331,11 @@ export class MapRendererCore {
     this.terrainRenderer = new TerrainRenderer(this.scene, this.assetLoader);
 
     // Convert heightmap Float32Array to a data URL for TerrainRenderer
-    const { url: heightmapUrl, minHeight, maxHeight } = this.createHeightmapDataUrl(
-      terrain.heightmap,
-      terrain.width,
-      terrain.height
-    );
+    const {
+      url: heightmapUrl,
+      minHeight,
+      maxHeight,
+    } = this.createHeightmapDataUrl(terrain.heightmap, terrain.width, terrain.height);
 
     // Check if we have multi-texture terrain (W3X maps with groundTextureIds)
     const hasMultiTexture =
@@ -418,7 +418,7 @@ export class MapRendererCore {
     heightmap: Float32Array,
     width: number,
     height: number
-  ): { url: string; minHeight: number; maxHeight: number} {
+  ): { url: string; minHeight: number; maxHeight: number } {
     // Create canvas to encode heightmap as image
     const canvas = document.createElement('canvas');
     canvas.width = width;
