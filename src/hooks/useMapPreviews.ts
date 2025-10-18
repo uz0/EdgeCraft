@@ -19,6 +19,7 @@ import { PreviewCache } from '../utils/PreviewCache';
 import { LoadingMessageGenerator } from '../utils/funnyLoadingMessages';
 import type { MapMetadata } from '../ui/MapGallery';
 import type { RawMapData } from '../formats/maps/types';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 export interface PreviewProgress {
   current: number;
@@ -98,27 +99,18 @@ export function useMapPreviews(): UseMapPreviewsResult {
       const newPreviews = new Map<string, string>();
       const newStates = new Map<string, PreviewLoadingState>();
       const newMessages = new Map<string, string>();
-
-      console.log(`[useMapPreviews] 🚀 Starting preview generation for ${maps.length} maps`);
-
       try {
         // Process maps in parallel batches of 4 for faster loading
         const BATCH_SIZE = 4;
         let completed = 0;
 
         const processBatch = async (batch: MapMetadata[]): Promise<void> => {
-          console.log(
-            `[useMapPreviews] 📦 Processing batch: ${batch.map((m) => m.name).join(', ')}`
-          );
-
           await Promise.all(
             batch.map(async (map) => {
               if (!map) return;
 
               // Generate funny loading message
               const loadingMessage = messageGeneratorRef.current.getNext();
-              console.log(`[useMapPreviews] 🎲 "${loadingMessage}" - ${map.name}`);
-
               // Set loading state with message
               newStates.set(map.id, 'loading');
               newMessages.set(map.id, loadingMessage);
@@ -127,11 +119,9 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
               try {
                 // Check cache first
-                console.log(`[useMapPreviews] 🔍 Checking cache for ${map.name}...`);
                 const cachedPreview = await cacheRef.current!.get(map.id);
 
                 if (cachedPreview) {
-                  console.log(`[useMapPreviews] ✅ Using cached preview for ${map.name}`);
                   newPreviews.set(map.id, cachedPreview);
                   newStates.set(map.id, 'success');
                   newMessages.delete(map.id);
@@ -152,17 +142,15 @@ export function useMapPreviews(): UseMapPreviewsResult {
                   setLoadingMessages(new Map(newMessages));
                   return;
                 }
-
-                console.log(`[useMapPreviews] 🎨 Generating preview for ${map.name}...`);
                 const startTime = performance.now();
-                const result = await extractorRef.current!.extract(map.file, mapData);
+                // Use extract-only mode for W3X maps (fast embedded previews)
+                // For W3N campaigns, allow terrain generation fallback since they often lack embedded previews
+                const result = await extractorRef.current!.extract(map.file, mapData, {
+                  extractOnly: mapData.format !== 'w3n',
+                });
                 const duration = performance.now() - startTime;
 
                 if (result.success && result.dataUrl) {
-                  console.log(
-                    `[useMapPreviews] ✅ Preview ${result.source} for ${map.name} in ${duration.toFixed(0)}ms`
-                  );
-
                   newPreviews.set(map.id, result.dataUrl);
                   newStates.set(map.id, 'success');
                   newMessages.delete(map.id);
@@ -172,7 +160,6 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
                   // Cache for future use
                   await cacheRef.current!.set(map.id, result.dataUrl);
-                  console.log(`[useMapPreviews] 💾 Cached preview for ${map.name}`);
                 } else {
                   console.error(
                     `[useMapPreviews] ❌ Failed to generate preview for ${map.name}:`,
@@ -191,9 +178,6 @@ export function useMapPreviews(): UseMapPreviewsResult {
                 setLoadingMessages(new Map(newMessages));
               } finally {
                 completed++;
-                console.log(
-                  `[useMapPreviews] 📊 Progress: ${completed}/${maps.length} (${((completed / maps.length) * 100).toFixed(1)}%)`
-                );
                 setProgress({ current: completed, total: maps.length, currentMap: map.name });
               }
             })
@@ -205,8 +189,6 @@ export function useMapPreviews(): UseMapPreviewsResult {
           const batch = maps.slice(i, i + BATCH_SIZE);
           await processBatch(batch);
         }
-
-        console.log('[useMapPreviews] Preview generation complete, size:', newPreviews.size);
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         setError(errorMsg);
@@ -233,21 +215,15 @@ export function useMapPreviews(): UseMapPreviewsResult {
         const cachedPreview = await cacheRef.current.get(map.id);
 
         if (cachedPreview) {
-          console.log(`Using cached preview for ${map.name}`);
           setPreviews((prev) => new Map(prev).set(map.id, cachedPreview));
           setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
           return;
         }
 
         // Not cached - extract or generate
-        console.log(`Generating preview for ${map.name}...`);
         const result = await extractorRef.current.extract(map.file, mapData);
 
         if (result.success && result.dataUrl) {
-          console.log(
-            `Preview ${result.source} for ${map.name} (${result.extractTimeMs.toFixed(0)}ms)`
-          );
-
           const dataUrl = result.dataUrl; // Type narrowing
           setPreviews((prev) => new Map(prev).set(map.id, dataUrl));
           setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
@@ -268,14 +244,11 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
   const clearCache = useCallback(async (): Promise<void> => {
     if (!cacheRef.current) return;
-
-    console.log('[useMapPreviews] 🗑️ Clearing all previews and cache...');
     await cacheRef.current.clear();
     setPreviews(new Map());
     setLoadingStates(new Map());
     setLoadingMessages(new Map());
     messageGeneratorRef.current.reset();
-    console.log('[useMapPreviews] ✅ Preview cache cleared');
   }, []);
 
   return {

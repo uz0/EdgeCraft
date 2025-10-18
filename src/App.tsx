@@ -11,6 +11,44 @@ import type { RawMapData } from './formats/maps/types';
 import * as BABYLON from '@babylonjs/core';
 import './App.css';
 
+/**
+ * Extract metadata from parsed map data
+ */
+function extractMapMetadata(
+  mapData: RawMapData
+): Pick<MapMetadata, 'gameVersion' | 'mapSize' | 'playerCount'> {
+  const { format, info, terrain } = mapData;
+
+  // Determine game version
+  let gameVersion: MapMetadata['gameVersion'] = 'Unknown';
+  if (format === 'sc2map') {
+    gameVersion = 'SC2';
+  } else if (format === 'w3x' || format === 'w3n') {
+    // W3I fileVersion values (approximate):
+    // 18 = ROC (Reign of Chaos)
+    // 25 = TFT (The Frozen Throne)
+    // 28-31 = Reforged
+    // We need to access the raw W3I data, but since RawMapData doesn't expose it,
+    // we'll use a heuristic based on map name or default to TFT
+    // TODO: Expose fileVersion in RawMapData for accurate detection
+    gameVersion = 'TFT'; // Default assumption for W3X files
+  }
+
+  // Extract map size (e.g. "256x256")
+  const mapSize = `${terrain.width}x${terrain.height}`;
+
+  // Count human + computer players (exclude neutral)
+  const playerCount = info.players.filter(
+    (p) => p.type === 'human' || p.type === 'computer'
+  ).length;
+
+  return {
+    gameVersion,
+    mapSize,
+    playerCount,
+  };
+}
+
 const App: React.FC = () => {
   const [maps, setMaps] = useState<MapMetadata[]>([]);
   const [currentMap, setCurrentMap] = useState<MapMetadata | null>(null);
@@ -25,6 +63,7 @@ const App: React.FC = () => {
   const engineRef = useRef<BABYLON.Engine | null>(null);
   const sceneRef = useRef<BABYLON.Scene | null>(null);
   const rendererRef = useRef<MapRendererCore | null>(null);
+  const previewGenerationStartedRef = useRef<boolean>(false);
 
   // Use the map previews hook
   const {
@@ -168,21 +207,15 @@ const App: React.FC = () => {
 
     try {
       // Fetch map file from /maps folder
-      console.log('[handleMapSelect] Fetching:', `/maps/${encodeURIComponent(map.name)}`);
       const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch map: ${response.statusText}`);
       }
 
       const blob = await response.blob();
-      console.log('[handleMapSelect] Blob size:', blob.size, 'bytes');
       const file = new File([blob], map.name);
-      console.log('[handleMapSelect] File created:', file.name, file.size, 'bytes');
-
       // Determine file extension
       const ext = `.${map.format}`;
-      console.log('[handleMapSelect] Extension:', ext);
-
       setLoadingProgress('Parsing map data...');
 
       // Load and render map
@@ -191,12 +224,9 @@ const App: React.FC = () => {
       if (result.success) {
         setCurrentMap(map);
         setLoadingProgress('');
-        console.log('✅ Map loaded successfully:', map.name);
-
         // Resize canvas now that it's visible
         if (engineRef.current && !engineRef.current.isDisposed) {
           engineRef.current.resize();
-          console.log('[APP] Canvas resized after map load');
         }
       } else {
         throw new Error('Failed to load map');
@@ -241,13 +271,17 @@ const App: React.FC = () => {
   useEffect(() => {
     if (maps.length === 0) return;
 
+    // Prevent infinite loop: only run once
+    if (previewGenerationStartedRef.current) {
+      return;
+    }
+    previewGenerationStartedRef.current = true;
+
     // Prevent multiple preview generation runs
     let cancelled = false;
 
     const loadMapsAndGeneratePreviews = async (): Promise<void> => {
       if (cancelled) return;
-
-      console.log('Starting preview generation for', maps.length, 'maps...');
       const mapDataMap = new Map<string, RawMapData>();
 
       // Load and parse maps in parallel batches (4 at a time) for faster loading
@@ -259,12 +293,8 @@ const App: React.FC = () => {
           // Skip very large maps (>1000MB) to avoid long load times
           const sizeMB = map.sizeBytes / (1024 * 1024);
           if (sizeMB > 1000) {
-            console.log(`Skipping preview for large map ${map.name} (${sizeMB.toFixed(1)}MB)`);
             return;
           }
-
-          console.log(`Loading ${map.name} for preview generation...`);
-
           // Fetch map file
           const response = await fetch(`/maps/${encodeURIComponent(map.name)}`);
           if (!response.ok) {
@@ -296,6 +326,12 @@ const App: React.FC = () => {
 
           if (mapData) {
             mapDataMap.set(map.id, mapData);
+
+            // Extract and update map metadata
+            const metadata = extractMapMetadata(mapData);
+            map.gameVersion = metadata.gameVersion;
+            map.mapSize = metadata.mapSize;
+            map.playerCount = metadata.playerCount;
           }
         } catch (err) {
           console.error(`Failed to load ${map.name} for preview:`, err);
@@ -309,12 +345,15 @@ const App: React.FC = () => {
         await Promise.all(batch.map(loadMap));
       }
 
+      // Update maps state to reflect new metadata
+      if (!cancelled) {
+        setMaps([...maps]); // Trigger re-render with updated metadata
+      }
+
       // Generate previews
       if (!cancelled && mapDataMap.size > 0) {
-        console.log(`Generating previews for ${mapDataMap.size} maps...`);
         await generatePreviews(maps, mapDataMap);
         if (!cancelled) {
-          console.log('Preview generation complete!');
         }
       }
     };
@@ -332,14 +371,12 @@ const App: React.FC = () => {
 
   // Expose handleMapSelect for E2E tests
   useEffect(() => {
-    console.log('[APP] Exposing handleMapSelect on window for E2E tests');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__handleMapSelect = handleMapSelect;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__testReady = true;
 
     return () => {
-      console.log('[APP] Removing handleMapSelect from window');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       delete (window as any).__handleMapSelect;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -351,25 +388,19 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleTestLoadMap = (event: Event): void => {
       const customEvent = event as CustomEvent<{ name: string; path: string; format: string }>;
-      console.log('[APP] test:loadMap event received:', customEvent.detail);
-
       // Find the map by name
       const map = maps.find((m) => m.name === customEvent.detail.name);
       if (map) {
-        console.log('[APP] Loading map from event:', map.name);
         void handleMapSelect(map);
       } else {
         console.error('[APP] Map not found:', customEvent.detail.name);
       }
     };
-
-    console.log('[APP] Registering test:loadMap event listener');
     window.addEventListener('test:loadMap', handleTestLoadMap);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (window as any).__testLoadMapListenerRegistered = true;
 
     return () => {
-      console.log('[APP] Removing test:loadMap event listener');
       window.removeEventListener('test:loadMap', handleTestLoadMap);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       delete (window as any).__testLoadMapListenerRegistered;
@@ -385,12 +416,8 @@ const App: React.FC = () => {
 
   // Merge previews with maps
   const mapsWithPreviews = useMemo(() => {
-    console.log('[App] Merging previews - previews Map size:', previews.size);
-    console.log('[App] Previews Map keys:', Array.from(previews.keys()));
-
     const merged = maps.map((map) => {
       const thumbnailUrl = previews.get(map.id);
-      console.log(`[App] Map "${map.id}" -> thumbnailUrl:`, thumbnailUrl ? 'HAS URL' : 'NO URL');
       return {
         ...map,
         thumbnailUrl,
@@ -441,6 +468,7 @@ const App: React.FC = () => {
                 previewLoadingStates={loadingStates}
                 previewLoadingMessages={loadingMessages}
                 onClearPreviews={() => {
+                  previewGenerationStartedRef.current = false; // Reset flag to allow re-generation
                   void clearCache();
                 }}
               />

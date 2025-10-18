@@ -88,9 +88,6 @@ export class TGADecoder {
       const scale = maxSize / maxDim;
       targetWidth = Math.floor(result.width * scale);
       targetHeight = Math.floor(result.height * scale);
-      console.log(
-        `[TGADecoder] Scaling ${result.width}x${result.height} -> ${targetWidth}x${targetHeight}`
-      );
     }
 
     // For large images, use chunked downscaling to avoid canvas size limits
@@ -99,9 +96,6 @@ export class TGADecoder {
     const needsChunking = result.width > CANVAS_LIMIT || result.height > CANVAS_LIMIT;
 
     if (needsChunking) {
-      console.log(
-        `[TGADecoder] Image too large (${result.width}x${result.height}), using direct downscaling`
-      );
       // For very large images, downsample the pixel data directly before canvas rendering
       const downscaledData = this.downsamplePixelData(
         result.data,
@@ -248,7 +242,10 @@ export class TGADecoder {
     const data = new Uint8ClampedArray(imageSize);
 
     let dataOffset = 18 + header.idLength; // Skip header + ID
-    let pixelIndex = 0;
+
+    // Check image origin (bit 5 of imageDescriptor)
+    // 0 = origin at bottom-left (upside down), 1 = origin at top-left (normal)
+    const originAtTop = (header.imageDescriptor & 0x20) !== 0;
 
     for (let y = 0; y < header.height; y++) {
       for (let x = 0; x < header.width; x++) {
@@ -258,6 +255,10 @@ export class TGADecoder {
         const r = view.getUint8(dataOffset + 2);
         const a = bytesPerPixel === 4 ? view.getUint8(dataOffset + 3) : 255;
 
+        // Calculate pixel position (flip vertically if origin is at bottom)
+        const targetY = originAtTop ? y : (header.height - 1 - y);
+        const pixelIndex = (targetY * header.width + x) * 4;
+
         // Convert to RGBA
         data[pixelIndex] = r;
         data[pixelIndex + 1] = g;
@@ -265,7 +266,6 @@ export class TGADecoder {
         data[pixelIndex + 3] = a;
 
         dataOffset += bytesPerPixel;
-        pixelIndex += 4;
       }
     }
 
@@ -278,8 +278,11 @@ export class TGADecoder {
     const data = new Uint8ClampedArray(imageSize);
 
     let dataOffset = 18 + header.idLength;
-    let pixelIndex = 0;
+    let currentPixel = 0; // Current pixel in scan-line order
     let pixelCount = header.width * header.height;
+
+    // Check image origin (bit 5 of imageDescriptor)
+    const originAtTop = (header.imageDescriptor & 0x20) !== 0;
 
     while (pixelCount > 0) {
       const packetHeader = view.getUint8(dataOffset++);
@@ -294,11 +297,17 @@ export class TGADecoder {
         dataOffset += bytesPerPixel;
 
         for (let i = 0; i < runLength; i++) {
+          // Calculate position with vertical flip if needed
+          const x = currentPixel % header.width;
+          const y = Math.floor(currentPixel / header.width);
+          const targetY = originAtTop ? y : (header.height - 1 - y);
+          const pixelIndex = (targetY * header.width + x) * 4;
+
           data[pixelIndex] = r;
           data[pixelIndex + 1] = g;
           data[pixelIndex + 2] = b;
           data[pixelIndex + 3] = a;
-          pixelIndex += 4;
+          currentPixel++;
         }
       } else {
         // Raw packet (individual pixels)
@@ -309,11 +318,17 @@ export class TGADecoder {
           const a = bytesPerPixel === 4 ? view.getUint8(dataOffset + 3) : 255;
           dataOffset += bytesPerPixel;
 
+          // Calculate position with vertical flip if needed
+          const x = currentPixel % header.width;
+          const y = Math.floor(currentPixel / header.width);
+          const targetY = originAtTop ? y : (header.height - 1 - y);
+          const pixelIndex = (targetY * header.width + x) * 4;
+
           data[pixelIndex] = r;
           data[pixelIndex + 1] = g;
           data[pixelIndex + 2] = b;
           data[pixelIndex + 3] = a;
-          pixelIndex += 4;
+          currentPixel++;
         }
       }
 
