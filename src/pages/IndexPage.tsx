@@ -15,46 +15,10 @@ import type { RawMapData } from '../formats/maps/types';
 
 // Hardcoded map list (matching actual /maps folder)
 const MAP_LIST = [
-  { name: '3P Sentinel 01 v3.06.w3x', format: 'w3x' as const, sizeBytes: 10 * 1024 * 1024 },
-  { name: '3P Sentinel 02 v3.06.w3x', format: 'w3x' as const, sizeBytes: 16 * 1024 * 1024 },
-  { name: '3P Sentinel 03 v3.07.w3x', format: 'w3x' as const, sizeBytes: 12 * 1024 * 1024 },
-  { name: '3P Sentinel 04 v3.05.w3x', format: 'w3x' as const, sizeBytes: 9.5 * 1024 * 1024 },
-  { name: '3P Sentinel 05 v3.02.w3x', format: 'w3x' as const, sizeBytes: 19 * 1024 * 1024 },
-  { name: '3P Sentinel 06 v3.03.w3x', format: 'w3x' as const, sizeBytes: 19 * 1024 * 1024 },
-  { name: '3P Sentinel 07 v3.02.w3x', format: 'w3x' as const, sizeBytes: 27 * 1024 * 1024 },
-  { name: '3pUndeadX01v2.w3x', format: 'w3x' as const, sizeBytes: 18 * 1024 * 1024 },
-  { name: 'EchoIslesAlltherandom.w3x', format: 'w3x' as const, sizeBytes: 109 * 1024 },
-  { name: 'Footmen Frenzy 1.9f.w3x', format: 'w3x' as const, sizeBytes: 221 * 1024 },
-  {
-    name: 'Legion_TD_11.2c-hf1_TeamOZE.w3x',
-    format: 'w3x' as const,
-    sizeBytes: 15 * 1024 * 1024,
-  },
-  {
-    name: 'Unity_Of_Forces_Path_10.10.25.w3x',
-    format: 'w3x' as const,
-    sizeBytes: 4 * 1024 * 1024,
-  },
-  { name: 'qcloud_20013247.w3x', format: 'w3x' as const, sizeBytes: 7.9 * 1024 * 1024 },
-  { name: 'ragingstream.w3x', format: 'w3x' as const, sizeBytes: 200 * 1024 },
-  { name: 'BurdenOfUncrowned.w3n', format: 'w3n' as const, sizeBytes: 320 * 1024 * 1024 },
-  { name: 'HorrorsOfNaxxramas.w3n', format: 'w3n' as const, sizeBytes: 433 * 1024 * 1024 },
-  { name: 'JudgementOfTheDead.w3n', format: 'w3n' as const, sizeBytes: 923 * 1024 * 1024 },
-  { name: 'SearchingForPower.w3n', format: 'w3n' as const, sizeBytes: 74 * 1024 * 1024 },
-  {
-    name: 'TheFateofAshenvaleBySvetli.w3n',
-    format: 'w3n' as const,
-    sizeBytes: 316 * 1024 * 1024,
-  },
-  { name: 'War3Alternate1 - Undead.w3n', format: 'w3n' as const, sizeBytes: 106 * 1024 * 1024 },
-  { name: 'Wrath of the Legion.w3n', format: 'w3n' as const, sizeBytes: 57 * 1024 * 1024 },
-  {
-    name: 'Aliens Binary Mothership.SC2Map',
-    format: 'sc2map' as const,
-    sizeBytes: 3.3 * 1024 * 1024,
-  },
-  { name: 'Ruined Citadel.SC2Map', format: 'sc2map' as const, sizeBytes: 800 * 1024 },
-  { name: 'TheUnitTester7.SC2Map', format: 'sc2map' as const, sizeBytes: 879 * 1024 },
+  { name: '[12]MeltedCrown_1.0.w3x', format: 'w3x' as const, sizeBytes: 667 * 1024 },
+  { name: 'Starlight.SC2Map', format: 'sc2map' as const, sizeBytes: 291 * 1024 },
+  { name: 'asset_test.SC2Map', format: 'sc2map' as const, sizeBytes: 332 * 1024 },
+  { name: 'trigger_test.SC2Map', format: 'sc2map' as const, sizeBytes: 1.1 * 1024 * 1024 },
 ];
 
 export const IndexPage: React.FC = () => {
