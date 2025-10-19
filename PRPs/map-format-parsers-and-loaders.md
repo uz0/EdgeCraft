@@ -1,6 +1,6 @@
 # PRP: Map Format Parsers and Loaders
 
-**Status**: ✅ Complete
+**Status**: 🟡 In Progress (95% Complete - W3U parser needs rewrite)
 **Created**: 2024-10-10
 
 ---
@@ -107,8 +107,14 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 | 2024-10-25 | Developer   | Unit tests for all parsers           | Complete |
 | 2024-11-01 | Developer   | Tested 24 maps (14 W3X, 7 W3N, 3 SC2) | Complete |
 
-**Current Blockers**: None
-**Next Steps**: Bug fixes only (W3U parser has 99.7% failure rate - known issue)
+**Current Blockers**:
+- **P1 MAJOR**: W3U unit parser 99.7% failure rate (offset errors) - needs complete rewrite
+
+**Next Steps**:
+1. Rewrite W3U parser to handle offset errors
+2. Add version detection for different W3X format versions
+3. Add optional field handling
+4. Test with 3P Sentinel (342 units expected)
 
 ---
 

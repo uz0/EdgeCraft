@@ -80,6 +80,27 @@ Every PRP MUST contain EXACTLY these sections (no more, no less):
 
 ---
 
+## 🏗️ Implementation Breakdown
+
+**Phase 1: {Phase Name}**
+- [ ] Step 1
+- [ ] Step 2
+
+**Phase 2: {Phase Name}**
+- [ ] Step 3
+- [ ] Step 4
+
+---
+
+## ⏱️ Timeline
+
+**Target Completion**: YYYY-MM-DD
+**Current Progress**: XX%
+**Phase 1**: Status
+**Phase 2**: Status
+
+---
+
 ## 🧪 Quality Gates (AQA)
 
 **Required checks before marking complete:**
@@ -89,6 +110,14 @@ Every PRP MUST contain EXACTLY these sections (no more, no less):
 - [ ] No TypeScript errors
 - [ ] No ESLint warnings
 - [ ] Performance benchmarks met
+
+---
+
+## 📊 Success Metrics
+
+**How do we measure success?**
+- Metric 1: [target value]
+- Metric 2: [target value]
 
 ---
 
@@ -151,6 +180,31 @@ Every PRP MUST contain EXACTLY these sections (no more, no less):
 - Test Matrix: [Link to test matrix]
 - Executed By: {QA Engineer}
 - Status: ✅ Passed
+
+---
+
+## 📈 Review & Approval
+
+**Code Review:**
+- Reviewer: {Name}
+- Date: YYYY-MM-DD
+- Status: ✅ Approved / ⏳ Pending
+
+**Final Sign-Off:**
+- Date: YYYY-MM-DD
+- Status: ✅ Complete / 🟡 In Progress
+
+---
+
+## 🚪 Exit Criteria
+
+**What signals work is DONE?**
+- [ ] All DoD items complete
+- [ ] Quality gates passing
+- [ ] Success metrics achieved
+- [ ] Code review approved
+- [ ] Documentation updated
+- [ ] PRP status updated to ✅ Complete
 
 ---
 
