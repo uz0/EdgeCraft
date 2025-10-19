@@ -7,6 +7,7 @@
  */
 
 import { MPQParser } from '../../mpq/MPQParser';
+import type { MPQFile } from '../../mpq/types';
 import { SC2Parser } from './SC2Parser';
 import { SC2TerrainParser } from './SC2TerrainParser';
 import { SC2UnitsParser } from './SC2UnitsParser';
@@ -33,6 +34,46 @@ export class SC2MapLoader implements IMapLoader {
     this.parser = new SC2Parser();
     this.terrainParser = new SC2TerrainParser();
     this.unitsParser = new SC2UnitsParser();
+  }
+
+  /**
+   * Extract a file from MPQ (gracefully handles decompression failures)
+   */
+  private async extractFileWithFallback(
+    mpqParser: MPQParser,
+    buffer: ArrayBuffer,
+    fileName: string
+  ): Promise<MPQFile | null> {
+    // Try MPQParser
+    try {
+      const result = await mpqParser.extractFile(fileName);
+      if (result) {
+        return result;
+      }
+    } catch (error) {
+      // eslint-disable-line no-empty
+      const errorMsg = error instanceof Error ? error.message : String(error);
+
+      // Check if this is a decompression error
+      const isDecompressionError =
+        errorMsg.includes('Huffman') ||
+        errorMsg.includes('Invalid distance') ||
+        errorMsg.includes('ZLIB') ||
+        errorMsg.includes('PKZIP') ||
+        errorMsg.includes('BZip2') ||
+        errorMsg.includes('decompression') ||
+        errorMsg.includes('unknown compression method') ||
+        errorMsg.includes('incorrect header check');
+
+      if (isDecompressionError) {
+        console.warn(
+          `[SC2MapLoader] MPQParser decompression failed for ${fileName} - file will be skipped`
+        );
+        return null;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -66,11 +107,10 @@ export class SC2MapLoader implements IMapLoader {
     }
 
     // Extract SC2-specific files
-    // SC2 maps contain various files, we'll try common ones
-    const docInfoData = await mpqParser.extractFile('DocumentInfo');
-    const mapInfoData = await mpqParser.extractFile('MapInfo');
-    const terrainData = await mpqParser.extractFile('TerrainData.xml');
-    const unitsData = await mpqParser.extractFile('Units');
+    const docInfoData = await this.extractFileWithFallback(mpqParser, buffer, 'DocumentInfo');
+    const mapInfoData = await this.extractFileWithFallback(mpqParser, buffer, 'MapInfo');
+    const terrainData = await this.extractFileWithFallback(mpqParser, buffer, 'TerrainData.xml');
+    const unitsData = await this.extractFileWithFallback(mpqParser, buffer, 'Units');
 
     // Parse map info (DocumentInfo is primary, MapInfo is fallback)
     let mapInfo: MapInfo;

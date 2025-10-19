@@ -9,7 +9,7 @@ import * as BABYLON from '@babylonjs/core';
 import { AdvancedTerrainRenderer } from '@/engine/terrain/AdvancedTerrainRenderer';
 import type { AdvancedTerrainOptions } from '@/engine/terrain/types';
 
-describe.skip('AdvancedTerrainRenderer', () => {
+describe('AdvancedTerrainRenderer', () => {
   let canvas: HTMLCanvasElement;
   let engine: BABYLON.Engine;
   let scene: BABYLON.Scene;

@@ -39,17 +39,7 @@ const PREVIEW_STANDARDS = {
   },
 };
 
-// Skip tests if running in CI or without Chrome DevTools MCP
-const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-
-if (isCI) {
-  describe.skip('Chrome DevTools MCP - All Map Preview Combinations (skipped in CI)', () => {
-    it('requires Chrome DevTools MCP and running dev server', () => {
-      // Placeholder test
-    });
-  });
-} else {
-  describe('Chrome DevTools MCP - All Map Preview Combinations', () => {
+describe('Chrome DevTools MCP - All Map Preview Combinations', () => {
     beforeAll(async () => {
       console.log('\n🧪 Starting Chrome DevTools MCP Comprehensive Validation\n');
       console.log(`URL: ${BASE_URL}`);
@@ -635,5 +625,4 @@ if (isCI) {
       expect(recommendations).toHaveLength(3);
     });
   });
-  });
-}
+});

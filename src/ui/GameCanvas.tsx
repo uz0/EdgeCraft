@@ -9,6 +9,7 @@ import { RTSCamera } from '@/engine/camera/RTSCamera';
 import { TerrainRenderer } from '@/engine/terrain/TerrainRenderer';
 import { ShadowCasterManager } from '@/engine/rendering/ShadowCasterManager';
 import { AssetLoader } from '@/engine/assets/AssetLoader';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 /**
  * Game Canvas props
@@ -144,11 +145,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       // Log shadow stats
       const shadowStats = shadowManager.getStats();
-      console.log('🌑 Shadow System Initialized:');
-      console.log(`   - CSM shadow casters: ${shadowStats.csmCasters}`);
-      console.log(`   - Blob shadows: ${shadowStats.blobShadows}`);
-      console.log(`   - Total objects: ${shadowStats.totalObjects}`);
-
       // Start rendering
       engine.startRenderLoop();
 

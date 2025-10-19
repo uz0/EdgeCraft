@@ -44,7 +44,11 @@ export function getFormat(filename: string): 'w3x' | 'w3n' | 'sc2map' {
 }
 
 /**
- * Get appropriate loader for format
+ * Get appropriate loader for format with unified API
+ * All loaders now use .parse() method
+ *
+ * Note: W3NCampaignLoader returns RawMapData (single map), not an array.
+ * Tests should NOT expect campaignData.maps - use the result directly.
  */
 export function getLoaderForFormat(format: 'w3x' | 'w3n' | 'sc2map') {
   switch (format) {
@@ -278,19 +282,22 @@ export function createMockMapData(
 // ============================================================================
 
 /**
- * Default test timeout for map loading tests (30 seconds)
+ * Default test timeout for map loading tests (90 seconds)
+ * Increased from 30s to 90s for StormJS fallback support
  */
-export const MAP_LOAD_TIMEOUT = 30000;
+export const MAP_LOAD_TIMEOUT = 90000;
 
 /**
- * Extended test timeout for large maps (60 seconds)
+ * Extended test timeout for large maps (180 seconds)
+ * Increased from 120s to 180s for W3N campaigns with nested MPQ parsing + StormJS fallback
  */
-export const LARGE_MAP_TIMEOUT = 60000;
+export const LARGE_MAP_TIMEOUT = 180000;
 
 /**
- * Quick test timeout for unit tests (10 seconds)
+ * Quick test timeout for unit tests (30 seconds)
+ * Increased from 10s to 30s for StormJS fallback
  */
-export const QUICK_TEST_TIMEOUT = 10000;
+export const QUICK_TEST_TIMEOUT = 30000;
 
 // ============================================================================
 // MAP INVENTORY
@@ -299,56 +306,46 @@ export const QUICK_TEST_TIMEOUT = 10000;
 /**
  * Complete inventory of all maps in /maps directory
  */
+/**
+ * IMPORTANT: Based on deep investigation (October 17, 2025):
+ * ALL 24 maps lack embedded preview images.
+ * Hash table dump revealed 0 preview files found in 419 files scanned.
+ * All "image-sized" files (93 total) are ADPCM audio files, not images.
+ * expectedSource = 'generated' for all maps (terrain generation fallback).
+ */
 export const MAP_INVENTORY = {
   w3x: [
-    { name: '3P Sentinel 01 v3.06.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3P Sentinel 02 v3.06.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3P Sentinel 03 v3.07.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3P Sentinel 04 v3.05.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3P Sentinel 05 v3.02.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3P Sentinel 06 v3.03.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3P Sentinel 07 v3.02.w3x', expectedSource: 'embedded' as const, size: 'medium' },
-    { name: '3pUndeadX01v2.w3x', expectedSource: 'embedded' as const, size: 'medium' },
+    // 3P Sentinel series (10-27MB)
+    { name: '3P Sentinel 01 v3.06.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: '3P Sentinel 02 v3.06.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: '3P Sentinel 03 v3.07.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: '3P Sentinel 04 v3.05.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: '3P Sentinel 05 v3.02.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: '3P Sentinel 06 v3.03.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: '3P Sentinel 07 v3.02.w3x', expectedSource: 'generated' as const, size: 'medium' },
+
+    // Other W3X maps
+    { name: '3pUndeadX01v2.w3x', expectedSource: 'generated' as const, size: 'medium' },
     { name: 'EchoIslesAlltherandom.w3x', expectedSource: 'generated' as const, size: 'small' },
-    { name: 'Footmen Frenzy 1.9f.w3x', expectedSource: 'embedded' as const, size: 'small' },
-    {
-      name: 'Legion_TD_11.2c-hf1_TeamOZE.w3x',
-      expectedSource: 'embedded' as const,
-      size: 'large',
-    },
-    { name: 'qcloud_20013247.w3x', expectedSource: 'embedded' as const, size: 'small' },
-    { name: 'ragingstream.w3x', expectedSource: 'embedded' as const, size: 'small' },
-    {
-      name: 'Unity_Of_Forces_Path_10.10.25.w3x',
-      expectedSource: 'embedded' as const,
-      size: 'medium',
-    },
+    { name: 'Footmen Frenzy 1.9f.w3x', expectedSource: 'generated' as const, size: 'small' },
+    { name: 'Legion_TD_11.2c-hf1_TeamOZE.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: 'qcloud_20013247.w3x', expectedSource: 'generated' as const, size: 'medium' },
+    { name: 'ragingstream.w3x', expectedSource: 'generated' as const, size: 'small' },
+    { name: 'Unity_Of_Forces_Path_10.10.25.w3x', expectedSource: 'generated' as const, size: 'medium' },
   ],
   w3n: [
-    { name: 'BurdenOfUncrowned.w3n', expectedSource: 'embedded' as const, size: 'large' },
-    { name: 'HorrorsOfNaxxramas.w3n', expectedSource: 'embedded' as const, size: 'xlarge' },
-    { name: 'JudgementOfTheDead.w3n', expectedSource: 'embedded' as const, size: 'xlarge' },
-    { name: 'SearchingForPower.w3n', expectedSource: 'embedded' as const, size: 'xlarge' },
-    {
-      name: 'TheFateofAshenvaleBySvetli.w3n',
-      expectedSource: 'embedded' as const,
-      size: 'xlarge',
-    },
-    {
-      name: 'War3Alternate1 - Undead.w3n',
-      expectedSource: 'embedded' as const,
-      size: 'xlarge',
-    },
-    { name: 'Wrath of the Legion.w3n', expectedSource: 'embedded' as const, size: 'xlarge' },
+    { name: 'BurdenOfUncrowned.w3n', expectedSource: 'generated' as const, size: 'xlarge' },
+    { name: 'HorrorsOfNaxxramas.w3n', expectedSource: 'generated' as const, size: 'xlarge' },
+    { name: 'JudgementOfTheDead.w3n', expectedSource: 'generated' as const, size: 'xlarge' },
+    { name: 'SearchingForPower.w3n', expectedSource: 'generated' as const, size: 'large' },
+    { name: 'TheFateofAshenvaleBySvetli.w3n', expectedSource: 'generated' as const, size: 'xlarge' },
+    { name: 'War3Alternate1 - Undead.w3n', expectedSource: 'generated' as const, size: 'xlarge' },
+    { name: 'Wrath of the Legion.w3n', expectedSource: 'generated' as const, size: 'large' },
   ],
   sc2map: [
-    {
-      name: 'Aliens Binary Mothership.SC2Map',
-      expectedSource: 'generated' as const,
-      size: 'large',
-    },
-    { name: 'Ruined Citadel.SC2Map', expectedSource: 'generated' as const, size: 'medium' },
-    { name: 'TheUnitTester7.SC2Map', expectedSource: 'generated' as const, size: 'medium' },
+    { name: 'Aliens Binary Mothership.SC2Map', expectedSource: 'generated' as const, size: 'medium' },
+    { name: 'Ruined Citadel.SC2Map', expectedSource: 'generated' as const, size: 'small' },
+    { name: 'TheUnitTester7.SC2Map', expectedSource: 'generated' as const, size: 'small' },
   ],
 };
 

@@ -6,6 +6,7 @@
 import type { W3UUnits, W3UUnit, W3UInventoryItem, W3UModifiedAbility } from './types';
 import type { W3OItemSet, W3ODroppedItem } from './types';
 import type { Vector3 } from '../types';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 /**
  * Parse war3mapUnits.doo file
@@ -38,9 +39,6 @@ export class W3UParser {
 
     // Read subversion (v8+)
     const subversion = this.readUint32();
-
-    console.log(`[W3UParser] Version ${version}, subversion ${subversion}`);
-
     // Read units
     const unitCount = this.readUint32();
     const units: W3UUnit[] = [];
@@ -64,6 +62,7 @@ export class W3UParser {
         units.push(unit);
         successCount++;
       } catch (error) {
+        // eslint-disable-line no-empty
         failCount++;
 
         // Only log first 5 errors to avoid spam
@@ -87,11 +86,6 @@ export class W3UParser {
         }
       }
     }
-
-    console.log(
-      `[W3UParser] Parsed ${successCount}/${unitCount} units successfully (${failCount} failures)`
-    );
-
     return {
       version,
       subversion,
@@ -101,14 +95,17 @@ export class W3UParser {
 
   /**
    * Read unit placement data
-   * @param _version - File version (reserved for future version-specific parsing)
-   * @param _subversion - File subversion (reserved for future version-specific parsing)
+   * @param version - File version (version-specific field handling)
+   * @param subversion - File subversion (version-specific field handling)
    */
-  private readUnit(_version: number, _subversion: number): W3UUnit {
+  private readUnit(version: number, subversion: number): W3UUnit {
     const startOffset = this.offset;
     const DEBUG = false; // Enable for detailed logging
 
-    if (DEBUG) console.log(`[W3UParser:readUnit] Starting at offset ${startOffset}`);
+    if (DEBUG)
+      console.log(
+        `[W3UParser:readUnit] Starting at offset ${startOffset} (v${version}.${subversion})`
+      );
 
     // Type ID (4 chars)
     const typeId = this.read4CC();
@@ -174,6 +171,7 @@ export class W3UParser {
     this.offset += 4;
 
     // Item table index (-1 = none)
+    this.checkBounds(4);
     const itemTable = this.view.getInt32(this.offset, true);
     this.offset += 4;
     if (DEBUG) console.log(`[W3UParser:readUnit] ItemTable: ${itemTable}, offset: ${this.offset}`);
@@ -290,67 +288,83 @@ export class W3UParser {
     if (DEBUG)
       console.log(`[W3UParser:readUnit] Finished modified abilities, offset: ${this.offset}`);
 
-    // Random flag
-    const randomFlag = this.readUint32();
-
-    // Level array (3 bytes: any, normal, hard)
-    const level = [
-      this.view.getUint8(this.offset),
-      this.view.getUint8(this.offset + 1),
-      this.view.getUint8(this.offset + 2),
-    ];
-    this.offset += 3;
-
-    // Item class
-    const itemClass = this.view.getUint8(this.offset);
-    this.offset += 1;
-
-    // Unit group
-    const unitGroup = this.readUint32();
-
-    // Position in group
-    const positionInGroup = this.readUint32();
-
-    // Random unit tables
-    const randomUnitTableCount = this.readUint32();
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] RandomUnitTableCount: ${randomUnitTableCount}, offset: ${this.offset}`
-      );
-
-    // Sanity check: random unit tables should be reasonable (< 50)
-    if (randomUnitTableCount > 50) {
-      throw new Error(
-        `Unreasonable randomUnitTableCount: ${randomUnitTableCount} (likely corrupted data or version mismatch)`
-      );
-    }
-
+    // Optional fields (may not exist in all versions)
+    let randomFlag = 0;
+    let level = [0, 0, 0];
+    let itemClass = 0;
+    let unitGroup = 0;
+    let positionInGroup = 0;
     const randomUnitTables: number[] = [];
+    let customColor = -1;
+    let waygateDestination = -1;
+    let creationNumber = 0;
+    let editorId = 0;
 
-    for (let i = 0; i < randomUnitTableCount; i++) {
-      randomUnitTables.push(this.readUint32());
+    // Try to read optional fields (gracefully handle missing data)
+    try {
+      // Random flag
+      randomFlag = this.readUint32();
+
+      // Level array (3 bytes: any, normal, hard)
+      this.checkBounds(3);
+      level = [
+        this.view.getUint8(this.offset),
+        this.view.getUint8(this.offset + 1),
+        this.view.getUint8(this.offset + 2),
+      ];
+      this.offset += 3;
+
+      // Item class
+      this.checkBounds(1);
+      itemClass = this.view.getUint8(this.offset);
+      this.offset += 1;
+
+      // Unit group
+      unitGroup = this.readUint32();
+
+      // Position in group
+      positionInGroup = this.readUint32();
+
+      // Random unit tables
+      const randomUnitTableCount = this.readUint32();
+      if (DEBUG)
+        console.log(
+          `[W3UParser:readUnit] RandomUnitTableCount: ${randomUnitTableCount}, offset: ${this.offset}`
+        );
+
+      // Sanity check: random unit tables should be reasonable (< 50)
+      if (randomUnitTableCount > 50) {
+        throw new Error(
+          `Unreasonable randomUnitTableCount: ${randomUnitTableCount} (likely corrupted data or version mismatch)`
+        );
+      }
+
+      for (let i = 0; i < randomUnitTableCount; i++) {
+        randomUnitTables.push(this.readUint32());
+      }
+
+      if (DEBUG)
+        console.log(`[W3UParser:readUnit] Finished random unit tables, offset: ${this.offset}`);
+
+      // Custom color
+      customColor = this.readUint32();
+
+      // Waygate destination
+      waygateDestination = this.readUint32();
+
+      // Creation number
+      creationNumber = this.readUint32();
+
+      // Editor ID
+      editorId = this.readUint32();
+    } catch (err) {
+      // Optional fields missing - this is OK for older map versions
+      if (DEBUG) {
+      }
     }
-
-    if (DEBUG)
-      console.log(`[W3UParser:readUnit] Finished random unit tables, offset: ${this.offset}`);
-
-    // Custom color
-    const customColor = this.readUint32();
-
-    // Waygate destination
-    const waygateDestination = this.readUint32();
-
-    // Creation number
-    const creationNumber = this.readUint32();
-
-    // Editor ID
-    const editorId = this.readUint32();
 
     if (DEBUG) {
       const bytesConsumed = this.offset - startOffset;
-      console.log(
-        `[W3UParser:readUnit] Finished unit at offset ${this.offset} (consumed ${bytesConsumed} bytes)`
-      );
     }
 
     return {

@@ -4,50 +4,8 @@ import { MapPreviewReport } from './ui/MapPreviewReport';
 import { MapRendererCore } from './engine/rendering/MapRendererCore';
 import { QualityPresetManager } from './engine/rendering/QualityPresetManager';
 import { useMapPreviews } from './hooks/useMapPreviews';
-import { W3XMapLoader } from './formats/maps/w3x/W3XMapLoader';
-import { SC2MapLoader } from './formats/maps/sc2/SC2MapLoader';
-import { W3NCampaignLoader } from './formats/maps/w3n/W3NCampaignLoader';
-import type { RawMapData } from './formats/maps/types';
 import * as BABYLON from '@babylonjs/core';
 import './App.css';
-
-/**
- * Extract metadata from parsed map data
- */
-function extractMapMetadata(
-  mapData: RawMapData
-): Pick<MapMetadata, 'gameVersion' | 'mapSize' | 'playerCount'> {
-  const { format, info, terrain } = mapData;
-
-  // Determine game version
-  let gameVersion: MapMetadata['gameVersion'] = 'Unknown';
-  if (format === 'sc2map') {
-    gameVersion = 'SC2';
-  } else if (format === 'w3x' || format === 'w3n') {
-    // W3I fileVersion values (approximate):
-    // 18 = ROC (Reign of Chaos)
-    // 25 = TFT (The Frozen Throne)
-    // 28-31 = Reforged
-    // We need to access the raw W3I data, but since RawMapData doesn't expose it,
-    // we'll use a heuristic based on map name or default to TFT
-    // TODO: Expose fileVersion in RawMapData for accurate detection
-    gameVersion = 'TFT'; // Default assumption for W3X files
-  }
-
-  // Extract map size (e.g. "256x256")
-  const mapSize = `${terrain.width}x${terrain.height}`;
-
-  // Count human + computer players (exclude neutral)
-  const playerCount = info.players.filter(
-    (p) => p.type === 'human' || p.type === 'computer'
-  ).length;
-
-  return {
-    gameVersion,
-    mapSize,
-    playerCount,
-  };
-}
 
 const App: React.FC = () => {
   const [maps, setMaps] = useState<MapMetadata[]>([]);
@@ -64,12 +22,14 @@ const App: React.FC = () => {
   const sceneRef = useRef<BABYLON.Scene | null>(null);
   const rendererRef = useRef<MapRendererCore | null>(null);
   const previewGenerationStartedRef = useRef<boolean>(false);
+  const [triggerRegeneration, setTriggerRegeneration] = useState(0);
 
   // Use the map previews hook
   const {
     previews,
     loadingStates,
     loadingMessages,
+    loadingProgress: previewProgress,
     isLoading: previewsLoading,
     generatePreviews,
     clearCache,
@@ -253,10 +213,10 @@ const App: React.FC = () => {
           sizeBytes: m.sizeBytes,
           file: new File([], m.name), // Placeholder, will be loaded on demand
         }));
-
         setMaps(mapMetadata);
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
+        console.error('[App] ❌ Failed to load map list:', errorMsg);
         setError(`Failed to load map list: ${errorMsg}`);
       } finally {
         setIsLoading(false);
@@ -269,22 +229,21 @@ const App: React.FC = () => {
 
   // Generate previews for maps (background process)
   useEffect(() => {
-    if (maps.length === 0) return;
+    if (maps.length === 0) {
+      return;
+    }
 
-    // Prevent infinite loop: only run once
-    if (previewGenerationStartedRef.current) {
+    // Prevent infinite loop: only run once per trigger
+    if (previewGenerationStartedRef.current && triggerRegeneration === 0) {
       return;
     }
     previewGenerationStartedRef.current = true;
-
     // Prevent multiple preview generation runs
     let cancelled = false;
 
     const loadMapsAndGeneratePreviews = async (): Promise<void> => {
       if (cancelled) return;
-      const mapDataMap = new Map<string, RawMapData>();
-
-      // Load and parse maps in parallel batches (4 at a time) for faster loading
+      // Fetch map files (workers will handle ALL parsing)
       const BATCH_SIZE = 4;
       const loadMap = async (map: MapMetadata): Promise<void> => {
         if (cancelled) return;
@@ -306,55 +265,28 @@ const App: React.FC = () => {
 
           const blob = await response.blob();
           const file = new File([blob], map.name);
-
           // Update map metadata with actual file
           map.file = file;
-
-          // Parse map based on format
-          let mapData: RawMapData | null = null;
-
-          if (map.format === 'w3x') {
-            const loader = new W3XMapLoader();
-            mapData = await loader.parse(file);
-          } else if (map.format === 'w3n') {
-            const loader = new W3NCampaignLoader();
-            mapData = await loader.parse(file);
-          } else if (map.format === 'sc2map') {
-            const loader = new SC2MapLoader();
-            mapData = await loader.parse(file);
-          }
-
-          if (mapData) {
-            mapDataMap.set(map.id, mapData);
-
-            // Extract and update map metadata
-            const metadata = extractMapMetadata(mapData);
-            map.gameVersion = metadata.gameVersion;
-            map.mapSize = metadata.mapSize;
-            map.playerCount = metadata.playerCount;
-          }
         } catch (err) {
-          console.error(`Failed to load ${map.name} for preview:`, err);
+          console.error(`[App] ❌ Error fetching ${map.name}:`, err);
         }
       };
 
-      // Process maps in batches
+      // Fetch files in batches
       for (let i = 0; i < maps.length; i += BATCH_SIZE) {
         if (cancelled) return;
         const batch = maps.slice(i, i + BATCH_SIZE);
         await Promise.all(batch.map(loadMap));
       }
 
-      // Update maps state to reflect new metadata
-      if (!cancelled) {
-        setMaps([...maps]); // Trigger re-render with updated metadata
-      }
-
-      // Generate previews
-      if (!cancelled && mapDataMap.size > 0) {
-        await generatePreviews(maps, mapDataMap);
-        if (!cancelled) {
-        }
+      // Filter maps that have files loaded
+      const mapsWithFiles = maps.filter((m) => m.file.size > 0);
+      // Generate previews using workers (workers handle ALL parsing and rendering)
+      if (!cancelled && mapsWithFiles.length > 0) {
+        // Pass empty mapDataMap - workers will parse everything
+        await generatePreviews(mapsWithFiles, new Map());
+      } else {
+        console.warn('[App] ⚠️ No maps with files to generate previews for!');
       }
     };
 
@@ -365,9 +297,9 @@ const App: React.FC = () => {
     return () => {
       cancelled = true;
     };
-    // Only run when maps array changes (not when generatePreviews changes)
+    // Run when maps array changes OR when triggerRegeneration changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [maps]);
+  }, [maps, triggerRegeneration]);
 
   // Expose handleMapSelect for E2E tests
   useEffect(() => {
@@ -464,12 +396,18 @@ const App: React.FC = () => {
                 onMapSelect={(map) => {
                   void handleMapSelect(map);
                 }}
-                isLoading={isLoading || previewsLoading}
+                previews={previews}
                 previewLoadingStates={loadingStates}
                 previewLoadingMessages={loadingMessages}
+                previewLoadingProgress={previewProgress}
+                isLoading={isLoading || previewsLoading}
                 onClearPreviews={() => {
-                  previewGenerationStartedRef.current = false; // Reset flag to allow re-generation
-                  void clearCache();
+                  void (async () => {
+                    previewGenerationStartedRef.current = false; // Reset flag to allow re-generation
+                    await clearCache();
+                    // Trigger re-generation by updating state
+                    setTriggerRegeneration((prev) => prev + 1);
+                  })();
                 }}
               />
             ) : (

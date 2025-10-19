@@ -96,16 +96,12 @@ export class WeatherSystem {
     if (scene.activeCamera != null) {
       this.cameraPosition = scene.activeCamera.position.clone();
     }
-
-    console.log('Weather system initialized');
   }
 
   /**
    * Set weather immediately
    */
   public setWeather(config: WeatherConfig): void {
-    console.log(`Setting weather to: ${config.type} (intensity: ${config.intensity ?? 1.0})`);
-
     // Clear current weather
     this.clearCurrentWeather();
 
@@ -144,9 +140,6 @@ export class WeatherSystem {
       console.warn('Weather transition already in progress');
       return;
     }
-
-    console.log(`Transitioning from ${this.currentWeather} to ${config.type} over ${durationMs}ms`);
-
     this.isTransitioning = true;
 
     // Fade out current weather
@@ -159,7 +152,6 @@ export class WeatherSystem {
     await this.fadeInWeather(durationMs / 2);
 
     this.isTransitioning = false;
-    console.log('Weather transition complete');
   }
 
   /**
@@ -297,8 +289,6 @@ export class WeatherSystem {
 
     // Very dark sky
     this.scene.clearColor = new BABYLON.Color4(0.2, 0.2, 0.25, 1.0);
-
-    console.log('Storm weather applied (heavy rain + fog)');
   }
 
   /**
@@ -405,6 +395,5 @@ export class WeatherSystem {
    */
   public dispose(): void {
     this.clearCurrentWeather();
-    console.log('Weather system disposed');
   }
 }

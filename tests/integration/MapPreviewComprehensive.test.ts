@@ -118,10 +118,10 @@ if (isCI) {
         let mapData;
         if (format === 'sc2map') {
           const loader = new SC2MapLoader();
-          mapData = await loader.load(file);
+          mapData = await loader.parse(file);
         } else {
           const loader = new W3XMapLoader();
-          mapData = await loader.load(file);
+          mapData = await loader.parse(file);
         }
 
         expect(mapData).toBeDefined();
@@ -186,7 +186,7 @@ if (isCI) {
         const file = new File([buffer], mapName);
 
         const loader = new W3XMapLoader();
-        const mapData = await loader.load(file);
+        const mapData = await loader.parse(file);
 
         const result = await extractor.extract(file, mapData, { forceGenerate: true });
 
@@ -275,7 +275,7 @@ if (isCI) {
         const file = new File([buffer], mapName);
 
         const loader = new W3XMapLoader();
-        const mapData = await loader.load(file);
+        const mapData = await loader.parse(file);
 
         const result = await extractor.extract(file, mapData);
 
@@ -297,7 +297,7 @@ if (isCI) {
         const file = new File([buffer], mapName);
 
         const loader = new W3XMapLoader();
-        const mapData = await loader.load(file);
+        const mapData = await loader.parse(file);
 
         // Force terrain generation
         const result = await extractor.extract(file, mapData, { forceGenerate: true });
@@ -325,7 +325,7 @@ if (isCI) {
 
           const format = mapName.endsWith('.SC2Map') ? 'sc2map' : 'w3x';
           const loader = format === 'sc2map' ? new SC2MapLoader() : new W3XMapLoader();
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           expect(mapData.format).toBe(format);
 
@@ -348,7 +348,7 @@ if (isCI) {
         const file = new File([buffer], mapName);
 
         const loader = new W3XMapLoader();
-        const mapData = await loader.load(file);
+        const mapData = await loader.parse(file);
 
         const result = await extractor.extract(file, mapData);
 
@@ -410,7 +410,7 @@ if (isCI) {
       const file = new File([buffer], mapName);
 
       const loader = new W3XMapLoader();
-      const mapData = await loader.load(file);
+      const mapData = await loader.parse(file);
 
       const startTime = performance.now();
       const result = await extractor.extract(file, mapData);
@@ -428,7 +428,7 @@ if (isCI) {
       const file = new File([buffer], mapName);
 
       const loader = new W3XMapLoader();
-      const mapData = await loader.load(file);
+      const mapData = await loader.parse(file);
 
       const startTime = performance.now();
       const result = await extractor.extract(file, mapData, { forceGenerate: true });
@@ -446,7 +446,7 @@ if (isCI) {
       const loader = new W3XMapLoader();
 
       const startTime = performance.now();
-      const mapData = await loader.load(file);
+      const mapData = await loader.parse(file);
       const duration = performance.now() - startTime;
 
       expect(mapData).toBeDefined();

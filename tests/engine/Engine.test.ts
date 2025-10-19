@@ -7,7 +7,7 @@
 
 import { EdgeCraftEngine } from '@/engine/core/Engine';
 
-describe.skip('EdgeCraftEngine', () => {
+describe('EdgeCraftEngine', () => {
   let canvas: HTMLCanvasElement;
 
   beforeEach(() => {

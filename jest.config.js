@@ -7,14 +7,13 @@ export default {
 
   roots: ['<rootDir>/src', '<rootDir>/tests'],
 
-  // Exclude E2E tests (Playwright) and WebGL-dependent integration tests from Jest
+  // Exclude E2E tests (Playwright) from Jest - these run separately
+  // WebGL/Babylon.js tests will run in GitHub Actions with headless browser support
   testPathIgnorePatterns: [
     '/node_modules/',
     '/tests/e2e/',
     '/tests/e2e-fixtures/',
-    'tests/integration', // Skip WebGL-dependent tests (no leading slash)
-    'comprehensive\\.test\\.(ts|tsx)$', // Skip all comprehensive tests
-    'MapPreview.*\\.test\\.(ts|tsx)$', // Skip MapPreview tests (require Babylon.js WebGL)
+    '\\.chromium\\.test\\.(ts|tsx)$', // Skip Chromium-based visual tests (require real browser)
   ],
 
   transformIgnorePatterns: [

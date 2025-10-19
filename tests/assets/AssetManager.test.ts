@@ -8,15 +8,14 @@
 import * as BABYLON from '@babylonjs/core';
 import { AssetManager } from '@/assets/AssetManager';
 
-describe.skip('AssetManager', () => {
-  let canvas: HTMLCanvasElement;
-  let engine: BABYLON.Engine;
+describe('AssetManager', () => {
+  let engine: BABYLON.NullEngine;
   let scene: BABYLON.Scene;
   let manager: AssetManager;
 
   beforeEach(() => {
-    canvas = document.createElement('canvas');
-    engine = new BABYLON.Engine(canvas, false);
+    // Use NullEngine for Jest compatibility (no WebGL required)
+    engine = new BABYLON.NullEngine();
     scene = new BABYLON.Scene(engine);
     manager = new AssetManager(scene);
   });

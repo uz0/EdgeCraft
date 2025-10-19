@@ -97,6 +97,7 @@ export class CopyrightValidator {
       const buffer = await response.arrayBuffer();
       return this.validateAsset(buffer);
     } catch (error) {
+      // eslint-disable-line no-empty
       return {
         valid: false,
         reason: `Failed to fetch file: ${error instanceof Error ? error.message : 'Unknown error'}`,

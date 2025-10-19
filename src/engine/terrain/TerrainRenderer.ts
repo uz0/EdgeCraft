@@ -166,8 +166,6 @@ void main(void) {
     // Register with Babylon.js shader store
     BABYLON.Effect.ShadersStore['terrainVertexShader'] = vertexShader;
     BABYLON.Effect.ShadersStore['terrainFragmentShader'] = fragmentShader;
-
-    console.log('[TerrainRenderer] Terrain splatmap shaders registered');
   }
 
   /**
@@ -195,10 +193,6 @@ void main(void) {
                 // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
                 // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
                 // W3X entity coordinates are also centered, so no offset needed
-                console.log(
-                  `[TerrainRenderer] Terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
-                );
-
                 this.applyMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
                 resolve({
@@ -223,6 +217,7 @@ void main(void) {
         }
       });
     } catch (error) {
+      // eslint-disable-line no-empty
       this.loadStatus = 'error' as TerrainLoadStatus;
       return {
         status: this.loadStatus,
@@ -242,8 +237,6 @@ void main(void) {
       try {
         // Map the terrain texture ID to our asset ID
         const mappedId = mapAssetID('w3x', 'terrain', options.textureId);
-        console.log(`[TerrainRenderer] Mapped texture ID: ${options.textureId} -> ${mappedId}`);
-
         // Load the diffuse texture
         const diffuseTexture = this.assetLoader.loadTexture(mappedId);
         diffuseTexture.uScale = 16;
@@ -257,6 +250,8 @@ void main(void) {
           normalTexture.vScale = 16;
           this.material.bumpTexture = normalTexture;
         } catch {
+          // eslint-disable-line no-empty
+          // eslint-disable-line no-empty
           // Normal map not available, continue without it
         }
 
@@ -267,12 +262,13 @@ void main(void) {
           roughnessTexture.vScale = 16;
           this.material.specularTexture = roughnessTexture;
         } catch {
+          // eslint-disable-line no-empty
+          // eslint-disable-line no-empty
           // Roughness map not available, use default specular
           this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
         }
-
-        console.log(`[TerrainRenderer] Loaded texture: ${mappedId} for terrain`);
       } catch (error) {
+        // eslint-disable-line no-empty
         console.warn(
           `[TerrainRenderer] Failed to load texture for ${options.textureId}, using fallback color`,
           error
@@ -283,7 +279,6 @@ void main(void) {
       }
     } else {
       // No textureId provided, use default grass color
-      console.log('[TerrainRenderer] No textureId provided, using default grass color');
       this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
       this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     }
@@ -297,13 +292,6 @@ void main(void) {
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
     mesh.doNotSyncBoundingInfo = true;
-
-    console.log(
-      `[TerrainRenderer] Material applied: mesh=${mesh.name}, ` +
-        `position=${mesh.position.toString()}, ` +
-        `visible=${mesh.isVisible}, ` +
-        `material=${this.material?.name ?? 'none'}`
-    );
   }
 
   /**
@@ -334,10 +322,6 @@ void main(void) {
                 // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
                 // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
                 // W3X entity coordinates are also centered, so no offset needed
-                console.log(
-                  `[TerrainRenderer] Multi-texture terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
-                );
-
                 this.applyMultiTextureMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
                 resolve({
@@ -359,6 +343,7 @@ void main(void) {
         );
       });
     } catch (error) {
+      // eslint-disable-line no-empty
       this.loadStatus = 'error' as TerrainLoadStatus;
       return {
         status: this.loadStatus,
@@ -378,11 +363,6 @@ void main(void) {
     }
   ): void {
     const { textureIds, blendMap } = options;
-
-    console.log(`[TerrainRenderer] 🔍 MATERIAL DEBUG - Applying multi-texture material`);
-    console.log(`[TerrainRenderer] 🔍 Total textures requested: ${textureIds.length}`);
-    console.log(`[TerrainRenderer] 🔍 Texture IDs: [${textureIds.join(', ')}]`);
-
     // Load up to 8 textures (shader now supports 8)
     const textures: BABYLON.Texture[] = [];
     for (let i = 0; i < Math.min(8, textureIds.length); i++) {
@@ -393,10 +373,8 @@ void main(void) {
         texture.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
         texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
         textures.push(texture);
-        console.log(
-          `[TerrainRenderer] ✅ Loaded texture slot ${i}: "${textureId}" -> "${mappedId}"`
-        );
       } catch (error) {
+        // eslint-disable-line no-empty
         const textureId = textureIds[i] ?? '';
         console.error(
           `[TerrainRenderer] ❌ Failed to load texture slot ${i}: "${textureId}"`,
@@ -408,7 +386,6 @@ void main(void) {
           this.scene
         );
         textures.push(fallbackTexture);
-        console.log(`[TerrainRenderer] 🔶 Using fallback color for slot ${i}`);
       }
     }
 
@@ -493,10 +470,6 @@ void main(void) {
     shaderMaterial.setFloat('debugMode', debugMode);
 
     if (debugMode > 0) {
-      console.log(
-        `[TerrainRenderer] 🐛 DEBUG MODE ENABLED: ${debugMode} ` +
-          `(0=normal, 1=splatmap1, 2=splatmap2, 3=UVs)`
-      );
     }
 
     // Apply material to mesh (cast to Material to avoid type incompatibility)
@@ -508,8 +481,6 @@ void main(void) {
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
     mesh.doNotSyncBoundingInfo = true;
-
-    console.log('[TerrainRenderer] Multi-texture splatmap material applied successfully');
   }
 
   /**
@@ -532,34 +503,12 @@ void main(void) {
       minIdx = Math.min(minIdx, idx);
       maxIdx = Math.max(maxIdx, idx);
     }
-
-    console.log(
-      `[TerrainRenderer] 🔍 SPLATMAP DEBUG - Creating dual ${width}x${height} splatmaps from ${blendMap.length} tiles`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 BlendMap index range: min=${minIdx}, max=${maxIdx}, unique=${indexCounts.size}`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 Index distribution:`,
-      Array.from(indexCounts.entries())
-        .sort((a, b) => a[0] - b[0])
-        .map(
-          ([idx, count]) =>
-            `  idx${idx}=${count} (${((count / blendMap.length) * 100).toFixed(1)}%)`
-        )
-        .join('\n')
-    );
-
     // Create RGBA texture data for both splatmaps
     const splatmapSize = width * height * 4; // RGBA
     const splatmap1Data = new Uint8Array(splatmapSize); // Textures 0-3
     const splatmap2Data = new Uint8Array(splatmapSize); // Textures 4-7
 
     // DEBUG: Sample first 5 blendMap values
-    console.log(
-      `[TerrainRenderer] 🔍 First 10 blendMap values: [${Array.from(blendMap.slice(0, 10)).join(', ')}]`
-    );
-
     let nonZeroSplatmap1Count = 0;
     let nonZeroSplatmap2Count = 0;
 
@@ -574,7 +523,7 @@ void main(void) {
         splatmap1Data[pixelOffset + 2] = textureIndex === 2 ? 255 : 0; // B
         splatmap1Data[pixelOffset + 3] = textureIndex === 3 ? 255 : 0; // A
         if (textureIndex === 0 || textureIndex === 1 || textureIndex === 2 || textureIndex === 3) {
-          nonZeroSplatmap1Count++;
+          nonZeroSplatmap1Count++; // eslint-disable-line @typescript-eslint/no-unused-vars
         }
         // Splatmap2 is all zeros for this tile
       } else {
@@ -584,27 +533,12 @@ void main(void) {
         splatmap2Data[pixelOffset + 2] = textureIndex === 6 ? 255 : 0; // B
         splatmap2Data[pixelOffset + 3] = textureIndex === 7 ? 255 : 0; // A
         if (textureIndex >= 4) {
-          nonZeroSplatmap2Count++;
+          nonZeroSplatmap2Count++; // eslint-disable-line @typescript-eslint/no-unused-vars
         }
         // Splatmap1 is all zeros for this tile
       }
     }
-
-    console.log(
-      `[TerrainRenderer] 🔍 Splatmap1 non-zero pixels: ${nonZeroSplatmap1Count}/${blendMap.length}`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 Splatmap2 non-zero pixels: ${nonZeroSplatmap2Count}/${blendMap.length}`
-    );
-
     // DEBUG: Sample first 20 bytes of splatmap1Data
-    console.log(
-      `[TerrainRenderer] 🔍 First 20 bytes of splatmap1Data: [${Array.from(splatmap1Data.slice(0, 20)).join(', ')}]`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 First 20 bytes of splatmap2Data: [${Array.from(splatmap2Data.slice(0, 20)).join(', ')}]`
-    );
-
     // Create textures from raw data
     const splatmap1 = BABYLON.RawTexture.CreateRGBATexture(
       splatmap1Data,
@@ -625,21 +559,6 @@ void main(void) {
       false, // invertY
       BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
     );
-
-    console.log(`[TerrainRenderer] ✅ Created dual splatmap textures: ${width}x${height}`);
-    console.log(
-      `[TerrainRenderer] ✅ Splatmap1 (textures 0-3): ${Array.from(indexCounts.entries())
-        .filter(([idx]) => idx < 4)
-        .map(([idx, count]) => `idx${idx}=${count}`)
-        .join(', ')}`
-    );
-    console.log(
-      `[TerrainRenderer] ✅ Splatmap2 (textures 4-7): ${Array.from(indexCounts.entries())
-        .filter(([idx]) => idx >= 4)
-        .map(([idx, count]) => `idx${idx}=${count}`)
-        .join(', ')}`
-    );
-
     return { splatmap1, splatmap2 };
   }
 

@@ -141,7 +141,8 @@ export class QualityPresetManager {
   private minimap: MinimapSystem | null = null;
 
   // Auto-adjustment
-  // @ts-expect-error - Reserved for future auto-adjustment features
+  // @ts-ignore - Reserved for future auto-adjustment features
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   private _enableAutoAdjust: boolean = false;
   private targetFPS: number = 60;
   private fpsSamples: number[] = [];
@@ -151,16 +152,12 @@ export class QualityPresetManager {
   constructor(scene: BABYLON.Scene) {
     this.scene = scene;
     this.engine = scene.getEngine();
-
-    console.log('Quality Preset Manager initialized');
   }
 
   /**
    * Initialize all Phase 2 systems
    */
   public async initialize(config?: QualityManagerConfig): Promise<void> {
-    console.log('Initializing Phase 2 rendering systems...');
-
     // Detect hardware and browser
     if (config?.enableAutoDetect !== false) {
       this.detectHardware();
@@ -173,11 +170,6 @@ export class QualityPresetManager {
     } else if (config?.enableAutoDetect !== false) {
       this.currentQuality = this.determineInitialQuality();
     }
-
-    console.log(
-      `Initial quality: ${this.currentQuality} (${this.hardwareTier} hardware, ${this.browser} browser)`
-    );
-
     // Initialize all systems
     await this.initializeSystems();
 
@@ -187,8 +179,6 @@ export class QualityPresetManager {
       this.targetFPS = config.targetFPS ?? 60;
       this.setupAutoAdjustment();
     }
-
-    console.log('Phase 2 rendering systems initialized');
   }
 
   /**
@@ -210,7 +200,6 @@ export class QualityPresetManager {
 
     if (debugInfo != null) {
       gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) as string;
-      console.log(`GPU: ${gpuInfo}`);
     }
 
     // Estimate tier based on GPU
@@ -231,8 +220,6 @@ export class QualityPresetManager {
       // Default to MEDIUM if unknown
       this.hardwareTier = HardwareTier.MEDIUM;
     }
-
-    console.log(`Hardware tier: ${this.hardwareTier}`);
   }
 
   /**
@@ -252,8 +239,6 @@ export class QualityPresetManager {
     } else {
       this.browser = BrowserType.OTHER;
     }
-
-    console.log(`Browser: ${this.browser}`);
   }
 
   /**
@@ -321,8 +306,6 @@ export class QualityPresetManager {
       quality: this.currentQuality,
     });
     this.minimap.initialize();
-
-    console.log('All Phase 2 systems initialized');
   }
 
   /**
@@ -345,8 +328,6 @@ export class QualityPresetManager {
         this.lastAdjustmentTime = now;
       }
     });
-
-    console.log(`Auto quality adjustment enabled (target: ${this.targetFPS} FPS)`);
   }
 
   /**
@@ -394,9 +375,6 @@ export class QualityPresetManager {
       console.warn('Safari restricted to LOW quality');
       return;
     }
-
-    console.log(`Changing quality: ${this.currentQuality} → ${quality}`);
-
     this.currentQuality = quality;
 
     // Update all systems
@@ -546,7 +524,5 @@ export class QualityPresetManager {
     this.shaders?.dispose();
     this.decals?.dispose();
     this.minimap?.dispose();
-
-    console.log('Quality Preset Manager disposed');
   }
 }

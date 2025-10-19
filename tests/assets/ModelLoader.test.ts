@@ -8,15 +8,14 @@
 import * as BABYLON from '@babylonjs/core';
 import { ModelLoader } from '@/assets/ModelLoader';
 
-describe.skip('ModelLoader', () => {
-  let canvas: HTMLCanvasElement;
-  let engine: BABYLON.Engine;
+describe('ModelLoader', () => {
+  let engine: BABYLON.NullEngine;
   let scene: BABYLON.Scene;
   let loader: ModelLoader;
 
   beforeEach(() => {
-    canvas = document.createElement('canvas');
-    engine = new BABYLON.Engine(canvas, false);
+    // Use NullEngine for Jest compatibility (no WebGL required)
+    engine = new BABYLON.NullEngine();
     scene = new BABYLON.Scene(engine);
     loader = new ModelLoader(scene);
   });

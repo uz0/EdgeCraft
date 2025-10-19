@@ -355,6 +355,38 @@
   font-weight: 500;
 }
 
+.map-card-details {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.map-version,
+.map-dimensions,
+.map-players {
+  background: #f3f4f6;
+  color: #4b5563;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.map-version {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.map-dimensions {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.map-players {
+  background: #d1fae5;
+  color: #065f46;
+}
+
 .map-gallery-empty {
   padding: 4rem 2rem;
   text-align: center;

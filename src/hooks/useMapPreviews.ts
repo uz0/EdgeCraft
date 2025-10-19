@@ -1,6 +1,9 @@
 /**
  * React hook for loading and caching map previews
  *
+ * Uses Web Workers for parallel preview generation without UI freezes.
+ * Implements cache-first strategy for instant display of cached previews.
+ *
  * @example
  * ```typescript
  * const { previews, isLoading, generatePreviews } = useMapPreviews();
@@ -14,9 +17,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MapPreviewExtractor } from '../engine/rendering/MapPreviewExtractor';
+import { WorkerPoolManager } from '../workers/WorkerPoolManager';
 import { PreviewCache } from '../utils/PreviewCache';
-import { LoadingMessageGenerator } from '../utils/funnyLoadingMessages';
 import type { MapMetadata } from '../ui/MapGallery';
 import type { RawMapData } from '../formats/maps/types';
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -39,6 +41,9 @@ export interface UseMapPreviewsResult {
   /** Map ID → Funny loading message */
   loadingMessages: Map<string, string>;
 
+  /** Map ID → Progress percentage (0-100) */
+  loadingProgress: Map<string, number>;
+
   /** Loading state */
   isLoading: boolean;
 
@@ -59,35 +64,45 @@ export interface UseMapPreviewsResult {
 }
 
 /**
+ * Determine map format from file extension
+ */
+function getMapFormat(fileName: string): 'w3x' | 'w3n' | 'sc2map' {
+  const ext = fileName.toLowerCase();
+  if (ext.endsWith('.w3n')) return 'w3n';
+  if (ext.endsWith('.sc2map')) return 'sc2map';
+  return 'w3x'; // Default to W3X (includes .w3x and .w3m)
+}
+
+/**
  * React hook for loading and caching map previews
  */
 export function useMapPreviews(): UseMapPreviewsResult {
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
   const [loadingStates, setLoadingStates] = useState<Map<string, PreviewLoadingState>>(new Map());
   const [loadingMessages, setLoadingMessages] = useState<Map<string, string>>(new Map());
+  const [loadingProgress, setLoadingProgress] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<PreviewProgress>({ current: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
 
-  const extractorRef = useRef<MapPreviewExtractor | null>(null);
+  const workerPoolRef = useRef<WorkerPoolManager | null>(null);
   const cacheRef = useRef<PreviewCache | null>(null);
-  const messageGeneratorRef = useRef<LoadingMessageGenerator>(new LoadingMessageGenerator());
 
   // Initialize on mount
   useEffect(() => {
-    extractorRef.current = new MapPreviewExtractor();
+    workerPoolRef.current = new WorkerPoolManager({ poolSize: 3 });
     cacheRef.current = new PreviewCache();
 
     void cacheRef.current.init();
 
     return () => {
-      extractorRef.current?.dispose();
+      workerPoolRef.current?.dispose();
     };
   }, []);
 
   const generatePreviews = useCallback(
     async (maps: MapMetadata[], mapDataMap: Map<string, RawMapData>): Promise<void> => {
-      if (!extractorRef.current || !cacheRef.current) {
+      if (!workerPoolRef.current || !cacheRef.current) {
         setError('Preview system not initialized');
         return;
       }
@@ -99,100 +114,102 @@ export function useMapPreviews(): UseMapPreviewsResult {
       const newPreviews = new Map<string, string>();
       const newStates = new Map<string, PreviewLoadingState>();
       const newMessages = new Map<string, string>();
+      const newProgress = new Map<string, number>();
+
       try {
-        // Process maps in parallel batches of 4 for faster loading
-        const BATCH_SIZE = 4;
         let completed = 0;
 
-        const processBatch = async (batch: MapMetadata[]): Promise<void> => {
-          await Promise.all(
-            batch.map(async (map) => {
-              if (!map) return;
+        // PHASE 1: Cache-first - check and show all cached previews immediately
+        await Promise.all(
+          maps.map(async (map) => {
+            const cachedPreview = await cacheRef.current!.get(map.id);
+            if (cachedPreview) {
+              newPreviews.set(map.id, cachedPreview);
+              newStates.set(map.id, 'success');
+              completed++;
+            } else {
+              // Not cached - set to idle state
+              newStates.set(map.id, 'idle');
+            }
+          })
+        );
 
-              // Generate funny loading message
-              const loadingMessage = messageGeneratorRef.current.getNext();
-              // Set loading state with message
-              newStates.set(map.id, 'loading');
-              newMessages.set(map.id, loadingMessage);
+        // Update UI with cached previews immediately
+        setPreviews(new Map(newPreviews));
+        setLoadingStates(new Map(newStates));
+        setProgress({ current: completed, total: maps.length });
+
+        // PHASE 2: Generate missing previews using workers
+        const mapsToGenerate = maps.filter((map) => !newPreviews.has(map.id));
+
+        if (mapsToGenerate.length === 0) {
+          setIsLoading(false);
+          return;
+        }
+
+        // Start all worker tasks in parallel (pool handles queue)
+        await Promise.all(
+          mapsToGenerate.map(async (map) => {
+            try {
+              // Check if file is available
+              if (!map.file || map.file.size === 0) {
+                newStates.set(map.id, 'error');
+                setLoadingStates(new Map(newStates));
+                return;
+              }
+
+              // Determine map format
+              const format = getMapFormat(map.file.name);
+
+              // Start worker task (worker will handle parsing)
+              const result = await workerPoolRef.current!.generatePreview(
+                map.id,
+                map.name,
+                map.file,
+                format,
+                undefined,
+                // Progress callback
+                (progressUpdate) => {
+                  newStates.set(map.id, 'loading');
+                  newMessages.set(map.id, progressUpdate.message);
+                  newProgress.set(map.id, progressUpdate.progress);
+                  setLoadingStates(new Map(newStates));
+                  setLoadingMessages(new Map(newMessages));
+                  setLoadingProgress(new Map(newProgress));
+                }
+              );
+
+              // Worker completed successfully
+              newPreviews.set(map.id, result.dataUrl);
+              newStates.set(map.id, 'success');
+              newMessages.delete(map.id);
+              newProgress.delete(map.id);
+              completed++;
+              // Update UI
+              setPreviews(new Map(newPreviews));
               setLoadingStates(new Map(newStates));
               setLoadingMessages(new Map(newMessages));
+              setLoadingProgress(new Map(newProgress));
+              setProgress({ current: completed, total: maps.length, currentMap: map.name });
 
-              try {
-                // Check cache first
-                const cachedPreview = await cacheRef.current!.get(map.id);
-
-                if (cachedPreview) {
-                  newPreviews.set(map.id, cachedPreview);
-                  newStates.set(map.id, 'success');
-                  newMessages.delete(map.id);
-                  setPreviews(new Map(newPreviews));
-                  setLoadingStates(new Map(newStates));
-                  setLoadingMessages(new Map(newMessages));
-                  return;
-                }
-
-                // Not cached - extract or generate
-                const mapData = mapDataMap.get(map.id);
-
-                if (!mapData) {
-                  console.error(`[useMapPreviews] ❌ No map data found for ${map.id}`);
-                  newStates.set(map.id, 'error');
-                  newMessages.delete(map.id);
-                  setLoadingStates(new Map(newStates));
-                  setLoadingMessages(new Map(newMessages));
-                  return;
-                }
-                const startTime = performance.now();
-                // Use extract-only mode for W3X maps (fast embedded previews)
-                // For W3N campaigns, allow terrain generation fallback since they often lack embedded previews
-                const result = await extractorRef.current!.extract(map.file, mapData, {
-                  extractOnly: mapData.format !== 'w3n',
-                });
-                const duration = performance.now() - startTime;
-
-                if (result.success && result.dataUrl) {
-                  newPreviews.set(map.id, result.dataUrl);
-                  newStates.set(map.id, 'success');
-                  newMessages.delete(map.id);
-                  setPreviews(new Map(newPreviews));
-                  setLoadingStates(new Map(newStates));
-                  setLoadingMessages(new Map(newMessages));
-
-                  // Cache for future use
-                  await cacheRef.current!.set(map.id, result.dataUrl);
-                } else {
-                  console.error(
-                    `[useMapPreviews] ❌ Failed to generate preview for ${map.name}:`,
-                    result.error
-                  );
-                  newStates.set(map.id, 'error');
-                  newMessages.delete(map.id);
-                  setLoadingStates(new Map(newStates));
-                  setLoadingMessages(new Map(newMessages));
-                }
-              } catch (err) {
-                console.error(`[useMapPreviews] ❌ Error generating preview for ${map.name}:`, err);
-                newStates.set(map.id, 'error');
-                newMessages.delete(map.id);
-                setLoadingStates(new Map(newStates));
-                setLoadingMessages(new Map(newMessages));
-              } finally {
-                completed++;
-                setProgress({ current: completed, total: maps.length, currentMap: map.name });
-              }
-            })
-          );
-        };
-
-        // Process all maps in batches
-        for (let i = 0; i < maps.length; i += BATCH_SIZE) {
-          const batch = maps.slice(i, i + BATCH_SIZE);
-          await processBatch(batch);
-        }
+              // Cache for future use
+              await cacheRef.current!.set(map.id, result.dataUrl);
+            } catch (err) {
+              console.error(`[useMapPreviews] ❌ Error generating preview for ${map.id}:`, err);
+              newStates.set(map.id, 'error');
+              newMessages.delete(map.id);
+              newProgress.delete(map.id);
+              completed++;
+              setLoadingStates(new Map(newStates));
+              setLoadingMessages(new Map(newMessages));
+              setLoadingProgress(new Map(newProgress));
+              setProgress({ current: completed, total: maps.length, currentMap: map.name });
+            }
+          })
+        );
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         setError(errorMsg);
-        console.error('Preview generation failed:', errorMsg);
       } finally {
         setIsLoading(false);
       }
@@ -202,16 +219,12 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
   const generateSinglePreview = useCallback(
     async (map: MapMetadata, mapData: RawMapData): Promise<void> => {
-      if (!extractorRef.current || !cacheRef.current) {
-        console.error('Preview system not initialized');
+      if (!workerPoolRef.current || !cacheRef.current) {
         return;
       }
 
-      // Set loading state
-      setLoadingStates((prev) => new Map(prev).set(map.id, 'loading'));
-
       try {
-        // Check cache first
+        // Cache-first: Check cache
         const cachedPreview = await cacheRef.current.get(map.id);
 
         if (cachedPreview) {
@@ -220,23 +233,52 @@ export function useMapPreviews(): UseMapPreviewsResult {
           return;
         }
 
-        // Not cached - extract or generate
-        const result = await extractorRef.current.extract(map.file, mapData);
+        // Not cached - generate using worker
+        const format = getMapFormat(map.file.name);
 
-        if (result.success && result.dataUrl) {
-          const dataUrl = result.dataUrl; // Type narrowing
-          setPreviews((prev) => new Map(prev).set(map.id, dataUrl));
-          setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
+        // Start worker task with progress
+        const result = await workerPoolRef.current.generatePreview(
+          map.id,
+          map.name,
+          map.file,
+          format,
+          undefined,
+          // Progress callback
+          (progressUpdate) => {
+            setLoadingStates((prev) => new Map(prev).set(map.id, 'loading'));
+            setLoadingMessages((prev) => new Map(prev).set(map.id, progressUpdate.message));
+            setLoadingProgress((prev) => new Map(prev).set(map.id, progressUpdate.progress));
+          }
+        );
 
-          // Cache for future use
-          await cacheRef.current.set(map.id, dataUrl);
-        } else {
-          console.error(`Failed to generate preview for ${map.name}:`, result.error);
-          setLoadingStates((prev) => new Map(prev).set(map.id, 'error'));
-        }
+        // Worker completed successfully
+        setPreviews((prev) => new Map(prev).set(map.id, result.dataUrl));
+        setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
+        setLoadingMessages((prev) => {
+          const updated = new Map(prev);
+          updated.delete(map.id);
+          return updated;
+        });
+        setLoadingProgress((prev) => {
+          const updated = new Map(prev);
+          updated.delete(map.id);
+          return updated;
+        });
+
+        // Cache for future use
+        await cacheRef.current.set(map.id, result.dataUrl);
       } catch (err) {
-        console.error(`Error generating preview for ${map.name}:`, err);
         setLoadingStates((prev) => new Map(prev).set(map.id, 'error'));
+        setLoadingMessages((prev) => {
+          const updated = new Map(prev);
+          updated.delete(map.id);
+          return updated;
+        });
+        setLoadingProgress((prev) => {
+          const updated = new Map(prev);
+          updated.delete(map.id);
+          return updated;
+        });
       }
     },
     []
@@ -248,13 +290,14 @@ export function useMapPreviews(): UseMapPreviewsResult {
     setPreviews(new Map());
     setLoadingStates(new Map());
     setLoadingMessages(new Map());
-    messageGeneratorRef.current.reset();
+    setLoadingProgress(new Map());
   }, []);
 
   return {
     previews,
     loadingStates,
     loadingMessages,
+    loadingProgress,
     isLoading,
     progress,
     error,

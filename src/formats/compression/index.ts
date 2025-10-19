@@ -9,3 +9,4 @@ export * from './LZMADecompressor';
 export * from './ZlibDecompressor';
 export * from './Bzip2Decompressor';
 export * from './HuffmanDecompressor';
+export * from './ImplodeDecompressor';

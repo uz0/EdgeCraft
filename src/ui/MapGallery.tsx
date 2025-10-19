@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { MapCard } from './MapCard';
 import type { MapLoadProgress } from '../formats/maps/BatchMapLoader';
 import type { PreviewLoadingState } from '../hooks/useMapPreviews';
 import './MapGallery.css';
@@ -21,6 +22,15 @@ export interface MapMetadata {
 
   /** File reference */
   file: File;
+
+  /** Game version (TFT, ROC, Reforged) */
+  gameVersion?: 'ROC' | 'TFT' | 'Reforged' | 'SC2' | 'Unknown';
+
+  /** Map dimensions (e.g. "256x256") */
+  mapSize?: string;
+
+  /** Number of players */
+  playerCount?: number;
 }
 
 export interface MapGalleryProps {
@@ -30,14 +40,20 @@ export interface MapGalleryProps {
   /** Callback when map is selected */
   onMapSelect: (map: MapMetadata) => void;
 
-  /** Loading progress (if batch loading) */
-  loadProgress?: Map<string, MapLoadProgress>;
+  /** Map previews (Map ID → Data URL) */
+  previews?: Map<string, string>;
 
   /** Preview loading states (per map) */
   previewLoadingStates?: Map<string, PreviewLoadingState>;
 
   /** Preview loading messages (funny text per map) */
   previewLoadingMessages?: Map<string, string>;
+
+  /** Preview loading progress (per map, 0-100%) */
+  previewLoadingProgress?: Map<string, number>;
+
+  /** Loading progress (if batch loading) */
+  loadProgress?: Map<string, MapLoadProgress>;
 
   /** Callback to clear all previews */
   onClearPreviews?: () => void;
@@ -53,9 +69,11 @@ type FormatFilter = 'all' | 'w3x' | 'w3n' | 'sc2map';
 export const MapGallery: React.FC<MapGalleryProps> = ({
   maps,
   onMapSelect,
-  loadProgress,
+  previews,
   previewLoadingStates,
   previewLoadingMessages,
+  previewLoadingProgress,
+  loadProgress,
   onClearPreviews,
   isLoading = false,
 }) => {
@@ -205,10 +223,13 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
         {filteredMaps.map((map) => (
           <MapCard
             key={map.id}
-            map={map}
-            progress={loadProgress?.get(map.id)}
-            previewLoadingState={previewLoadingStates?.get(map.id)}
-            previewLoadingMessage={previewLoadingMessages?.get(map.id)}
+            mapId={map.id}
+            mapName={map.name}
+            previewUrl={previews?.get(map.id)}
+            loadingState={previewLoadingStates?.get(map.id) || 'idle'}
+            loadingMessage={previewLoadingMessages?.get(map.id)}
+            loadingProgress={previewLoadingProgress?.get(map.id)}
+            format={map.format}
             onClick={() => onMapSelect(map)}
           />
         ))}
@@ -220,89 +241,6 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
           <p>No maps found matching your filters.</p>
         </div>
       )}
-    </div>
-  );
-};
-
-/**
- * Individual map card component
- */
-interface MapCardProps {
-  map: MapMetadata;
-  progress?: MapLoadProgress;
-  previewLoadingState?: PreviewLoadingState;
-  previewLoadingMessage?: string;
-  onClick: () => void;
-}
-
-const MapCard: React.FC<MapCardProps> = ({
-  map,
-  progress,
-  previewLoadingState,
-  previewLoadingMessage,
-  onClick,
-}) => {
-  const formatSizeDisplay = (bytes: number): string => {
-    const mb = bytes / (1024 * 1024);
-    return mb < 1 ? `${(bytes / 1024).toFixed(0)} KB` : `${mb.toFixed(1)} MB`;
-  };
-
-  const formatLabel: Record<string, string> = {
-    w3x: 'W3X',
-    w3n: 'W3N',
-    sc2map: 'SC2',
-  };
-
-  return (
-    <div
-      className={`map-card ${progress?.status === 'loading' ? 'loading' : ''}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onClick();
-        }
-      }}
-      aria-label={`Load map: ${map.name}`}
-    >
-      {/* Thumbnail */}
-      <div className="map-card-thumbnail">
-        {map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '' ? (
-          <img src={map.thumbnailUrl} alt={map.name} className="map-card-image-loaded" />
-        ) : previewLoadingState === 'loading' ? (
-          <div className="map-card-skeleton">
-            <div className="skeleton-shimmer" />
-            <div className="skeleton-content">
-              <div className="spinner-small" />
-              <span className="skeleton-text">
-                {previewLoadingMessage || 'Generating preview...'}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="map-card-placeholder">
-            <span className="format-badge">{formatLabel[map.format]}</span>
-          </div>
-        )}
-
-        {progress?.status === 'loading' && (
-          <div className="map-card-loading">
-            <div className="spinner" />
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="map-card-info">
-        <div className="map-card-name" title={map.name}>
-          {map.name}
-        </div>
-        <div className="map-card-meta">
-          <span className="map-format">{formatLabel[map.format]}</span>
-          <span className="map-size">{formatSizeDisplay(map.sizeBytes)}</span>
-        </div>
-      </div>
     </div>
   );
 };

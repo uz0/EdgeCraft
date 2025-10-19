@@ -36,9 +36,6 @@ export class BakedAnimationSystem {
     if (!mesh.skeleton) {
       throw new Error('Mesh must have a skeleton for animation baking');
     }
-
-    console.log(`Baking ${animations.length} animations for mesh...`);
-
     // Store animation metadata
     animations.forEach((anim, index) => {
       this.animationClips.set(anim.name, anim);
@@ -84,9 +81,6 @@ export class BakedAnimationSystem {
     }
 
     mesh.bakedVertexAnimationManager.texture = this.bakedTexture;
-
-    console.log(`Animation baking complete: ${this.textureWidth}x${this.textureHeight} texture`);
-
     return {
       texture: this.bakedTexture,
       width: this.textureWidth,

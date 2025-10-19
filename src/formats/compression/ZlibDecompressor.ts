@@ -7,6 +7,7 @@
 
 import * as pako from 'pako';
 import type { IDecompressor } from './types';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 export class ZlibDecompressor implements IDecompressor {
   /**
@@ -29,35 +30,39 @@ export class ZlibDecompressor implements IDecompressor {
         )
           .map((b) => b.toString(16).padStart(2, '0'))
           .join(' ');
-        console.log(
-          `[ZlibDecompressor] 🔍 Input: ${compressedArray.length} bytes, first 16: ${previewBytes}`
-        );
-        console.log(`[ZlibDecompressor] Expected output: ${uncompressedSize} bytes`);
-
         // Detect ZLIB header (0x78 in first byte indicates ZLIB wrapper)
         const firstByte = compressedArray.length > 0 ? (compressedArray[0] ?? 0) : 0;
         const hasZlibWrapper = (firstByte & 0x0f) === 0x08 && (firstByte & 0xf0) !== 0;
-        console.log(
-          `[ZlibDecompressor] First byte: 0x${firstByte.toString(16)}, hasZlibWrapper: ${hasZlibWrapper}`
-        );
+        // Try multiple decompression strategies
+        let decompressedArray: Uint8Array | null = null;
+        let lastError: Error | null = null;
 
-        // Try raw deflate first (PKZIP style - no zlib wrapper)
-        let decompressedArray: Uint8Array;
+        // Strategy 1: Try raw deflate (PKZIP style - no zlib wrapper)
         try {
-          console.log('[ZlibDecompressor] Trying inflateRaw (PKZIP/raw DEFLATE)...');
           decompressedArray = pako.inflateRaw(compressedArray);
-          console.log(
-            `[ZlibDecompressor] ✅ inflateRaw succeeded: ${decompressedArray.byteLength} bytes`
-          );
         } catch (rawError) {
-          // If raw deflate fails, try with zlib wrapper
-          const rawErrorMsg = rawError instanceof Error ? rawError.message : String(rawError);
-          console.log(`[ZlibDecompressor] ❌ inflateRaw failed: ${rawErrorMsg}`);
-          console.log('[ZlibDecompressor] Trying inflate (with ZLIB wrapper)...');
-          decompressedArray = pako.inflate(compressedArray);
-          console.log(
-            `[ZlibDecompressor] ✅ inflate succeeded: ${decompressedArray.byteLength} bytes`
-          );
+          lastError = rawError instanceof Error ? rawError : new Error(String(rawError));
+
+          // Strategy 2: Try with zlib wrapper
+          try {
+            decompressedArray = pako.inflate(compressedArray);
+          } catch (zlibError) {
+            lastError = zlibError instanceof Error ? zlibError : new Error(String(zlibError));
+
+            // Strategy 3: Try skipping potential header bytes
+            if (compressedArray.length > 2) {
+              try {
+                decompressedArray = pako.inflateRaw(compressedArray.slice(2));
+              } catch (headerError) {
+                lastError =
+                  headerError instanceof Error ? headerError : new Error(String(headerError));
+              }
+            }
+          }
+        }
+
+        if (!decompressedArray) {
+          throw lastError || new Error('All decompression strategies failed');
         }
 
         // Verify decompressed size
@@ -73,6 +78,7 @@ export class ZlibDecompressor implements IDecompressor {
           decompressedArray.byteOffset + decompressedArray.byteLength
         ) as ArrayBuffer;
       } catch (error) {
+        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`[ZlibDecompressor] ❌ Decompression failed: ${errorMsg}`);
         throw new Error(`ZLIB decompression failed: ${errorMsg}`);

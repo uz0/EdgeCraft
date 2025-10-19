@@ -22,17 +22,7 @@ import {
   getTimeoutForMap,
 } from './test-helpers';
 
-// Skip tests if running in CI without WebGL support
-const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-
-if (isCI) {
-  describe.skip('Format Standards Compliance (skipped in CI)', () => {
-    it('requires WebGL support', () => {
-      // Placeholder test
-    });
-  });
-} else {
-  describe('Format Standards Compliance', () => {
+describe('Format Standards Compliance', () => {
     let extractor: MapPreviewExtractor;
 
     beforeAll(() => {
@@ -285,7 +275,7 @@ if (isCI) {
           // 1. Load map file
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('sc2map');
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           // 2. Extract preview (will generate terrain since SC2 embedded extraction not implemented)
           const result = await extractor.extract(file, mapData);
@@ -312,7 +302,7 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('sc2map');
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           const result = await extractor.extract(file, mapData);
           expect(result.success).toBe(true);
@@ -350,7 +340,7 @@ if (isCI) {
           try {
             const file = await loadMapFile(map.name);
             const loader = getLoaderForFormat('sc2map');
-            const mapData = await loader.load(file);
+            const mapData = await loader.parse(file);
 
             const result = await extractor.extract(file, mapData);
 
@@ -389,15 +379,15 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('w3n');
-          const campaignData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
-          expect(campaignData).toBeDefined();
-          expect(campaignData.maps).toBeDefined();
-          expect(campaignData.maps.length).toBeGreaterThan(0);
+          expect(mapData).toBeDefined();
+          // W3NCampaignLoader returns the first map as RawMapData, not an array
+          expect(mapData.format).toBe('w3n');
+          expect(mapData.terrain).toBeDefined();
 
-          // Extract campaign preview (from first map)
-          const firstMap = campaignData.maps[0];
-          const result = await extractor.extract(file, firstMap!);
+          // Extract campaign preview (from map data)
+          const result = await extractor.extract(file, mapData);
 
           expect(result.success).toBe(true);
           expect(result.dataUrl).toBeDefined();
@@ -414,15 +404,18 @@ if (isCI) {
 
     describe('Multi-Map Support', () => {
       it.each(MAP_INVENTORY.w3n)(
-        'should validate campaign contains multiple maps for $name',
+        'should validate campaign loads first map for $name',
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('w3n');
-          const campaignData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
-          expect(campaignData.maps.length).toBeGreaterThan(0);
+          // W3NCampaignLoader returns the first map in the campaign
+          expect(mapData).toBeDefined();
+          expect(mapData.format).toBe('w3n');
+          expect(mapData.terrain).toBeDefined();
 
-          console.log(`✅ ${name}: Contains ${campaignData.maps.length} maps`);
+          console.log(`✅ ${name}: First map loaded successfully`);
         },
         getTimeoutForMap(MAP_INVENTORY.w3n[0]?.name || 'default')
       );
@@ -461,5 +454,4 @@ if (isCI) {
       console.log(`    - Square requirement enforced: ${summary.sc2.squareRequired}`);
     });
   });
-  });
-}
+});

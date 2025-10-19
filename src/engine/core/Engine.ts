@@ -91,8 +91,6 @@ export class EdgeCraftEngine implements IEngineCore {
       targetFPS: 60,
       initialQuality: QualityPreset.HIGH,
     });
-
-    console.log('Optimized render pipeline initialized');
   }
 
   /**
@@ -118,7 +116,6 @@ export class EdgeCraftEngine implements IEngineCore {
     });
 
     this._canvas.addEventListener('webglcontextrestored', () => {
-      console.log('WebGL context restored');
       if (this._state.isRunning) {
         this.startRenderLoop();
       }
@@ -207,7 +204,5 @@ export class EdgeCraftEngine implements IEngineCore {
 
     // Dispose engine
     this._engine.dispose();
-
-    console.log('Edge Craft engine disposed');
   }
 }

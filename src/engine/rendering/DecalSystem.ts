@@ -110,7 +110,8 @@ export class DecalSystem {
   private decals: Map<string, DecalInstance> = new Map();
   private maxDecals: number;
   private nextDecalId: number = 0;
-  // @ts-expect-error - Reserved for future mesh targeting implementation
+  // @ts-ignore - Reserved for future mesh targeting implementation
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   private _targetMeshes: BABYLON.AbstractMesh[] = [];
 
   constructor(scene: BABYLON.Scene, config: { quality: QualityPreset }) {
@@ -119,8 +120,6 @@ export class DecalSystem {
 
     // Set limits based on quality
     this.maxDecals = this.getMaxDecals(config.quality);
-
-    console.log(`Decal system initialized (max ${this.maxDecals} decals)`);
   }
 
   /**
@@ -146,7 +145,6 @@ export class DecalSystem {
    */
   public setTargetMeshes(meshes: BABYLON.AbstractMesh[]): void {
     this._targetMeshes = meshes;
-    console.log(`Decal target meshes set: ${meshes.length} meshes`);
   }
 
   /**
@@ -211,8 +209,6 @@ export class DecalSystem {
       lifetime: config.lifetime ?? 0,
       isFading: false,
     });
-
-    console.log(`Created ${config.type} decal: ${decalId}`);
     return decalId;
   }
 
@@ -268,8 +264,6 @@ export class DecalSystem {
 
     decal.mesh.dispose();
     this.decals.delete(decalId);
-
-    console.log(`Decal removed: ${decalId}`);
   }
 
   /**
@@ -322,9 +316,6 @@ export class DecalSystem {
     if (quality === this.quality) {
       return;
     }
-
-    console.log(`Updating decal quality: ${this.quality} → ${quality}`);
-
     const newMaxDecals = this.getMaxDecals(quality);
     this.quality = quality;
     this.maxDecals = newMaxDecals;
@@ -366,7 +357,6 @@ export class DecalSystem {
       decal.mesh.dispose();
     }
     this.decals.clear();
-    console.log('All decals cleared');
   }
 
   /**
@@ -374,6 +364,5 @@ export class DecalSystem {
    */
   public dispose(): void {
     this.clearAll();
-    console.log('Decal system disposed');
   }
 }

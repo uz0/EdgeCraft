@@ -17,17 +17,7 @@ import * as path from 'path';
 // Test timeout for large maps
 jest.setTimeout(60000); // 60 seconds per test
 
-// Skip tests if running in CI without WebGL support
-const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-
-if (isCI) {
-  describe.skip('Integration: All Maps Preview Validation (skipped in CI)', () => {
-    it('requires WebGL support', () => {
-      // Placeholder test
-    });
-  });
-} else {
-  describe('Integration: All Maps Preview Validation', () => {
+describe('Integration: All Maps Preview Validation', () => {
     const mapsDir = path.join(__dirname, '../../maps');
     let extractor: MapPreviewExtractor;
 
@@ -141,7 +131,8 @@ if (isCI) {
           mapFile = new File([buffer], mapName, { type: 'application/octet-stream' });
 
           try {
-            mapData = await W3XMapLoader.load(mapFile);
+            const loader = new W3XMapLoader();
+            mapData = await loader.parse(mapFile);
           } catch (error) {
             console.error(`Failed to load ${mapName}:`, error);
           }
@@ -479,5 +470,4 @@ if (isCI) {
       console.log('='.repeat(50) + '\n');
     });
   });
-  });
-}
+});

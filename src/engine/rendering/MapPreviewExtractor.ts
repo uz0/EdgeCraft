@@ -6,7 +6,6 @@
  */
 
 import { MPQParser } from '../../formats/mpq/MPQParser';
-import { StormJSAdapter } from '../../formats/mpq/StormJSAdapter';
 import { TGADecoder } from './TGADecoder';
 import { MapPreviewGenerator } from './MapPreviewGenerator';
 import type { RawMapData } from '../../formats/maps/types';
@@ -100,6 +99,8 @@ export class MapPreviewExtractor {
   /**
    * Find and extract TGA files by scanning block table (fallback when listfile fails)
    * Useful for W3N campaigns where nested W3X archives may have corrupted/encrypted listfiles
+   *
+   * This method checks compression flags BEFORE attempting extraction to skip ADPCM/SPARSE files
    */
   private async findTGAByBlockScan(parser: MPQParser): Promise<ArrayBuffer | null> {
     const archive = parser['archive']; // Access private property
@@ -107,14 +108,46 @@ export class MapPreviewExtractor {
       return null;
     }
 
+    const buffer = parser['buffer']; // Access buffer to read compression flags
+
     // Look for files that might be TGA files (reasonable size for preview images)
     const candidates = archive.blockTable
       .map((block, index) => ({ block, index }))
       .filter(({ block }) => {
         const exists = (block.flags & 0x80000000) !== 0;
+        const isCompressed = (block.flags & 0x00000200) !== 0;
+        const isEncrypted = (block.flags & 0x00010000) !== 0;
         const size = block.uncompressedSize;
+
         // TGA previews are typically 50KB-2MB (128x128 to 512x512, 32-bit)
         const isReasonableSize = size > 10000 && size < 3000000;
+
+        // Skip encrypted files (can't extract without filename)
+        if (isEncrypted) return false;
+
+        // If compressed, check compression flags to skip ADPCM/SPARSE
+        if (isCompressed && buffer) {
+          try {
+            const rawData = buffer.slice(
+              block.filePos,
+              block.filePos + Math.min(10, block.compressedSize)
+            );
+            const firstByte = new DataView(rawData).getUint8(0);
+
+            // Check for ADPCM/SPARSE flags (0x20, 0x40, 0x80)
+            const hasADPCM = (firstByte & 0x40) !== 0 || (firstByte & 0x80) !== 0;
+            const hasSPARSE = (firstByte & 0x20) !== 0;
+
+            // Skip files with audio compression
+            if (hasADPCM || hasSPARSE) {
+              return false;
+            }
+          } catch (err) {
+            // If we can't read the compression flags, skip this file
+            return false;
+          }
+        }
+
         return exists && isReasonableSize;
       })
       .sort((a, b) => b.block.uncompressedSize - a.block.uncompressedSize); // Largest first
@@ -132,7 +165,12 @@ export class MapPreviewExtractor {
           return fileData.data;
         }
       } catch (error) {
-        console.warn(`[MapPreviewExtractor] Failed to check block ${index}:`, error);
+        // eslint-disable-line no-empty
+        // Log but continue - might be wrong compression detection
+        const errMsg = error instanceof Error ? error.message : String(error);
+        if (!errMsg.includes('ADPCM') && !errMsg.includes('SPARSE')) {
+          console.warn(`[MapPreviewExtractor] Failed to check block ${index}:`, errMsg);
+        }
         continue;
       }
     }
@@ -152,40 +190,24 @@ export class MapPreviewExtractor {
     options?: ExtractOptions
   ): Promise<ExtractResult> {
     const startTime = performance.now();
-    console.log(`[MapPreviewExtractor] 🎬 Starting extraction for: ${file.name}`);
-
     try {
       // Skip embedded extraction if forced generation
       if (!options?.forceGenerate) {
         // Try extracting embedded preview
-        console.log(`[MapPreviewExtractor] 🔍 Attempting embedded extraction for: ${file.name}`);
         const embedStart = performance.now();
         const embeddedResult = await this.extractEmbedded(file, mapData.format);
         const embedTime = performance.now() - embedStart;
-        console.log(
-          `[MapPreviewExtractor] ⏱️ Embedded extraction took ${embedTime.toFixed(0)}ms for: ${file.name}`
-        );
-
         if (embeddedResult.success && embeddedResult.dataUrl) {
-          console.log(
-            `[MapPreviewExtractor] ✅ Successfully extracted embedded preview for: ${file.name} (${embedTime.toFixed(0)}ms)`
-          );
           return {
             ...embeddedResult,
             source: 'embedded',
             extractTimeMs: performance.now() - startTime,
           };
         }
-        console.log(
-          `[MapPreviewExtractor] ⚠️ No embedded preview found, falling back to generation for: ${file.name}`
-        );
       }
 
       // If extractOnly mode, skip generation
       if (options?.extractOnly) {
-        console.log(
-          `[MapPreviewExtractor] ⏭️ Extract-only mode: skipping generation for: ${file.name}`
-        );
         return {
           success: false,
           source: 'error',
@@ -195,22 +217,14 @@ export class MapPreviewExtractor {
       }
 
       // Fallback: Generate preview from map data
-      console.log(`[MapPreviewExtractor] 🎨 Generating preview from map data for: ${file.name}`);
       const genStart = performance.now();
       const generatedResult = await this.previewGenerator.generatePreview(mapData, {
         width: options?.width,
         height: options?.height,
       });
       const genTime = performance.now() - genStart;
-      console.log(
-        `[MapPreviewExtractor] ⏱️ Preview generation took ${genTime.toFixed(0)}ms for: ${file.name}`
-      );
-
       if (generatedResult.success && generatedResult.dataUrl) {
         const totalTime = performance.now() - startTime;
-        console.log(
-          `[MapPreviewExtractor] ✅ Successfully generated preview for: ${file.name} (total: ${totalTime.toFixed(0)}ms)`
-        );
         return {
           success: true,
           dataUrl: generatedResult.dataUrl,
@@ -226,6 +240,7 @@ export class MapPreviewExtractor {
         extractTimeMs: performance.now() - startTime,
       };
     } catch (error) {
+      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       const totalTime = performance.now() - startTime;
       console.error(
@@ -258,37 +273,26 @@ export class MapPreviewExtractor {
         const mpqResult = mpqParser.parse();
         if (mpqResult.success && mpqResult.archive) {
           // FIRST: Try to extract campaign preview from OUTER W3N archive
-          console.log(
-            `[MapPreviewExtractor] 🔍 Checking outer W3N archive for campaign preview...`
-          );
           for (const fileName of MapPreviewExtractor.W3N_CAMPAIGN_PREVIEW_FILES) {
             const previewData = await mpqParser.extractFile(fileName);
             if (previewData) {
-              const dataUrl = this.tgaDecoder.decodeToDataURL(previewData.data);
+              const dataUrl = await this.tgaDecoder.decodeToDataURL(previewData.data);
               if (dataUrl) {
-                console.log(
-                  `[MapPreviewExtractor] ✅ Found campaign preview in outer archive: ${fileName}`
-                );
                 return { success: true, dataUrl };
               }
             }
           }
-          console.log(
-            `[MapPreviewExtractor] ⚠️ No campaign preview in outer archive, checking nested W3X maps...`
-          );
-
           // SECOND: Find embedded .w3x files in the block table
           const blockTable = mpqResult.archive.blockTable;
-          // Log first few blocks for debugging
-          // Try to extract files that might be W3X maps
-          // W3N campaigns typically have files at specific positions
-          // We'll try the largest files (likely to be W3X maps)
+          // W3N campaigns store maps in insertion order (Chapter01, Chapter02, etc.)
+          // We extract the FIRST W3X map found (should be Chapter 1), not the largest
           const largeFiles = blockTable
             .map((block, index) => ({ block, index }))
-            .filter(({ block }) => block.compressedSize > 100000) // W3X maps are at least 100KB compressed
-            .sort((a, b) => b.block.compressedSize - a.block.compressedSize);
-          for (const { index } of largeFiles.slice(0, 5)) {
-            // Try first 5 large files
+            .filter(({ block }) => block.compressedSize > 100000); // W3X maps are at least 100KB compressed
+          // NO SORT - preserve insertion order (campaign chapter order)
+          for (let i = 0; i < Math.min(largeFiles.length, 10); i++) {
+            // Try first 10 large files (campaigns can have many maps)
+            const { index, block } = largeFiles[i]!;
             try {
               // Extract by block index (we don't know the filename)
               const blockData = await mpqParser.extractFileByIndex(index);
@@ -331,18 +335,23 @@ export class MapPreviewExtractor {
 
                   // If we found TGA data, try to decode it
                   if (tgaData) {
-                    const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
+                    const dataUrl = await this.tgaDecoder.decodeToDataURL(tgaData);
 
                     if (dataUrl) {
                       return { success: true, dataUrl };
                     } else {
+                      console.warn(`[MapPreviewExtractor] ⚠️ File #${i + 1}: TGA decode failed`);
                     }
                   } else {
+                    console.warn(
+                      `[MapPreviewExtractor] ⚠️ File #${i + 1}: No TGA preview found in W3X`
+                    );
                   }
                 }
               } else {
               }
             } catch (error) {
+              // eslint-disable-line no-empty
               const errorMsg = error instanceof Error ? error.message : String(error);
               console.error(
                 `[MapPreviewExtractor] W3N: ❌ Failed to extract block ${index}:`,
@@ -354,6 +363,7 @@ export class MapPreviewExtractor {
         } else {
         }
       } catch (error) {
+        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`[MapPreviewExtractor] W3N extraction failed:`, errorMsg);
         // Fall through to generation fallback
@@ -369,79 +379,57 @@ export class MapPreviewExtractor {
         ? MapPreviewExtractor.SC2_PREVIEW_FILES
         : MapPreviewExtractor.W3X_PREVIEW_FILES;
 
-    // Try MPQParser first (faster, pure TypeScript)
+    // Try MPQParser with block scanning (bypasses ADPCM/SPARSE compression issues)
     try {
       const mpqParser = new MPQParser(buffer);
       const mpqResult = mpqParser.parse();
 
       if (mpqResult.success && mpqResult.archive) {
-        // Try each preview file name
         let tgaData: ArrayBuffer | null = null;
-        for (const fileName of previewFiles) {
-          const fileData = await mpqParser.extractFile(fileName);
 
-          if (fileData) {
-            tgaData = fileData.data;
-            break;
-          }
+        // For W3X maps, skip filename-based extraction (often fails due to ADPCM/SPARSE)
+        // Go straight to block scanning which looks for TGA headers
+        if (format !== 'sc2map') {
+          tgaData = await this.findTGAByBlockScan(mpqParser);
         }
 
-        // If filename-based extraction failed, try block scanning
-        if (!tgaData && format !== 'sc2map') {
-          // Only for W3X maps (SC2 maps have more reliable listfiles)
-          tgaData = await this.findTGAByBlockScan(mpqParser);
+        // SC2 maps: try filename first (more reliable), then block scan
+        if (!tgaData && format === 'sc2map') {
+          for (const fileName of previewFiles) {
+            try {
+              const fileData = await mpqParser.extractFile(fileName);
+              if (fileData) {
+                tgaData = fileData.data;
+                break;
+              }
+            } catch (err) {
+              // ADPCM/SPARSE error - skip this file
+              const errMsg = err instanceof Error ? err.message : String(err);
+              if (errMsg.includes('ADPCM') || errMsg.includes('SPARSE')) {
+                continue;
+              }
+              throw err; // Re-throw other errors
+            }
+          }
+
+          // Fallback to block scanning for SC2
+          if (!tgaData) {
+            tgaData = await this.findTGAByBlockScan(mpqParser);
+          }
         }
 
         // If we found TGA data, decode it
         if (tgaData) {
-          const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
+          const dataUrl = await this.tgaDecoder.decodeToDataURL(tgaData);
           if (dataUrl) {
             return { success: true, dataUrl };
           }
         }
       }
     } catch (error) {
+      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.warn(`[MapPreviewExtractor] MPQParser failed: ${errorMsg}`);
-
-      // Check if this is a decompression error (Huffman, ZLIB, PKZIP, etc.)
-      const isDecompressionError =
-        errorMsg.includes('Huffman') ||
-        errorMsg.includes('Invalid distance') ||
-        errorMsg.includes('ZLIB') ||
-        errorMsg.includes('PKZIP') ||
-        errorMsg.includes('decompression') ||
-        errorMsg.includes('unknown compression method') ||
-        errorMsg.includes('incorrect header check');
-
-      if (isDecompressionError) {
-        // Try StormJS adapter as fallback
-        try {
-          const isStormJSAvailable = await StormJSAdapter.isAvailable();
-
-          if (isStormJSAvailable) {
-            for (const fileName of previewFiles) {
-              const result = await StormJSAdapter.extractFile(buffer, fileName);
-
-              if (result.success && result.data) {
-                // Decode TGA to data URL
-                const dataUrl = this.tgaDecoder.decodeToDataURL(result.data);
-
-                if (dataUrl) {
-                  return { success: true, dataUrl };
-                }
-              }
-            }
-          } else {
-            console.warn('[MapPreviewExtractor] StormJS not available');
-          }
-        } catch (stormError) {
-          console.error(
-            '[MapPreviewExtractor] StormJS fallback failed:',
-            stormError instanceof Error ? stormError.message : String(stormError)
-          );
-        }
-      }
+      console.warn(`[MapPreviewExtractor] MPQParser extraction failed: ${errorMsg}`);
     }
 
     return {

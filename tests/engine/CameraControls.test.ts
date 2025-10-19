@@ -8,7 +8,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { CameraControls } from '@/engine/camera/CameraControls';
 
-describe.skip('CameraControls', () => {
+describe('CameraControls', () => {
   let canvas: HTMLCanvasElement;
   let engine: BABYLON.Engine;
   let scene: BABYLON.Scene;

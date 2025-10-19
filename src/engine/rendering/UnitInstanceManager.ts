@@ -214,8 +214,6 @@ export class UnitInstanceManager {
    */
   private growBuffers(): void {
     const newCapacity = Math.max(this.capacity * 2, 100);
-    console.log(`Growing instance buffers: ${this.capacity} -> ${newCapacity} units`);
-
     const oldMatrixBuffer = this.matrixBuffer;
     const oldColorBuffer = this.colorBuffer;
     const oldAnimBuffer = this.animBuffer;

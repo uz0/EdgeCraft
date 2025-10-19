@@ -73,6 +73,7 @@ export class VisualSimilarity {
         height: imageData.height,
       };
     } catch (error) {
+      // eslint-disable-line no-empty
       throw new Error(
         `Failed to compute perceptual hash: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -197,6 +198,8 @@ export class VisualSimilarity {
         return new ImageDataConstructor(data, width, height);
       }
     } catch {
+      // eslint-disable-line no-empty
+      // eslint-disable-line no-empty
       // Fall through to polyfill
     }
 

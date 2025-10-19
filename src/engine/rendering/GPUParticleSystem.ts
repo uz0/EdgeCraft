@@ -143,10 +143,6 @@ export class AdvancedParticleSystem {
 
     // Check GPU support
     this.useGPU = BABYLON.GPUParticleSystem.IsSupported;
-
-    console.log(
-      `Particle system initialized (${this.useGPU ? 'GPU' : 'CPU'}, max ${this.maxParticles} particles, ${this.maxConcurrentEffects} effects)`
-    );
   }
 
   /**
@@ -203,8 +199,6 @@ export class AdvancedParticleSystem {
 
     // Start emitting
     system.start();
-
-    console.log(`Created ${config.type} effect: ${effectId} (${this.useGPU ? 'GPU' : 'CPU'})`);
     return effectId;
   }
 
@@ -389,8 +383,6 @@ export class AdvancedParticleSystem {
     effect.system.stop();
     effect.system.dispose();
     this.effects.delete(effectId);
-
-    console.log(`Effect removed: ${effectId}`);
   }
 
   /**
@@ -414,9 +406,6 @@ export class AdvancedParticleSystem {
     if (quality === this.quality) {
       return;
     }
-
-    console.log(`Updating particle quality: ${this.quality} → ${quality}`);
-
     const newLimits = this.getQualityLimits(quality);
     this.quality = quality;
     this.maxParticles = newLimits.maxParticles;
@@ -474,6 +463,5 @@ export class AdvancedParticleSystem {
       effect.system.dispose();
     }
     this.effects.clear();
-    console.log('Particle system disposed');
   }
 }

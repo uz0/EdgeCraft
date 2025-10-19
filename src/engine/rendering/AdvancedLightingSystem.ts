@@ -13,6 +13,7 @@
 
 import * as BABYLON from '@babylonjs/core';
 import { QualityPreset } from './types';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 /**
  * Light configuration
@@ -121,10 +122,6 @@ export class AdvancedLightingSystem {
     const limits = this.getQualityLimits(config.quality);
     this.maxPointLights = limits.pointLights;
     this.maxSpotLights = limits.spotLights;
-
-    console.log(
-      `Advanced lighting initialized (max ${this.maxPointLights} point, ${this.maxSpotLights} spot lights)`
-    );
   }
 
   /**
@@ -179,8 +176,6 @@ export class AdvancedLightingSystem {
     pooled.lastUpdate = Date.now();
 
     this.lightPool.set(lightId, pooled);
-
-    console.log(`Created ${config.type} light: ${lightId}`);
     return lightId;
   }
 
@@ -276,7 +271,6 @@ export class AdvancedLightingSystem {
       pooled.shadowGenerator = new BABYLON.ShadowGenerator(shadowMapSize, light);
       pooled.shadowGenerator.useBlurExponentialShadowMap = true;
       pooled.shadowGenerator.blurKernel = 32;
-      console.log(`Shadow generator created for light (${shadowMapSize}x${shadowMapSize})`);
     } else if (config.castShadows === false && pooled.shadowGenerator != null) {
       pooled.shadowGenerator.dispose();
       pooled.shadowGenerator = undefined;
@@ -311,8 +305,6 @@ export class AdvancedLightingSystem {
 
     pooled.inUse = false;
     pooled.light.setEnabled(false);
-
-    console.log(`Light removed: ${lightId}`);
   }
 
   /**
@@ -336,9 +328,6 @@ export class AdvancedLightingSystem {
 
         if (light.isEnabled() !== shouldEnable) {
           light.setEnabled(shouldEnable);
-          console.log(
-            `Light ${lightId} ${shouldEnable ? 'enabled' : 'disabled'} (distance: ${Math.round(distance)})`
-          );
         }
       }
     }
@@ -382,9 +371,6 @@ export class AdvancedLightingSystem {
     if (quality === this.quality) {
       return;
     }
-
-    console.log(`Updating lighting quality: ${this.quality} → ${quality}`);
-
     const oldLimits = this.getQualityLimits(this.quality);
     const newLimits = this.getQualityLimits(quality);
 
@@ -475,6 +461,5 @@ export class AdvancedLightingSystem {
       pooled.light.dispose();
     }
     this.lightPool.clear();
-    console.log('Advanced lighting system disposed');
   }
 }

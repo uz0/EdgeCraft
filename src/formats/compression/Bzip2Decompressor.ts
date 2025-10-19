@@ -44,10 +44,6 @@ if (typeof Buffer === 'undefined') {
   // Install the polyfill globally
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   (globalThis as any).Buffer = BufferPolyfill;
-
-  console.log(
-    '[Bzip2Decompressor] Buffer polyfill installed for browser environment (with constructor support)'
-  );
 }
 
 import Bunzip from 'seek-bzip';
@@ -84,6 +80,7 @@ export class Bzip2Decompressor implements IDecompressor {
           decompressedArray.byteOffset + decompressedArray.byteLength
         ) as ArrayBuffer;
       } catch (error) {
+        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('[Bzip2Decompressor] Decompression failed:', errorMsg);
         throw new Error(`BZip2 decompression failed: ${errorMsg}`);

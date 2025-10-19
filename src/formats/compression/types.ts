@@ -14,6 +14,8 @@ export enum CompressionAlgorithm {
   HUFFMAN = 0x01,
   /** Zlib compression */
   ZLIB = 0x02,
+  /** PKWare DCL Implode compression (legacy) */
+  IMPLODE = 0x04,
   /** PKZIP/Deflate compression */
   PKZIP = 0x08,
   /** BZip2 compression */

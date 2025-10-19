@@ -43,8 +43,8 @@ export default defineConfig({
 
   // Shared settings for all tests
   use: {
-    // Base URL for tests (port 3000 is Vite's default)
-    baseURL: 'http://localhost:3000',
+    // Base URL for tests (port 3001 is current dev server)
+    baseURL: 'http://localhost:3001',
 
     // Screenshot on failure for debugging
     screenshot: 'only-on-failure',
@@ -65,15 +65,15 @@ export default defineConfig({
     navigationTimeout: 60000,
   },
 
-  // Configure Vite dev server
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000', // Port 3000 is Vite's default
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000, // 2 minutes to start
-    stdout: 'pipe', // Log server output for debugging
-    stderr: 'pipe',
-  },
+  // Configure Vite dev server (disabled - use existing dev server)
+  // webServer: {
+  //   command: 'npm run dev',
+  //   url: 'http://localhost:3001',
+  //   reuseExistingServer: !process.env.CI,
+  //   timeout: 120000, // 2 minutes to start
+  //   stdout: 'ignore', // Reduce noise
+  //   stderr: 'pipe',
+  // },
 
   // Test projects for different browsers
   projects: [

@@ -75,9 +75,6 @@ export class InstancedUnitRenderer {
       console.warn(`Unit type already registered: ${unitType}`);
       return;
     }
-
-    console.log(`Registering unit type: ${unitType}`);
-
     // Load mesh
     const result = await BABYLON.SceneLoader.ImportMeshAsync('', meshUrl, '', this.scene);
 
@@ -93,8 +90,6 @@ export class InstancedUnitRenderer {
       const animSystem = new BakedAnimationSystem(this.scene);
       bakedAnimationData = await animSystem.bakeAnimations(mesh, animations);
       this.animationSystems.set(unitType, animSystem);
-
-      console.log(`Baked ${animations.length} animations for ${unitType}`);
     }
 
     // Store unit type data
@@ -128,8 +123,6 @@ export class InstancedUnitRenderer {
         autoGrow: true,
       })
     );
-
-    console.log(`Unit type registered successfully: ${unitType}`);
   }
 
   /**

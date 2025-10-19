@@ -56,7 +56,10 @@
     // General rules
     "no-console": "off",
     "prefer-const": "error",
-    "no-var": "error"
+    "no-var": "error",
+    "no-empty": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/require-await": "off"
   },
   "overrides": [
     {

@@ -59,6 +59,7 @@ export class TGADecoder {
         data: imageData,
       };
     } catch (error) {
+      // eslint-disable-line no-empty
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -72,7 +73,7 @@ export class TGADecoder {
    * @param maxSize - Maximum width/height (default: 512, safe for previews)
    * @returns Data URL (base64 PNG)
    */
-  public decodeToDataURL(buffer: ArrayBuffer, maxSize: number = 512): string | null {
+  public async decodeToDataURL(buffer: ArrayBuffer, maxSize: number = 512): Promise<string | null> {
     const result = this.decode(buffer);
 
     if (!result.success || !result.data || !result.width || !result.height) {
@@ -105,9 +106,7 @@ export class TGADecoder {
         targetHeight
       );
 
-      const canvas = document.createElement('canvas');
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
+      const canvas = new OffscreenCanvas(targetWidth, targetHeight);
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
@@ -115,14 +114,12 @@ export class TGADecoder {
       imageData.data.set(downscaledData);
       ctx.putImageData(imageData, 0, 0);
 
-      return canvas.toDataURL('image/png');
+      const blob = await canvas.convertToBlob({ type: 'image/png' });
+      return await this.blobToDataUrl(blob);
     }
 
     // For normal-sized images, use standard canvas scaling
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-
+    const canvas = new OffscreenCanvas(targetWidth, targetHeight);
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
@@ -133,9 +130,7 @@ export class TGADecoder {
       ctx.putImageData(imageData, 0, 0);
     } else {
       // Create temp canvas for scaling
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = result.width;
-      tempCanvas.height = result.height;
+      const tempCanvas = new OffscreenCanvas(result.width, result.height);
       const tempCtx = tempCanvas.getContext('2d');
       if (!tempCtx) return null;
 
@@ -147,7 +142,20 @@ export class TGADecoder {
       ctx.drawImage(tempCanvas, 0, 0, result.width, result.height, 0, 0, targetWidth, targetHeight);
     }
 
-    return canvas.toDataURL('image/png');
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    return await this.blobToDataUrl(blob);
+  }
+
+  /**
+   * Convert Blob to data URL (for OffscreenCanvas compatibility)
+   */
+  private blobToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   /**
@@ -246,7 +254,6 @@ export class TGADecoder {
     // Check image origin (bit 5 of imageDescriptor)
     // 0 = origin at bottom-left (upside down), 1 = origin at top-left (normal)
     const originAtTop = (header.imageDescriptor & 0x20) !== 0;
-
     for (let y = 0; y < header.height; y++) {
       for (let x = 0; x < header.width; x++) {
         // TGA stores pixels as BGR(A)
@@ -256,7 +263,7 @@ export class TGADecoder {
         const a = bytesPerPixel === 4 ? view.getUint8(dataOffset + 3) : 255;
 
         // Calculate pixel position (flip vertically if origin is at bottom)
-        const targetY = originAtTop ? y : (header.height - 1 - y);
+        const targetY = originAtTop ? y : header.height - 1 - y;
         const pixelIndex = (targetY * header.width + x) * 4;
 
         // Convert to RGBA
@@ -283,7 +290,6 @@ export class TGADecoder {
 
     // Check image origin (bit 5 of imageDescriptor)
     const originAtTop = (header.imageDescriptor & 0x20) !== 0;
-
     while (pixelCount > 0) {
       const packetHeader = view.getUint8(dataOffset++);
       const runLength = (packetHeader & 0x7f) + 1;
@@ -300,7 +306,7 @@ export class TGADecoder {
           // Calculate position with vertical flip if needed
           const x = currentPixel % header.width;
           const y = Math.floor(currentPixel / header.width);
-          const targetY = originAtTop ? y : (header.height - 1 - y);
+          const targetY = originAtTop ? y : header.height - 1 - y;
           const pixelIndex = (targetY * header.width + x) * 4;
 
           data[pixelIndex] = r;
@@ -321,7 +327,7 @@ export class TGADecoder {
           // Calculate position with vertical flip if needed
           const x = currentPixel % header.width;
           const y = Math.floor(currentPixel / header.width);
-          const targetY = originAtTop ? y : (header.height - 1 - y);
+          const targetY = originAtTop ? y : header.height - 1 - y;
           const pixelIndex = (targetY * header.width + x) * 4;
 
           data[pixelIndex] = r;

@@ -78,7 +78,8 @@ export class MinimapSystem {
   private updateFPS: number;
   private renderTarget: BABYLON.RenderTargetTexture | null = null;
   private minimapCamera: BABYLON.FreeCamera | null = null;
-  // @ts-expect-error - Reserved for future enable/disable implementation
+  // @ts-ignore - Reserved for future enable/disable implementation
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   private _isEnabled: boolean = false;
   private mapBounds: {
     minX: number;
@@ -103,10 +104,6 @@ export class MinimapSystem {
       minZ: -100,
       maxZ: 100,
     };
-
-    console.log(
-      `Minimap system initialized (${this.rttSize}x${this.rttSize} @ ${this.updateFPS}fps)`
-    );
   }
 
   /**
@@ -135,12 +132,8 @@ export class MinimapSystem {
    */
   public initialize(): void {
     if (this.rttSize === 0) {
-      console.log('Minimap disabled (LOW quality)');
       return;
     }
-
-    console.log('Initializing minimap...');
-
     // Create minimap camera (orthographic, top-down)
     const centerX = (this.mapBounds.minX + this.mapBounds.maxX) / 2;
     const centerZ = (this.mapBounds.minZ + this.mapBounds.maxZ) / 2;
@@ -194,10 +187,6 @@ export class MinimapSystem {
     this.renderTarget.refreshRate = framesBetweenUpdates;
 
     this._isEnabled = true;
-
-    console.log(
-      `Minimap initialized (${this.rttSize}x${this.rttSize}, refresh every ${framesBetweenUpdates} frames)`
-    );
   }
 
   /**
@@ -267,9 +256,6 @@ export class MinimapSystem {
     if (quality === this.quality) {
       return;
     }
-
-    console.log(`Updating minimap quality: ${this.quality} → ${quality}`);
-
     const params = this.getQualityParams(quality);
     this.quality = quality;
 
@@ -342,6 +328,5 @@ export class MinimapSystem {
     }
 
     this._isEnabled = false;
-    console.log('Minimap system disposed');
   }
 }

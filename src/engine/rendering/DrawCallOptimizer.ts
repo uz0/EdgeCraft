@@ -57,9 +57,6 @@ export class DrawCallOptimizer {
     });
 
     if (staticMeshes.length < this.config.minMeshesForMerge) {
-      console.log(
-        `Skipping merge: only ${staticMeshes.length} static meshes (min: ${this.config.minMeshesForMerge})`
-      );
       return { mesh: null, sourceCount: 0, drawCallsSaved: 0 };
     }
 
@@ -161,6 +158,7 @@ export class DrawCallOptimizer {
 
       return mergedMesh;
     } catch (error) {
+      // eslint-disable-line no-empty
       console.error(`Failed to merge group ${materialKey}:`, error);
       return null;
     }

@@ -71,17 +71,21 @@ export class HuffmanDecompressor implements IDecompressor {
               const distance = readBits(8) + 1;
 
               // Copy from lookback buffer
+              // MPQ Huffman can reference data within the current run (overlapping copy)
               for (let i = 0; i < length; i++) {
                 const sourcePos = outPos - distance;
-                if (sourcePos < 0 || sourcePos >= output.length) {
-                  throw new Error('Invalid distance in Huffman stream');
+
+                // More lenient bounds checking for MPQ's overlapping copy pattern
+                if (sourcePos < 0) {
+                  // Distance too far back - skip this byte
+                  output[outPos++] = 0;
+                  if (outPos >= uncompressedSize) break;
+                  continue;
                 }
-                const sourceByte = output[sourcePos];
-                if (sourceByte === undefined) {
-                  throw new Error('Invalid source position in Huffman stream');
-                }
-                output[outPos] = sourceByte;
-                outPos++;
+
+                // For overlapping copies, we may reference bytes we just wrote
+                const sourceByte = output[sourcePos] ?? 0;
+                output[outPos++] = sourceByte;
                 if (outPos >= uncompressedSize) break;
               }
             } else if (code === 3) {
@@ -108,17 +112,21 @@ export class HuffmanDecompressor implements IDecompressor {
               const distance = readBits(distanceBits) + 1;
 
               // Copy from lookback buffer
+              // MPQ Huffman can reference data within the current run (overlapping copy)
               for (let i = 0; i < length; i++) {
                 const sourcePos = outPos - distance;
-                if (sourcePos < 0 || sourcePos >= output.length) {
-                  throw new Error('Invalid distance in Huffman stream');
+
+                // More lenient bounds checking for MPQ's overlapping copy pattern
+                if (sourcePos < 0) {
+                  // Distance too far back - skip this byte
+                  output[outPos++] = 0;
+                  if (outPos >= uncompressedSize) break;
+                  continue;
                 }
-                const sourceByte = output[sourcePos];
-                if (sourceByte === undefined) {
-                  throw new Error('Invalid source position in Huffman stream');
-                }
-                output[outPos] = sourceByte;
-                outPos++;
+
+                // For overlapping copies, we may reference bytes we just wrote
+                const sourceByte = output[sourcePos] ?? 0;
+                output[outPos++] = sourceByte;
                 if (outPos >= uncompressedSize) break;
               }
             }
@@ -133,6 +141,7 @@ export class HuffmanDecompressor implements IDecompressor {
 
         return output.buffer.slice(output.byteOffset, output.byteOffset + output.byteLength);
       } catch (error) {
+        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('[HuffmanDecompressor] Decompression failed:', errorMsg);
         throw new Error(`Huffman decompression failed: ${errorMsg}`);

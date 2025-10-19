@@ -1,0 +1,108 @@
+/**
+ * Loading Spinner Styles
+ *
+ * Discord-style spinner with funny messages
+ */
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 16px;
+  padding: 24px;
+}
+
+/* Spinner circle */
+.spinner-circle {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.spinner-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(88, 101, 242, 0.1); /* Discord blurple */
+  border-top-color: rgb(88, 101, 242);
+  border-radius: 50%;
+  animation: spinner-spin 1s linear infinite;
+}
+
+@keyframes spinner-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading message */
+.loading-message {
+  font-size: 14px;
+  color: #4f5660;
+  text-align: center;
+  max-width: 200px;
+  animation: loading-message-fade 0.3s ease-in-out;
+}
+
+@keyframes loading-message-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress bar */
+.loading-progress-bar {
+  width: 100%;
+  max-width: 200px;
+  height: 4px;
+  background: rgba(88, 101, 242, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5865f2, #7289da);
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+  animation: loading-progress-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-progress-shimmer {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .loading-message {
+    color: #b9bbbe;
+  }
+
+  .spinner-inner {
+    border-color: rgba(88, 101, 242, 0.2);
+    border-top-color: rgb(88, 101, 242);
+  }
+
+  .loading-progress-bar {
+    background: rgba(88, 101, 242, 0.2);
+  }
+}

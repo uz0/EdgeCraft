@@ -30,17 +30,7 @@ import {
   createMockMapData,
 } from './test-helpers';
 
-// Skip tests if running in CI without WebGL support
-const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-
-if (isCI) {
-  describe.skip('All Map Preview Combinations - Comprehensive Test Suite (skipped in CI)', () => {
-    it('requires WebGL support', () => {
-      // Placeholder test
-    });
-  });
-} else {
-  describe('All Map Preview Combinations - Comprehensive Test Suite', () => {
+describe('All Map Preview Combinations - Comprehensive Test Suite', () => {
     let extractor: MapPreviewExtractor;
     let generator: MapPreviewGenerator;
     let tgaDecoder: TGADecoder;
@@ -70,7 +60,7 @@ if (isCI) {
           const file = await loadMapFile(name);
           const format = getFormat(name);
           const loader = getLoaderForFormat(format);
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           // Attempt extraction WITHOUT forcing generation
           const result = await extractor.extract(file, mapData, { forceGenerate: false });
@@ -99,7 +89,7 @@ if (isCI) {
           const file = await loadMapFile(name);
           const format = getFormat(name);
           const loader = getLoaderForFormat(format);
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           // Force terrain generation (bypass embedded extraction)
           const result = await extractor.extract(file, mapData, { forceGenerate: true });
@@ -126,7 +116,7 @@ if (isCI) {
           const file = await loadMapFile(name);
           const format = getFormat(name);
           const loader = getLoaderForFormat(format);
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           // Try embedded first
           const embeddedResult = await extractor.extract(file, mapData, { forceGenerate: false });
@@ -184,7 +174,7 @@ if (isCI) {
           const file = await loadMapFile(name);
           const format = getFormat(name);
           const loader = getLoaderForFormat(format);
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           const result = await extractor.extract(file, mapData);
 
@@ -215,7 +205,7 @@ if (isCI) {
           const file = await loadMapFile(name);
           const format = getFormat(name);
           const loader = getLoaderForFormat(format);
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           const result = await extractor.extract(file, mapData);
 
@@ -369,7 +359,7 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('sc2map');
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           const result = await extractor.extract(file, mapData);
 
@@ -424,7 +414,7 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('w3n');
-          const campaignData = await loader.load(file);
+          const campaignData = await loader.parse(file);
 
           expect(campaignData).toBeDefined();
           expect(campaignData.maps).toBeDefined();
@@ -465,7 +455,7 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('w3x');
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           const result = await generator.generatePreview(mapData);
 
@@ -488,7 +478,7 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('w3n');
-          const campaignData = await loader.load(file);
+          const campaignData = await loader.parse(file);
 
           const firstMap = campaignData.maps[0];
           expect(firstMap).toBeDefined();
@@ -514,7 +504,7 @@ if (isCI) {
         async ({ name }) => {
           const file = await loadMapFile(name);
           const loader = getLoaderForFormat('sc2map');
-          const mapData = await loader.load(file);
+          const mapData = await loader.parse(file);
 
           const result = await generator.generatePreview(mapData);
 
@@ -635,5 +625,4 @@ if (isCI) {
       expect(summary.totalTests).toBe(24 * 6); // 144 tests
     });
   });
-  });
-}
+});

@@ -4,6 +4,7 @@
  */
 
 import { MPQParser } from '../../mpq/MPQParser';
+import type { MPQFile } from '../../mpq/types';
 import { W3IParser } from './W3IParser';
 import { W3EParser } from './W3EParser';
 import { W3DParser } from './W3DParser';
@@ -11,6 +12,7 @@ import { W3UParser } from './W3UParser';
 import type { W3ODoodad } from './types';
 import type { W3UUnit } from './types';
 import type {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   IMapLoader,
   RawMapData,
   MapInfo,
@@ -25,6 +27,46 @@ import type {
  * Parses Warcraft 3 map files
  */
 export class W3XMapLoader implements IMapLoader {
+  /**
+   * Extract a file from MPQ (gracefully handles decompression failures)
+   */
+  private async extractFileWithFallback(
+    mpqParser: MPQParser,
+    buffer: ArrayBuffer,
+    fileName: string
+  ): Promise<MPQFile | null> {
+    // Try MPQParser first
+    try {
+      const result = await mpqParser.extractFile(fileName);
+      if (result) {
+        return result;
+      }
+    } catch (error) {
+      // eslint-disable-line no-empty
+      const errorMsg = error instanceof Error ? error.message : String(error);
+
+      // Check if this is a decompression error that StormJS can handle
+      const isDecompressionError =
+        errorMsg.includes('Huffman') ||
+        errorMsg.includes('Invalid distance') ||
+        errorMsg.includes('ZLIB') ||
+        errorMsg.includes('PKZIP') ||
+        errorMsg.includes('BZip2') ||
+        errorMsg.includes('decompression') ||
+        errorMsg.includes('unknown compression method') ||
+        errorMsg.includes('incorrect header check');
+
+      if (isDecompressionError) {
+        console.warn(
+          `[W3XMapLoader] MPQParser decompression failed for ${fileName} - file will be skipped`
+        );
+        return null;
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Parse W3X/W3M map file
    * @param file - Map file or ArrayBuffer
@@ -98,55 +140,32 @@ export class W3XMapLoader implements IMapLoader {
 
     // Debug: List all files in archive
     const allFiles = mpqParser.listFiles();
-    console.log(
-      `[W3XMapLoader] Files in archive (${allFiles.length} total):`,
-      allFiles.slice(0, 20)
-    );
-
     // Try to extract files, but catch errors (multi-compression, encryption, etc.)
-    let w3iData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
-    let w3eData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
-    let dooData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
-    let unitsData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
+    let w3iData: MPQFile | null = null;
+    let w3eData: MPQFile | null = null;
+    let dooData: MPQFile | null = null;
+    let unitsData: MPQFile | null = null;
 
-    try {
-      // Try different case variations for war3map.w3i
-      w3iData = await mpqParser.extractFile('war3map.w3i');
-      if (!w3iData) {
-        console.log('[W3XMapLoader] Trying uppercase: war3map.W3I');
-        w3iData = await mpqParser.extractFile('war3map.W3I');
-      }
-      if (!w3iData) {
-        console.log('[W3XMapLoader] Trying all caps: WAR3MAP.W3I');
-        w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
-      }
-    } catch (err) {
-      console.warn(
-        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3i:',
-        err instanceof Error ? err.message : String(err)
-      );
+    // WORKER MODE: StormJS with shared WASM module (optimized)
+    // Workers receive pre-compiled WebAssembly.Module from main thread
+    // This avoids 3× compilation and reduces memory usage significantly
+    // Try different case variations for war3map.w3i
+    w3iData = await this.extractFileWithFallback(mpqParser, buffer, 'war3map.w3i');
+    if (!w3iData) {
+      w3iData = await this.extractFileWithFallback(mpqParser, buffer, 'war3map.W3I');
+    }
+    if (!w3iData) {
+      w3iData = await this.extractFileWithFallback(mpqParser, buffer, 'WAR3MAP.W3I');
     }
 
-    try {
-      w3eData = await mpqParser.extractFile('war3map.w3e');
-    } catch (err) {
-      console.warn(
-        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3e:',
-        err instanceof Error ? err.message : String(err)
-      );
-    }
+    // Extract terrain data
+    w3eData = await this.extractFileWithFallback(mpqParser, buffer, 'war3map.w3e');
 
-    try {
-      dooData = await mpqParser.extractFile('war3map.doo');
-    } catch (err) {
-      // Optional file, silent fail
-    }
+    // Extract doodads (optional)
+    dooData = await this.extractFileWithFallback(mpqParser, buffer, 'war3map.doo');
 
-    try {
-      unitsData = await mpqParser.extractFile('war3mapUnits.doo');
-    } catch (err) {
-      // Optional file, silent fail
-    }
+    // Extract units (optional)
+    unitsData = await this.extractFileWithFallback(mpqParser, buffer, 'war3mapUnits.doo');
 
     // If extraction fails (likely due to multi-compression not being supported),
     // create placeholder data so we can still generate SOME preview
@@ -259,16 +278,30 @@ export class W3XMapLoader implements IMapLoader {
       };
     }
 
+    // CRITICAL FIX: Use groundTextureIds array instead of single tileset character
+    // W3E parser extracts groundTextureIds like ["Adrt", "Ldrt", "Agrs", "Arok"]
+    // Each tile's groundTexture field (0-7) is an index into this array
+    // We need to pass ALL texture IDs so the multi-texture splatmap renderer can load them
+    const textures =
+      w3e.groundTextureIds && w3e.groundTextureIds.length > 0
+        ? w3e.groundTextureIds.map((textureId, index) => ({
+            id: textureId,
+            // Only the first texture gets the blendMap (it's shared across all textures)
+            blendMap: index === 0 ? textureIndices : undefined,
+          }))
+        : [
+            {
+              // Fallback to tileset character if groundTextureIds is empty or undefined
+              id: w3e.tileset,
+              blendMap: textureIndices,
+            },
+          ];
+
     return {
       width: w3e.width,
       height: w3e.height,
       heightmap,
-      textures: [
-        {
-          id: w3e.tileset,
-          blendMap: textureIndices,
-        },
-      ],
+      textures,
       water,
     };
   }
@@ -318,8 +351,6 @@ export class W3XMapLoader implements IMapLoader {
    * This allows preview generation to work even when multi-compression is not supported
    */
   private createPlaceholderMapData(availableFiles: string[]): RawMapData {
-    console.log('[W3XMapLoader] Creating placeholder map data with default 256x256 terrain');
-
     // Determine map size from filename hints if possible
     let mapSize = 256;
     const fileName = availableFiles.find((f) => f.includes('war3map')) || '';

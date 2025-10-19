@@ -162,8 +162,6 @@ export class DoodadRenderer {
     try {
       // Map the doodad type ID to our asset ID
       const mappedId = mapAssetID('w3x', 'doodad', typeId);
-      console.log(`[DoodadRenderer] Mapped doodad ID: ${typeId} -> ${mappedId}`);
-
       // Load the model from AssetLoader
       const baseMesh = await this.assetLoader.loadModel(mappedId);
       baseMesh.setEnabled(false); // Use as template only
@@ -171,7 +169,6 @@ export class DoodadRenderer {
       const variationMeshes: BABYLON.Mesh[] = [];
       if (variations && variations.length > 0) {
         // For now, skip variations - will implement in Phase 2
-        console.log(`[DoodadRenderer] Skipping ${variations.length} variations for ${typeId}`);
       }
 
       this.doodadTypes.set(typeId, {
@@ -180,9 +177,8 @@ export class DoodadRenderer {
         variations: variationMeshes.length > 0 ? variationMeshes : undefined,
         boundingRadius: 5, // TODO: Calculate from mesh bounds
       });
-
-      console.log(`[DoodadRenderer] Loaded doodad type: ${typeId} (mapped to ${mappedId})`);
     } catch (error) {
+      // eslint-disable-line no-empty
       console.warn(`[DoodadRenderer] Failed to load doodad type ${typeId}, using fallback`, error);
 
       // Fallback to placeholder mesh
@@ -232,11 +228,6 @@ export class DoodadRenderer {
 
     // Debug: log first instance to verify offset calculation
     if (this.instances.size === 0) {
-      console.log(
-        `[DoodadRenderer] 🔍 COORDINATE DEBUG - First doodad:`,
-        `mapWidth=${this.config.mapWidth}, mapHeight=${this.config.mapHeight},`,
-        `raw W3X pos=(${placement.position.x.toFixed(1)}, ${placement.position.y.toFixed(1)}, ${placement.position.z.toFixed(1)})`
-      );
     }
 
     const instance: DoodadInstance = {
@@ -254,10 +245,6 @@ export class DoodadRenderer {
 
     // Debug: log first instance result
     if (this.instances.size === 0) {
-      console.log(
-        `[DoodadRenderer] 🔍 COORDINATE DEBUG - After offset:`,
-        `Babylon pos=(${instance.position.x.toFixed(1)}, ${instance.position.y.toFixed(1)}, ${instance.position.z.toFixed(1)})`
-      );
     }
 
     this.instances.set(instance.id, instance);
@@ -305,8 +292,6 @@ export class DoodadRenderer {
       doodadType.mesh.setEnabled(true);
 
       this.instanceBuffers.set(typeId, matrixBuffer);
-
-      console.log(`Created instance buffer for ${typeId}: ${count} instances`);
     });
   }
 

@@ -83,9 +83,12 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
 
   // Mock WebGL context for Babylon.js
   if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
-    // Create a comprehensive WebGL mock with all methods as bound functions
-    const mockFn = () => {};
-    mockFn.bind = () => mockFn;
+    // Create a base mock function that can be bound
+    const createMockFn = () => {
+      const fn = jest.fn();
+      fn.bind = () => fn;
+      return fn;
+    };
 
     const ctx = {
       canvas: document.createElement('canvas'),
@@ -125,17 +128,17 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
         }
         return {};
       }),
-      createProgram: jest.fn(),
-      createShader: jest.fn(),
+      createProgram: jest.fn(() => ({ __mockProgram: true })),
+      createShader: jest.fn(() => ({ __mockShader: true })),
       shaderSource: jest.fn(),
       compileShader: jest.fn(),
       attachShader: jest.fn(),
       linkProgram: jest.fn(),
       useProgram: jest.fn(),
-      createBuffer: jest.fn(),
+      createBuffer: jest.fn(() => ({ __mockBuffer: true })),
       bindBuffer: jest.fn(),
       bufferData: jest.fn(),
-      createTexture: jest.fn(),
+      createTexture: jest.fn(() => ({ __mockTexture: true })),
       bindTexture: jest.fn(),
       texImage2D: jest.fn(),
       texParameteri: jest.fn(),
@@ -153,7 +156,7 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
       getProgramParameter: jest.fn(() => true),
       getShaderInfoLog: jest.fn(() => ''),
       getProgramInfoLog: jest.fn(() => ''),
-      createFramebuffer: jest.fn(),
+      createFramebuffer: jest.fn(() => ({ __mockFramebuffer: true })),
       bindFramebuffer: jest.fn(),
       framebufferTexture2D: jest.fn(),
       checkFramebufferStatus: jest.fn(() => 36053), // FRAMEBUFFER_COMPLETE
@@ -199,15 +202,16 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
       STENCIL_ATTACHMENT: 36128,
     };
 
-    // Wrap context in Proxy to ensure all methods have .bind()
+    // Wrap context in Proxy to ensure ALL properties return bound functions
     return new Proxy(ctx, {
       get(target, prop) {
-        const value = target[prop];
-        // If it's a function, ensure it has bind method
-        if (typeof value === 'function' && !value.bind) {
-          value.bind = () => value;
+        if (prop in target) {
+          return target[prop];
         }
-        return value;
+        // For any property not explicitly defined, return a bound mock function
+        const mockFn = createMockFn();
+        target[prop] = mockFn;
+        return mockFn;
       }
     });
   }
@@ -221,3 +225,11 @@ HTMLCanvasElement.prototype.toDataURL = jest.fn(function(type) {
   const minimalPNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
   return `data:${type || 'image/png'};base64,${minimalPNG}`;
 });
+
+// Mock WebGL2RenderingContext for Babylon.js
+global.WebGL2RenderingContext = class WebGL2RenderingContext {};
+global.WebGLRenderingContext = class WebGLRenderingContext {};
+
+// Set SKIP_WEBGL_TESTS flag to false to ensure all tests run
+// WebGL is now mocked comprehensively, so tests can execute
+global.SKIP_WEBGL_TESTS = false;

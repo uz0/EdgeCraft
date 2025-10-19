@@ -52,11 +52,8 @@ export class AssetLoader {
         throw new Error(`Failed to load manifest: ${response.statusText}`);
       }
       this.manifest = (await response.json()) as AssetManifest;
-      console.log('[AssetLoader] Manifest loaded:', {
-        textures: Object.keys(this.manifest.textures).length,
-        models: Object.keys(this.manifest.models).length,
-      });
     } catch (error) {
+      // eslint-disable-line no-empty
       console.error('[AssetLoader] Failed to load manifest:', error);
       this.manifest = { textures: {}, models: {} };
     }
@@ -81,9 +78,9 @@ export class AssetLoader {
       const texture = new BABYLON.Texture(asset.path, this.scene);
       texture.name = id;
       this.loadedTextures.set(id, texture);
-      console.log(`[AssetLoader] Loaded texture: ${id} from ${asset.path}`);
       return texture;
     } catch (error) {
+      // eslint-disable-line no-empty
       console.error(`[AssetLoader] Failed to load texture ${id}:`, error);
       return this.createFallbackTexture();
     }
@@ -123,10 +120,10 @@ export class AssetLoader {
       const mesh = result.meshes[0] as BABYLON.Mesh;
       mesh.name = id;
       this.loadedModels.set(id, mesh);
-      console.log(`[AssetLoader] Loaded model: ${id} from ${asset.path}`);
       const cloned = mesh.clone(`${id}_instance_${Date.now()}`, null);
       return cloned !== null ? cloned : mesh;
     } catch (error) {
+      // eslint-disable-line no-empty
       console.error(`[AssetLoader] Failed to load model ${id}:`, error);
       return this.createFallbackBox();
     }
@@ -158,7 +155,6 @@ export class AssetLoader {
   }
 
   dispose(): void {
-    console.log('[AssetLoader] Disposing assets...');
     for (const texture of this.loadedTextures.values()) {
       texture.dispose();
     }
