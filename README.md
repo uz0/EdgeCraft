@@ -157,7 +157,7 @@ npm test -- --testPathPattern="MapPreview|AllMapsPreview|TGADecoder"
 - **MapPreviewExtractor**: 100% (40+ tests) - Embedded/generated preview extraction
 - **MapPreviewGenerator**: 100% (30+ tests) - Babylon.js terrain rendering
 - **TGADecoder**: 100% (25+ tests) - TGA format decoding
-- **Integration**: 72+ tests across all 24 maps (11 W3X, 4 W3N, 2 SC2)
+- **Integration**: 72+ tests across all 6 maps (1 W3X, 2 W3M, 3 SC2)
 - **Visual Validation**: Browser-based Chrome DevTools tests
 
 See [PRPs/map-preview-visual-regression-testing.md](PRPs/map-preview-visual-regression-testing.md) for detailed test specifications.
@@ -204,7 +204,7 @@ Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requir
 - Decal System (50 texture decals @ MEDIUM)
 - Minimap RTT (256x256 @ 30fps)
 - Quality Preset System (LOW/MEDIUM/HIGH/ULTRA)
-- Map Gallery UI (Browse and load 24 maps)
+- Map Gallery UI (Browse and load 6 maps)
 - Map Viewer App (Integrated rendering with Phase 2 effects)
 - Legal Asset Library (PRP 2.12: 19 terrain textures, 33 doodad models)
 

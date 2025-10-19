@@ -27,7 +27,7 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
 
   const formatLabel: Record<string, string> = {
     w3x: 'Warcraft 3 Map',
-    w3n: 'Warcraft 3 Campaign',
+    w3m: 'Warcraft 3 Reforged',
     sc2map: 'StarCraft 2 Map',
   };
 
@@ -36,7 +36,7 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
     const grouped: Record<string, MapMetadata[]> = {
       sc2map: [],
       w3x: [],
-      w3n: [],
+      w3m: [],
     };
     maps.forEach((map) => {
       const formatGroup = grouped[map.format];

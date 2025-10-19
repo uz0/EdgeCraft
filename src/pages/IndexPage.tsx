@@ -10,7 +10,6 @@ import { MapPreviewReport } from '../ui/MapPreviewReport';
 import { useMapPreviews } from '../hooks/useMapPreviews';
 import { W3XMapLoader } from '../formats/maps/w3x/W3XMapLoader';
 import { SC2MapLoader } from '../formats/maps/sc2/SC2MapLoader';
-import { W3NCampaignLoader } from '../formats/maps/w3n/W3NCampaignLoader';
 import type { RawMapData } from '../formats/maps/types';
 
 // Hardcoded map list (matching actual /maps folder)
@@ -83,9 +82,6 @@ export const IndexPage: React.FC = () => {
           if (map.format === 'w3x' || map.format === 'w3m') {
             // W3X = Warcraft 3 Classic, W3M = Warcraft 3 Reforged (same parser)
             const loader = new W3XMapLoader();
-            mapData = await loader.parse(file);
-          } else if (map.format === 'w3n') {
-            const loader = new W3NCampaignLoader();
             mapData = await loader.parse(file);
           } else if (map.format === 'sc2map') {
             const loader = new SC2MapLoader();

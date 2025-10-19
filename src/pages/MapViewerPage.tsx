@@ -15,7 +15,6 @@ import * as BABYLON from '@babylonjs/core';
 const getMapFormat = (filename: string): string => {
   if (filename.endsWith('.w3x')) return 'w3x';
   if (filename.endsWith('.w3m')) return 'w3m';
-  if (filename.endsWith('.w3n')) return 'w3n';
   if (filename.endsWith('.SC2Map')) return 'sc2map';
   return 'unknown';
 };

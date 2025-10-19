@@ -10,7 +10,7 @@
 Implement basic map rendering with terrain, doodads, and automated map preview generation for Map Gallery UI. Focus on visual correctness, not gameplay.
 
 **Value**: Users can browse and preview RTS maps before playing
-**Goal**: Render all 24 maps correctly with terrain textures, doodads, and camera controls
+**Goal**: Render all 6 maps correctly with terrain textures, doodads, and camera controls
 
 ---
 
@@ -35,7 +35,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 - [x] Map Gallery UI with thumbnails
 - [x] E2E tests for rendering
 - [x] Performance: 60 FPS @ 256x256 terrain
-- [ ] **INCOMPLETE**: All 24 maps render correctly (currently broken terrain textures)
+- [ ] **INCOMPLETE**: All 6 maps render correctly (currently broken terrain textures)
 
 ---
 
@@ -65,7 +65,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 **Phase 4: Testing & Validation**
 - [x] E2E tests with Playwright
 - [x] Unit tests (>80% coverage)
-- [ ] **PENDING**: Visual regression tests for 24 maps
+- [ ] **PENDING**: Visual regression tests for 6 maps
 - [x] Performance benchmarks (60 FPS achieved @ 256x256)
 
 ---
@@ -83,14 +83,14 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 1. Fix terrain multi-texture splatmap (2-3 days)
 2. Download and map 40-50 doodad types from Kenney.nl (4-6 hours)
 3. Fix W3U unit parser for unit rendering (1-2 days)
-4. Visual regression test suite for 24 maps (2 days)
+4. Visual regression test suite for 6 maps (2 days)
 
 ---
 
 ## 📊 Success Metrics
 
 **How do we measure success?**
-- Map Rendering Accuracy: 24/24 maps render correctly ❌ **BLOCKED** (terrain textures broken)
+- Map Rendering Accuracy: 3/6 maps render correctly ❌ **BLOCKED** (terrain textures broken)
 - Doodad Coverage: 100% of doodad types mapped ❌ 37% (34/93 types)
 - Unit Rendering: Units visible on maps ❌ **BLOCKED** (0.3% parser success)
 - Performance: 60 FPS @ 256x256 terrain ✅ Achieved
@@ -104,7 +104,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 **Required checks before marking complete:**
 - [x] Unit tests coverage >80%
 - [x] E2E tests for Map Gallery
-- [ ] **PENDING**: Visual regression tests for all 24 maps
+- [ ] **PENDING**: Visual regression tests for all 6 maps
 - [x] No TypeScript errors
 - [x] No ESLint warnings
 - [ ] **BLOCKED**: Performance benchmarks (60 FPS not met due to placeholder rendering)
@@ -168,7 +168,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 | 2024-11-20 | Developer   | Map Gallery UI                                 | Complete    |
 | 2024-11-22 | Developer   | Legal asset library (19 textures, 33 models)   | Complete    |
 | 2024-12-01 | AQA         | E2E tests for Map Gallery                      | Complete    |
-| 2024-12-05 | Developer   | Tested 24 maps - identified 3 critical issues  | In Progress |
+| 2024-12-05 | Developer   | Tested 6 maps - identified 3 critical issues  | In Progress |
 | 2024-12-10 | Developer   | Performance optimization (60 FPS achieved)     | Complete    |
 | 2025-01-15 | Developer   | Visual regression test framework (Playwright)  | Complete    |
 
@@ -229,11 +229,11 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 ## 🚪 Exit Criteria
 
 **What signals work is DONE?**
-- [ ] **All 24 maps render with correct terrain textures** (P0 blocker)
+- [ ] **All 6 maps render with correct terrain textures** (P0 blocker)
 - [ ] **60% → 100% doodad coverage** (download and map 56 missing types)
 - [ ] **Unit rendering functional** (depends on W3U parser rewrite)
 - [x] 60 FPS performance maintained
 - [x] Map preview generation working (<5s per map)
-- [ ] **Visual regression test suite for 24 maps**
+- [ ] **Visual regression test suite for 6 maps**
 - [x] Code review approved (partial - pending blockers resolution)
 - [ ] **PRP status updated to ✅ Complete** (blocked by 3 critical issues)

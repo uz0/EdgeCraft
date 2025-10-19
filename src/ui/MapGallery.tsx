@@ -48,7 +48,7 @@ export interface MapGalleryProps {
 
 type SortOption = 'name' | 'size' | 'format';
 type SizeFilter = 'all' | 'small' | 'medium' | 'large';
-type FormatFilter = 'all' | 'w3x' | 'w3m' | 'w3n' | 'sc2map';
+type FormatFilter = 'all' | 'w3x' | 'w3m' | 'sc2map';
 
 export const MapGallery: React.FC<MapGalleryProps> = ({
   maps,
@@ -158,8 +158,8 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
           aria-label="Filter by format"
         >
           <option value="all">All Formats</option>
-          <option value="w3x">Warcraft 3 Maps (.w3x)</option>
-          <option value="w3n">Warcraft 3 Campaigns (.w3n)</option>
+          <option value="w3x">Warcraft 3 Classic (.w3x)</option>
+          <option value="w3m">Warcraft 3 Reforged (.w3m)</option>
           <option value="sc2map">StarCraft 2 (.sc2map)</option>
         </select>
 
@@ -249,7 +249,7 @@ const MapCard: React.FC<MapCardProps> = ({
 
   const formatLabel: Record<string, string> = {
     w3x: 'W3X',
-    w3n: 'W3N',
+    w3m: 'W3M',
     sc2map: 'SC2',
   };
 
