@@ -106,7 +106,6 @@ export class StormJSAdapter {
       }
       return bytes.buffer;
     } catch (error) {
-     
       console.error('[StormJSAdapter] ❌ Failed to decode WASM binary:', error);
       throw error;
     }
@@ -134,7 +133,6 @@ export class StormJSAdapter {
         (0, eval)(code);
         return;
       } catch (error) {
-       
         throw new Error(`Failed to load script in worker: ${src}. Error: ${error}`);
       }
     } else {
@@ -372,7 +370,6 @@ export class StormJSAdapter {
           (currentReleaseLock as () => void)();
         }
       } catch (error) {
-       
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('[StormJSAdapter] ❌ Failed to load StormJS:', errorMsg);
 
@@ -403,7 +400,6 @@ export class StormJSAdapter {
       await this.initialize();
       return true;
     } catch (error) {
-     
       console.error(
         '[StormJSAdapter] ❌ StormJS not available:',
         error instanceof Error ? error.message : String(error)
@@ -440,7 +436,6 @@ export class StormJSAdapter {
         try {
           FS.mkdir(this.VIRTUAL_MOUNT_PATH);
         } catch {
-         
           // Directory might already exist
         }
 
@@ -477,12 +472,10 @@ export class StormJSAdapter {
         try {
           FS.unlink(this.VIRTUAL_ARCHIVE_PATH);
         } catch {
-         
           // Ignore cleanup errors
         }
       }
     } catch (error) {
-     
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`[StormJSAdapter] ❌ Extraction failed:`, errorMsg);
 
@@ -525,7 +518,6 @@ export class StormJSAdapter {
         try {
           FS.mkdir(this.VIRTUAL_MOUNT_PATH);
         } catch {
-         
           // Directory might already exist
         }
 
@@ -555,7 +547,6 @@ export class StormJSAdapter {
                 file.close();
               }
             } catch (error) {
-             
               const errorMsg = error instanceof Error ? error.message : String(error);
               results.set(fileName, {
                 success: false,
@@ -570,12 +561,10 @@ export class StormJSAdapter {
         try {
           FS.unlink(this.VIRTUAL_ARCHIVE_PATH);
         } catch {
-         
           // Ignore cleanup errors
         }
       }
     } catch (error) {
-     
       const errorMsg = error instanceof Error ? error.message : String(error);
       const errorResult: StormJSExtractResult = {
         success: false,
