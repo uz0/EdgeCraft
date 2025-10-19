@@ -97,20 +97,6 @@ export default defineConfig(({ mode }) => {
       // CORS configuration
       cors: true,
 
-      // Proxy configuration for backend
-      proxy: {
-        '/api': {
-          target: 'http://localhost:2567',
-          changeOrigin: true,
-          secure: false
-        },
-        '/colyseus': {
-          target: 'ws://localhost:2567',
-          ws: true,
-          changeOrigin: true
-        }
-      },
-
       // File watching
       watch: {
         ignored: ['**/node_modules/**', '**/dist/**']
@@ -152,11 +138,6 @@ export default defineConfig(({ mode }) => {
             // React in separate chunk
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react';
-            }
-
-            // Networking libraries
-            if (id.includes('colyseus') || id.includes('socket')) {
-              return 'networking';
             }
 
             // Node modules vendor chunk
@@ -214,11 +195,8 @@ export default defineConfig(({ mode }) => {
       include: [
         '@babylonjs/core',
         '@babylonjs/loaders',
-        '@babylonjs/materials',
-        '@babylonjs/gui',
         'react',
-        'react-dom',
-        'colyseus.js'
+        'react-dom'
       ],
 
       // Exclude from pre-bundling (special modules only)

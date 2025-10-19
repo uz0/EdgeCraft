@@ -17,7 +17,7 @@ test.describe('Open Map', () => {
 
     // Click on the first map card
     const firstMapCard = page.locator('button[class*="map-card"]').first();
-    const mapName = await firstMapCard.locator('h3, h2, p').first().textContent();
+    const mapName = await firstMapCard.locator('.map-card-name').textContent();
 
     await firstMapCard.click();
 

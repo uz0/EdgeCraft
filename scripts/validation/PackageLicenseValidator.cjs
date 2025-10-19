@@ -81,6 +81,13 @@ function needsAttribution(license) {
   return ATTRIBUTION_REQUIRED.some(req => license.includes(req));
 }
 
+// Known packages with missing license info in package.json but verified MIT licensed
+const KNOWN_MIT_PACKAGES = {
+  'console-browserify': '1.2.0', // Verified MIT: https://github.com/browserify/console-browserify
+  'exit': '0.1.2',               // Verified MIT: https://github.com/cowboy/node-exit
+  'querystring-es3': '0.2.1',    // Verified MIT: https://github.com/mike-spainhower/querystring
+};
+
 function getDependencyLicenses() {
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   const packageLockPath = path.join(process.cwd(), 'package-lock.json');
@@ -106,7 +113,12 @@ function getDependencyLicenses() {
       if (pkgPath === '') continue; // Skip root package
 
       const pkgName = pkgPath.replace('node_modules/', '');
-      const license = pkgData.license || 'UNKNOWN';
+      let license = pkgData.license || 'UNKNOWN';
+
+      // Check if this is a known MIT package with missing license info
+      if (license === 'UNKNOWN' && KNOWN_MIT_PACKAGES[pkgName]) {
+        license = 'MIT';
+      }
 
       licenses.set(pkgName, {
         name: pkgName,

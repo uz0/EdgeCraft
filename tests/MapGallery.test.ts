@@ -29,7 +29,7 @@ test.describe('Map Gallery', () => {
     });
 
     // Verify key elements are visible
-    await expect(page.locator('h1')).toContainText(/maps/i);
+    await expect(page.locator('h1')).toContainText(/Edge Craft/i);
 
     // Verify filter buttons are present
     const filterButtons = await page.locator('button[class*="filter"]').count();
