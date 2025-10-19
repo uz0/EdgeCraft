@@ -7,8 +7,11 @@ import { defineConfig, devices } from '@playwright/test';
  * Based on: https://github.com/BarthPaleologue/BabylonPlaywrightExample
  */
 export default defineConfig({
-  // Test directory
-  testDir: './tests/e2e',
+  // Test directory - ALL E2E tests in tests/ (excluding unit tests)
+  testDir: './tests',
+
+  // ONLY match E2E tests (*.test.ts), EXCLUDE unit tests (*.unit.ts)
+  testMatch: ['**/*.test.ts', '!**/*.unit.ts', '!**/*.unit.tsx'],
 
   // Baseline screenshots directory
   snapshotDir: './tests/e2e-screenshots',

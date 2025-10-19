@@ -199,6 +199,25 @@ void main(void) {
                   `[TerrainRenderer] Terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
                 );
 
+                // CRITICAL FIX: Ensure UV coordinates are present
+                // CreateGroundFromHeightMap should generate UVs, but verify and regenerate if missing
+                const hasUVs = mesh.isVerticesDataPresent(BABYLON.VertexBuffer.UVKind);
+                if (!hasUVs) {
+                  console.warn(
+                    '[TerrainRenderer] UVs missing from heightmap mesh, regenerating...'
+                  );
+                  // Generate UV coordinates manually
+                  const subdivisions = options.subdivisions;
+                  const uvs: number[] = [];
+                  for (let y = 0; y <= subdivisions; y++) {
+                    for (let x = 0; x <= subdivisions; x++) {
+                      uvs.push(x / subdivisions, y / subdivisions);
+                    }
+                  }
+                  mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
+                  console.log(`[TerrainRenderer] Generated ${uvs.length / 2} UV coordinates`);
+                }
+
                 this.applyMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
                 resolve({
@@ -291,6 +310,10 @@ void main(void) {
     // Enable backface culling for performance
     this.material.backFaceCulling = true;
 
+    // Set ambient color to white for proper texture visibility
+    // ambientColor (0,0,0) blocks texture rendering
+    this.material.ambientColor = new BABYLON.Color3(1, 1, 1);
+
     // Apply material to mesh
     mesh.material = this.material;
 
@@ -337,6 +360,52 @@ void main(void) {
                 console.log(
                   `[TerrainRenderer] Multi-texture terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
                 );
+
+                // CRITICAL FIX: Check if indices were generated
+                // If heightmap fails to load, Babylon creates vertices but NO indices
+                const indices = mesh.getIndices();
+                if (!indices || indices.length === 0) {
+                  console.warn(
+                    '[TerrainRenderer] Indices missing from heightmap mesh! Regenerating...'
+                  );
+
+                  // Calculate subdivisions from actual vertex count
+                  // For a grid: vertexCount = (subdivisions + 1)²
+                  const totalVertices = mesh.getTotalVertices();
+                  const subdivisions = Math.floor(Math.sqrt(totalVertices)) - 1;
+
+                  console.log(
+                    `[TerrainRenderer] Calculated subdivisions=${subdivisions} from ${totalVertices} vertices`
+                  );
+
+                  // Generate indices manually for grid mesh
+                  // Use Uint32Array to ensure integer indices (not floats!)
+                  const indexCount = subdivisions * subdivisions * 6; // 2 triangles per quad, 3 indices per triangle
+                  const generatedIndices = new Uint32Array(indexCount);
+                  let indexOffset = 0;
+
+                  for (let y = 0; y < subdivisions; y++) {
+                    for (let x = 0; x < subdivisions; x++) {
+                      const i0 = y * (subdivisions + 1) + x;
+                      const i1 = i0 + 1;
+                      const i2 = i0 + (subdivisions + 1);
+                      const i3 = i2 + 1;
+
+                      // Two triangles per quad
+                      generatedIndices[indexOffset++] = i0; // Triangle 1
+                      generatedIndices[indexOffset++] = i2;
+                      generatedIndices[indexOffset++] = i1;
+                      generatedIndices[indexOffset++] = i1; // Triangle 2
+                      generatedIndices[indexOffset++] = i2;
+                      generatedIndices[indexOffset++] = i3;
+                    }
+                  }
+
+                  mesh.setIndices(generatedIndices);
+                  console.log(
+                    `[TerrainRenderer] Generated ${generatedIndices.length} indices (${Math.floor(generatedIndices.length / 3)} triangles) as Uint32Array`
+                  );
+                }
 
                 this.applyMultiTextureMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
@@ -563,30 +632,102 @@ void main(void) {
     let nonZeroSplatmap1Count = 0;
     let nonZeroSplatmap2Count = 0;
 
-    for (let i = 0; i < blendMap.length; i++) {
-      const textureIndex = blendMap[i] ?? 0; // 0-7
-      const pixelOffset = i * 4;
+    // SC2-STYLE SMOOTH BLENDING
+    // Instead of hard 0/255 values, we blend textures based on neighboring tiles
+    // This creates smooth transitions like in StarCraft 2
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = y * width + x;
+        const centerTexture = blendMap[i] ?? 0;
+        const pixelOffset = i * 4;
 
-      if (textureIndex < 4) {
-        // Textures 0-3 go into splatmap1
-        splatmap1Data[pixelOffset + 0] = textureIndex === 0 ? 255 : 0; // R
-        splatmap1Data[pixelOffset + 1] = textureIndex === 1 ? 255 : 0; // G
-        splatmap1Data[pixelOffset + 2] = textureIndex === 2 ? 255 : 0; // B
-        splatmap1Data[pixelOffset + 3] = textureIndex === 3 ? 255 : 0; // A
-        if (textureIndex === 0 || textureIndex === 1 || textureIndex === 2 || textureIndex === 3) {
+        // SC2-style blending: Strong center weight with subtle edge softening
+        // Center dominates (80%), neighbors add subtle transitions (20% total)
+        const weights = new Float32Array(8); // Weights for each texture (0-7)
+        let totalWeight = 0;
+
+        // Subtle 3x3 kernel: Center=8.0, Edge=0.5, Corner=0.25 (sum ~11.5)
+        // This gives ~70% center weight, ~30% neighbor influence
+        const kernelWeights = [
+          0.25,
+          0.5,
+          0.25, // Top row (corners and edge)
+          0.5,
+          8.0,
+          0.5, // Middle row (CENTER DOMINATES)
+          0.25,
+          0.5,
+          0.25, // Bottom row
+        ];
+
+        const offsets = [
+          [-1, -1],
+          [0, -1],
+          [1, -1], // Top row
+          [-1, 0],
+          [0, 0],
+          [1, 0], // Middle row
+          [-1, 1],
+          [0, 1],
+          [1, 1], // Bottom row
+        ];
+
+        for (let k = 0; k < offsets.length; k++) {
+          const nx = x + (offsets[k]?.[0] ?? 0);
+          const ny = y + (offsets[k]?.[1] ?? 0);
+
+          // Clamp to bounds
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const neighborIdx = ny * width + nx;
+            const neighborTexture = blendMap[neighborIdx] ?? 0;
+            const kernelWeight = kernelWeights[k] ?? 1.0;
+
+            if (weights[neighborTexture] !== undefined) {
+              weights[neighborTexture] += kernelWeight;
+              totalWeight += kernelWeight;
+            }
+          }
+        }
+
+        // Normalize weights to [0, 255]
+        if (totalWeight > 0) {
+          for (let t = 0; t < 8; t++) {
+            weights[t] = ((weights[t] ?? 0) / totalWeight) * 255;
+          }
+        } else {
+          // Fallback: set center texture to full weight
+          weights[centerTexture] = 255;
+        }
+
+        // Write to splatmap1 (textures 0-3)
+        splatmap1Data[pixelOffset + 0] = Math.min(255, Math.max(0, Math.round(weights[0] ?? 0)));
+        splatmap1Data[pixelOffset + 1] = Math.min(255, Math.max(0, Math.round(weights[1] ?? 0)));
+        splatmap1Data[pixelOffset + 2] = Math.min(255, Math.max(0, Math.round(weights[2] ?? 0)));
+        splatmap1Data[pixelOffset + 3] = Math.min(255, Math.max(0, Math.round(weights[3] ?? 0)));
+
+        if (
+          (weights[0] ?? 0) > 0 ||
+          (weights[1] ?? 0) > 0 ||
+          (weights[2] ?? 0) > 0 ||
+          (weights[3] ?? 0) > 0
+        ) {
           nonZeroSplatmap1Count++;
         }
-        // Splatmap2 is all zeros for this tile
-      } else {
-        // Textures 4-7 go into splatmap2
-        splatmap2Data[pixelOffset + 0] = textureIndex === 4 ? 255 : 0; // R
-        splatmap2Data[pixelOffset + 1] = textureIndex === 5 ? 255 : 0; // G
-        splatmap2Data[pixelOffset + 2] = textureIndex === 6 ? 255 : 0; // B
-        splatmap2Data[pixelOffset + 3] = textureIndex === 7 ? 255 : 0; // A
-        if (textureIndex >= 4) {
+
+        // Write to splatmap2 (textures 4-7)
+        splatmap2Data[pixelOffset + 0] = Math.min(255, Math.max(0, Math.round(weights[4] ?? 0)));
+        splatmap2Data[pixelOffset + 1] = Math.min(255, Math.max(0, Math.round(weights[5] ?? 0)));
+        splatmap2Data[pixelOffset + 2] = Math.min(255, Math.max(0, Math.round(weights[6] ?? 0)));
+        splatmap2Data[pixelOffset + 3] = Math.min(255, Math.max(0, Math.round(weights[7] ?? 0)));
+
+        if (
+          (weights[4] ?? 0) > 0 ||
+          (weights[5] ?? 0) > 0 ||
+          (weights[6] ?? 0) > 0 ||
+          (weights[7] ?? 0) > 0
+        ) {
           nonZeroSplatmap2Count++;
         }
-        // Splatmap1 is all zeros for this tile
       }
     }
 
@@ -606,6 +747,7 @@ void main(void) {
     );
 
     // Create textures from raw data
+    // Use BILINEAR filtering for smooth SC2-style blending between textures
     const splatmap1 = BABYLON.RawTexture.CreateRGBATexture(
       splatmap1Data,
       width,
@@ -613,7 +755,7 @@ void main(void) {
       this.scene,
       false, // generateMipMaps
       false, // invertY
-      BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
+      BABYLON.Texture.BILINEAR_SAMPLINGMODE // Smooth interpolation for SC2-style blending
     );
 
     const splatmap2 = BABYLON.RawTexture.CreateRGBATexture(
@@ -623,7 +765,7 @@ void main(void) {
       this.scene,
       false, // generateMipMaps
       false, // invertY
-      BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
+      BABYLON.Texture.BILINEAR_SAMPLINGMODE // Smooth interpolation for SC2-style blending
     );
 
     console.log(`[TerrainRenderer] ✅ Created dual splatmap textures: ${width}x${height}`);

@@ -1,382 +1,369 @@
 # Edge Craft - AI Development Guidelines
 
-## 🚨 **CRITICAL: THE THREE-FILE RULE** (MOST IMPORTANT)
-
-**⚠️ READ THIS FIRST - THIS RULE OVERRIDES EVERYTHING ELSE ⚠️**
-
-### 🔴 ABSOLUTE RULE: ONLY 3 DOCUMENTATION TYPES ALLOWED
-
-**NO EXCEPTIONS. NO COMPROMISES. NO VIOLATIONS.**
-
-**ONLY 3 types of documentation are allowed in this repository:**
-
-1. **`CLAUDE.md`** - This file. AI development guidelines and workflow rules.
-2. **`README.md`** - Project overview, setup instructions, current status.
-3. **`PRPs/`** - Phase Requirement Proposals. The ONLY format for all project requirements.
-
-### ❌ **ABSOLUTELY FORBIDDEN** (Delete Immediately)
-
-**Documentation Files:**
-- ❌ No `docs/` directory
-- ❌ No scattered `.md` files anywhere except root (CLAUDE.md, README.md) and PRPs/
-- ❌ No `ARCHITECTURE.md`, `TECHNICAL-SPEC.md`, `PLAN.md`
-- ❌ No `tests/**/*.md` (test documentation goes in PRPs)
-- ❌ No `src/**/*.md` (implementation docs go in PRPs)
-- ❌ No "summary", "findings", "specification", "guide" files outside PRPs/
-- ❌ No duplicate documentation
-
-**❗ EXAMPLES OF VIOLATIONS (Delete These If Found):**
-```
-tests/MAP_PREVIEW_TEST_SUMMARY.md          ← DELETE
-tests/engine/rendering/VISUAL_VALIDATION_FINDINGS.md  ← DELETE
-tests/engine/rendering/README_MAP_PREVIEW_TESTS.md    ← DELETE
-tests/engine/rendering/MAP_PREVIEW_TEST_SPECIFICATION.md ← DELETE
-docs/                                       ← DELETE ENTIRE DIRECTORY
-ARCHITECTURE.md                             ← DELETE
-TECHNICAL_SPEC.md                           ← DELETE
-```
-
-**✅ CORRECT LOCATIONS:**
-```
-CLAUDE.md                                   ← Testing guidelines, workflows
-README.md                                   ← Current status, setup instructions
-PRPs/map-preview-visual-regression-testing.md  ← Test specifications, standards
-```
-
-### ✅ **IF IT'S NOT IN A PRP, IT DOESN'T EXIST.**
-
-**Why This Rule Exists:**
-- Prevents documentation drift and conflicts
-- Single source of truth per phase
-- Forces executable, actionable requirements
-- Enables automation and clear gates
-- Makes progress measurable
-- **Eliminates confusion about where to find information**
-
-**When You See Violations:**
-1. **STOP** - Do not continue work
-2. **Extract** valuable content from forbidden files
-3. **Move** content to appropriate PRP or CLAUDE.md
-4. **DELETE** all forbidden documentation files
-5. **Commit** with message: "Enforce Three-File Rule: consolidate documentation"
-
----
-
 ## 🎯 Project Context
 **Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with **TypeScript, React, and Babylon.js**.
 
 ---
 
-## 📋 PRP-ONLY WORKFLOW
+## 🚨 CRITICAL: PRP-CENTRIC WORKFLOW (MANDATORY)
 
-### What is a PRP?
+### 🔴 THE GOLDEN RULE
 
-**PRP = Phase Requirement Proposal**
+**EVERY PIECE OF WORK MUST BE TIED TO A PRP.**
 
-A PRP is the ONLY allowed format for documenting:
-- Phase objectives and scope
-- Technical requirements
-- Implementation steps
-- Success criteria
-- Testing & validation
-- Exit conditions
+**IF THERE IS NO PRP, STOP AND ASK THE USER WHICH PRP THIS WORK RELATES TO.**
 
-### PRP Structure (MANDATORY)
+**ALWAYS REFLECT UPDATES TO PRP**
 
-Every PRP MUST contain these sections:
+**NO EXCEPTIONS. NO WORKAROUNDS. NO SHORTCUTS.**
 
-```markdown
-# PRP {N}: Phase {N} - {Phase Name}
+---
 
-**Phase Name**: {Name}
-**Duration**: {X} weeks | **Team**: {N} developers | **Budget**: ${X}
-**Status**: 📋 Planned | 🟡 In Progress | ✅ Complete
+## 📋 WHAT IS A PRP?
 
-## 🎯 Phase Overview
-{Strategic context, why this phase matters}
+**PRP = Product Requirement Proposal**
 
-## 📋 Definition of Ready (DoR)
-{Checklist of prerequisites to START this phase}
-- [ ] Prerequisite 1
-- [ ] Prerequisite 2
-...
+A PRP is the **ONLY** allowed format for documenting work. Every business logic change, feature, bugfix, or improvement MUST have a PRP.
 
-## ✅ Definition of Done (DoD)
-{Checklist of deliverables to COMPLETE this phase}
-- [ ] Deliverable 1
-- [ ] Deliverable 2
-...
-
-## 🏗️ Implementation Breakdown
-{Detailed architecture, code examples, sub-tasks}
-
-## 📅 Implementation Timeline
-{Week-by-week rollout plan}
-
-## 🧪 Testing & Validation
-{Benchmarks, test commands, success metrics}
-
-## 📊 Success Metrics
-{Quantifiable targets}
-
-## 📈 Phase Exit Criteria
-{Final checklist to close phase}
-```
-
-### PRP Naming Convention
-
+**PRP Directory Structure:**
 ```
 PRPs/
-├── phase1-foundation/
-│   └── 1-mvp-launch-functions.md          # Consolidated Phase 1 PRP
-├── phase2-rendering/
-│   └── 2-advanced-rendering-visual-effects.md  # Consolidated Phase 2 PRP
-├── phase3-gameplay/
-│   └── 3-gameplay-mechanics.md            # Consolidated Phase 3 PRP
-└── phase{N}-{slug}/
-    └── {N}-{slug}.md                      # Consolidated Phase N PRP
+├── 2.13-complete-map-validation-closure.md
+├── w3u-reforged-parser-fix.md
+├── asset-credits-validation.md
+└── {descriptive-name}.md
 ```
 
 **Rules:**
-- **One PRP per phase** (consolidated)
-- **PRP number = Phase number**
-- **Filename = phase number + slug**
-- **No sub-PRPs** - use "Implementation Breakdown" sections within main PRP
+- ✅ **Flat structure** - All PRPs directly in `PRPs/` directory
+- ✅ **Descriptive names** - `{feature-or-bugfix-description}.md`
+- ❌ **No subdirectories** - No `PRPs/phase1/`, `PRPs/features/`, etc.
 
 ---
 
-## 🔄 PHASE EXECUTION WORKFLOW
+## 📝 PRP STRUCTURE (MANDATORY)
 
-### The 4-Gate Iteration Cycle
+Every PRP MUST contain EXACTLY these sections (no more, no less):
 
-Every phase follows this cycle:
+```markdown
+# PRP: {Descriptive Title}
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 1: DoR VALIDATION                                      │
-│ ✅ All prerequisites from previous phase complete           │
-│ ✅ Infrastructure ready                                      │
-│ ✅ Team assigned and available                              │
-│ └──> AUTOMATION: CI/CD checks DoR checklist                 │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 2: IMPLEMENTATION                                       │
-│ 📝 Follow PRP Implementation Breakdown section              │
-│ 🧪 Run tests continuously (>80% coverage)                   │
-│ ⚡ Meet performance targets (benchmarks pass)               │
-│ 📊 Update DoD checklist items as completed                  │
-│ └──> AUTOMATION: CI/CD runs tests, benchmarks on each PR    │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 3: DOD VALIDATION                                       │
-│ ✅ All DoD checklist items checked                          │
-│ ✅ All success metrics met                                   │
-│ ✅ All tests passing (>80% coverage)                        │
-│ ✅ All benchmarks passing                                    │
-│ └──> AUTOMATION: CI/CD blocks merge if DoD incomplete       │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 4: PHASE CLOSURE                                        │
-│ 📝 Update PRP status to ✅ Complete                         │
-│ 📝 Update README.md with phase completion                   │
-│ 📝 Merge to main branch                                      │
-│ 📝 Next phase DoR automatically becomes ready               │
-│ └──> AUTOMATION: GitHub Actions updates project board       │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Gate Automation Rules
-
-**GATE 1 (DoR) - Automated Checks:**
-```yaml
-# .github/workflows/gate-1-dor.yml
-- Check all previous phase PRPs marked ✅ Complete
-- Verify performance baselines documented
-- Ensure no failing tests in main branch
-- Validate team assignment in PRP
-```
-
-**GATE 2 (Implementation) - Continuous Validation:**
-```yaml
-# .github/workflows/gate-2-implementation.yml
-on: [pull_request]
-steps:
-  - Run TypeScript type checking (strict mode)
-  - Run test suite (require >80% coverage)
-  - Run performance benchmarks (must meet targets)
-  - Run legal compliance validation (zero copyright violations)
-  - Check code < 500 lines per file
-```
-
-**GATE 3 (DoD) - Merge Blocker:**
-```yaml
-# .github/workflows/gate-3-dod.yml
-on: [pull_request]
-steps:
-  - Parse PRP DoD checklist
-  - Verify all [ ] items are [x] checked
-  - Run full benchmark suite
-  - Validate success metrics met
-  - Block merge if ANY item incomplete
-```
-
-**GATE 4 (Closure) - Phase Transition:**
-```yaml
-# .github/workflows/gate-4-closure.yml
-on: [push to main]
-steps:
-  - Update PRP status badge to ✅ Complete
-  - Generate phase completion report
-  - Update README.md progress tracking
-  - Create GitHub release for phase
-  - Notify team of next phase readiness
-```
+**Status**: 📋 Planned | 🔬 Research | 🟡 In Progress | 🧪 Testing | ✅ Complete | ❌ Cancelled
+**Created**: YYYY-MM-DD
 
 ---
 
-## 📊 CURRENT PROJECT STATUS
+## 🎯 Goal / Description
 
-### Phase 2: Advanced Rendering & Visual Effects (IN PROGRESS)
+{Clear, concise description of WHAT we're building and WHY}
 
-**Overall Status**: ⚠️ 70% Complete | 🔴 3 Critical Issues Blocking Completion
-
-**PRIMARY GOAL**: ALL 24 MAPS (14 w3x, 7 w3n, 3 SC2Map) RENDER CORRECTLY
-
-#### ✅ What Works (70%)
-- Rendering system architecture
-- Post-processing effects (FXAA, Bloom, Color Grading, Tone Mapping)
-- Advanced lighting (8 dynamic lights @ MEDIUM, distance culling)
-- GPU particle system (5,000 particles @ 60 FPS)
-- Weather effects (Rain, Snow, Fog)
-- PBR material system (glTF 2.0)
-- Custom shader framework (Water, Force Field, Hologram, Dissolve)
-- Decal system (50 texture decals @ MEDIUM)
-- Minimap RTT (256x256 @ 30fps)
-- Quality presets (LOW/MEDIUM/HIGH/ULTRA)
-- Map Gallery UI
-- Legal Asset Library (19 terrain textures, 33 doodad models)
-
-#### ❌ Critical Issues (30%)
-
-**1. Terrain Multi-Texture Splatmap (P0 - CRITICAL)**
-- **Problem**: All terrain rendered with single fallback texture (`terrain_grass_light`)
-- **Root Cause**: `W3XMapLoader.ts:272` passes tileset letter "A" instead of `groundTextureIds` array
-- **Technical Details**:
-  - W3E parser correctly extracts `groundTextureIds` array: `["Adrt", "Ldrt", "Agrs", "Arok"]`
-  - Each tile has `groundTexture` index (0-3) pointing to this array
-  - Loader ignores this and passes "A" which has NO mapping in AssetMap
-  - Result: Fallback to single grass texture across entire map
-- **Solution Required**:
-  - Modify `W3XMapLoader.convertTerrain()` to pass `groundTextureIds` array as textures
-  - Implement splatmap shader with 4-8 texture samplers
-  - Use texture indices for per-vertex blending
-- **File Locations**: `src/formats/maps/w3x/W3XMapLoader.ts:272`, `src/engine/assets/AssetMap.ts`
-- **ETA**: 2-3 days
-
-**2. Asset Coverage Gap (P0 - CRITICAL)**
-- **Problem**: 56/93 doodad types missing (60% render as placeholder boxes)
-- **Stats for 3P Sentinel 01 v3.06.w3x**:
-  - Total unique doodads: 93
-  - Currently mapped: 34 (37%)
-  - Missing: 56 (60%)
-  - Visible as white cubes: ~2,520 instances
-- **Missing Categories**:
-  - Trees (10): `ASx0`, `ASx2`, `ATwf`, `COlg`, `CTtc`, `LOtr`, `LOth`, `LTe1`, `LTe3`, `LTbs`
-  - Rocks (12): `AOsk`, `AOsr`, `COhs`, `LOrb`, `LOsh`, `LOca`, `LOcg`, `LTcr`, `ZPsh`, `ZZdt`
-  - Plants (15): `APbs`, `APms`, `ASr1`, `ASv3`, `AWfs`, `DTg1`, `DTg3`, `NWfb`, `NWfp`, `NWpa`, `VOfs`, `YOec`, `YOf2`, `YOf3`, `YOfr`
-  - Structures (11): `AOhs`, `AOks`, `AOla`, `AOlg`, `DRfc`, `NOft`, `NOfp`, `NWsd`, `OTis`, `ZPfw`, `LWw0`
-  - Misc (8): `DSp9`, `LOtz`, `LOwr`, `LTlt`, `LTs5`, `LTs8`, `YTlb`, `YTpb`, `Ytlc`
-- **Solution Required**:
-  - Download Kenney.nl asset packs (CC0, FREE):
-    - Nature Kit - trees, rocks, plants
-    - Platformer Kit - structures
-    - Dungeon Kit - cave props
-  - Add to `public/assets/models/doodads/`
-  - Map 40-50 new entries in `AssetMap.ts`
-- **File Locations**: `src/engine/assets/AssetMap.ts`, `public/assets/models/doodads/`
-- **ETA**: 4-6 hours manual work
-
-**3. Unit Parser Failures (P1 - MAJOR)**
-- **Problem**: Only 1/342 units parsed (0.3% success rate)
-- **Error**: `[W3UParser] Failed to parse unit 2/342: RangeError: Offset is outside bounds`
-- **Impact**: Map appears empty of units (99.7% parse failure)
-- **Solution Required**:
-  - Debug W3U parser offset errors
-  - Add version detection for different W3X format versions
-  - Add optional field handling (some fields may not exist in all versions)
-  - Test with 3P Sentinel (342 units expected)
-- **File Locations**: `src/formats/maps/w3x/W3UParser.ts`
-- **ETA**: 1-2 days
-
-#### 🎯 Required Work to Complete Phase 2
-
-**Per PRP 2 (PRPs/phase2-rendering/2-advanced-rendering-visual-effects.md)**:
-
-1. **Fix Terrain Multi-Texture Splatmap** (P0, ETA 2-3 days)
-2. **Expand Asset Library** (P0, ETA 4-6 hours)
-3. **Fix Unit Parser** (P1, ETA 1-2 days)
-4. **Validate All 24 Maps** (P1, ETA 2 days)
-5. **Create Screenshot Test Suite** (P1, ETA 2 days)
-
-**Total Remaining Work**: 7-10 days to Phase 2 completion
+**Value**: {Why this matters}
+**Goal**: {What do we want to achieve}
 
 ---
 
-## 🚀 AI AGENT WORKFLOW
+## 📋 Definition of Ready (DoR)
 
-### When Working on a Phase
+**Prerequisites to START work:**
+- [ ] all test data and assets prepared
+- [ ] test data prepared
+- [ ] needed assets upload and legal complient
 
-**1. ALWAYS Read the PRP First**
+---
+
+## ✅ Definition of Done (DoD)
+
+**Deliverables to COMPLETE work:**
+- [ ] all tests are passed
+- [ ] tests are written
+- [ ] prp updated
+
+---
+
+## 🧪 Quality Gates (AQA)
+
+**Required checks before marking complete:**
+- [ ] Unit tests coverage >80%
+- [ ] E2E tests for critical paths
+- [ ] Manual QA test matrix passed
+- [ ] No TypeScript errors
+- [ ] No ESLint warnings
+- [ ] Performance benchmarks met
+
+---
+
+## 📖 User Stories
+
+**As a** {user type}
+**I want** {feature}
+**So that** {benefit}
+
+**Acceptance Criteria:**
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+---
+
+## 🔬 Research / Related Materials
+
+**Technical Context:**
+- [Documentation link](url)
+- [Code reference](file:line)
+- [Related RFC/ADR](link)
+
+**High-Level Design:**
+- Architecture Decision: {Decision made and why}
+- Interface Design: {Key interfaces/contracts}
+- Dependencies: {What we depend on}
+
+**Code References:**
+- `src/path/to/file.ts:123` - Description
+- `src/other/file.ts:456` - Description
+
+---
+
+## 📊 Progress Tracking
+
+| Date       | Author    | Change Made                          | Status      |
+|------------|-----------|--------------------------------------|-------------|
+| YYYY-MM-DD | Developer | Initial implementation               | In Progress |
+| YYYY-MM-DD | AQA       | E2E tests added                      | Complete    |
+| YYYY-MM-DD | Developer | Code review feedback addressed       | Complete    |
+
+**Current Blockers**: {Any blockers or issues}
+**Next Steps**: {What's next}
+
+---
+
+## 🧪 Testing Evidence
+
+**Unit Tests:**
+- File: `src/path/to/test.unit.ts`
+- Coverage: 95%
+- Status: ✅ Passing
+
+**E2E Tests:**
+- File: `tests/feature.test.ts`
+- Scenarios: 5
+- Status: ✅ Passing
+
+**Manual QA:**
+- Test Matrix: [Link to test matrix]
+- Executed By: {QA Engineer}
+- Status: ✅ Passed
+
+---
+
+## 🔄 PRP WORKFLOW (STRICT ENFORCEMENT)
+
+### Phase 1: PRP Creation (Planning)
+
+**Step 1: System Analyst** - Define Goal & DoR
+- Write clear goal/description
+- Define business value
+- List prerequisites (DoR)
+- Create initial DoD outline
+
+**Step 2: AQA (Automation QA Engineer)** - Add Quality Gates
+- Complete DoD with quality criteria
+- Define required test coverage
+- List validation checks
+- Specify performance benchmarks
+
+**Step 3: Developer** - Technical Planning
+- Research technical approach
+- Document high-level design (ADR style)
+- List code references and dependencies
+- Create breakthrough plan
+- Add interface design
+- Link related documentation
+
+**Step 4: Finalization**
+- All three roles review and finalize PRP
+- PRP status: 📋 Planned → 🔬 Research
+- PRP is now **executable**
+
+### Phase 2: Development (Execution)
+
+**Step 1: Developer Research**
+- Review all materials in PRP
+- Conduct additional research if needed
+- Update "Research / Related Materials" section
+- PRP status: 🔬 Research → 🟡 In Progress
+
+**Step 2: Implementation**
+- Write code following PRP design
+- **ALWAYS update Progress Tracking table** after each significant change
+- Run `npm run typecheck && npm run lint` continuously
+- Write unit tests as you code (TDD)
+- **All business logic changes MUST have tests**
+
+**Step 3: Developer Self-Check**
+- [ ] All DoD items checked
+- [ ] All tests passing (`npm run test:unit`)
+- [ ] No TypeScript errors (`npm run typecheck`)
+- [ ] No ESLint errors (`npm run lint`)
+- [ ] Code documented (JSDoc for public APIs)
+
+### Phase 3: QA & Testing
+
+**Step 1: Manual QA**
+- Create test matrix (scenarios, test cases, results)
+- Manually test all user stories
+- Document results in PRP "Testing Evidence"
+- Update Progress Tracking table
+- PRP status: 🟡 In Progress → 🧪 Testing
+
+**Step 2: AQA - Automated Tests**
+- Write E2E tests for critical paths (if needed)
+- Run full test suite
+- Verify quality gates (coverage, performance)
+- Mark "Quality Gates" section as complete
+- Update Progress Tracking table
+
+### Phase 4: Review & Merge
+
+**Step 1: Create PR**
+- Push code to branch
+- Create Pull Request
+- Link PRP in PR description
+- Tag reviewers
+
+**Step 2: Code Review**
+- Address all review feedback
+- Update Progress Tracking table with changes
+- Get approval
+
+**Step 3: Merge & Close**
+- Merge PR to main
+- Update PRP status: 🧪 Testing → ✅ Complete
+- Fill "Review & Approval" section
+- Document final status in PRP
+
+---
+
+## 🚦 AI AGENT WORKFLOW (MANDATORY RULES)
+
+### BEFORE STARTING ANY WORK
+
+**1. ALWAYS IDENTIFY CURRENT PRP**
+
+```
+User: "Fix the terrain texture bug"
+
+CORRECT RESPONSE:
+"Which PRP is this work related to? I need to know the PRP file name so I can:
+1. Read the PRP to understand context
+2. Update Progress Tracking
+3. Ensure my work aligns with DoD
+4. Mark appropriate checklist items
+
+Please provide the PRP filename (e.g., 'terrain-texture-splatmap-fix.md')"
+```
+
+**2. IF USER DOESN'T SPECIFY PRP**
+
+```
+User: "Add new feature X"
+
+CORRECT RESPONSE:
+"I don't see a PRP for this work. Before I start, we need to:
+
+1. Create a new PRP following the 3-phase process:
+   - System Analyst: Define goal & DoR
+   - AQA: Add quality gates & testing requirements
+   - Developer: Technical planning & design
+
+Would you like me to:
+a) Help create a new PRP for this feature?
+b) Check if there's an existing PRP this relates to?
+c) Wait while you specify the PRP filename?
+
+Note: I cannot proceed without a PRP - this is a mandatory workflow requirement."
+```
+
+**3. READ PRP BEFORE CODING**
+
 ```bash
-# Before ANY implementation work
-cat PRPs/phase{N}-{slug}/{N}-{slug}.md
+# ALWAYS start by reading the PRP
+cat PRPs/{prp-filename}.md
+
+# Check DoR is complete
+# Review Research / Related Materials
+# Understand DoD requirements
+# Review existing Progress Tracking
 ```
 
-**2. Validate DoR (Gate 1)**
-- Check ALL DoR checklist items
-- If ANY item unchecked → STOP, complete prerequisites first
-- Never start implementation without passing Gate 1
+**4. UPDATE PRP DURING WORK**
 
-**3. Follow Implementation Breakdown**
-- Use architecture from PRP
-- Use code examples from PRP
-- Follow timeline from PRP
-- Meet performance targets from PRP
+After EVERY significant change:
+- Add row to Progress Tracking table
+- Check off DoD items as completed
+- Update "Current Blockers" or "Next Steps"
+- Commit PRP changes with code
 
-**4. Update DoD as You Go**
-- Check off [ ] items as completed
-- Never mark item complete unless fully validated
-- Keep PRP as single source of truth for progress
+**5. VERIFY QUALITY BEFORE CLAIMING DONE**
 
-**5. Validate Success Metrics**
-- Run benchmarks from PRP
-- Ensure all metrics met
-- Document results in PR
+```bash
+# ALWAYS run before marking work complete
+npm run typecheck  # Must pass
+npm run lint       # Must pass
+npm run test:unit  # Must pass
+npm run test:e2e   # Must pass (if E2E tests exist)
+```
 
-**6. Pass Gate 3 (DoD Validation)**
-- All DoD items checked ✅
-- All tests passing
-- All benchmarks passing
-- Ready for merge
+### DURING DEVELOPMENT
 
-### When Starting New Work
+**Update PRP Progress Table:**
+```markdown
+| Date       | Author    | Change Made                          | Status      |
+|------------|-----------|--------------------------------------|-------------|
+| 2025-01-19 | Claude    | Implemented terrain splatmap shader  | Complete    |
+| 2025-01-19 | Claude    | Added unit tests (coverage 92%)      | Complete    |
+| 2025-01-19 | Claude    | Fixed TypeScript errors              | Complete    |
+```
 
-**ASK YOURSELF:**
-1. **"Which phase am I in?"** → Check README.md
-2. **"What's the current PRP?"** → Read `PRPs/phase{N}-{slug}/{N}-{slug}.md`
-3. **"Did Gate 1 pass?"** → Validate DoR checklist
-4. **"What's next to implement?"** → Check DoD, find unchecked items
-5. **"How do I implement it?"** → Follow "Implementation Breakdown" section
+**Check DoD Items:**
+```markdown
+## ✅ Definition of Done (DoD)
 
-**NEVER:**
-- ❌ Create new documentation outside PRPs/
-- ❌ Start implementation without reading PRP
-- ❌ Skip DoR validation
-- ❌ Mark DoD items complete without validation
-- ❌ Merge without passing Gate 3
+- [x] Terrain shader supports 4-8 textures
+- [x] Unit tests >80% coverage
+- [ ] E2E test for terrain rendering (AQA to add)
+- [x] No TypeScript/ESLint errors
+- [ ] Code review approved
+```
+
+### COMMON MISTAKES TO AVOID
+
+❌ **WRONG:**
+```
+User: "Fix bug X"
+Assistant: *Starts coding immediately*
+```
+
+✅ **CORRECT:**
+```
+User: "Fix bug X"
+Assistant: "Which PRP should I work on? Please provide the filename from PRPs/ directory."
+User: "PRPs/w3u-reforged-parser-fix.md"
+Assistant: *Reads PRP first, then starts work*
+```
+
+❌ **WRONG:**
+```
+Assistant: *Completes work*
+Assistant: "Done! The feature is implemented."
+```
+
+✅ **CORRECT:**
+```
+Assistant: *Completes work*
+Assistant: *Updates PRP Progress Tracking table*
+Assistant: *Checks off DoD items*
+Assistant: *Runs all tests*
+Assistant: "Work complete. Updated PRP with progress. All tests passing. Ready for review."
+```
 
 ---
 
@@ -385,31 +372,6 @@ cat PRPs/phase{N}-{slug}/{N}-{slug}.md
 ### File Size Limit
 - **HARD LIMIT: 500 lines per file**
 - Split into modules when approaching limit
-- Use barrel exports (`index.ts`) for clean APIs
-
-### Code Organization
-```
-src/
-├── engine/       # Babylon.js game engine core
-│   ├── renderer/
-│   ├── camera/
-│   └── scene/
-├── formats/      # File format parsers
-│   ├── mpq/
-│   ├── casc/
-│   └── mdx/
-├── gameplay/     # Game mechanics
-│   ├── units/
-│   ├── pathfinding/
-│   └── combat/
-```
-
-**Each module should contain:**
-- `index.ts` - Public exports
-- `types.ts` - TypeScript interfaces
-- `Component.tsx` - React component (if UI)
-- `utils.ts` - Helper functions
-- `Component.test.tsx` - Tests
 
 ### TypeScript Standards
 ```typescript
@@ -422,267 +384,85 @@ interface UnitData {
 
 // ❌ DON'T: Use 'any'
 function processUnit(unit: any) { } // FORBIDDEN
-
-// ✅ DO: Use enums for constants
-enum UnitType {
-  WORKER = 'worker',
-  WARRIOR = 'warrior'
-}
-
-// ✅ DO: Use async/await
-async function loadMap(path: string): Promise<MapData> {
-  const data = await fetch(path);
-  return parse(data);
-}
 ```
 
-### React Patterns
-```typescript
-// ✅ DO: Functional components with hooks
-const MapEditor: React.FC<MapEditorProps> = ({ mapData }) => {
-  const [selectedTool, setSelectedTool] = useState<Tool>('terrain');
-  const { terrain, updateTerrain } = useTerrainEditor(mapData);
-
-  return <div>{/* UI */}</div>;
-};
-
-// ❌ DON'T: Class components
-class MapEditor extends React.Component { } // Avoid
-```
-
-### Babylon.js Patterns
-```typescript
-// ✅ DO: Scene management with disposal
-class GameScene {
-  private scene: BABYLON.Scene;
-  private engine: BABYLON.Engine;
-
-  async initialize(): Promise<void> {
-    // Setup scene, lights, camera
-  }
-
-  dispose(): void {
-    this.scene.dispose();
-    this.engine.dispose();
-  }
-}
-```
-
----
-
-## 🧪 TESTING REQUIREMENTS
-
-### Test Coverage
-- **Minimum: 80% coverage** (enforced by CI/CD)
-- Test files: `*.test.ts`, `*.test.tsx`
+### Testing Requirements
+- **Minimum: 80% unit test coverage** (enforced by CI/CD)
+- Test files: `*.unit.ts`, `*.unit.tsx`
 - Framework: Jest + React Testing Library
+- E2E: Playwright
 
-### Test Structure
-```typescript
-describe('FeatureName', () => {
-  it('should handle normal operation', () => {
-    // Arrange
-    const input = createTestData();
-
-    // Act
-    const result = feature(input);
-
-    // Assert
-    expect(result).toBe(expected);
-  });
-
-  it('should handle edge cases', () => {
-    // Test boundary conditions
-  });
-
-  it('should handle errors gracefully', () => {
-    // Test error handling
-  });
-});
-```
-
-### Performance Testing
-- **Babylon.js**: 60 FPS with 500 units
-- **Memory**: No leaks during 1-hour sessions
-- **Load times**: Maps < 10 seconds, models < 1 second
-
-**Benchmark Commands:**
-```bash
-# From PRP success metrics
-npm run benchmark -- terrain-lod        # 60 FPS @ 256x256
-npm run benchmark -- unit-instancing    # 60 FPS @ 500 units
-npm run benchmark -- full-system        # All systems @ 60 FPS
-```
+**Every business logic change MUST have tests. No exceptions.**
 
 ---
 
 ## 🛡️ LEGAL COMPLIANCE
 
 ### Zero Tolerance Policy
-- **NEVER include copyrighted assets** from Blizzard games
+- **NEVER include copyrighted assets** from another games
 - **Use ONLY original or CC0/MIT licensed** content
-- **Run validation before EVERY commit**: `npm run validate-assets`
-
-### Asset Sources
-- ✅ Original creations
-- ✅ CC0 (Public Domain)
-- ✅ MIT licensed
-- ❌ Blizzard copyrighted content
-- ❌ Fan-made assets derivative of Blizzard IP
-
-### Automated Validation
-```yaml
-# .github/workflows/legal-compliance.yml
-on: [push, pull_request]
-steps:
-  - SHA-256 hash check (blacklist)
-  - Embedded metadata scan
-  - Visual similarity detection
-  - Block merge if violations found
-```
+- **Run validation before EVERY commit**: `npm run validate:all`
 
 ---
 
-## 📊 PERFORMANCE TARGETS
+## 📊 VALIDATION PIPELINE
 
-### Phase 1 Baseline
-- 60 FPS @ 256x256 terrain with 4 textures
-- 60 FPS @ 500 units with animations
-- <200 draw calls
-- <2GB memory usage
-- No memory leaks over 1hr
+### Pre-Commit Checks (5 steps)
+```bash
+npm run typecheck          # TypeScript: 0 errors
+npm run lint               # ESLint: 0 errors
+npm run test:unit          # Tests: All passing
+npm run validate:licenses  # Licenses: 0 blocked
+npm run validate:credits   # Assets: Properly attributed
+```
 
-### Phase 2 Targets
-- 60 FPS @ MEDIUM preset (all effects active)
-- <16ms frame time
-- 5,000 GPU particles
-- 8 dynamic lights
-- Quality presets: LOW/MEDIUM/HIGH/ULTRA
-
-### Phase 3 Targets
-- 60 FPS with 500 units in combat
-- <16ms pathfinding for 100 units
-- <5ms selection for 500 units
-- <10ms AI decision making
-- Deterministic simulation (100% reproducible)
+### CI/CD Workflows
+- **validation.yml** - TypeScript, ESLint, Unit Tests, Licenses, Credits
+- **ci.yml** - Full pipeline (Lint, Tests, Security, Build, E2E)
+- **e2e-tests.yml** - Playwright E2E tests
 
 ---
 
-## 🎯 BABYLON.JS BEST PRACTICES
-
-### Optimization Patterns
-```typescript
-// ✅ DO: Use thin instances for repeated objects
-mesh.thinInstanceEnablePicking = false;
-mesh.thinInstanceSetBuffer("matrix", matrixBuffer, 16);
-
-// ✅ DO: Freeze active meshes when static
-scene.freezeActiveMeshes();
-
-// ✅ DO: Disable auto-clear for extra FPS
-scene.autoClear = false;
-scene.autoClearDepthAndStencil = false;
-
-// ✅ DO: Use cascaded shadows (NOT regular shadow maps)
-const shadowGen = new BABYLON.CascadedShadowGenerator(2048, light);
-
-// ✅ DO: Bake animations for instanced units
-const baker = new BABYLON.VertexAnimationBaker(scene, mesh);
-```
-
-### Anti-Patterns to Avoid
-```typescript
-// ❌ DON'T: Load entire maps into memory at once
-const allData = loadEntireMap(); // BAD
-
-// ✅ DO: Stream and chunk large data
-const chunk = loadMapChunk(x, z); // GOOD
-
-// ❌ DON'T: Use synchronous file operations
-const data = fs.readFileSync(path); // BAD
-
-// ✅ DO: Use async operations
-const data = await fs.promises.readFile(path); // GOOD
-
-// ❌ DON'T: Couple rendering to game logic
-function update() {
-  moveUnit();
-  renderUnit(); // BAD - tight coupling
-}
-
-// ✅ DO: Separate concerns
-function update() {
-  gameLogic.update();
-}
-function render() {
-  renderer.render();
-}
-```
-
----
-
-## 📝 JSOC DOCUMENTATION
-
-### Public APIs
-```typescript
-/**
- * Parses a Warcraft 3 map file (.w3x)
- *
- * @param buffer - The map file buffer
- * @returns Parsed map data with terrain, units, and triggers
- * @throws {InvalidFormatError} If map format is invalid
- * @throws {CorruptedDataError} If map data is corrupted
- *
- * @example
- * ```typescript
- * const mapData = await parseW3Map(buffer);
- * console.log(mapData.terrain.width); // 256
- * ```
- */
-async function parseW3Map(buffer: ArrayBuffer): Promise<MapData>
-```
-
-### Complex Algorithms
-```typescript
-// A* pathfinding implementation
-// Uses binary heap for O(log n) priority queue operations
-// Grid-based navigation mesh with 8-directional movement
-function findPath(start: Vector3, goal: Vector3): Vector3[] {
-  // ... implementation with detailed comments
-}
-```
-
----
-
-## 🚨 WORKFLOW VIOLATIONS & PENALTIES
+## 🚨 WORKFLOW VIOLATIONS & ENFORCEMENT
 
 ### ❌ VIOLATIONS
 
-**Documentation Violations:**
-- Creating `.md` files outside PRPs/ → **Delete immediately**
-- Creating `docs/` directory → **Delete immediately**
-- Duplicating PRP content elsewhere → **Delete duplicates**
-- Modifying requirements outside PRPs → **Revert changes**
+**1. Working Without PRP**
+- **Violation**: Starting code changes without specifying PRP
+- **Action**: STOP immediately. Ask user for PRP filename.
 
-**Process Violations:**
-- Starting work without reading PRP → **Stop and read PRP**
-- Skipping DoR validation → **Go back to Gate 1**
-- Marking DoD items complete without validation → **Uncheck and validate**
-- Merging without passing Gate 3 → **Block merge, fix issues**
+**2. Skipping Quality Gates**
+- **Violation**: Marking work complete without running tests
+- **Action**: Run all validation checks. Fix failures.
 
-### ✅ COMPLIANCE
+**3. Not Updating PRP**
+- **Violation**: Making changes without updating Progress Tracking
+- **Action**: Update PRP before committing code.
 
-**When You See Violations:**
-1. **Immediately stop work**
-2. **Delete forbidden documentation**
-3. **Consolidate into PRPs/** if needed
-4. **Update PRP with new information**
-5. **Resume work following PRP**
+**4. Incomplete DoD**
+- **Violation**: Claiming work done with unchecked DoD items
+- **Action**: Complete all DoD items or ask for clarification.
 
-**Enforcement:**
-- CI/CD automatically rejects PRs with violations
-- Code review checklist includes workflow compliance
-- Automated scripts clean up violations weekly
+### ✅ ENFORCEMENT
+
+**AI Agent Rules:**
+1. **ALWAYS** ask for PRP if not specified
+2. **ALWAYS** read PRP before starting work
+3. **ALWAYS** update PRP during work
+4. **ALWAYS** run tests before claiming done
+5. **ALWAYS** check DoD before marking complete
+
+**If unclear which PRP to use:**
+```
+"I need clarification on which PRP this work relates to.
+
+Current PRPs in PRPs/:
+- 2.13-complete-map-validation-closure.md
+- w3u-reforged-parser-fix.md
+- asset-credits-validation.md
+
+Which PRP should I work on, or should I help create a new one?"
+```
 
 ---
 
@@ -690,73 +470,66 @@ function findPath(start: Vector3, goal: Vector3): Vector3[] {
 
 ### Starting New Work
 ```bash
-# 1. Check current phase
-cat README.md
-
+# 1. User specifies or I ask for PRP
 # 2. Read the PRP
-cat PRPs/phase{N}-{slug}/{N}-{slug}.md
+cat PRPs/{prp-name}.md
 
-# 3. Validate DoR
-grep "Definition of Ready" PRPs/phase{N}-{slug}/{N}-{slug}.md
+# 3. Verify DoR complete
+# 4. Review Research section
+# 5. Understand DoD requirements
 
-# 4. Find next task
-grep "^\- \[ \]" PRPs/phase{N}-{slug}/{N}-{slug}.md
+# 6. Implement following PRP design
+# 7. Update Progress Tracking after each change
+# 8. Check off DoD items as completed
 
-# 5. Implement following PRP
-# ... write code ...
+# 9. Run validation before claiming done
+npm run typecheck && npm run lint && npm run test:unit
 
-# 6. Run tests
-npm test
-
-# 7. Run benchmarks
-npm run benchmark
-
-# 8. Update DoD
-# Mark items complete in PRP
+# 10. Update PRP status and progress
+# 11. Commit PRP + code together
 ```
 
-### Daily Checklist
-- [ ] Read current PRP before coding
-- [ ] Follow Implementation Breakdown
-- [ ] Write tests (>80% coverage)
-- [ ] Run benchmarks (meet targets)
-- [ ] Update DoD checklist
-- [ ] No files >500 lines
-- [ ] No copyrighted assets
-- [ ] No documentation outside PRPs/
+### Creating New PRP
+```bash
+# 1. System Analyst: Goal + DoR
+# 2. AQA: Quality Gates + Testing
+# 3. Developer: Technical Design + Research
+# 4. All review and finalize
+# 5. PRP status: 📋 Planned
+```
+
+### Daily Workflow
+- [ ] Which PRP am I working on?
+- [ ] Have I read the PRP recently?
+- [ ] Is my work aligned with PRP DoD?
+- [ ] Have I updated Progress Tracking?
+- [ ] Have I run tests?
+- [ ] Are there any blockers to document?
 
 ---
 
 ## 📚 REMEMBER
 
-**The Three-File Rule:**
-1. `CLAUDE.md` ← You are here
+**The PRP-Centric Workflow:**
+1. `CLAUDE.md` ← You are here (workflow rules)
 2. `README.md` ← Project overview
-3. `PRPs/` ← ONLY allowed requirements format
+3. `PRPs/` ← ALL work is defined here
 
 **If it's not in a PRP, it doesn't exist.**
 
-**Every phase has:**
-- ✅ DoR (prerequisites)
-- ✅ DoD (deliverables)
-- ✅ Implementation Breakdown (how-to)
-- ✅ Success Metrics (validation)
-- ✅ Exit Criteria (done means done)
-
-**Every commit must:**
-- ✅ Pass automated gates
-- ✅ Meet PRP requirements
-- ✅ Advance DoD progress
-- ✅ Maintain quality standards
-
----
+**Every change requires:**
+- ✅ PRP defining the work
+- ✅ Progress tracking updates
+- ✅ Tests confirming functionality
+- ✅ DoD items checked off
+- ✅ Quality gates passing
 
 **This workflow ensures:**
-- 🎯 Clear objectives (PRPs define goals)
-- 📊 Measurable progress (DoD checklists)
-- 🚦 Transparent gates (automation enforces)
-- ✅ Quality assurance (tests + benchmarks)
-- 🔄 Iterative improvement (phase-by-phase)
-- 📝 Single source of truth (no doc drift)
+- 🎯 Clear objectives (PRPs define work)
+- 📊 Measurable progress (Progress Tracking)
+- 🚦 Transparent status (DoD checklists)
+- ✅ Quality assurance (Tests + validation)
+- 🔄 Continuous improvement (Review feedback)
+- 📝 Single source of truth (No doc drift)
 
-**Follow this workflow. Trust the process. Ship great code.** 🚀
+**Follow this workflow. Trust the process. Ship quality code.** 🚀

@@ -103,7 +103,7 @@ jobs:
         run: npm audit --audit-level=high || echo "⚠️ Moderate vulnerabilities detected in dev dependencies (acceptable for development)"
 
       - name: License compliance check
-        run: npm run validate:legal
+        run: npm run validate:licenses
 
   build:
     name: Build Check

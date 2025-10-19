@@ -206,10 +206,10 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
           <MapCard
             key={map.id}
             map={map}
+            onSelect={() => onMapSelect(map)}
             progress={loadProgress?.get(map.id)}
             previewLoadingState={previewLoadingStates?.get(map.id)}
             previewLoadingMessage={previewLoadingMessages?.get(map.id)}
-            onClick={() => onMapSelect(map)}
           />
         ))}
       </div>
@@ -229,18 +229,18 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
  */
 interface MapCardProps {
   map: MapMetadata;
+  onSelect: () => void;
   progress?: MapLoadProgress;
   previewLoadingState?: PreviewLoadingState;
   previewLoadingMessage?: string;
-  onClick: () => void;
 }
 
 const MapCard: React.FC<MapCardProps> = ({
   map,
+  onSelect,
   progress,
   previewLoadingState,
   previewLoadingMessage,
-  onClick,
 }) => {
   const formatSizeDisplay = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
@@ -254,16 +254,9 @@ const MapCard: React.FC<MapCardProps> = ({
   };
 
   return (
-    <div
+    <button
+      onClick={onSelect}
       className={`map-card ${progress?.status === 'loading' ? 'loading' : ''}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onClick();
-        }
-      }}
       aria-label={`Load map: ${map.name}`}
     >
       {/* Thumbnail */}
@@ -303,6 +296,6 @@ const MapCard: React.FC<MapCardProps> = ({
           <span className="map-size">{formatSizeDisplay(map.sizeBytes)}</span>
         </div>
       </div>
-    </div>
+    </button>
   );
 };

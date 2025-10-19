@@ -191,10 +191,10 @@ This project uses Context Engineering to ensure efficient AI-assisted developmen
 Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requirement Proposals). See [PRPs/README.md](./PRPs/README.md) for the complete development plan.
 
 ### Current Phase: Phase 2 - Advanced Rendering & Visual Effects
-**Status**: ⚠️ 70% Complete | 🔴 3 Critical Issues Blocking Map Rendering
+**Status**: 🔴 **BLOCKED** - Map file extraction broken
 **PRIMARY GOAL**: ALL 24 MAPS (14 w3x, 7 w3n, 3 SC2Map) RENDER CORRECTLY
 
-**✅ Completed (70%)**:
+**✅ Rendering Systems Complete (70%)**:
 - Post-Processing Pipeline (FXAA, Bloom, Color Grading, Tone Mapping)
 - Advanced Lighting System (8 lights @ MEDIUM, distance culling)
 - GPU Particle System (5,000 particles @ 60 FPS)
@@ -208,23 +208,32 @@ Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requir
 - Map Viewer App (Integrated rendering with Phase 2 effects)
 - Legal Asset Library (PRP 2.12: 19 terrain textures, 33 doodad models)
 
-**❌ Critical Issues (30%)**:
-1. **Terrain Multi-Texture Splatmap** (P0) - All terrain rendered with single fallback texture
-   - Root Cause: `W3XMapLoader.ts:272` passes tileset letter "A" instead of `groundTextureIds` array
-   - Solution Required: Implement splatmap shader with 4-8 texture samplers
-   - ETA: 2-3 days
+**🔴 CRITICAL BLOCKERS** (P0 - Validation discovered Oct 14, 2025):
+1. **MPQ Multi-Compression Support** (P0) - Maps cannot extract critical files
+   - Missing: SPARSE (0x20), ADPCM_MONO (0x40), ADPCM_STEREO (0x80) decompression
+   - Impact: 3/3 maps tested fail extraction → placeholder data (0 doodads, 0 units)
+   - Files: `src/formats/mpq/MPQParser.ts`, `decompressors/`
+   - Solution: Implement missing decompressors or integrate StormJS fallback
+   - ETA: 3-5 days
 
-2. **Asset Coverage Gap** (P0) - 60% of doodads render as placeholder boxes
-   - 56/93 doodad types missing (trees, rocks, plants, structures)
-   - Solution Required: Download Kenney.nl asset packs, map 40-50 new models
-   - ETA: 4-6 hours
-
-3. **Unit Parser Failures** (P1) - Only 1/342 units parsed (0.3% success rate)
-   - Error: `RangeError: Offset is outside bounds` in W3UParser
-   - Solution Required: Add version detection, optional field handling
+2. **Huffman Decompression Bug** (P0) - war3map.w3i extraction fails
+   - Error: "Invalid distance in Huffman stream"
+   - Impact: Cannot load map info (dimensions, tileset, players)
+   - File: `src/formats/mpq/decompressors/HuffmanDecompressor.ts:112`
+   - Solution: Fix Huffman stream parsing logic, add bounds checking
    - ETA: 1-2 days
 
-**Next Steps**: Fix 3 critical issues, validate all 24 maps, create screenshot tests
+**⚠️ Cannot Validate Phase 2 Systems**:
+- ❌ Multi-texture terrain (no terrain data extracted from war3map.w3e)
+- ❌ 97% doodad coverage (no doodad data extracted from war3map.doo)
+- ❌ Unit parser success rate (no unit data extracted from war3mapUnits.doo)
+- ❌ Performance targets (FPS meaningless on empty placeholder terrain)
+
+**Status**: Phase 2 validation HALTED until MPQ decompression blockers resolved
+
+**Validation Report**: See `PRPs/phase2-rendering/2.13-complete-map-validation-closure.md` for detailed findings
+
+**Next Steps**: Create PRP 2.14 "MPQ Multi-Compression Support", resolve blockers, re-run validation
 
 **Previous Phase: Phase 1 - Foundation (COMPLETE ✅)**
 Completion Date: 2025-10-10
@@ -322,12 +331,49 @@ See [e2e/README.md](./e2e/README.md) for detailed e2e testing documentation.
 
 This project is licensed under the MIT License - see [LICENSE](./LICENSE) file for details.
 
+## ⚠️ Known Issues & Future Work
+
+### W3U Parser (war3mapUnits.doo) - Reforged Format Limitation
+
+**Current Status**: Custom parser achieves 2.3% success rate (8/342 units) due to Reforged format incompatibility.
+
+**Issue**: Blizzard added skinId field (4 bytes) + padding (12 bytes) in Warcraft 3 v1.32 Reforged **WITHOUT incrementing version number**. Both our custom parser and the popular `wc3maptranslator` library (v4.0.4) fail with the same error:
+
+```
+RangeError: The value of "offset" is out of range. It must be >= 0 and <= 38766. Received 38769
+```
+
+**Current Solution**:
+- Integrated `wc3maptranslator` library with fallback to custom W3UParser
+- Custom parser improved with:
+  - Enhanced Reforged format detection (16-byte alignment check)
+  - Opportunistic skinId reading with validation
+  - Graceful handling of trailing fields
+
+**Recommended Future Work** (P1 - Post Phase 2):
+1. **Fork wc3maptranslator**: Create `@edgecraft/wc3maptranslator` fork
+   - Add Reforged skinId support (4 bytes)
+   - Add Reforged padding handling (12 bytes)
+   - Submit upstream PR to `wc3maptranslator` maintainers
+2. **Test with multiple Reforged maps**: Validate fix across various map versions
+3. **Update integration**: Switch W3XMapLoader to use forked library
+
+**Files**:
+- `src/formats/maps/w3x/W3UParser.ts` - Custom parser (improved but still limited)
+- `src/formats/maps/w3x/W3XMapLoader.ts:180-215` - Integration code
+- `node_modules/wc3maptranslator` - External library (also fails on Reforged)
+
+**Impact**: Units in Reforged maps render as placeholder boxes until parser is fixed. Game is still playable but with limited visual fidelity.
+
+---
+
 ## 🔗 Resources
 
 - [Babylon.js Documentation](https://doc.babylonjs.com/)
 - [StormLib Repository](https://github.com/ladislav-zezula/StormLib)
 - [CascLib Repository](https://github.com/ladislav-zezula/CascLib)
 - [MDX Viewer Reference](https://github.com/flowtsohg/mdx-m3-viewer)
+- [wc3maptranslator](https://github.com/ChiefOfGxBxL/WC3MapTranslator) - W3X format parser (needs Reforged fix)
 
 ## 🙏 Acknowledgments
 

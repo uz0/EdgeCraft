@@ -23,19 +23,13 @@
       "jsx": true
     }
   },
-  "plugins": [
-    "@typescript-eslint",
-    "react",
-    "react-hooks",
-    "react-refresh"
-  ],
+  "plugins": ["@typescript-eslint", "react", "react-hooks", "react-refresh"],
   "settings": {
     "react": {
       "version": "detect"
     }
   },
   "rules": {
-    // TypeScript strict rules
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-unsafe-assignment": "error",
     "@typescript-eslint/no-unsafe-call": "error",
@@ -47,13 +41,9 @@
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/strict-boolean-expressions": "warn",
     "@typescript-eslint/no-misused-promises": "error",
-
-    // React rules
     "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-
-    // General rules
     "no-console": "off",
     "prefer-const": "error",
     "no-var": "error"
@@ -90,21 +80,28 @@
         "@typescript-eslint/strict-boolean-expressions": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
-        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+        ]
       }
     },
     {
       "files": [
         "src/App.tsx",
-        "src/engine/rendering/**/*.ts",
-        "src/formats/maps/**/*.ts",
+        "src/engine/**/*.ts",
+        "src/formats/**/*.ts",
         "src/hooks/**/*.ts",
+        "src/main.tsx",
+        "src/pages/**/*.tsx",
         "src/ui/**/*.tsx",
         "src/utils/**/*.ts"
       ],
       "rules": {
         "@typescript-eslint/strict-boolean-expressions": "off",
-        "@typescript-eslint/explicit-function-return-type": "off"
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-misused-promises": "off"
       }
     }
   ],

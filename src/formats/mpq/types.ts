@@ -23,6 +23,8 @@ export interface MPQHeader {
   hashTableSize: number;
   /** Number of entries in block table */
   blockTableSize: number;
+  /** Offset where MPQ header starts in the file (0, 512, or 1024) */
+  headerOffset: number;
 }
 
 /**

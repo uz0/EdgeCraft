@@ -6,7 +6,6 @@
  */
 
 import { MPQParser } from '../../formats/mpq/MPQParser';
-import { StormJSAdapter } from '../../formats/mpq/StormJSAdapter';
 import { TGADecoder } from './TGADecoder';
 import { MapPreviewGenerator } from './MapPreviewGenerator';
 import type { RawMapData } from '../../formats/maps/types';
@@ -462,51 +461,6 @@ export class MapPreviewExtractor {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`[MapPreviewExtractor] MPQParser failed: ${errorMsg}`);
-
-      // Check if this is a decompression error (Huffman, ZLIB, PKZIP, etc.)
-      const isDecompressionError =
-        errorMsg.includes('Huffman') ||
-        errorMsg.includes('Invalid distance') ||
-        errorMsg.includes('ZLIB') ||
-        errorMsg.includes('PKZIP') ||
-        errorMsg.includes('decompression') ||
-        errorMsg.includes('unknown compression method') ||
-        errorMsg.includes('incorrect header check');
-
-      if (isDecompressionError) {
-        console.log(
-          `[MapPreviewExtractor] Detected decompression error, falling back to StormJS (WASM)...`
-        );
-
-        // Try StormJS adapter as fallback
-        try {
-          const isStormJSAvailable = await StormJSAdapter.isAvailable();
-
-          if (isStormJSAvailable) {
-            for (const fileName of previewFiles) {
-              const result = await StormJSAdapter.extractFile(buffer, fileName);
-
-              if (result.success && result.data) {
-                console.log(`[MapPreviewExtractor] ✅ StormJS extracted: ${fileName}`);
-
-                // Decode TGA to data URL
-                const dataUrl = this.tgaDecoder.decodeToDataURL(result.data);
-
-                if (dataUrl) {
-                  return { success: true, dataUrl };
-                }
-              }
-            }
-          } else {
-            console.warn('[MapPreviewExtractor] StormJS not available');
-          }
-        } catch (stormError) {
-          console.error(
-            '[MapPreviewExtractor] StormJS fallback failed:',
-            stormError instanceof Error ? stormError.message : String(stormError)
-          );
-        }
-      }
     }
 
     return {
