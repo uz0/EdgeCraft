@@ -65,15 +65,15 @@ export default defineConfig({
     navigationTimeout: 60000,
   },
 
-  // Configure Vite dev server (disabled - use existing dev server)
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3001',
-  //   reuseExistingServer: !process.env.CI,
-  //   timeout: 120000, // 2 minutes to start
-  //   stdout: 'ignore', // Reduce noise
-  //   stderr: 'pipe',
-  // },
+  // Configure Vite dev server
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3001',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000, // 2 minutes to start
+    stdout: 'ignore', // Reduce noise
+    stderr: 'pipe',
+  },
 
   // Test projects for different browsers
   projects: [
