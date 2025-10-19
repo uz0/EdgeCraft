@@ -11,7 +11,7 @@ export interface MapMetadata {
   name: string;
 
   /** File format */
-  format: 'w3x' | 'w3n' | 'sc2map';
+  format: 'w3x' | 'w3m' | 'sc2map';
 
   /** File size in bytes */
   sizeBytes: number;
@@ -48,7 +48,7 @@ export interface MapGalleryProps {
 
 type SortOption = 'name' | 'size' | 'format';
 type SizeFilter = 'all' | 'small' | 'medium' | 'large';
-type FormatFilter = 'all' | 'w3x' | 'w3n' | 'sc2map';
+type FormatFilter = 'all' | 'w3x' | 'w3m' | 'w3n' | 'sc2map';
 
 export const MapGallery: React.FC<MapGalleryProps> = ({
   maps,

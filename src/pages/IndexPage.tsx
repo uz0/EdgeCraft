@@ -14,8 +14,11 @@ import { W3NCampaignLoader } from '../formats/maps/w3n/W3NCampaignLoader';
 import type { RawMapData } from '../formats/maps/types';
 
 // Hardcoded map list (matching actual /maps folder)
+// W3X = Warcraft 3 Classic, W3M = Warcraft 3 Reforged, SC2Map = StarCraft 2
 const MAP_LIST = [
   { name: '[12]MeltedCrown_1.0.w3x', format: 'w3x' as const, sizeBytes: 667 * 1024 },
+  { name: 'asset_test.w3m', format: 'w3m' as const, sizeBytes: 22 * 1024 },
+  { name: 'trigger_test.w3m', format: 'w3m' as const, sizeBytes: 697 * 1024 },
   { name: 'Starlight.SC2Map', format: 'sc2map' as const, sizeBytes: 291 * 1024 },
   { name: 'asset_test.SC2Map', format: 'sc2map' as const, sizeBytes: 332 * 1024 },
   { name: 'trigger_test.SC2Map', format: 'sc2map' as const, sizeBytes: 1.1 * 1024 * 1024 },
@@ -77,7 +80,8 @@ export const IndexPage: React.FC = () => {
 
           let mapData: RawMapData | null = null;
 
-          if (map.format === 'w3x') {
+          if (map.format === 'w3x' || map.format === 'w3m') {
+            // W3X = Warcraft 3 Classic, W3M = Warcraft 3 Reforged (same parser)
             const loader = new W3XMapLoader();
             mapData = await loader.parse(file);
           } else if (map.format === 'w3n') {

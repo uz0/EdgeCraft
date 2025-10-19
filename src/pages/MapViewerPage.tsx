@@ -11,8 +11,10 @@ import { QualityPresetManager } from '../engine/rendering/QualityPresetManager';
 import * as BABYLON from '@babylonjs/core';
 
 // Map format detection
+// W3X = Warcraft 3 Classic, W3M = Warcraft 3 Reforged, SC2Map = StarCraft 2
 const getMapFormat = (filename: string): string => {
   if (filename.endsWith('.w3x')) return 'w3x';
+  if (filename.endsWith('.w3m')) return 'w3m';
   if (filename.endsWith('.w3n')) return 'w3n';
   if (filename.endsWith('.SC2Map')) return 'sc2map';
   return 'unknown';
