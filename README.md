@@ -160,7 +160,7 @@ npm test -- --testPathPattern="MapPreview|AllMapsPreview|TGADecoder"
 - **Integration**: 72+ tests across all 6 maps (1 W3X, 2 W3M, 3 SC2)
 - **Visual Validation**: Browser-based Chrome DevTools tests
 
-See [PRPs/map-preview-visual-regression-testing.md](PRPs/map-preview-visual-regression-testing.md) for detailed test specifications.
+See [PRPs/map-preview-and-basic-rendering.md](PRPs/map-preview-and-basic-rendering.md) for detailed test specifications.
 
 ## 🔧 Context Engineering Methodology
 
@@ -188,7 +188,7 @@ This project uses Context Engineering to ensure efficient AI-assisted developmen
 
 ## 📚 Development Roadmap
 
-Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requirement Proposals). See [PRPs/README.md](./PRPs/README.md) for the complete development plan.
+Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requirement Proposals). See the PRPs/ directory for all phase documentation.
 
 ### Current Phase: Phase 2 - Advanced Rendering & Visual Effects
 **Status**: 🔴 **BLOCKED** - Map file extraction broken
@@ -249,9 +249,12 @@ Performance: 187 draw calls, 58 FPS, 1842 MB memory
 | **9** | Multiplayer Infrastructure | 8 | ⏳ Pending |
 
 ### Getting Started with Development
-1. Review [PRPs/README.md](./PRPs/README.md) for detailed phase information
-2. Check Phase 1 completion: [PRPs/phase1-foundation/README.md](./PRPs/phase1-foundation/README.md)
-3. Review Phase 2 planning: [PRPs/phase2-rendering/](./PRPs/phase2-rendering/)
+1. Review PRPs/ directory for detailed phase information
+2. Check current phase status in README.md
+3. Review active PRPs:
+   - [Map Format Parsers and Loaders](PRPs/map-format-parsers-and-loaders.md)
+   - [Map Preview and Basic Rendering](PRPs/map-preview-and-basic-rendering.md)
+   - [Bootstrap Development Environment](PRPs/bootstrap-development-environment.md)
 4. Execute PRPs that can run in parallel within the same phase
 5. Use specialist agents for domain-specific work
 

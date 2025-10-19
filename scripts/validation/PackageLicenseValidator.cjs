@@ -54,10 +54,22 @@ const BLOCKED_LICENSES = [
 function isCompatibleLicense(license) {
   if (!license) return false;
 
-  // Handle SPDX expressions (e.g., "MIT OR Apache-2.0")
-  const licenses = license.split(/\s+OR\s+/i);
+  // Handle SPDX expressions with AND/OR operators
+  // For "AND" expressions, ALL licenses must be compatible
+  // For "OR" expressions, AT LEAST ONE license must be compatible
 
-  // At least one license must be compatible
+  // First check for AND expressions (stricter requirement)
+  if (/\s+AND\s+/i.test(license)) {
+    const andLicenses = license.split(/\s+AND\s+/i);
+    // For AND, all licenses must be compatible
+    return andLicenses.every(lic => {
+      const normalized = lic.trim().replace(/[()]/g, '');
+      return COMPATIBLE_LICENSES.some(compat => normalized.includes(compat));
+    });
+  }
+
+  // Handle OR expressions (at least one must be compatible)
+  const licenses = license.split(/\s+OR\s+/i);
   return licenses.some(lic => {
     const normalized = lic.trim().replace(/[()]/g, '');
     return COMPATIBLE_LICENSES.some(compat => normalized.includes(compat));
