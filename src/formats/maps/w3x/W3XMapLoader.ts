@@ -12,7 +12,6 @@ import { W3UParser } from './W3UParser';
 import type { W3ODoodad } from './types';
 import type { W3UUnit } from './types';
 import type {
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   IMapLoader,
   RawMapData,
   MapInfo,
@@ -42,7 +41,6 @@ export class W3XMapLoader implements IMapLoader {
         return result;
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
 
       // Check if this is a decompression error that StormJS can handle

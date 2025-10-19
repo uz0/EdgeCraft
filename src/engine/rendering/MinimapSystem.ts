@@ -79,7 +79,6 @@ export class MinimapSystem {
   private renderTarget: BABYLON.RenderTargetTexture | null = null;
   private minimapCamera: BABYLON.FreeCamera | null = null;
   // @ts-ignore - Reserved for future enable/disable implementation
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   private _isEnabled: boolean = false;
   private mapBounds: {
     minX: number;

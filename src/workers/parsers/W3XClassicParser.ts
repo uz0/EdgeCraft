@@ -47,7 +47,7 @@ export class W3XClassicParser {
       onProgress(25, 'extracting', 'Searching for embedded preview...');
       const embeddedPreview = await this.extractEmbeddedPreview(mpqParser, mapBuffer, onProgress);
 
-      if (embeddedPreview) {
+      if (embeddedPreview !== null && embeddedPreview !== '') {
         onProgress(100, 'encoding', 'Embedded preview extracted');
         return {
           dataUrl: embeddedPreview,
@@ -64,7 +64,6 @@ export class W3XClassicParser {
         source: 'generated',
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       throw new Error(
         `W3X parsing failed: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -113,10 +112,10 @@ export class W3XClassicParser {
           const dataUrl = await decoder.decodeToDataURL(fileData.data);
 
           console.log(
-            `[W3XClassicParser] TGA decode result: ${dataUrl ? `SUCCESS (${dataUrl.length} chars)` : 'FAILED (null)'}`
+            `[W3XClassicParser] TGA decode result: ${dataUrl !== null && dataUrl !== '' ? `SUCCESS (${dataUrl.length} chars)` : 'FAILED (null)'}`
           );
 
-          if (dataUrl) {
+          if (dataUrl !== null && dataUrl !== '') {
             console.log(`[W3XClassicParser] 🎉 Returning TGA preview!`);
             return dataUrl;
           }
@@ -130,16 +129,15 @@ export class W3XClassicParser {
           const dataUrl = decoder.decodeToDataURL(fileData.data);
 
           console.log(
-            `[W3XClassicParser] BLP decode result: ${dataUrl ? `SUCCESS (${dataUrl.length} chars)` : 'FAILED (null)'}`
+            `[W3XClassicParser] BLP decode result: ${dataUrl !== null && dataUrl !== '' ? `SUCCESS (${dataUrl.length} chars)` : 'FAILED (null)'}`
           );
 
-          if (dataUrl) {
+          if (dataUrl !== null && dataUrl !== '') {
             console.log(`[W3XClassicParser] 🎉 Returning BLP preview!`);
             return dataUrl;
           }
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         // Log error and continue to next preview file
         console.error(`[W3XClassicParser] ❌ Error extracting ${fileName}:`, error);
         continue;
@@ -204,7 +202,6 @@ export class W3XClassicParser {
 
       return dataUrl;
     } catch (error) {
-      // eslint-disable-line no-empty
       // If terrain generation fails, create a simple placeholder
       return this.createPlaceholder('W3X Classic', onProgress);
     }
@@ -329,9 +326,9 @@ export class W3XClassicParser {
    * Convert Blob to data URL
    */
   private blobToDataUrl(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = (): void => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });

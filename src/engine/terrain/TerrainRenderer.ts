@@ -217,7 +217,6 @@ void main(void) {
         }
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       this.loadStatus = 'error' as TerrainLoadStatus;
       return {
         status: this.loadStatus,
@@ -250,8 +249,6 @@ void main(void) {
           normalTexture.vScale = 16;
           this.material.bumpTexture = normalTexture;
         } catch {
-          // eslint-disable-line no-empty
-          // eslint-disable-line no-empty
           // Normal map not available, continue without it
         }
 
@@ -262,13 +259,10 @@ void main(void) {
           roughnessTexture.vScale = 16;
           this.material.specularTexture = roughnessTexture;
         } catch {
-          // eslint-disable-line no-empty
-          // eslint-disable-line no-empty
           // Roughness map not available, use default specular
           this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         console.warn(
           `[TerrainRenderer] Failed to load texture for ${options.textureId}, using fallback color`,
           error
@@ -343,7 +337,6 @@ void main(void) {
         );
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       this.loadStatus = 'error' as TerrainLoadStatus;
       return {
         status: this.loadStatus,
@@ -374,7 +367,6 @@ void main(void) {
         texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
         textures.push(texture);
       } catch (error) {
-        // eslint-disable-line no-empty
         const textureId = textureIds[i] ?? '';
         console.error(
           `[TerrainRenderer] ❌ Failed to load texture slot ${i}: "${textureId}"`,

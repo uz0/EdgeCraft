@@ -22,7 +22,6 @@ import * as BABYLON from '@babylonjs/core';
 import type { RawMapData } from '../../formats/maps/types';
 import { TerrainRenderer } from '../terrain/TerrainRenderer';
 import { AssetLoader } from '../assets/AssetLoader';
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
 export interface PreviewConfig {
   /** Output width */
@@ -84,7 +83,6 @@ export class MapPreviewGenerator {
         throw new Error('WebGL is not supported in this browser');
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[MapPreviewGenerator] ❌ Failed to create Engine:', error);
       throw error;
     }
@@ -213,7 +211,6 @@ export class MapPreviewGenerator {
           clearTimeout(timeoutId);
           resolve(canvasDataUrl);
         } catch (error) {
-          // eslint-disable-line no-empty
           console.error(`[MapPreviewGenerator] Screenshot capture error:`, error);
           reject(error);
         }
@@ -230,7 +227,6 @@ export class MapPreviewGenerator {
         generationTimeMs,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[MapPreviewGenerator] ❌ Preview generation failed:', errorMsg, error);
 

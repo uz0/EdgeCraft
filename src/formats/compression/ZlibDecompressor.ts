@@ -78,7 +78,6 @@ export class ZlibDecompressor implements IDecompressor {
           decompressedArray.byteOffset + decompressedArray.byteLength
         ) as ArrayBuffer;
       } catch (error) {
-        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`[ZlibDecompressor] ❌ Decompression failed: ${errorMsg}`);
         throw new Error(`ZLIB decompression failed: ${errorMsg}`);

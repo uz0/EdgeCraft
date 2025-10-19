@@ -132,7 +132,6 @@ export class MapRendererCore {
         renderTimeMs,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('Map loading failed:', errorMsg);
 

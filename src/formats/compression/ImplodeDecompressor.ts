@@ -113,7 +113,6 @@ export class ImplodeDecompressor implements IDecompressor {
         }
         return output.buffer.slice(output.byteOffset, output.byteOffset + output.byteLength);
       } catch (error) {
-        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`[ImplodeDecompressor] ❌ Decompression failed: ${errorMsg}`);
         throw new Error(`IMPLODE decompression failed: ${errorMsg}`);

@@ -110,7 +110,7 @@ async function initializeStormLib(): Promise<any> {
         resolve(instance);
       }
     } catch (error) {
-      // eslint-disable-line no-empty
+     
       console.error('[StormJS Browser] ❌ Failed to initialize:', error);
       initPromise = null;
       reject(error);

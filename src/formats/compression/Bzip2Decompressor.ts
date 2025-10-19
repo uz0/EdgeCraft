@@ -80,7 +80,6 @@ export class Bzip2Decompressor implements IDecompressor {
           decompressedArray.byteOffset + decompressedArray.byteLength
         ) as ArrayBuffer;
       } catch (error) {
-        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('[Bzip2Decompressor] Decompression failed:', errorMsg);
         throw new Error(`BZip2 decompression failed: ${errorMsg}`);

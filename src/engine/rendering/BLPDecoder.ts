@@ -66,7 +66,6 @@ export class BLPDecoder {
         data: imageData,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',

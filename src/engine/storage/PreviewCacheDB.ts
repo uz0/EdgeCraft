@@ -85,7 +85,6 @@ class PreviewCacheDB {
         };
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[PreviewCacheDB] Get operation failed:', error);
       return null;
     }
@@ -112,7 +111,6 @@ class PreviewCacheDB {
         };
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[PreviewCacheDB] Set operation failed:', error);
       throw error;
     }
@@ -139,7 +137,6 @@ class PreviewCacheDB {
         };
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[PreviewCacheDB] Delete operation failed:', error);
       throw error;
     }
@@ -166,7 +163,6 @@ class PreviewCacheDB {
         };
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[PreviewCacheDB] Clear operation failed:', error);
       throw error;
     }
@@ -194,7 +190,6 @@ class PreviewCacheDB {
         };
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[PreviewCacheDB] GetAll operation failed:', error);
       return [];
     }
@@ -212,7 +207,6 @@ class PreviewCacheDB {
         totalSize,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[PreviewCacheDB] Failed to get stats:', error);
       return { count: 0, totalSize: 0 };
     }

@@ -151,7 +151,6 @@ async function generatePreview(request: GeneratePreviewRequest): Promise<void> {
     const extractTimeMs = performance.now() - startTime;
     sendComplete(mapId, dataUrl, source, extractTimeMs);
   } catch (error) {
-    // eslint-disable-line no-empty
     sendError(mapId, error instanceof Error ? error : new Error(String(error)));
   }
 }
@@ -159,7 +158,7 @@ async function generatePreview(request: GeneratePreviewRequest): Promise<void> {
 /**
  * Worker message handler
  */
-self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
+self.onmessage = async (e: MessageEvent<WorkerMessage>): Promise<void> => {
   try {
     const message = e.data;
     switch (message.type) {
@@ -172,7 +171,6 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         console.error('[PreviewWorker] ❌ Unknown message type:', message);
     }
   } catch (error) {
-    // eslint-disable-line no-empty
     console.error('[PreviewWorker] 🔥 FATAL ERROR in message handler:', error);
     // Send error to main thread if possible (only for GENERATE_PREVIEW messages)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
@@ -185,24 +183,20 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 /**
  * Global error handlers to catch uncaught errors
  */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-self.onerror = (event: ErrorEvent) => {
+self.onerror = (event: ErrorEvent): boolean => {
   console.error('[PreviewWorker] 🔥 UNCAUGHT ERROR:', {
     message: event.message,
     filename: event.filename,
     lineno: event.lineno,
     colno: event.colno,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    error: event.error,
+    error: event.error instanceof Error ? event.error.message : String(event.error),
   });
   return false; // Let the error propagate
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-self.onunhandledrejection = (event: PromiseRejectionEvent) => {
+self.onunhandledrejection = (event: PromiseRejectionEvent): void => {
   console.error('[PreviewWorker] 🔥 UNHANDLED PROMISE REJECTION:', {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    reason: event.reason,
+    reason: event.reason instanceof Error ? event.reason.message : String(event.reason),
     promise: event.promise,
   });
 };

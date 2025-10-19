@@ -83,7 +83,6 @@ export class ModelLoader {
         animationGroups: result.animationGroups,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       throw new Error(
         `Failed to load glTF model: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

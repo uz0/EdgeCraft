@@ -85,7 +85,6 @@ export class SC2Parser {
       const parserError = doc.querySelector('parsererror');
       return !parserError;
     } catch {
-      // eslint-disable-line no-empty
       return false;
     }
   }

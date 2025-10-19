@@ -46,7 +46,7 @@ export class SC2MapParser {
       onProgress(25, 'extracting', 'Searching for SC2 preview...');
       const embeddedPreview = await this.extractEmbeddedPreview(mpqParser, onProgress);
 
-      if (embeddedPreview) {
+      if (embeddedPreview !== null && embeddedPreview !== '') {
         onProgress(100, 'encoding', 'SC2 preview extracted');
         return {
           dataUrl: embeddedPreview,
@@ -63,7 +63,6 @@ export class SC2MapParser {
         source: 'generated',
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       throw new Error(
         `SC2 parsing failed: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -99,7 +98,7 @@ export class SC2MapParser {
         const decoder = new TGADecoder();
         const dataUrl = await decoder.decodeToDataURL(fileData.data);
 
-        if (dataUrl) {
+        if (dataUrl !== null && dataUrl !== '') {
           // Validate square requirement for SC2
           const isSquare = await this.validateSquare(dataUrl);
           if (!isSquare) {
@@ -110,7 +109,6 @@ export class SC2MapParser {
           return dataUrl;
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         // Continue to next file
         continue;
       }
@@ -123,12 +121,12 @@ export class SC2MapParser {
    * Validate that image is square (width === height)
    */
   private async validateSquare(dataUrl: string): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise((resolve): void => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = (): void => {
         resolve(img.width === img.height);
       };
-      img.onerror = () => resolve(false);
+      img.onerror = (): void => resolve(false);
       img.src = dataUrl;
     });
   }
@@ -189,7 +187,6 @@ export class SC2MapParser {
 
       return dataUrl;
     } catch (error) {
-      // eslint-disable-line no-empty
       // If terrain generation fails, create a simple placeholder
       return this.createPlaceholder('SC2', onProgress);
     }
@@ -228,9 +225,9 @@ export class SC2MapParser {
    * Convert Blob to data URL
    */
   private blobToDataUrl(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = (): void => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });

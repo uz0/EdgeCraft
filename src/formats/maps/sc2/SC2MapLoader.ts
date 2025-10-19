@@ -51,7 +51,6 @@ export class SC2MapLoader implements IMapLoader {
         return result;
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
 
       // Check if this is a decompression error

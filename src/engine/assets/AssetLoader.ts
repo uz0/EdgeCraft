@@ -53,7 +53,6 @@ export class AssetLoader {
       }
       this.manifest = (await response.json()) as AssetManifest;
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error('[AssetLoader] Failed to load manifest:', error);
       this.manifest = { textures: {}, models: {} };
     }
@@ -80,7 +79,6 @@ export class AssetLoader {
       this.loadedTextures.set(id, texture);
       return texture;
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(`[AssetLoader] Failed to load texture ${id}:`, error);
       return this.createFallbackTexture();
     }
@@ -123,7 +121,6 @@ export class AssetLoader {
       const cloned = mesh.clone(`${id}_instance_${Date.now()}`, null);
       return cloned !== null ? cloned : mesh;
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(`[AssetLoader] Failed to load model ${id}:`, error);
       return this.createFallbackBox();
     }

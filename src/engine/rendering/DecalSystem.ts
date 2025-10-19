@@ -111,7 +111,6 @@ export class DecalSystem {
   private maxDecals: number;
   private nextDecalId: number = 0;
   // @ts-ignore - Reserved for future mesh targeting implementation
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   private _targetMeshes: BABYLON.AbstractMesh[] = [];
 
   constructor(scene: BABYLON.Scene, config: { quality: QualityPreset }) {

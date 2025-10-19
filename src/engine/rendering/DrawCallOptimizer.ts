@@ -158,7 +158,6 @@ export class DrawCallOptimizer {
 
       return mergedMesh;
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(`Failed to merge group ${materialKey}:`, error);
       return null;
     }

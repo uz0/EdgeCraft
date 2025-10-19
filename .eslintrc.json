@@ -98,16 +98,15 @@
     },
     {
       "files": [
-        "src/App.tsx",
-        "src/engine/rendering/**/*.ts",
-        "src/formats/maps/**/*.ts",
-        "src/hooks/**/*.ts",
-        "src/ui/**/*.tsx",
-        "src/utils/**/*.ts"
+        "src/**/*.ts",
+        "src/**/*.tsx"
       ],
+      "excludedFiles": ["tests/**"],
       "rules": {
         "@typescript-eslint/strict-boolean-expressions": "off",
-        "@typescript-eslint/explicit-function-return-type": "off"
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "no-empty": "off"
       }
     }
   ],

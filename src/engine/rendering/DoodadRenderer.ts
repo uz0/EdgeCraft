@@ -178,7 +178,6 @@ export class DoodadRenderer {
         boundingRadius: 5, // TODO: Calculate from mesh bounds
       });
     } catch (error) {
-      // eslint-disable-line no-empty
       console.warn(`[DoodadRenderer] Failed to load doodad type ${typeId}, using fallback`, error);
 
       // Fallback to placeholder mesh

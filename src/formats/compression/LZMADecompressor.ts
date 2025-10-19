@@ -101,7 +101,6 @@ export class LZMADecompressor implements IDecompressor {
           resolve(arrayBuffer);
         });
       } catch (error) {
-        // eslint-disable-line no-empty
         reject(
           new Error(
             `LZMA decompression error: ${error instanceof Error ? error.message : 'Unknown error'}`

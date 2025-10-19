@@ -62,7 +62,6 @@ export class W3UParser {
         units.push(unit);
         successCount++;
       } catch (error) {
-        // eslint-disable-line no-empty
         failCount++;
 
         // Only log first 5 errors to avoid spam

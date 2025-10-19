@@ -88,18 +88,17 @@ export class WorkerPoolManager {
         currentTask: null,
       };
 
-      worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
+      worker.onmessage = (e: MessageEvent<WorkerMessage>): void => {
         this.handleWorkerMessage(workerState, e.data);
       };
 
-      worker.onerror = (error) => {
+      worker.onerror = (error: ErrorEvent): void => {
         this.handleWorkerError(workerState, error);
       };
 
       this.workers[id] = workerState;
       this.stats.activeWorkers++;
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(`[WorkerPoolManager] Failed to spawn worker ${id}:`, error);
     }
   }

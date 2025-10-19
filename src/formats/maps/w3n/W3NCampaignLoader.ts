@@ -73,7 +73,6 @@ export class W3NCampaignLoader implements IMapLoader {
         campaignInfo = w3fParser.parse();
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       // Campaign info is optional, continue without it
       // This is common with corrupted campaigns or unusual compression
       console.warn(
@@ -87,7 +86,6 @@ export class W3NCampaignLoader implements IMapLoader {
     try {
       embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(
         '[W3NCampaignLoader] Failed to extract embedded maps:',
         error instanceof Error ? error.message : error
@@ -107,7 +105,6 @@ export class W3NCampaignLoader implements IMapLoader {
     try {
       mapData = await this.w3xLoader.parse(firstMap.data);
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(
         '[W3NCampaignLoader] Failed to parse first map:',
         error instanceof Error ? error.message : error
@@ -241,7 +238,6 @@ export class W3NCampaignLoader implements IMapLoader {
         } else {
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         console.warn(`[W3NCampaignLoader] Failed to check block ${index}:`, error);
         continue;
       }
@@ -308,7 +304,6 @@ export class W3NCampaignLoader implements IMapLoader {
             index++;
           }
         } catch (error) {
-          // eslint-disable-line no-empty
           const errorMsg = error instanceof Error ? error.message : String(error);
           // Skip ADPCM/SPARSE audio files - they require StormJS (WASM) to decompress
           // These are not map files anyway, so we can safely ignore them
@@ -325,7 +320,6 @@ export class W3NCampaignLoader implements IMapLoader {
         }
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
       // Only log non-ADPCM errors (ADPCM is expected and not critical)
       if (
@@ -448,7 +442,6 @@ export class W3NCampaignLoader implements IMapLoader {
         } else {
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         // Skip files with unsupported compression - they're not map files anyway
         // Common issues: ADPCM audio (0x40), SPARSE (0x20), multi-algorithm (0x1c)
         const errorMsg = error instanceof Error ? error.message : String(error);
@@ -562,7 +555,6 @@ export class W3NCampaignLoader implements IMapLoader {
       const w3fParser = new W3FCampaignInfoParser(w3fData.data);
       return w3fParser.parse();
     } catch (error) {
-      // eslint-disable-line no-empty
       console.warn('Failed to parse campaign info:', error);
       return null;
     }

@@ -207,7 +207,6 @@ export class BatchMapLoader {
           this.config.onProgress(results.get(task.id)!);
           succeeded++;
         } catch (error) {
-          // eslint-disable-line no-empty
           const errorMsg = error instanceof Error ? error.message : String(error);
           results.set(task.id, {
             taskId: task.id,

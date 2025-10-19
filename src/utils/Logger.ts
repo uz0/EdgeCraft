@@ -219,9 +219,7 @@ export class Logger {
     const _style = styles[level]; // Reserved for future browser color styling
 
     if (args.length > 0) {
-      // eslint-disable-next-line no-console
     } else {
-      // eslint-disable-next-line no-console
     }
   }
 

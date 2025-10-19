@@ -13,9 +13,7 @@
  */
 
 // Dynamic script loading to avoid WASM/CommonJS issues
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let StormLibModule: any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let StormJSWrappers: { FS: any; MPQ: any; File: any } | null = null;
 let isInitialized = false;
 let initPromise: Promise<void> | null = null;
@@ -108,7 +106,7 @@ export class StormJSAdapter {
       }
       return bytes.buffer;
     } catch (error) {
-      // eslint-disable-line no-empty
+     
       console.error('[StormJSAdapter] ❌ Failed to decode WASM binary:', error);
       throw error;
     }
@@ -136,7 +134,7 @@ export class StormJSAdapter {
         (0, eval)(code);
         return;
       } catch (error) {
-        // eslint-disable-line no-empty
+       
         throw new Error(`Failed to load script in worker: ${src}. Error: ${error}`);
       }
     } else {
@@ -374,7 +372,7 @@ export class StormJSAdapter {
           (currentReleaseLock as () => void)();
         }
       } catch (error) {
-        // eslint-disable-line no-empty
+       
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error('[StormJSAdapter] ❌ Failed to load StormJS:', errorMsg);
 
@@ -405,7 +403,7 @@ export class StormJSAdapter {
       await this.initialize();
       return true;
     } catch (error) {
-      // eslint-disable-line no-empty
+     
       console.error(
         '[StormJSAdapter] ❌ StormJS not available:',
         error instanceof Error ? error.message : String(error)
@@ -441,8 +439,8 @@ export class StormJSAdapter {
         // Create mount point if it doesn't exist
         try {
           FS.mkdir(this.VIRTUAL_MOUNT_PATH);
-        } catch { // eslint-disable-line no-empty
-          // eslint-disable-line no-empty
+        } catch {
+         
           // Directory might already exist
         }
 
@@ -478,13 +476,13 @@ export class StormJSAdapter {
         // Cleanup virtual filesystem
         try {
           FS.unlink(this.VIRTUAL_ARCHIVE_PATH);
-        } catch { // eslint-disable-line no-empty
-          // eslint-disable-line no-empty
+        } catch {
+         
           // Ignore cleanup errors
         }
       }
     } catch (error) {
-      // eslint-disable-line no-empty
+     
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error(`[StormJSAdapter] ❌ Extraction failed:`, errorMsg);
 
@@ -526,8 +524,8 @@ export class StormJSAdapter {
       try {
         try {
           FS.mkdir(this.VIRTUAL_MOUNT_PATH);
-        } catch { // eslint-disable-line no-empty
-          // eslint-disable-line no-empty
+        } catch {
+         
           // Directory might already exist
         }
 
@@ -557,7 +555,7 @@ export class StormJSAdapter {
                 file.close();
               }
             } catch (error) {
-              // eslint-disable-line no-empty
+             
               const errorMsg = error instanceof Error ? error.message : String(error);
               results.set(fileName, {
                 success: false,
@@ -571,13 +569,13 @@ export class StormJSAdapter {
       } finally {
         try {
           FS.unlink(this.VIRTUAL_ARCHIVE_PATH);
-        } catch { // eslint-disable-line no-empty
-          // eslint-disable-line no-empty
+        } catch {
+         
           // Ignore cleanup errors
         }
       }
     } catch (error) {
-      // eslint-disable-line no-empty
+     
       const errorMsg = error instanceof Error ? error.message : String(error);
       const errorResult: StormJSExtractResult = {
         success: false,

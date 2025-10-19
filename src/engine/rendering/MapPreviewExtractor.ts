@@ -165,7 +165,6 @@ export class MapPreviewExtractor {
           return fileData.data;
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         // Log but continue - might be wrong compression detection
         const errMsg = error instanceof Error ? error.message : String(error);
         if (!errMsg.includes('ADPCM') && !errMsg.includes('SPARSE')) {
@@ -240,7 +239,6 @@ export class MapPreviewExtractor {
         extractTimeMs: performance.now() - startTime,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       const totalTime = performance.now() - startTime;
       console.error(
@@ -351,7 +349,6 @@ export class MapPreviewExtractor {
               } else {
               }
             } catch (error) {
-              // eslint-disable-line no-empty
               const errorMsg = error instanceof Error ? error.message : String(error);
               console.error(
                 `[MapPreviewExtractor] W3N: ❌ Failed to extract block ${index}:`,
@@ -363,7 +360,6 @@ export class MapPreviewExtractor {
         } else {
         }
       } catch (error) {
-        // eslint-disable-line no-empty
         const errorMsg = error instanceof Error ? error.message : String(error);
         console.error(`[MapPreviewExtractor] W3N extraction failed:`, errorMsg);
         // Fall through to generation fallback
@@ -427,7 +423,6 @@ export class MapPreviewExtractor {
         }
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`[MapPreviewExtractor] MPQParser extraction failed: ${errorMsg}`);
     }

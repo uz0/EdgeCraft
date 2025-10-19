@@ -95,7 +95,6 @@ export class MPQParser {
       try {
         hashTable = this.readHashTable(header);
       } catch (error) {
-        // eslint-disable-line no-empty
         console.error('[MPQParser] Error reading hash table:', error);
         throw error;
       }
@@ -105,7 +104,6 @@ export class MPQParser {
       try {
         blockTable = this.readBlockTable(header);
       } catch (error) {
-        // eslint-disable-line no-empty
         console.error('[MPQParser] Error reading block table:', error);
         throw error;
       }
@@ -124,7 +122,6 @@ export class MPQParser {
         parseTimeMs: performance.now() - startTime,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -237,7 +234,6 @@ export class MPQParser {
         parseTimeMs: performance.now() - startTime,
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       return {
         success: false,
         files: [],
@@ -1226,7 +1222,6 @@ export class MPQParser {
         }
       }
     } catch (error) {
-      // eslint-disable-line no-empty
       console.error(
         `[MPQParser] ❌ Decompression failed for flags 0x${compressionFlags.toString(16)}:`,
         error
@@ -1537,7 +1532,6 @@ export class MPQParser {
 
       return fileList;
     } catch (error) {
-      // eslint-disable-line no-empty
       // Listfile not found or error - return common names as fallback
       return this.generateCommonMapNamesForStreaming();
     }

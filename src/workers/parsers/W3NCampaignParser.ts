@@ -49,7 +49,7 @@ export class W3NCampaignParser {
       onProgress(25, 'extracting', 'Searching for campaign icon...');
       const campaignIcon = await this.extractCampaignIcon(mpqParser, campaignBuffer, onProgress);
 
-      if (campaignIcon) {
+      if (campaignIcon !== null && campaignIcon !== '') {
         onProgress(100, 'encoding', 'Campaign icon extracted');
         return {
           dataUrl: campaignIcon,
@@ -65,7 +65,7 @@ export class W3NCampaignParser {
         onProgress
       );
 
-      if (nestedPreview) {
+      if (nestedPreview !== null && nestedPreview !== '') {
         onProgress(100, 'encoding', 'Nested map preview extracted');
         return {
           dataUrl: nestedPreview,
@@ -82,7 +82,6 @@ export class W3NCampaignParser {
         source: 'generated',
       };
     } catch (error) {
-      // eslint-disable-line no-empty
       throw new Error(
         `W3N parsing failed: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -110,7 +109,6 @@ export class W3NCampaignParser {
       // For now, return null
       return null;
     } catch (error) {
-      // eslint-disable-line no-empty
       return null;
     }
   }
@@ -135,7 +133,7 @@ export class W3NCampaignParser {
       // Find first .w3x or .w3m file
       const mapFile = files.find((f) => f.endsWith('.w3x') || f.endsWith('.w3m'));
 
-      if (!mapFile) {
+      if (mapFile === null || mapFile === undefined) {
         return null;
       }
 
@@ -163,19 +161,17 @@ export class W3NCampaignParser {
           if (previewData) {
             const decoder = new TGADecoder();
             const dataUrl = await decoder.decodeToDataURL(previewData.data);
-            if (dataUrl) {
+            if (dataUrl !== null && dataUrl !== '') {
               return dataUrl;
             }
           }
         } catch (error) {
-          // eslint-disable-line no-empty
           continue;
         }
       }
 
       return null;
     } catch (error) {
-      // eslint-disable-line no-empty
       return null;
     }
   }
@@ -232,7 +228,6 @@ export class W3NCampaignParser {
 
       return dataUrl;
     } catch (error) {
-      // eslint-disable-line no-empty
       // If generation fails, create simple placeholder
       return this.createPlaceholder('W3N Campaign', onProgress);
     }
@@ -271,9 +266,9 @@ export class W3NCampaignParser {
    * Convert Blob to data URL
    */
   private blobToDataUrl(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = (): void => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });

@@ -142,7 +142,6 @@ export class QualityPresetManager {
 
   // Auto-adjustment
   // @ts-ignore - Reserved for future auto-adjustment features
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   private _enableAutoAdjust: boolean = false;
   private targetFPS: number = 60;
   private fpsSamples: number[] = [];
