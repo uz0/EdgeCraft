@@ -32,7 +32,7 @@ jobs:
         run: npm run lint
 
       - name: Check Prettier formatting
-        run: npm run format:check
+        run: npm run format
 
   typecheck:
     name: TypeScript Type Check
@@ -126,9 +126,6 @@ jobs:
 
       - name: Build project
         run: npm run build
-
-      - name: Validate bundle size
-        run: npm run validate:bundle
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

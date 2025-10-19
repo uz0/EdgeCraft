@@ -39,6 +39,66 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 
 ---
 
+## 🏗️ Implementation Breakdown
+
+**Phase 1: Core Rendering Pipeline**
+- [x] Babylon.js scene setup and engine initialization
+- [x] RTS camera controls (arc rotate, pan, zoom)
+- [x] Basic terrain mesh generation from height maps
+- [ ] **BLOCKED**: Multi-texture splatmap shader (single texture fallback)
+- [x] Light system (directional + ambient)
+
+**Phase 2: Doodad Rendering**
+- [x] glTF model loader integration
+- [x] Instanced mesh rendering for performance
+- [x] Doodad placement from W3D data
+- [x] Asset mapping system (34/93 types mapped - 37%)
+- [ ] **INCOMPLETE**: Download and map remaining 56 doodad types (60% missing)
+
+**Phase 3: Map Preview Generation**
+- [x] Offscreen RTT (Render-To-Texture) at 512x512
+- [x] Auto-capture camera positioning
+- [x] Preview caching system
+- [x] Map Gallery UI with thumbnails
+- [x] Loading states and progress indicators
+
+**Phase 4: Testing & Validation**
+- [x] E2E tests with Playwright
+- [x] Unit tests (>80% coverage)
+- [ ] **PENDING**: Visual regression tests for 24 maps
+- [x] Performance benchmarks (60 FPS achieved @ 256x256)
+
+---
+
+## ⏱️ Timeline
+
+**Target Completion**: TBD (blocked by 3 critical issues)
+**Current Progress**: 70%
+**Phase 1 (Core Pipeline)**: 🟡 80% Complete (terrain shader blocked)
+**Phase 2 (Doodads)**: 🟡 37% Complete (56 asset types missing)
+**Phase 3 (Preview Gen)**: ✅ 100% Complete
+**Phase 4 (Testing)**: 🟡 75% Complete (visual regression pending)
+
+**Remaining Work**:
+1. Fix terrain multi-texture splatmap (2-3 days)
+2. Download and map 40-50 doodad types from Kenney.nl (4-6 hours)
+3. Fix W3U unit parser for unit rendering (1-2 days)
+4. Visual regression test suite for 24 maps (2 days)
+
+---
+
+## 📊 Success Metrics
+
+**How do we measure success?**
+- Map Rendering Accuracy: 24/24 maps render correctly ❌ **BLOCKED** (terrain textures broken)
+- Doodad Coverage: 100% of doodad types mapped ❌ 37% (34/93 types)
+- Unit Rendering: Units visible on maps ❌ **BLOCKED** (0.3% parser success)
+- Performance: 60 FPS @ 256x256 terrain ✅ Achieved
+- Preview Generation: <5s per map ✅ Achieved (avg 2.3s)
+- Test Coverage: >80% unit tests ✅ Achieved (87%)
+
+---
+
 ## 🧪 Quality Gates (AQA)
 
 **Required checks before marking complete:**
@@ -163,3 +223,17 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 - Date: Pending
 - Status: 🟡 In Progress (70% complete)
 - Blockers: 3 critical issues preventing full map rendering
+
+---
+
+## 🚪 Exit Criteria
+
+**What signals work is DONE?**
+- [ ] **All 24 maps render with correct terrain textures** (P0 blocker)
+- [ ] **60% → 100% doodad coverage** (download and map 56 missing types)
+- [ ] **Unit rendering functional** (depends on W3U parser rewrite)
+- [x] 60 FPS performance maintained
+- [x] Map preview generation working (<5s per map)
+- [ ] **Visual regression test suite for 24 maps**
+- [x] Code review approved (partial - pending blockers resolution)
+- [ ] **PRP status updated to ✅ Complete** (blocked by 3 critical issues)
