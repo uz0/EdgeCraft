@@ -1,12 +1,17 @@
 /**
  * Simple logger utility to suppress debug logs in production
+ *
+ * Usage:
+ * - logger.log() - Debug logs (only in DEV mode)
+ * - logger.warn() - Warnings (always shown)
+ * - logger.error() - Errors (always shown)
  */
 
-const DEBUG = import.meta.env.VITE_DEBUG === 'true';
+const IS_DEV = import.meta.env.DEV;
 
 export const logger = {
   log: (...args: unknown[]): void => {
-    if (DEBUG) console.log(...args);
+    if (IS_DEV) console.log(...args);
   },
   warn: (...args: unknown[]): void => {
     console.warn(...args);
