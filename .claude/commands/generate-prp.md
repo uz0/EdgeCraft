@@ -79,7 +79,7 @@
 Use Task tool:
 ```javascript
 Task({
-  subagent_type: "general-purpose",
+  subagent_type: "system-analyst",
   description: "System Analyst fills DoR",
   prompt: `You are a System Analyst.
 
@@ -130,7 +130,7 @@ Save changes directly to file.`
 Use Task tool:
 ```javascript
 Task({
-  subagent_type: "general-purpose",
+  subagent_type: "aqa-engineer",
   description: "AQA fills DoD and testing",
   prompt: `You are an AQA Engineer.
 
@@ -208,7 +208,7 @@ Save changes directly to file.`
 Use Task tool:
 ```javascript
 Task({
-  subagent_type: "general-purpose",
+  subagent_type: "developer",
   description: "Developer fills implementation & research",
   prompt: `You are a Senior Developer.
 
