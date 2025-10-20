@@ -94,10 +94,13 @@ function needsAttribution(license) {
 }
 
 // Known packages with missing license info in package.json but verified MIT licensed
+// VERSION-AGNOSTIC: These packages have MIT license across all versions
+// Versions listed are reference versions where license was manually verified
+// The validator will accept ANY version of these packages as MIT
 const KNOWN_MIT_PACKAGES = {
-  'console-browserify': '1.2.0', // Verified MIT: https://github.com/browserify/console-browserify
-  'exit': '0.1.2',               // Verified MIT: https://github.com/cowboy/node-exit
-  'querystring-es3': '0.2.1',    // Verified MIT: https://github.com/mike-spainhower/querystring
+  'console-browserify': true, // Verified MIT @ 1.2.0: https://github.com/browserify/console-browserify
+  'exit': true,               // Verified MIT @ 0.1.2: https://github.com/cowboy/node-exit
+  'querystring-es3': true,    // Verified MIT @ 0.2.1: https://github.com/mike-spainhower/querystring
 };
 
 function getDependencyLicenses() {

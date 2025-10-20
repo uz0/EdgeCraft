@@ -133,7 +133,7 @@ edge-craft/
 
 ## 🧪 Testing
 
-**Test Coverage**: 170+ test cases, > 95% code coverage
+**Test Coverage**: 91 passing tests (17 skipped), 82-87% code coverage
 
 ### Test Suites
 ```bash
@@ -262,7 +262,7 @@ Performance: 187 draw calls, 58 FPS, 1842 MB memory
 - **Performance**: 60 FPS with 500 animated units + terrain + shadows
 - **Draw Calls**: 81.7% reduction (1024 → 187)
 - **Memory**: 90% of budget (1842 MB / 2048 MB)
-- **Test Coverage**: >80% with 120+ unit tests
+- **Test Coverage**: 82-87% with 91 passing unit tests
 - **Legal Compliance**: 100% automated copyright detection
 
 ## 🛡️ Legal Compliance

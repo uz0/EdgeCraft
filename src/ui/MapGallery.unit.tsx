@@ -20,10 +20,10 @@ describe('MapGallery', () => {
     },
     {
       id: 'map3',
-      name: 'Large Campaign.w3n',
-      format: 'w3n',
+      name: 'Large Map.w3m',
+      format: 'w3m',
       sizeBytes: 100 * 1024 * 1024, // 100 MB
-      file: new File([], 'Large Campaign.w3n'),
+      file: new File([], 'Large Map.w3m'),
     },
     {
       id: 'map4',
@@ -64,7 +64,7 @@ describe('MapGallery', () => {
 
       expect(screen.getByText('Test Map 1.w3x')).toBeInTheDocument();
       expect(screen.getByText('Small Map.w3x')).toBeInTheDocument();
-      expect(screen.getByText('Large Campaign.w3n')).toBeInTheDocument();
+      expect(screen.getByText('Large Map.w3m')).toBeInTheDocument();
       expect(screen.getByText('StarCraft Map.SC2Map')).toBeInTheDocument();
     });
 
@@ -75,7 +75,7 @@ describe('MapGallery', () => {
       const w3xBadges = screen.getAllByText('W3X');
       expect(w3xBadges.length).toBe(4); // 2 maps × 2 badges per map
 
-      expect(screen.getAllByText('W3N').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('W3M').length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText('SC2').length).toBeGreaterThanOrEqual(1);
     });
 
@@ -135,9 +135,9 @@ describe('MapGallery', () => {
       render(<MapGallery maps={mockMaps} onMapSelect={mockOnMapSelect} />);
 
       const formatFilter = screen.getByLabelText('Filter by format');
-      fireEvent.change(formatFilter, { target: { value: 'w3n' } });
+      fireEvent.change(formatFilter, { target: { value: 'w3m' } });
 
-      expect(screen.getByText('Large Campaign.w3n')).toBeInTheDocument();
+      expect(screen.getByText('Large Map.w3m')).toBeInTheDocument();
       expect(screen.queryByText('Test Map 1.w3x')).not.toBeInTheDocument();
       expect(screen.getByText('1 map')).toBeInTheDocument();
     });
@@ -163,7 +163,7 @@ describe('MapGallery', () => {
       expect(screen.getByText('Test Map 1.w3x')).toBeInTheDocument();
       expect(screen.getByText('Small Map.w3x')).toBeInTheDocument();
       expect(screen.getByText('StarCraft Map.SC2Map')).toBeInTheDocument();
-      expect(screen.queryByText('Large Campaign.w3n')).not.toBeInTheDocument();
+      expect(screen.queryByText('Large Map.w3m')).not.toBeInTheDocument();
     });
 
     it('should filter maps by size (medium)', () => {
@@ -172,7 +172,7 @@ describe('MapGallery', () => {
       const sizeFilter = screen.getByLabelText('Filter by size');
       fireEvent.change(sizeFilter, { target: { value: 'medium' } });
 
-      expect(screen.getByText('Large Campaign.w3n')).toBeInTheDocument();
+      expect(screen.getByText('Large Map.w3m')).toBeInTheDocument();
       expect(screen.getByText('1 map')).toBeInTheDocument();
     });
 
@@ -181,10 +181,10 @@ describe('MapGallery', () => {
         ...mockMaps,
         {
           id: 'map5',
-          name: 'Huge Map.w3n',
-          format: 'w3n' as const,
+          name: 'Huge Map.w3m',
+          format: 'w3m' as const,
           sizeBytes: 200 * 1024 * 1024, // 200 MB
-          file: new File([], 'Huge Map.w3n'),
+          file: new File([], 'Huge Map.w3m'),
         },
       ];
 
@@ -193,7 +193,7 @@ describe('MapGallery', () => {
       const sizeFilter = screen.getByLabelText('Filter by size');
       fireEvent.change(sizeFilter, { target: { value: 'large' } });
 
-      expect(screen.getByText('Huge Map.w3n')).toBeInTheDocument();
+      expect(screen.getByText('Huge Map.w3m')).toBeInTheDocument();
       expect(screen.getByText('1 map')).toBeInTheDocument();
     });
   });
@@ -203,7 +203,7 @@ describe('MapGallery', () => {
       render(<MapGallery maps={mockMaps} onMapSelect={mockOnMapSelect} />);
 
       const mapCards = screen.getAllByRole('button');
-      expect(mapCards[0]).toHaveTextContent('Large Campaign.w3n');
+      expect(mapCards[0]).toHaveTextContent('Large Map.w3m');
       expect(mapCards[1]).toHaveTextContent('Small Map.w3x');
       expect(mapCards[2]).toHaveTextContent('StarCraft Map.SC2Map');
       expect(mapCards[3]).toHaveTextContent('Test Map 1.w3x');
@@ -219,7 +219,7 @@ describe('MapGallery', () => {
       expect(mapCards[0]).toHaveTextContent('Small Map.w3x'); // 1 MB
       expect(mapCards[1]).toHaveTextContent('StarCraft Map.SC2Map'); // 5 MB
       expect(mapCards[2]).toHaveTextContent('Test Map 1.w3x'); // 10 MB
-      expect(mapCards[3]).toHaveTextContent('Large Campaign.w3n'); // 100 MB
+      expect(mapCards[3]).toHaveTextContent('Large Map.w3m'); // 100 MB
     });
 
     it('should sort maps by format', () => {
@@ -494,7 +494,7 @@ describe('MapGallery', () => {
 
       expect(screen.getByAltText('Test Map 1.w3x')).toBeInTheDocument();
       expect(screen.queryByAltText('Small Map.w3x')).not.toBeInTheDocument();
-      expect(screen.getByAltText('Large Campaign.w3n')).toBeInTheDocument();
+      expect(screen.getByAltText('Large Map.w3m')).toBeInTheDocument();
     });
 
     it('should use correct alt text for accessibility', () => {
