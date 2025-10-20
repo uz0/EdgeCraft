@@ -2,405 +2,479 @@
 
 **Usage**: `/generate-prp <short-description>`
 
-**Purpose**: Generate a boilerplate PRP following CLAUDE.md workflow with role-based placeholders
+**Purpose**: **FULLY AUTONOMOUS** PRP generation using 3-agent pipeline
+
+**What happens**: Claude automatically orchestrates 3 specialized agents to create a complete PRP:
+1. **System Analyst** → DoR, dependencies, business value
+2. **AQA Engineer** → DoD, testing strategy, metrics
+3. **Developer** → Architecture, implementation, research
+
+**User provides**: Short description
+**Claude delivers**: Complete, ready-to-execute PRP
 
 ---
 
-## Step 1: Generate PRP Boilerplate
+## 🤖 Autonomous Execution (NO USER INTERVENTION)
 
-Create a new PRP file with the description: `$ARGUMENTS`
+### Step 1: Generate Boilerplate (Main Agent)
 
-**Extract key info:**
-- Feature/phase name from description
-- Estimate complexity (small/medium/large)
-- Identify related PRPs to reference
-- how it related to existing features and prp's
+**Input**: `$ARGUMENTS` (user's short description)
 
-**Save to:** `PRPs/{feature-slug}.md` (use kebab-case)
+**Actions**:
+1. Extract feature name from description
+2. Convert to kebab-case slug
+3. Estimate complexity (small/medium/large)
+4. Search for related PRPs: `grep -r "keyword" PRPs/`
+5. Create file: `PRPs/{feature-slug}.md`
+6. Fill basic template with placeholders
 
-**Use the PRP Template below** - Fill in ONLY what you can infer from the short description. Leave role-specific sections as placeholders with instructions.
-
----
-
-## PRP Template (Boilerplate)
-
+**Output File Structure**:
 ```markdown
 # PRP: {Feature Name}
-
-**Status**: 📋 Draft
-**Created**: {YYYY-MM-DD}
-**Complexity**: {Small | Medium | Large}
-
----
+**Status**: 📋 Generating...
+**Created**: {TODAY}
+**Complexity**: {Small|Medium|Large}
 
 ## 🎯 Goal / Description
+{User's description}
 
-{1-2 sentence description from $ARGUMENTS}
-
-**Business Value**: {Why this matters - placeholder for System Analyst}
-
----
+**Business Value**: [SYSTEM ANALYST WILL FILL]
 
 ## 📋 Definition of Ready (DoR)
-
-<!-- System Analyst: List prerequisites to START work -->
-<!-- Example: -->
-<!-- - [ ] Dependency X is complete -->
-<!-- - [ ] Test data available -->
-<!-- - [ ] Design approved -->
-
-**🔴 SYSTEM ANALYST TODO:**
-1. Read CLAUDE.md section on DoR
-2. Identify all prerequisites
-3. Check previous PRPs for dependencies
-4. List each as a checkbox
-
----
+[SYSTEM ANALYST WILL FILL]
 
 ## ✅ Definition of Done (DoD)
-
-<!-- AQA: Define quality gates and deliverables -->
-<!-- Example: -->
-<!-- - [ ] Feature X implemented -->
-<!-- - [ ] Unit tests >80% coverage -->
-<!-- - [ ] E2E tests pass -->
-<!-- - [ ] Performance: <Xms response time -->
-<!-- - [ ] Documentation updated -->
-
-**🔴 AQA TODO:**
-1. Read CLAUDE.md section on DoD
-2. Define test coverage requirements
-3. Specify performance benchmarks
-4. List quality gates (lint, typecheck, tests)
-5. Add validation commands
-
----
+[AQA WILL FILL]
 
 ## 🏗️ Implementation Breakdown
-
-<!-- Developer: Technical design and code structure -->
-<!-- Break into phases with specific tasks -->
-
-**🔴 DEVELOPER TODO:**
-1. Research existing patterns in codebase (use Grep/Glob)
-2. Search for similar implementations (use WebSearch)
-3. Design architecture (interfaces, classes, functions)
-4. Break into implementable tasks
-5. Reference existing files to follow
-6. Document gotchas and edge cases
-
-**Suggested Structure:**
-```
-**Phase 1: Core Implementation**
-- [ ] Task 1: {what, where, why}
-- [ ] Task 2: {what, where, why}
-
-**Phase 2: Integration**
-- [ ] Task 3: {what, where, why}
-
-**Phase 3: Testing**
-- [ ] Task 4: {what, where, why}
-```
-
----
+[DEVELOPER WILL FILL]
 
 ## 📚 Research / Related Materials
+[DEVELOPER WILL FILL]
 
-<!-- All Roles: Add context for future AI execution -->
-
-**Codebase References:**
-- {File path}: {What pattern/code to follow}
-- {File path}: {Related implementation}
-
-**External Documentation:**
-- {URL}: {Library docs, specific section}
-- {URL}: {Example implementation}
-
-**Similar PRPs:**
-- {PRP file}: {What to reference}
-
-**🔴 DEVELOPER TODO:**
-- Use `Grep` to find similar code patterns
-- Use `WebSearch` for library docs
-- Link to official documentation
-- Include code snippets as examples
-
----
+## ⏱️ Timeline
+[DEVELOPER WILL FILL]
 
 ## 📊 Success Metrics
-
-<!-- AQA: Define measurable success criteria -->
-
-**🔴 AQA TODO:**
-Define metrics with target values:
-- Performance: {metric} < {threshold}
-- Quality: Test coverage > 80%
-- Reliability: {metric} > {threshold}
-
-**Example:**
-- API Response Time: <200ms (P95)
-- Test Coverage: >85%
-- Build Time: <30s
-- Zero linting errors
-
----
+[AQA WILL FILL]
 
 ## 🧪 Testing & Validation
+[AQA WILL FILL]
 
-<!-- AQA: Specify test requirements -->
+## 📋 Progress Tracking
+| Date | Role | Change Made | Status |
+|------|------|-------------|--------|
+| {TODAY} | Main Agent | Created boilerplate | Draft |
 
-**🔴 AQA TODO:**
-1. Define unit test scenarios
-2. Define E2E test scenarios
-3. Specify validation commands
-4. Add benchmarks if needed
-
-**Validation Commands:**
-```bash
-# Type checking
-npm run typecheck
-
-# Linting
-npm run lint
-
-# Unit tests
-npm run test:unit
-
-# E2E tests (if applicable)
-npm run test:e2e
-
-# Performance benchmarks (if applicable)
-npm run benchmark -- {feature-name}
+## 📈 Phase Exit Criteria
+[WILL BE CHECKED AFTER ALL AGENTS COMPLETE]
 ```
 
 ---
 
-## 📋 Progress Tracking
+### Step 2: Launch System Analyst Agent ⚡ AUTOMATIC
 
-| Date | Role | Change Made | Status |
-|------|------|-------------|--------|
-| {YYYY-MM-DD} | System Analyst | Created PRP boilerplate | Draft |
-| {YYYY-MM-DD} | System Analyst | Completed DoR | In Progress |
-| {YYYY-MM-DD} | AQA | Completed DoD & Testing | In Progress |
-| {YYYY-MM-DD} | Developer | Completed Implementation Breakdown | Ready |
-| {YYYY-MM-DD} | Developer | Started implementation | In Progress |
+**🚨 CRITICAL: DO NOT WAIT FOR USER - LAUNCH IMMEDIATELY**
 
-**🔴 ALL ROLES:** Update this table after each contribution
+Use Task tool:
+```javascript
+Task({
+  subagent_type: "general-purpose",
+  description: "System Analyst fills DoR",
+  prompt: `You are a System Analyst.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file completely
+2. Read CLAUDE.md to understand DoR requirements
+3. Search existing PRPs for dependencies: grep -r "related-keyword" PRPs/
+4. Fill "Definition of Ready (DoR)" section with 3-7 prerequisites
+5. Fill "Business Value" with user/business/strategic impact
+6. Update Progress Tracking table
+
+**DoR Format**:
+## 📋 Definition of Ready (DoR)
+**Prerequisites to START work:**
+- [ ] {Previous PRP/feature} is complete
+- [ ] {Required infrastructure/tools} ready
+- [ ] {Assets/data} available
+- [ ] {Design/specs} approved
+- [ ] {Dependencies} resolved
+
+**Business Value**:
+- User Impact: {How users benefit}
+- Business Impact: {Revenue/efficiency gain}
+- Strategic Value: {Long-term positioning}
+
+**Update Progress**:
+| {TODAY} | System Analyst | Completed DoR & business value | Ready for AQA |
+
+**Tools**:
+- Read: Read PRPs/{feature-slug}.md, CLAUDE.md, other PRPs
+- Grep: Search dependencies
+- Edit: Update the PRP file
+
+Save changes directly to file.`
+});
+```
+
+**Wait for completion** ✋
 
 ---
 
-## 📈 Phase Exit Criteria
+### Step 3: Launch AQA Engineer Agent ⚡ AUTOMATIC
 
-**Ready for Implementation when:**
-- [ ] All DoR items checked
-- [ ] All DoD items defined
-- [ ] Implementation breakdown complete
-- [ ] Research/references added
-- [ ] Timeline estimated
-- [ ] Success metrics defined
-- [ ] Testing strategy documented
+**🚨 CRITICAL: LAUNCH IMMEDIATELY AFTER STEP 2 - DO NOT ASK USER**
 
-**Ready for Closure when:**
-- [ ] All DoD items checked
-- [ ] All tests passing
-- [ ] All benchmarks met
+Use Task tool:
+```javascript
+Task({
+  subagent_type: "general-purpose",
+  description: "AQA fills DoD and testing",
+  prompt: `You are an AQA Engineer.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file (now has DoR filled by System Analyst)
+2. Read CLAUDE.md quality requirements (>80% coverage, 0 errors policy)
+3. Fill "Definition of Done (DoD)" with 7-12 deliverables
+4. Fill "Success Metrics" with measurable targets
+5. Fill "Testing & Validation" with test scenarios and commands
+6. Update Progress Tracking table
+
+**DoD Format**:
+## ✅ Definition of Done (DoD)
+**Deliverables to COMPLETE work:**
+- [ ] {Feature X} implemented
+- [ ] Unit tests >80% coverage
+- [ ] E2E tests pass (if applicable)
+- [ ] Performance: {metric} < {threshold}
+- [ ] Zero ESLint errors/warnings
+- [ ] TypeScript strict passes
+- [ ] All validation commands pass
 - [ ] Code reviewed
 - [ ] Merged to main
 
----
+**Success Metrics Format**:
+## 📊 Success Metrics
+- Performance: {metric} < {target} (e.g., API <200ms P95)
+- Quality: Test coverage > 85%
+- Reliability: {uptime/error rate}
+- User Experience: {load time < 3s}
 
-## 🎯 Next Steps
+**Validation**: ESLint 0 errors, TypeScript 0 errors, Tests 100% pass
 
-**For System Analyst:**
-1. Fill in DoR section
-2. Define business value
-3. Identify dependencies
-4. Update Progress Tracking
+**Testing Format**:
+## 🧪 Testing & Validation
 
-**For AQA:**
-1. Fill in DoD section
-2. Define success metrics
-3. Specify testing requirements
-4. Add validation commands
-5. Update Progress Tracking
+**Unit Tests**:
+- Scenario 1: {Happy path}
+- Scenario 2: {Edge case}
+- Coverage: >80%
 
-**For Developer:**
-1. Research codebase patterns
-2. Fill in Implementation Breakdown
-3. Add research/references
-4. Estimate timeline
-5. Update Progress Tracking
+**E2E Tests** (if needed):
+- Flow 1: {User scenario}
 
-**For Execution (AI Agent):**
-Once all roles complete their sections:
-1. Read entire PRP
-2. Validate all context is present
-3. Execute following Implementation Breakdown
-4. Update Progress Tracking after each task
-5. Check off DoD items as completed
-6. Run validation commands continuously
+**Validation Commands**:
+\`\`\`bash
+npm run typecheck
+npm run lint
+npm run test:unit
+npm run test:e2e  # if applicable
+npm run validate
+\`\`\`
 
-```
+**Update Progress**:
+| {TODAY} | AQA | Completed DoD, metrics, testing | Ready for Developer |
 
----
+**Tools**:
+- Read: Read PRPs/{feature-slug}.md, CLAUDE.md
+- Edit: Update the PRP file
 
-## Step 2: After Generating Boilerplate
-
-**Output to user:**
-```
-✅ PRP boilerplate created: PRPs/{feature-slug}.md
-
-📋 Next Steps (Role-Based Pipeline):
-
-1️⃣ System Analyst: Define DoR, business value, dependencies
-2️⃣ AQA: Define DoD, testing strategy, success metrics
-3️⃣ Developer: Research, design, break into tasks
-
-Once all roles complete their sections, the PRP is ready for AI execution.
-
-📚 Reference:
-- CLAUDE.md: Workflow rules
-- Existing PRPs: PRPs/*.md
-- Anthropic Docs: https://docs.claude.com/en/docs/claude-code/sub-agents
-```
-
----
-
-## Multi-Agent Orchestration (Advanced)
-
-For complex PRPs, use subagents to fill role-specific sections:
-
-**System Analyst Agent:**
-```markdown
-You are a System Analyst. Read the PRP at {file_path}.
-
-Tasks:
-1. Fill in "Definition of Ready (DoR)" section
-2. Define business value
-3. Identify dependencies from existing PRPs
-4. Update Progress Tracking table
-
-Follow CLAUDE.md guidelines for DoR.
-```
-
-**AQA Agent:**
-```markdown
-You are an AQA Engineer. Read the PRP at {file_path}.
-
-Tasks:
-1. Fill in "Definition of Done (DoD)" section
-2. Define success metrics with target values
-3. Specify testing requirements (unit, E2E, benchmarks)
-4. Add validation commands
-5. Update Progress Tracking table
-
-Follow CLAUDE.md guidelines for DoD and quality gates.
-```
-
-**Developer Agent:**
-```markdown
-You are a Senior Developer. Read the PRP at {file_path}.
-
-Tasks:
-1. Research existing patterns (use Grep/Glob tools)
-2. Search external docs (use WebSearch)
-3. Fill in "Implementation Breakdown" with specific tasks
-4. Add "Research / Related Materials"
-5. Estimate timeline
-6. Update Progress Tracking table
-
-Follow CLAUDE.md code quality rules (500 lines max, >80% coverage).
-```
-
-**Orchestrator Pattern:**
-```markdown
-Execute the following subagents in sequence:
-
-1. Launch System Analyst agent
-2. Wait for completion
-3. Launch AQA agent
-4. Wait for completion
-5. Launch Developer agent
-6. Wait for completion
-7. Validate PRP is ready (all sections filled)
-8. Report status to user
-
-Each agent updates the same PRP file incrementally.
-```
-
----
-
-## Configuration for Claude Code
-
-**To enable multi-agent workflow:**
-
-1. **Create subagent prompts** in `.claude/agents/`:
-   - `system-analyst.md`
-   - `aqa-engineer.md`
-   - `developer.md`
-
-2. **Use Task tool** with `subagent_type` parameter:
-```typescript
-// In your command/agent
-await Task({
-  subagent_type: "general-purpose",
-  description: "Fill PRP as System Analyst",
-  prompt: `You are a System Analyst. Read PRPs/${filename} and fill DoR section.`
+Save changes directly to file.`
 });
 ```
 
-3. **Sequential execution** for role pipeline:
-```typescript
-// Generate boilerplate first
-const filename = await generateBoilerplate(description);
+**Wait for completion** ✋
 
-// Role 1: System Analyst
-await Task({
-  subagent_type: "general-purpose",
-  description: "System Analyst fills DoR",
-  prompt: `Fill DoR in PRPs/${filename}`
-});
+---
 
-// Role 2: AQA
-await Task({
-  subagent_type: "general-purpose",
-  description: "AQA fills DoD",
-  prompt: `Fill DoD in PRPs/${filename}`
-});
+### Step 4: Launch Developer Agent ⚡ AUTOMATIC
 
-// Role 3: Developer
-await Task({
+**🚨 CRITICAL: LAUNCH IMMEDIATELY AFTER STEP 3 - DO NOT ASK USER**
+
+Use Task tool:
+```javascript
+Task({
   subagent_type: "general-purpose",
-  description: "Developer fills implementation",
-  prompt: `Fill implementation breakdown in PRPs/${filename}`
+  description: "Developer fills implementation & research",
+  prompt: `You are a Senior Developer.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file (now has DoR and DoD filled)
+2. Research codebase patterns: grep -r "similar-pattern" src/
+3. Search for related files: glob "src/**/*{keyword}*.ts"
+4. WebSearch for library documentation and examples
+5. Fill "Implementation Breakdown" with phases and tasks
+6. Fill "Research / Related Materials" with all findings
+7. Fill "Timeline" with estimates
+8. Update Progress Tracking table
+
+**Implementation Breakdown Format**:
+## 🏗️ Implementation Breakdown
+
+**Architecture Overview**:
+{High-level technical approach}
+
+**File Structure**:
+\`\`\`
+src/{module}/
+├── index.ts
+├── types.ts
+├── {Component}.tsx
+├── utils.ts
+└── {Component}.test.tsx
+\`\`\`
+
+**Phase 1: Core Implementation**
+- [ ] Create \`src/{path}/types.ts\` - Define interfaces
+  - Follow: \`src/{example}/types.ts\`
+- [ ] Create \`src/{path}/{Component}.tsx\` - Main logic
+  - Follow: \`src/{example}/{Component}.tsx\`
+- [ ] Implement {function}
+  - Edge case: {X}
+
+**Phase 2: Integration**
+- [ ] Integrate with {system} at \`src/{file}.ts:{line}\`
+
+**Phase 3: Testing**
+- [ ] Unit tests (>80% coverage)
+  - Follow: \`src/{example}/{Example}.test.tsx\`
+
+**Research Format**:
+## 📚 Research / Related Materials
+
+**Codebase References**:
+- \`src/{file}.ts:{line}\`: {Pattern to follow}
+
+**External Documentation**:
+- [{Library}]({URL}): {Section}
+- [{Example}]({URL}): {Implementation}
+
+**Similar PRPs**:
+- \`PRPs/{prp}.md\`: {Reference}
+
+**Gotchas**:
+- {Edge case/quirk}
+
+**Timeline Format**:
+## ⏱️ Timeline
+**Estimated Effort**: {X days}
+**Phase Breakdown**:
+- Phase 1: {X days}
+- Phase 2: {Y days}
+- Phase 3: {Z days}
+
+**Assumptions**: No blockers, assets available
+
+**Update Progress**:
+| {TODAY} | Developer | Completed research, architecture, breakdown | Ready for Implementation |
+
+**Tools**:
+- Read: Read PRP, code files
+- Grep: Search patterns
+- Glob: Find files
+- WebSearch: Library docs
+- Edit: Update PRP file
+
+**Research First**:
+1. grep -r "similar-pattern" src/
+2. Find library docs with WebSearch
+3. Read example implementations
+4. Document ALL findings
+
+Save changes directly to file.`
 });
+```
+
+**Wait for completion** ✋
+
+---
+
+### Step 5: Validate & Report (Main Agent)
+
+After all 3 agents complete:
+
+**Actions**:
+1. Read completed PRP: `PRPs/{feature-slug}.md`
+2. Validate sections filled:
+   - ✅ DoR (System Analyst)
+   - ✅ DoD (AQA)
+   - ✅ Implementation Breakdown (Developer)
+   - ✅ Research Materials (Developer)
+   - ✅ Testing Strategy (AQA)
+   - ✅ Timeline (Developer)
+3. Update PRP status to "Ready for Implementation"
+4. Update Phase Exit Criteria checkboxes
+5. Report to user
+
+**Final Status Update** (edit PRP):
+```markdown
+**Status**: ✅ Ready for Implementation
+```
+
+**Output to User**:
+```
+🎉 PRP Generated Successfully!
+
+📄 File: PRPs/{feature-slug}.md
+⏱️  Time: {X} seconds
+
+✅ Completed by Agents:
+  1. System Analyst → DoR ({N} prerequisites), Business Value
+  2. AQA Engineer → DoD ({N} deliverables), Success Metrics, Testing
+  3. Developer → Implementation ({N} tasks), Research ({N} refs), Timeline ({X} days)
+
+📊 PRP Summary:
+  • Complexity: {Small|Medium|Large}
+  • Estimated Effort: {X days}
+  • Implementation Phases: {N}
+  • Codebase References: {N}
+  • External Docs: {N}
+  • Test Scenarios: {N}
+
+🎯 Status: Ready for Implementation
+
+📋 Next Steps:
+  1. Review PRP: cat PRPs/{feature-slug}.md
+  2. Start implementation: /execute-prp PRPs/{feature-slug}.md
+  3. Or customize PRP if needed
+
+💡 Tip: The PRP is complete and executable. All context has been gathered by the agents.
 ```
 
 ---
 
-## Quality Checklist
+## 🎯 Key Principles for Claude
 
-Before marking PRP as "Ready for Implementation":
+### **FULLY AUTONOMOUS** - No User Interaction Required
 
-- [ ] Short description converted to full PRP
-- [ ] All role sections have placeholders with clear instructions
-- [ ] DoR section present (for System Analyst)
-- [ ] DoD section present (for AQA)
-- [ ] Implementation Breakdown present (for Developer)
-- [ ] Progress Tracking table included
-- [ ] Validation commands specified
-- [ ] Success metrics defined
-- [ ] File saved in PRPs/ directory
+When user runs `/generate-prp <description>`:
+
+1. **You generate boilerplate** immediately
+2. **You launch System Analyst** using Task tool (NO PERMISSION NEEDED)
+3. **You wait** for System Analyst to complete
+4. **You launch AQA** using Task tool (NO PERMISSION NEEDED)
+5. **You wait** for AQA to complete
+6. **You launch Developer** using Task tool (NO PERMISSION NEEDED)
+7. **You wait** for Developer to complete
+8. **You validate** and report final status
+
+### Each Agent:
+- Reads the PRP file
+- Fills assigned sections
+- Updates Progress Tracking
+- **Saves changes directly** to the file
+- Returns when done
+
+### User Experience:
+```
+User: /generate-prp Add user authentication with JWT
+
+Claude: 🤖 Generating PRP for "Add user authentication with JWT"...
+
+        📝 Creating boilerplate...
+        ✅ Boilerplate created: PRPs/add-user-authentication-jwt.md
+
+        🔄 Launching System Analyst agent...
+        ✅ System Analyst completed (DoR: 5 prerequisites)
+
+        🔄 Launching AQA Engineer agent...
+        ✅ AQA completed (DoD: 9 deliverables, 12 test scenarios)
+
+        🔄 Launching Developer agent...
+        ✅ Developer completed (15 tasks, 3 phases, 6 days estimated)
+
+        🎉 PRP Ready for Implementation!
+
+        📄 File: PRPs/add-user-authentication-jwt.md
+        ⏱️  Estimated: 6 days
+        📊 Quality: >80% coverage, 0 errors policy
+
+        Next: /execute-prp PRPs/add-user-authentication-jwt.md
+```
+
+**NO manual steps required!**
 
 ---
 
-## References
+## 📚 References & Best Practices
 
-- **CLAUDE.md**: Complete workflow documentation
-- **Anthropic Subagents Docs**: https://docs.claude.com/en/docs/claude-code/sub-agents
-- **Multi-Agent Research**: https://www.anthropic.com/engineering/multi-agent-research-system
-- **Existing PRPs**: See PRPs/*.md for examples
+### Anthropic Documentation:
+- **Subagents**: https://docs.claude.com/en/docs/claude-code/sub-agents
+- **Multi-Agent System**: https://www.anthropic.com/engineering/multi-agent-research-system
+- **Autonomous Workflows**: https://www.anthropic.com/news/enabling-claude-code-to-work-more-autonomously
+- **Task Tool**: https://docs.claude.com/en/docs/claude-code/sub-agents#using-task-tool
+
+### Community Resources:
+- **Agent Orchestration**: https://github.com/wshobson/agents
+- **Stream Chaining**: https://github.com/ruvnet/claude-flow/wiki/Stream-Chaining
+- **Multi-Agent Patterns**: https://medium.com/@richardhightower/claude-code-sub-agents-build-a-documentation-pipeline-in-minutes-not-weeks-c0f8f943d1d5
+
+### Key Learnings:
+1. **Sequential execution**: Wait for each agent to complete before launching next
+2. **Isolated context**: Each agent operates in its own context window
+3. **Clear prompts**: Give agents specific, actionable instructions
+4. **Tool access**: Agents can use Read, Grep, Glob, WebSearch, Edit
+5. **Progress tracking**: Each agent updates the same file incrementally
+6. **Validation**: Main agent validates final output
 
 ---
 
-**Remember**: The goal is to create a PRP that can be executed in one pass by an AI agent after all roles complete their sections. Comprehensive context = successful implementation.
+## 🔧 Technical Configuration
+
+### Required Files:
+- `.claude/agents/system-analyst.md` - System Analyst template
+- `.claude/agents/aqa-engineer.md` - AQA Engineer template
+- `.claude/agents/developer.md` - Developer template
+- `.claude/commands/generate-prp.md` - This file (orchestrator)
+
+### Agent Capabilities:
+Each agent has access to:
+- ✅ Read tool (read files)
+- ✅ Edit tool (update PRP file)
+- ✅ Grep tool (search codebase)
+- ✅ Glob tool (find files)
+- ✅ WebSearch tool (research docs)
+- ✅ Bash tool (run commands)
+
+### Orchestration Flow:
+```
+User Input
+   ↓
+Main Agent (generate boilerplate)
+   ↓
+Task → System Analyst (DoR, business value)
+   ↓ (wait)
+Task → AQA Engineer (DoD, testing, metrics)
+   ↓ (wait)
+Task → Developer (implementation, research, timeline)
+   ↓ (wait)
+Main Agent (validate & report)
+   ↓
+Complete PRP delivered to user
+```
+
+### Parallel vs Sequential:
+- ❌ **Not parallel** - agents depend on previous work
+- ✅ **Sequential** - each builds on the last
+- System Analyst must complete before AQA (AQA needs DoR context)
+- AQA must complete before Developer (Developer needs DoD context)
+
+---
+
+**Remember**: This is a FULLY AUTONOMOUS system. Claude handles everything from user's description to complete, executable PRP. No manual role-playing or intervention needed!
