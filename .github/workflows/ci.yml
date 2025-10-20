@@ -100,9 +100,7 @@ jobs:
           threshold: 80
           package-manager: npm
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-step: all
-          coverage-file: ./coverage/coverage-final.json
-          base-coverage-file: ./coverage/coverage-final.json
+          skip-step: install
           annotations: coverage
 
   security:
