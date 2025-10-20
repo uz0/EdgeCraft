@@ -84,14 +84,12 @@ export class UnitPool {
     } else if (this.config.autoGrow) {
       // Check max size limit
       if (this.config.maxSize > 0 && this.inUse.size >= this.config.maxSize) {
-        console.warn(`Unit pool at maximum capacity: ${this.config.maxSize}`);
         return null;
       }
 
       // Create new instance
       instance = this.createInstance();
     } else {
-      console.warn('Unit pool exhausted and auto-grow is disabled');
       return null;
     }
 
@@ -125,7 +123,6 @@ export class UnitPool {
    */
   release(instance: UnitInstance): void {
     if (!this.inUse.has(instance.id)) {
-      console.warn(`Attempting to release unit not from this pool: ${instance.id}`);
       return;
     }
 

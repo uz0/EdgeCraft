@@ -8,7 +8,6 @@
  * ```typescript
  * const reader = new StreamingFileReader(file, {
  *   chunkSize: 4 * 1024 * 1024, // 4MB chunks
- *   onProgress: (read, total) => console.log(`${(read/total*100).toFixed(1)}%`)
  * });
  *
  * // Read in chunks

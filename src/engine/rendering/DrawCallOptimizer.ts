@@ -17,7 +17,6 @@ import type { DrawCallOptimizerConfig, MeshMergeResult } from './types';
  * ```typescript
  * const optimizer = new DrawCallOptimizer(scene);
  * const result = optimizer.mergeStaticMeshes();
- * console.log(`Saved ${result.drawCallsSaved} draw calls`);
  * ```
  */
 export class DrawCallOptimizer {
@@ -57,9 +56,6 @@ export class DrawCallOptimizer {
     });
 
     if (staticMeshes.length < this.config.minMeshesForMerge) {
-      console.log(
-        `Skipping merge: only ${staticMeshes.length} static meshes (min: ${this.config.minMeshesForMerge})`
-      );
       return { mesh: null, sourceCount: 0, drawCallsSaved: 0 };
     }
 
@@ -130,9 +126,6 @@ export class DrawCallOptimizer {
 
     // Check vertex limit
     if (totalVertices > this.config.maxVerticesPerMesh) {
-      console.warn(
-        `Cannot merge group ${materialKey}: ${totalVertices} vertices exceeds limit ${this.config.maxVerticesPerMesh}`
-      );
       return null;
     }
 
@@ -161,7 +154,6 @@ export class DrawCallOptimizer {
 
       return mergedMesh;
     } catch (error) {
-      console.error(`Failed to merge group ${materialKey}:`, error);
       return null;
     }
   }

@@ -24,7 +24,6 @@ export class W3UParser {
     this.view = new DataView(buffer);
     if (formatVersion) {
       this.formatVersion = formatVersion;
-      console.log(`[W3UParser] Format explicitly set to: ${formatVersion.toUpperCase()}`);
     }
   }
 
@@ -52,13 +51,6 @@ export class W3UParser {
     // The gap skip will be undone when we reset offset, so we must NOT apply it during detection
     this.isDetectingFormat = true;
 
-    console.log(
-      `[W3UParser:detectFormatVersion] 🔍 Starting multi-strategy detection at offset ${startOffset}`
-    );
-    console.log(
-      `[W3UParser:detectFormatVersion]    File version=${version}, subversion=${subversion}`
-    );
-
     // STRATEGY 1: Try parsing 3 units as CLASSIC
     let classicSuccess = 0;
     try {
@@ -66,42 +58,24 @@ export class W3UParser {
       this.formatVersion = 'classic';
 
       const maxUnitsToTest = Math.min(3, 5); // Test up to 3 units
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 1: Attempting to parse ${maxUnitsToTest} units as CLASSIC`
-      );
 
       for (let i = 0; i < maxUnitsToTest; i++) {
         const offsetBefore = this.offset;
         try {
           const unit = this.readUnit(version, subversion);
-          const bytesConsumed = this.offset - offsetBefore;
+          const _bytesConsumed = this.offset - offsetBefore;
 
           if (unit.typeId && unit.typeId.length === 4) {
             classicSuccess++;
-            console.log(
-              `[W3UParser:detectFormatVersion] Strategy 1: Unit ${i + 1}/${maxUnitsToTest} parsed OK - typeId="${unit.typeId}", consumed ${bytesConsumed} bytes`
-            );
           } else {
-            console.log(
-              `[W3UParser:detectFormatVersion] Strategy 1: Unit ${i + 1}/${maxUnitsToTest} invalid typeId: "${unit.typeId}"`
-            );
             break;
           }
         } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : String(err);
-          console.log(
-            `[W3UParser:detectFormatVersion] Strategy 1: Unit ${i + 1}/${maxUnitsToTest} FAILED at offset ${offsetBefore}: ${errorMsg}`
-          );
+          const _errorMsg = err instanceof Error ? err.message : String(err);
           break;
         }
       }
-
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 1 (CLASSIC): ${classicSuccess}/3 units parsed successfully`
-      );
-    } catch (err) {
-      console.log('[W3UParser:detectFormatVersion] Strategy 1 (CLASSIC): Failed completely');
-    }
+    } catch (err) {}
 
     // STRATEGY 2: Try parsing 3 units as REFORGED
     let reforgedSuccess = 0;
@@ -110,44 +84,25 @@ export class W3UParser {
       this.formatVersion = 'reforged';
 
       const maxUnitsToTest = Math.min(3, 5); // Test up to 3 units
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 2: Attempting to parse ${maxUnitsToTest} units as REFORGED`
-      );
 
       for (let i = 0; i < maxUnitsToTest; i++) {
         const offsetBefore = this.offset;
         try {
           const unit = this.readUnit(version, subversion);
-          const bytesConsumed = this.offset - offsetBefore;
+          const _bytesConsumed = this.offset - offsetBefore;
 
           if (unit.typeId && unit.typeId.length === 4) {
             reforgedSuccess++;
-            console.log(
-              `[W3UParser:detectFormatVersion] Strategy 2: Unit ${i + 1}/${maxUnitsToTest} parsed OK - typeId="${unit.typeId}", consumed ${bytesConsumed} bytes`
-            );
           } else {
-            console.log(
-              `[W3UParser:detectFormatVersion] Strategy 2: Unit ${i + 1}/${maxUnitsToTest} invalid typeId: "${unit.typeId}"`
-            );
             break;
           }
         } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : String(err);
-          console.log(
-            `[W3UParser:detectFormatVersion] Strategy 2: Unit ${i + 1}/${maxUnitsToTest} FAILED at offset ${offsetBefore}: ${errorMsg}`
-          );
+          const _errorMsg = err instanceof Error ? err.message : String(err);
           break;
         }
       }
-
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 2 (REFORGED): ${reforgedSuccess}/3 units parsed successfully`
-      );
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 2 (REFORGED): Failed completely - ${errorMsg}`
-      );
+      const _errorMsg = err instanceof Error ? err.message : String(err);
     }
 
     // Reset to start
@@ -160,29 +115,21 @@ export class W3UParser {
     // - If neither parsed successfully: Try Strategy 3 (next TypeID check)
 
     if (classicSuccess >= 3 && reforgedSuccess < 2) {
-      console.log('[W3UParser:detectFormatVersion] ✅ CLASSIC format detected (Strategy 1 winner)');
       this.formatVersion = 'classic';
       this.isDetectingFormat = false;
       return 'classic';
     } else if (reforgedSuccess >= 3 && classicSuccess < 2) {
-      console.log(
-        '[W3UParser:detectFormatVersion] ✅ REFORGED format detected (Strategy 2 winner)'
-      );
       this.formatVersion = 'reforged';
       this.isDetectingFormat = false;
       return 'reforged';
     } else if (classicSuccess >= 2 && reforgedSuccess >= 2) {
       // Both work - prefer Reforged for modern maps
-      console.log('[W3UParser:detectFormatVersion] ⚠️ Both formats work, defaulting to REFORGED');
       this.formatVersion = 'reforged';
       this.isDetectingFormat = false;
       return 'reforged';
     }
 
     // STRATEGY 3: Parse first unit as CLASSIC, check next TypeID at +0 and +16
-    console.log(
-      '[W3UParser:detectFormatVersion] Strategies 1-2 inconclusive, trying Strategy 3 (TypeID check)'
-    );
 
     try {
       this.offset = startOffset;
@@ -215,29 +162,18 @@ export class W3UParser {
       const classicOffsetValid = isValidTypeID(firstUnitEnd);
       const reforgedOffsetValid = isValidTypeID(firstUnitEnd + 16);
 
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 3: Classic offset ${firstUnitEnd}: ${classicOffsetValid ? 'VALID' : 'INVALID'}`
-      );
-      console.log(
-        `[W3UParser:detectFormatVersion] Strategy 3: Reforged offset ${firstUnitEnd + 16}: ${reforgedOffsetValid ? 'VALID' : 'INVALID'}`
-      );
-
       if (reforgedOffsetValid && !classicOffsetValid) {
-        console.log('[W3UParser:detectFormatVersion] ✅ REFORGED format detected (Strategy 3)');
         this.offset = startOffset;
         this.formatVersion = 'reforged';
         this.isDetectingFormat = false;
         return 'reforged';
       } else if (classicOffsetValid && !reforgedOffsetValid) {
-        console.log('[W3UParser:detectFormatVersion] ✅ CLASSIC format detected (Strategy 3)');
         this.offset = startOffset;
         this.formatVersion = 'classic';
         this.isDetectingFormat = false;
         return 'classic';
       }
-    } catch (err) {
-      console.log('[W3UParser:detectFormatVersion] Strategy 3 failed');
-    }
+    } catch (err) {}
 
     // STRATEGY 4: Educated guess based on version ranges (per WC3MapSpecification)
     // Classic: version <= 27
@@ -250,15 +186,9 @@ export class W3UParser {
     this.isDetectingFormat = false;
 
     if (version >= 28) {
-      console.log(
-        `[W3UParser:detectFormatVersion] ⚠️ All strategies failed, using version-based guess: REFORGED (version=${version} >= 28)`
-      );
       this.formatVersion = 'reforged';
       return 'reforged';
     } else {
-      console.warn(
-        `[W3UParser:detectFormatVersion] ⚠️ All strategies failed, using version-based guess: CLASSIC (version=${version} < 28)`
-      );
       this.formatVersion = 'classic';
       return 'classic';
     }
@@ -268,8 +198,6 @@ export class W3UParser {
    * Parse the entire units file
    */
   public parse(): W3UUnits {
-    console.error('🚨🚨🚨 NEW W3UPARSER WITH isDetectingFormat FLAG LOADED (v2) 🚨🚨🚨');
-    console.error(`🔍 isDetectingFormat flag value: ${this.isDetectingFormat}`);
     this.offset = 0;
 
     // Read and validate magic
@@ -284,8 +212,6 @@ export class W3UParser {
     // Read subversion (v8+)
     const subversion = this.readUint32();
 
-    console.log(`[W3UParser] Version ${version}, subversion ${subversion}`);
-
     // Read units
     const unitCount = this.readUint32();
 
@@ -295,13 +221,8 @@ export class W3UParser {
 
     if (unitCount > 0 && !formatWasExplicitlySet) {
       this.formatVersion = this.detectFormatVersion(version, subversion);
-      console.log(`[W3UParser] ✅ Auto-detected format: ${this.formatVersion.toUpperCase()}`);
     } else if (formatWasExplicitlySet) {
-      console.log(
-        `[W3UParser] ✅ Using explicitly set format: ${this.formatVersion.toUpperCase()} (skipping auto-detection)`
-      );
     } else {
-      console.log(`[W3UParser] No units to detect format, assuming Classic`);
     }
 
     const units: W3UUnit[] = [];
@@ -318,9 +239,6 @@ export class W3UParser {
         // Check if we have enough buffer left for at least the minimum unit data
         // Minimum: 4 (typeId) + 4 (variation) + 12 (position) + 4 (rotation) + 12 (scale) + 1 (flags) = 37 bytes
         if (this.offset + 37 > this.view.byteLength) {
-          console.warn(
-            `[W3UParser] Insufficient buffer for unit ${i + 1}/${unitCount}, stopping parse`
-          );
           break;
         }
 
@@ -328,9 +246,6 @@ export class W3UParser {
 
         // Skip units marked with typeId='SKIP' (invalid randomUnitTableCount recovery)
         if (unit.typeId === 'SKIP') {
-          console.log(
-            `[W3UParser] Skipping unit ${i + 1}/${unitCount} (invalid data, gap scan recovered offset)`
-          );
           continue;
         }
 
@@ -339,64 +254,37 @@ export class W3UParser {
 
         // Log the first successful parse with details
         if (successCount === 1) {
-          const bytesConsumed = this.offset - unitStartOffset;
-          console.log(
-            `[W3UParser] ✅ First unit parsed successfully: typeId="${unit.typeId}", consumed ${bytesConsumed} bytes`
-          );
+          const _bytesConsumed = this.offset - unitStartOffset;
         }
       } catch (error) {
         failCount++;
 
         // Log detailed error information for the first few failures
         if (failCount <= 3) {
-          const errorMsg = error instanceof Error ? error.message : String(error);
-          console.warn(
-            `[W3UParser] ❌ Failed to parse unit ${i + 1}/${unitCount} at offset ${unitStartOffset}: ${errorMsg}`
-          );
+          const _errorMsg = error instanceof Error ? error.message : String(error);
 
           // If this is the very first unit and it fails, the format is likely incompatible
           if (i === 0) {
-            console.error(
-              `[W3UParser] 🔴 CRITICAL: First unit failed to parse. This suggests:` +
-                `\n  1. Incorrect file format version (version=${version}, subversion=${subversion})` +
-                `\n  2. File corruption` +
-                `\n  3. Unsupported W3X format variant` +
-                `\n  Attempting to continue with remaining units...`
-            );
           }
         }
 
         // IMPROVED: Instead of blind 300-byte skip, stop after 5 consecutive failures
         // This prevents cascading errors from corrupting the entire parse
         if (failCount > 5 && successCount === 0) {
-          console.error(
-            `[W3UParser] 🔴 Stopping parse: ${failCount} consecutive failures with 0 successes. ` +
-              `Format version ${version}.${subversion} may be unsupported.`
-          );
           break;
         }
 
         // If we've exceeded buffer, stop
         if (this.offset >= this.view.byteLength) {
-          console.warn(
-            `[W3UParser] Exceeded buffer after parse error, stopping at unit ${i + 1}/${unitCount}`
-          );
           break;
         }
       }
     }
 
-    console.log(
-      `[W3UParser] Parsed ${successCount}/${unitCount} units successfully (${failCount} failures)`
-    );
-
     // Log first unit details for verification
     if (units.length > 0) {
       const first = units[0];
       if (first) {
-        console.log(
-          `[W3UParser] First unit: typeId="${first.typeId}", skinId="${first.skinId ?? 'N/A'}"`
-        );
       }
     }
 
@@ -416,25 +304,14 @@ export class W3UParser {
     const startOffset = this.offset;
 
     // Get current unit number from parse() method context
-    const unitNum = this.currentUnitNumber || 0;
+    const _unitNum = this.currentUnitNumber || 0;
 
     // Only log for units 6 and 7 to reduce noise
-    const DEBUG = unitNum === 6 || unitNum === 7;
-
-    if (DEBUG) {
-      console.log(`\n🚨🚨🚨 [W3UParser:readUnit] UNIT ${unitNum} DEBUG START 🚨🚨🚨`);
-      console.log(
-        `[W3UParser:readUnit] Starting at offset ${startOffset} (v${version}.${subversion}), format=${this.formatVersion.toUpperCase()}`
-      );
-    }
-
     // Type ID (4 chars)
     const typeId = this.read4CC();
-    console.log(`[W3UParser:readUnit] ✅ TypeID: "${typeId}", offset now: ${this.offset}`);
 
     // Variation
     const variation = this.readUint32();
-    if (DEBUG) console.log(`[W3UParser:readUnit] Variation: ${variation}, offset: ${this.offset}`);
 
     // Position
     const position: Vector3 = {
@@ -442,14 +319,9 @@ export class W3UParser {
       y: this.readFloat32(),
       z: this.readFloat32(),
     };
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] Position: (${position.x}, ${position.y}, ${position.z}), offset: ${this.offset}`
-      );
 
     // Rotation (radians)
     const rotation = this.readFloat32();
-    if (DEBUG) console.log(`[W3UParser:readUnit] Rotation: ${rotation}, offset: ${this.offset}`);
 
     // Scale
     const scale: Vector3 = {
@@ -457,26 +329,17 @@ export class W3UParser {
       y: this.readFloat32(),
       z: this.readFloat32(),
     };
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] Scale: (${scale.x}, ${scale.y}, ${scale.z}), offset: ${this.offset}`
-      );
 
     // Flags
     this.checkBounds(1);
     const flags = this.view.getUint8(this.offset);
     this.offset += 1;
-    if (DEBUG)
-      console.log(`[W3UParser:readUnit] Flags: 0x${flags.toString(16)}, offset: ${this.offset}`);
 
     // CRITICAL FIX: Unknown int32 field between flags and owner (discovered from wc3maptranslator line 121)
-    const unknownInt = this.readUint32();
-    if (DEBUG)
-      console.log(`[W3UParser:readUnit] UnknownInt: ${unknownInt}, offset: ${this.offset}`);
+    const _unknownInt = this.readUint32();
 
     // Owner (player number)
     const owner = this.readUint32();
-    if (DEBUG) console.log(`[W3UParser:readUnit] Owner: ${owner}, offset: ${this.offset}`);
 
     // Unknown bytes
     this.checkBounds(2);
@@ -499,18 +362,12 @@ export class W3UParser {
     // Item table index (-1 = none)
     const itemTable = this.view.getInt32(this.offset, true);
     this.offset += 4;
-    if (DEBUG) console.log(`[W3UParser:readUnit] ItemTable: ${itemTable}, offset: ${this.offset}`);
 
     // Item sets
     const itemSetCountRaw = this.readUint32();
 
     // CRITICAL FIX: 0xFFFFFFFF (-1 as signed int) means "no item sets" or "default"
     const itemSetCount = itemSetCountRaw === 0xffffffff ? 0 : itemSetCountRaw;
-
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] ItemSetCount: ${itemSetCount} (raw: ${itemSetCountRaw}), offset: ${this.offset}`
-      );
 
     // Sanity check: item set count should be reasonable (< 100)
     // But AFTER converting sentinel value to 0
@@ -531,11 +388,6 @@ export class W3UParser {
       const itemCount =
         itemCountRaw === 0xffffffff || itemCountRaw === 0x80000000 ? 0 : itemCountRaw;
 
-      if (DEBUG)
-        console.log(
-          `[W3UParser:readUnit] ItemSet ${i}: itemCount=${itemCount} (raw: ${itemCountRaw}), offset: ${this.offset}`
-        );
-
       // Sanity check: item count should be reasonable (< 50)
       // But AFTER converting sentinel values to 0
       if (itemCount > 50) {
@@ -551,8 +403,6 @@ export class W3UParser {
 
       itemSets.push({ items });
     }
-
-    if (DEBUG) console.log(`[W3UParser:readUnit] Finished item sets, offset: ${this.offset}`);
 
     // Gold amount (for gold mines)
     const goldAmount = this.readUint32();
@@ -577,11 +427,6 @@ export class W3UParser {
     // This is a WC3 sentinel value, NOT corrupted data!
     const inventoryItemCount = inventoryItemCountRaw === 0xffffffff ? 0 : inventoryItemCountRaw;
 
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] InventoryItemCount: ${inventoryItemCount} (raw: ${inventoryItemCountRaw}), offset: ${this.offset}`
-      );
-
     // Sanity check: inventory should be reasonable (< 20)
     // But AFTER converting sentinel value to 0
     if (inventoryItemCount > 20) {
@@ -599,19 +444,12 @@ export class W3UParser {
       });
     }
 
-    if (DEBUG) console.log(`[W3UParser:readUnit] Finished inventory items, offset: ${this.offset}`);
-
     // Modified abilities
     const modifiedAbilityCountRaw = this.readUint32();
 
     // CRITICAL FIX: 0xFFFFFFFF (-1 as signed int) means "no abilities" or "default"
     const modifiedAbilityCount =
       modifiedAbilityCountRaw === 0xffffffff ? 0 : modifiedAbilityCountRaw;
-
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] ModifiedAbilityCount: ${modifiedAbilityCount} (raw: ${modifiedAbilityCountRaw}), offset: ${this.offset}`
-      );
 
     // Sanity check: abilities should be reasonable (< 50)
     // But AFTER converting sentinel value to 0
@@ -631,13 +469,8 @@ export class W3UParser {
       });
     }
 
-    if (DEBUG)
-      console.log(`[W3UParser:readUnit] Finished modified abilities, offset: ${this.offset}`);
-
     // Random flag
     const randomFlag = this.readUint32();
-    if (DEBUG)
-      console.log(`[W3UParser:readUnit] RandomFlag: ${randomFlag}, offset: ${this.offset}`);
 
     // CRITICAL FIX: Branch logic based on randomFlag value (from wc3maptranslator)
     // randFlag values:
@@ -665,32 +498,17 @@ export class W3UParser {
       this.offset += 3;
       itemClass = this.view.getUint8(this.offset);
       this.offset += 1;
-
-      if (DEBUG)
-        console.log(
-          `[W3UParser:readUnit] RandomFlag=0: level=[${level.join(', ')}], itemClass=${itemClass}`
-        );
     } else if (randomFlag === 1) {
       // 1 = Random unit from random group (defined in w3i)
       // int: unit group number (which group from global table)
       // int: position number (which column of this group)
       unitGroup = this.readUint32();
       positionInGroup = this.readUint32();
-
-      if (DEBUG)
-        console.log(
-          `[W3UParser:readUnit] RandomFlag=1: unitGroup=${unitGroup}, positionInGroup=${positionInGroup}`
-        );
     } else if (randomFlag === 2) {
       // 2 = Random unit from custom table
       // int: number "n" of different available units
       // then n times: [4-char unitId + int chance]
       const randomUnitTableCount = this.readUint32();
-
-      if (DEBUG)
-        console.log(
-          `[W3UParser:readUnit] RandomFlag=2: randomUnitTableCount=${randomUnitTableCount}`
-        );
 
       // Sanity check
       if (randomUnitTableCount > 200) {
@@ -709,9 +527,6 @@ export class W3UParser {
         randomUnitTables.push(chance);
       }
     }
-
-    if (DEBUG)
-      console.log(`[W3UParser:readUnit] After randomFlag handling, offset: ${this.offset}`);
 
     // Final 3 fields (always present in v8+)
     // CRITICAL FIX: wc3maptranslator only reads 3 fields here (color, waygate, id), NOT 4!
@@ -734,11 +549,9 @@ export class W3UParser {
         creationNumber = this.readUint32();
       } else {
         // Not enough space for optional fields - likely an older format
-        if (DEBUG) console.log(`[W3UParser:readUnit] Skipping optional fields (buffer too small)`);
       }
     } catch (error) {
       // Optional fields failed - this is okay for older formats
-      if (DEBUG) console.log(`[W3UParser:readUnit] Optional fields not available (older format)`);
     }
 
     // Reforged-specific fields (v1.32+)
@@ -749,15 +562,7 @@ export class W3UParser {
     // Try to parse skinId if possible, but skip 16 bytes regardless
     let skinId: string | undefined;
 
-    if (DEBUG)
-      console.log(
-        `[W3UParser:readUnit] 🔍 Reforged padding check: offset=${this.offset}, format=${this.formatVersion}`
-      );
-
     if (this.formatVersion === 'reforged') {
-      console.log(
-        `[W3UParser:readUnit] 🚨 REFORGED FORMAT DETECTED - Will skip 16 bytes of padding`
-      );
       const offsetBeforePadding = this.offset;
 
       // REFORGED FORMAT: Always skip 16 bytes after standard fields
@@ -781,11 +586,7 @@ export class W3UParser {
 
           if (isValidSkinId) {
             skinId = potentialSkinId;
-            console.log(`[W3UParser:readUnit] ✅ Read Reforged skinId: "${skinId}"`);
           } else {
-            console.log(
-              `[W3UParser:readUnit] ⚠️ Invalid skinId format: "${potentialSkinId}", treating as padding`
-            );
           }
         }
 
@@ -794,9 +595,6 @@ export class W3UParser {
         const remainingPadding = 12; // Always 12 bytes remaining after read4CC()
         if (this.offset + remainingPadding <= this.view.byteLength) {
           this.offset += remainingPadding;
-          console.log(
-            `[W3UParser:readUnit] ✅ Skipped ${remainingPadding} bytes of Reforged padding (total 16 bytes)`
-          );
         }
       } catch (error) {
         // If any Reforged field reading fails, skip remaining bytes to maintain alignment
@@ -806,20 +604,12 @@ export class W3UParser {
         const remainingSkip = 16 - bytesAlreadyRead;
         if (this.offset + remainingSkip <= this.view.byteLength) {
           this.offset += remainingSkip;
-          console.log(
-            `[W3UParser:readUnit] ⚠️ Error reading Reforged fields, skipped ${remainingSkip} bytes to maintain alignment`
-          );
         }
       }
 
       const offsetAfterPadding = this.offset;
-      const totalSkipped = offsetAfterPadding - offsetBeforePadding;
-      console.log(
-        `[W3UParser:readUnit] 🎯 AFTER Reforged padding: offset=${this.offset} (skipped ${totalSkipped} bytes total)`
-      );
+      const _totalSkipped = offsetAfterPadding - offsetBeforePadding;
     } else {
-      console.log(`[W3UParser:readUnit] ℹ️ Classic format - NO Reforged padding`);
-
       // VERSION 8.11 SUFFIX - Classic maps have a 111-byte suffix at the END of each unit
       // CRITICAL DISCOVERY: Binary analysis shows Unit 2 starts 111 bytes AFTER where parser thinks Unit 1 ends!
       // The suffix structure:
@@ -832,7 +622,7 @@ export class W3UParser {
         subversion === 11 &&
         this.formatVersion === 'classic'
       ) {
-        const offsetBeforeSuffix = this.offset;
+        const _offsetBeforeSuffix = this.offset;
         const suffixSize = 111;
 
         if (this.offset + suffixSize <= this.view.byteLength) {
@@ -840,35 +630,20 @@ export class W3UParser {
           const duplicateTypeId = this.read4CC();
 
           if (duplicateTypeId === typeId) {
-            console.log(
-              `[W3UParser:readUnit] ✅ VERSION 8.11 SUFFIX: Found TypeID duplicate "${duplicateTypeId}" matching unit TypeID`
-            );
           } else {
-            console.log(
-              `[W3UParser:readUnit] ⚠️ VERSION 8.11 SUFFIX: TypeID mismatch! Expected "${typeId}", got "${duplicateTypeId}"`
-            );
           }
 
           // Skip remaining 107 bytes of suffix (already read 4 bytes for TypeID)
           const remainingSuffixBytes = suffixSize - 4;
           if (this.offset + remainingSuffixBytes <= this.view.byteLength) {
             this.offset += remainingSuffixBytes;
-            console.log(
-              `[W3UParser:readUnit] ✅ VERSION 8.11: Skipped ${suffixSize}-byte unit suffix (${offsetBeforeSuffix} → ${this.offset})`
-            );
           }
         } else {
-          console.log(
-            `[W3UParser:readUnit] ⚠️ VERSION 8.11: Cannot read ${suffixSize}-byte suffix, insufficient buffer`
-          );
         }
       }
     }
 
-    const bytesConsumed = this.offset - startOffset;
-    console.log(
-      `[W3UParser:readUnit] ✅ FINISHED unit "${typeId}" at offset ${this.offset} (consumed ${bytesConsumed} bytes from ${startOffset})`
-    );
+    const _bytesConsumed = this.offset - startOffset;
 
     return {
       typeId,

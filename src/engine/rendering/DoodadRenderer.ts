@@ -33,7 +33,6 @@
  *
  * // Get stats
  * const stats = renderer.getStats();
- * console.log(`Rendering ${stats.visibleDoodads}/${stats.totalDoodads} doodads`);
  * ```
  */
 
@@ -227,9 +226,6 @@ export class DoodadRenderer {
   public addDoodad(placement: DoodadPlacement): void {
     if (this.instances.size >= this.config.maxDoodads) {
       if (!this.maxDoodadsWarningLogged) {
-        console.warn(
-          `Max doodads reached (${this.config.maxDoodads}), ignoring additional doodads`
-        );
         this.maxDoodadsWarningLogged = true;
       }
       return;

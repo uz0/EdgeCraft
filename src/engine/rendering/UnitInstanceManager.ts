@@ -97,13 +97,11 @@ export class UnitInstanceManager {
    */
   updateInstance(index: number, instance: Partial<UnitInstance>): void {
     if (index < 0 || index >= this.instances.length) {
-      console.warn(`Invalid instance index: ${index}`);
       return;
     }
 
     const currentInstance = this.instances[index];
     if (!currentInstance) {
-      console.warn(`Instance not found at index: ${index}`);
       return;
     }
 
@@ -123,7 +121,6 @@ export class UnitInstanceManager {
    */
   removeInstance(index: number): void {
     if (index < 0 || index >= this.instances.length) {
-      console.warn(`Invalid instance index: ${index}`);
       return;
     }
 
@@ -214,7 +211,6 @@ export class UnitInstanceManager {
    */
   private growBuffers(): void {
     const newCapacity = Math.max(this.capacity * 2, 100);
-    console.log(`Growing instance buffers: ${this.capacity} -> ${newCapacity} units`);
 
     const oldMatrixBuffer = this.matrixBuffer;
     const oldColorBuffer = this.colorBuffer;

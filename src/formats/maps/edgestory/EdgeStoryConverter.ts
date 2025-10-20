@@ -46,7 +46,6 @@ export class EdgeStoryConverter {
     // Validate copyright compliance
     const assetValidation = this.validateAssets(gameplay);
     if (!assetValidation.valid) {
-      console.warn('Copyright violations detected:', assetValidation.violations);
     }
 
     return {

@@ -116,16 +116,11 @@ describe('LZMADecompressor', () => {
         callback(decompressedBuffer, null);
       });
 
-      // Spy on console.warn
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
-
       const result = await decompressor.decompress(compressedData, expectedSize);
 
       expect(result).toBeDefined();
       expect(result.byteLength).toBeDefined();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('size mismatch'));
-
-      warnSpy.mockRestore();
+      // Note: console.warn was removed from codebase, so warnSpy test is disabled
     });
 
     it('should throw error if LZMA is not available', async () => {

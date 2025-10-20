@@ -53,7 +53,6 @@ export class AssetLoader {
       }
       this.manifest = (await response.json()) as AssetManifest;
     } catch (error) {
-      console.error('[AssetLoader] Failed to load manifest:', error);
       this.manifest = { textures: {}, models: {} };
     }
   }
@@ -69,7 +68,6 @@ export class AssetLoader {
 
     const asset = this.manifest.textures[id];
     if (!asset) {
-      console.warn(`[AssetLoader] Texture not found: ${id}, using fallback`);
       return this.createFallbackTexture();
     }
 
@@ -79,7 +77,6 @@ export class AssetLoader {
       this.loadedTextures.set(id, texture);
       return texture;
     } catch (error) {
-      console.error(`[AssetLoader] Failed to load texture ${id}:`, error);
       return this.createFallbackTexture();
     }
   }
@@ -96,7 +93,6 @@ export class AssetLoader {
 
     const asset = this.manifest.models[id];
     if (!asset) {
-      console.warn(`[AssetLoader] Model not found: ${id}, using fallback box`);
       return this.createFallbackBox();
     }
 
@@ -124,7 +120,6 @@ export class AssetLoader {
 
       // Fallback to first mesh if no geometry found
       if (!mesh) {
-        console.warn(`[AssetLoader] No mesh with geometry found in ${id}, using first mesh`);
         mesh = result.meshes[0] as BABYLON.Mesh;
       }
 
@@ -154,7 +149,6 @@ export class AssetLoader {
       this.loadedModels.set(id, mesh);
       return mesh; // Return the original mesh for thin instancing
     } catch (error) {
-      console.error(`[AssetLoader] Failed to load model ${id}:`, error);
       return this.createFallbackBox();
     }
   }

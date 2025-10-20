@@ -224,7 +224,6 @@ export class CascadedShadowSystem {
    * @example
    * ```typescript
    * const stats = csm.getStats();
-   * console.log(`Memory: ${stats.memoryUsage / 1024 / 1024} MB`);
    * ```
    */
   public getStats(): ShadowStats {

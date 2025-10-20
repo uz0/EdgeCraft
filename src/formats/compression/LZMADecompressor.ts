@@ -32,7 +32,6 @@ export class LZMADecompressor implements IDecompressor {
           return true;
         }
       } catch (e) {
-        console.warn('lzma-native module not available:', e);
         return false;
       }
     }
@@ -87,9 +86,6 @@ export class LZMADecompressor implements IDecompressor {
 
           // Validate decompressed size
           if (result.length !== expectedSize) {
-            console.warn(
-              `LZMA decompression size mismatch: expected ${expectedSize}, got ${result.length}`
-            );
           }
 
           // Convert Buffer to ArrayBuffer

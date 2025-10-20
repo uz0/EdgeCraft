@@ -10,7 +10,6 @@
  * const result = await generator.generatePreview(mapData);
  *
  * if (result.success) {
- *   console.log('Thumbnail generated:', result.dataUrl);
  *   // Use in <img src={result.dataUrl} />
  * }
  *
@@ -73,8 +72,6 @@ export class MapPreviewGenerator {
     targetCanvas.width = 512;
     targetCanvas.height = 512;
 
-    console.log('[MapPreviewGenerator] Creating Babylon.js Engine...');
-
     try {
       this.engine = new BABYLON.Engine(targetCanvas, false, {
         preserveDrawingBuffer: true, // Required for screenshots
@@ -82,15 +79,9 @@ export class MapPreviewGenerator {
       });
 
       if (!this.engine.webGLVersion) {
-        console.error('[MapPreviewGenerator] ❌ WebGL not supported!');
         throw new Error('WebGL is not supported in this browser');
       }
-
-      console.log(
-        `[MapPreviewGenerator] ✅ Engine created, WebGL version: ${this.engine.webGLVersion}`
-      );
     } catch (error) {
-      console.error('[MapPreviewGenerator] ❌ Failed to create Engine:', error);
       throw error;
     }
   }
@@ -103,14 +94,10 @@ export class MapPreviewGenerator {
     config?: PreviewConfig
   ): Promise<PreviewResult> {
     const startTime = performance.now();
-    console.log(
-      `[MapPreviewGenerator] generatePreview() called, map dimensions: ${mapData.info.dimensions.width}x${mapData.info.dimensions.height}`
-    );
 
     // Validate engine is still valid
     if (this.engine == null || this.engine.isDisposed) {
       const error = 'Engine has been disposed';
-      console.error(`[MapPreviewGenerator] ❌ ${error}`);
       return {
         success: false,
         generationTimeMs: 0,
@@ -129,10 +116,8 @@ export class MapPreviewGenerator {
 
     try {
       // Step 1: Create temporary scene
-      console.log(`[MapPreviewGenerator] Step 1: Creating Babylon.js scene...`);
       this.scene = new BABYLON.Scene(this.engine);
       this.scene.clearColor = new BABYLON.Color4(0.3, 0.4, 0.5, 1.0);
-      console.log(`[MapPreviewGenerator] ✅ Scene created`);
 
       // Step 2: Setup orthographic camera (top-down)
       const { width, height } = mapData.info.dimensions;
@@ -154,7 +139,6 @@ export class MapPreviewGenerator {
       this.camera.orthoBottom = -maxDim / 2;
 
       // Step 3: Render terrain using existing API
-      console.log(`[MapPreviewGenerator] Step 3: Rendering terrain...`);
       const assetLoader = new AssetLoader(this.scene);
       const terrainRenderer = new TerrainRenderer(this.scene, assetLoader);
       const heightmapUrl = this.createHeightmapDataUrl(
@@ -162,15 +146,9 @@ export class MapPreviewGenerator {
         mapData.terrain.width,
         mapData.terrain.height
       );
-      console.log(
-        `[MapPreviewGenerator] Heightmap data URL created, length: ${heightmapUrl.length}`
-      );
 
       // For preview generation, don't use textures - they often don't exist
       // Use solid color material instead for faster, more reliable preview generation
-      console.log(
-        `[MapPreviewGenerator] Loading terrain: ${mapData.terrain.width}x${mapData.terrain.height}`
-      );
       await terrainRenderer.loadHeightmap(heightmapUrl, {
         width: mapData.terrain.width,
         height: mapData.terrain.height,
@@ -178,7 +156,6 @@ export class MapPreviewGenerator {
         maxHeight: 100,
         textures: [], // Empty - use default color material
       });
-      console.log(`[MapPreviewGenerator] ✅ Terrain rendered`);
 
       // Step 4: Optional - render units
       if (finalConfig.includeUnits && mapData.units.length > 0) {
@@ -199,16 +176,12 @@ export class MapPreviewGenerator {
       }
 
       // Step 5: Render one frame
-      console.log(`[MapPreviewGenerator] Step 5: Rendering frame...`);
       this.scene.render();
-      console.log(`[MapPreviewGenerator] ✅ Frame rendered`);
 
       // Step 6: Capture screenshot
       if (this.camera === null) {
         throw new Error('Camera not initialized');
       }
-
-      console.log(`[MapPreviewGenerator] Step 6: Capturing screenshot...`);
 
       // Use canvas.toDataURL() directly - more reliable than CreateScreenshotUsingRenderTarget
       const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -221,7 +194,6 @@ export class MapPreviewGenerator {
 
           // Set timeout fallback (5 seconds)
           const timeoutId = setTimeout(() => {
-            console.error('[MapPreviewGenerator] ⚠️ Screenshot timeout - using fallback');
             // Fallback: just use the current canvas state
             const mimeType = finalConfig.format === 'png' ? 'image/png' : 'image/jpeg';
             try {
@@ -239,27 +211,18 @@ export class MapPreviewGenerator {
           const mimeType = finalConfig.format === 'png' ? 'image/png' : 'image/jpeg';
           const canvasDataUrl = canvas.toDataURL(mimeType, finalConfig.quality);
 
-          console.log(
-            `[MapPreviewGenerator] Screenshot captured! Data URL length: ${canvasDataUrl.length}, starts with: ${canvasDataUrl.substring(0, 50)}`
-          );
-
           clearTimeout(timeoutId);
           resolve(canvasDataUrl);
         } catch (error) {
-          console.error(`[MapPreviewGenerator] Screenshot capture error:`, error);
           reject(error);
         }
       });
 
       // Cleanup
-      console.log(`[MapPreviewGenerator] Cleaning up...`);
       terrainRenderer.dispose();
       this.dispose();
 
       const generationTimeMs = performance.now() - startTime;
-      console.log(
-        `[MapPreviewGenerator] ✅ Preview generation complete in ${generationTimeMs.toFixed(0)}ms`
-      );
 
       return {
         success: true,
@@ -268,7 +231,6 @@ export class MapPreviewGenerator {
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('[MapPreviewGenerator] ❌ Preview generation failed:', errorMsg, error);
 
       this.dispose();
 
@@ -296,7 +258,6 @@ export class MapPreviewGenerator {
 
       const { id, mapData } = map;
 
-      console.log(`Generating preview ${i + 1}/${maps.length}: ${id}`);
       const result = await this.generatePreview(mapData, config);
       results.set(id, result);
 

@@ -176,7 +176,6 @@ export class ShadowCasterManager {
    * @example
    * ```typescript
    * const stats = manager.getStats();
-   * console.log(`CSM: ${stats.csmCasters}, Blob: ${stats.blobShadows}`);
    * ```
    */
   public getStats(): ShadowCasterStats {

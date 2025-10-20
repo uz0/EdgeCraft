@@ -209,7 +209,6 @@ export function mapAssetID(
     return mappedID;
   }
 
-  console.warn(`[AssetMap] No mapping for ${format}:${assetType}:${originalID}, using fallback`);
   const fallback = mapping['_fallback'];
   return fallback !== undefined && fallback !== null && fallback !== ''
     ? fallback

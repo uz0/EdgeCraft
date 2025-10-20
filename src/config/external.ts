@@ -122,52 +122,26 @@ export function validateExternalDependencies(): {
  * Log external dependency status on startup
  */
 export function logExternalStatus(): void {
-  console.log('╔════════════════════════════════════════════════════════╗');
-  console.log('║              EXTERNAL DEPENDENCIES STATUS               ║');
-  console.log('╠════════════════════════════════════════════════════════╣');
-
   const multiplayerEndpoint = getMultiplayerEndpoint();
   const isUsingMockServer = multiplayerEndpoint.includes('localhost');
 
-  console.log('║ Multiplayer Server:                                    ║');
-  console.log(
-    `║   ${isUsingMockServer ? '⚠️  MOCK' : '✅ PRODUCTION'}: ${multiplayerEndpoint.padEnd(44)} ║`
-  );
-
   if (isUsingMockServer) {
-    console.log('║   📦 Full server: https://github.com/uz0/core-edge    ║');
   }
-
-  console.log('║                                                        ║');
 
   const launcherPath = getLauncherPath();
   const isUsingMockLauncher = launcherPath.includes('mocks');
 
-  console.log('║ Launcher Map:                                          ║');
-  console.log(
-    `║   ${isUsingMockLauncher ? '⚠️  MOCK' : '✅ PRODUCTION'}: ${launcherPath.substring(0, 44).padEnd(44)} ║`
-  );
-
   if (isUsingMockLauncher) {
-    console.log('║   📦 Full launcher: https://github.com/uz0/index.edgecraft ║');
   }
-
-  console.log('╚════════════════════════════════════════════════════════╝');
 
   const validation = validateExternalDependencies();
 
   if (validation.warnings.length > 0) {
-    console.log('\\n⚠️  Warnings:');
-    validation.warnings.forEach((warning) => {
-      console.log(`   - ${warning}`);
-    });
+    validation.warnings.forEach((warning) => {});
   }
 
   if (!validation.valid) {
-    console.error('\\n❌ Errors:');
-    validation.errors.forEach((error) => {
-      console.error(`   - ${error}`);
-    });
+    validation.errors.forEach((error) => {});
     throw new Error('External dependency configuration invalid');
   }
 }

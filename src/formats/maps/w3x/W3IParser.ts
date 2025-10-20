@@ -33,15 +33,11 @@ export class W3IParser {
    * Parse the entire w3i file
    */
   public parse(): W3IMapInfo {
-    console.error('🚨🚨🚨 NEW W3IPARSER CODE LOADED - REFORGED FIX ACTIVE 🚨🚨🚨');
-
     // DEBUG: Log first 64 bytes of W3I buffer to diagnose StormJS extraction issue
     const debugView = new Uint8Array(this.buffer, 0, Math.min(64, this.buffer.byteLength));
-    const hexDump = Array.from(debugView)
+    const _hexDump = Array.from(debugView)
       .map((b) => b.toString(16).padStart(2, '0'))
       .join(' ');
-    console.error(`[W3IParser] First 64 bytes (hex): ${hexDump}`);
-    console.error(`[W3IParser] Buffer size: ${this.buffer.byteLength} bytes`);
 
     this.offset = 0;
 
@@ -54,19 +50,13 @@ export class W3IParser {
     // Per HiveWE wiki: gameVersionMajor, gameVersionMinor, gameVersionPatch, gameVersionBuild
     // These are MANDATORY for Reforged maps (version >= 28)
     if (fileVersion >= 28) {
-      const gameVersionMajor = this.readUint32();
-      const gameVersionMinor = this.readUint32();
-      const gameVersionPatch = this.readUint32();
-      const gameVersionBuild = this.readUint32();
-      console.log(
-        `[W3IParser] Reforged format (v${fileVersion}) - Game version: ${gameVersionMajor}.${gameVersionMinor}.${gameVersionPatch}.${gameVersionBuild}`
-      );
+      const _gameVersionMajor = this.readUint32();
+      const _gameVersionMinor = this.readUint32();
+      const _gameVersionPatch = this.readUint32();
+      const _gameVersionBuild = this.readUint32();
     }
 
     // Log version numbers for format detection debugging
-    console.log(
-      `[W3IParser] Version numbers - fileVersion: ${fileVersion}, mapVersion: ${mapVersion}, editorVersion: ${editorVersion}`
-    );
 
     // Read strings
     const name = this.readString();
@@ -147,15 +137,12 @@ export class W3IParser {
         const playerCount = this.readUint32();
         for (let i = 0; i < playerCount; i++) {
           if (this.offset + 40 > this.buffer.byteLength) {
-            console.warn(`[W3IParser] Insufficient buffer for player ${i}/${playerCount}`);
             break;
           }
           players.push(this.readPlayer());
         }
       }
-    } catch (err) {
-      console.warn('[W3IParser] Error reading players (map may be truncated):', err);
-    }
+    } catch (err) {}
 
     // Forces (may be truncated in old/corrupted maps)
     const forces: W3IForce[] = [];
@@ -164,15 +151,12 @@ export class W3IParser {
         const forceCount = this.readUint32();
         for (let i = 0; i < forceCount; i++) {
           if (this.offset + 12 > this.buffer.byteLength) {
-            console.warn(`[W3IParser] Insufficient buffer for force ${i}/${forceCount}`);
             break;
           }
           forces.push(this.readForce());
         }
       }
-    } catch (err) {
-      console.warn('[W3IParser] Error reading forces (map may be truncated):', err);
-    }
+    } catch (err) {}
 
     // All remaining fields are optional and may not be present
     // Wrap in try-catch to handle truncated files gracefully
@@ -188,9 +172,6 @@ export class W3IParser {
         for (let i = 0; i < upgradeCount; i++) {
           // Check if we have enough buffer for this upgrade entry (4 + 4 + 4 + 4 = 16 bytes)
           if (this.offset + 16 > this.buffer.byteLength) {
-            console.warn(
-              `[W3IParser] Insufficient buffer for upgrade ${i}/${upgradeCount} at offset ${this.offset}`
-            );
             break;
           }
           upgradeAvailability.push({
@@ -208,9 +189,6 @@ export class W3IParser {
         for (let i = 0; i < techCount; i++) {
           // Check if we have enough buffer for this tech entry (4 + 4 = 8 bytes)
           if (this.offset + 8 > this.buffer.byteLength) {
-            console.warn(
-              `[W3IParser] Insufficient buffer for tech ${i}/${techCount} at offset ${this.offset}`
-            );
             break;
           }
           techAvailability.push({
@@ -225,7 +203,6 @@ export class W3IParser {
         try {
           unitTable = this.readRandomUnitTable();
         } catch (err) {
-          console.warn('[W3IParser] Failed to read random unit table (optional field):', err);
           unitTable = undefined;
         }
       }
@@ -235,13 +212,11 @@ export class W3IParser {
         try {
           itemTable = this.readRandomItemTable();
         } catch (err) {
-          console.warn('[W3IParser] Failed to read random item table (optional field):', err);
           itemTable = undefined;
         }
       }
     } catch (err) {
       // If any error occurs reading optional fields, log but continue
-      console.warn('[W3IParser] Error reading optional fields (this is OK for older maps):', err);
     }
 
     return {

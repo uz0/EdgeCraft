@@ -38,7 +38,6 @@ describe('SC2MapLoader', () => {
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
-        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -61,7 +60,6 @@ describe('SC2MapLoader', () => {
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
-        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -81,7 +79,6 @@ describe('SC2MapLoader', () => {
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
-        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -101,7 +98,6 @@ describe('SC2MapLoader', () => {
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
-        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 
@@ -123,7 +119,6 @@ describe('SC2MapLoader', () => {
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
-        console.warn(`Skipping test: ${mapPath} not found or invalid`);
         return;
       }
 

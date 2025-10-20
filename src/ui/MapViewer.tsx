@@ -66,7 +66,6 @@ export const MapViewer: React.FC = () => {
     });
 
     // Mark renderer as ready
-    console.log('[MapViewer] Renderer initialized, marking as ready');
     setRendererReady(true);
 
     // FPS tracking
@@ -97,15 +96,8 @@ export const MapViewer: React.FC = () => {
   useEffect(() => {
     const loadMap = async (): Promise<void> => {
       if (mapName == null || mapName === '' || rendererRef.current == null || !rendererReady) {
-        console.log('[MapViewer] Skipping map load:', {
-          hasMapName: mapName != null && mapName !== '',
-          hasRenderer: !!rendererRef.current,
-          rendererReady,
-        });
         return;
       }
-
-      console.log('[MapViewer] Starting map load for:', mapName);
 
       setIsLoading(true);
       setError(null);

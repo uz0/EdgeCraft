@@ -110,8 +110,6 @@ export class PostProcessingPipeline {
    * Initialize the post-processing pipeline
    */
   public async initialize(): Promise<void> {
-    console.log('Initializing post-processing pipeline...');
-
     // Create default rendering pipeline
     this.pipeline = new BABYLON.DefaultRenderingPipeline(
       'defaultPipeline',
@@ -127,8 +125,6 @@ export class PostProcessingPipeline {
     if (this.config.enableColorGrading && this.config.lutTextureUrl) {
       await this.loadLUTTexture(this.config.lutTextureUrl);
     }
-
-    console.log('Post-processing pipeline initialized');
   }
 
   /**
@@ -142,7 +138,6 @@ export class PostProcessingPipeline {
     // FXAA Anti-Aliasing (1-1.5ms)
     if (this.config.enableFXAA) {
       this.pipeline.fxaaEnabled = true;
-      console.log('FXAA enabled');
     }
 
     // Bloom Effect (2-2.5ms)
@@ -152,7 +147,6 @@ export class PostProcessingPipeline {
       this.pipeline.bloomWeight = this.config.bloomIntensity;
       this.pipeline.bloomKernel = 64; // Good balance of quality/performance
       this.pipeline.bloomScale = 0.5;
-      console.log(`Bloom enabled (threshold: ${this.config.bloomThreshold})`);
     }
 
     // Tone Mapping (0.3ms)
@@ -161,14 +155,12 @@ export class PostProcessingPipeline {
     // Color Grading (0.5ms) - will be configured when LUT loads
     if (this.config.enableColorGrading) {
       this.pipeline.imageProcessingEnabled = true;
-      console.log('Color grading enabled');
     }
 
     // Chromatic Aberration (0.5ms) @ HIGH+
     if (this.config.enableChromaticAberration) {
       this.pipeline.chromaticAberrationEnabled = true;
       this.pipeline.chromaticAberration.aberrationAmount = 30;
-      console.log('Chromatic aberration enabled');
     }
 
     // Vignette (0.3ms) @ HIGH+
@@ -177,7 +169,6 @@ export class PostProcessingPipeline {
       this.pipeline.imageProcessing.vignetteEnabled = true;
       this.pipeline.imageProcessing.vignetteWeight = this.config.vignetteWeight;
       this.pipeline.imageProcessing.vignetteCameraFov = 0.5;
-      console.log('Vignette enabled');
     }
   }
 
@@ -196,19 +187,16 @@ export class PostProcessingPipeline {
         this.pipeline.imageProcessing.toneMappingEnabled = true;
         this.pipeline.imageProcessing.toneMappingType =
           BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-        console.log('Tone mapping: ACES');
         break;
 
       case 'reinhard':
         this.pipeline.imageProcessing.toneMappingEnabled = true;
         this.pipeline.imageProcessing.toneMappingType =
           BABYLON.ImageProcessingConfiguration.TONEMAPPING_STANDARD;
-        console.log('Tone mapping: Reinhard');
         break;
 
       case 'none':
         this.pipeline.imageProcessing.toneMappingEnabled = false;
-        console.log('Tone mapping: disabled');
         break;
     }
   }
@@ -228,12 +216,10 @@ export class PostProcessingPipeline {
           if (this.pipeline != null && this.lutTexture != null) {
             this.pipeline.imageProcessing.colorGradingEnabled = true;
             this.pipeline.imageProcessing.colorGradingTexture = this.lutTexture;
-            console.log(`LUT texture loaded: ${url}`);
           }
           resolve();
         },
         (message) => {
-          console.warn(`Failed to load LUT texture: ${message}`);
           resolve(); // Don't fail, just continue without LUT
         }
       );
@@ -247,8 +233,6 @@ export class PostProcessingPipeline {
     if (quality === this.config.quality) {
       return;
     }
-
-    console.log(`Updating post-processing quality: ${this.config.quality} → ${quality}`);
 
     this.config.quality = quality;
     this.config.enableFXAA = this.shouldEnableFXAA(quality);
@@ -381,6 +365,5 @@ export class PostProcessingPipeline {
    */
   public dispose(): void {
     this.disable();
-    console.log('Post-processing pipeline disposed');
   }
 }

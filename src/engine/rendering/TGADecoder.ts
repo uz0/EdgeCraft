@@ -95,9 +95,6 @@ export class TGADecoder {
       const scale = maxSize / maxDim;
       targetWidth = Math.floor(result.width * scale);
       targetHeight = Math.floor(result.height * scale);
-      console.log(
-        `[TGADecoder] Scaling ${result.width}x${result.height} -> ${targetWidth}x${targetHeight}`
-      );
     }
 
     // For large images, use chunked downscaling to avoid canvas size limits
@@ -106,9 +103,6 @@ export class TGADecoder {
     const needsChunking = result.width > CANVAS_LIMIT || result.height > CANVAS_LIMIT;
 
     if (needsChunking) {
-      console.log(
-        `[TGADecoder] Image too large (${result.width}x${result.height}), using direct downscaling`
-      );
       // For very large images, downsample the pixel data directly before canvas rendering
       const downscaledData = this.downsamplePixelData(
         result.data,

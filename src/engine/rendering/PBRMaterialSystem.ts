@@ -106,7 +106,6 @@ export class PBRMaterialSystem {
 
   constructor(scene: BABYLON.Scene) {
     this.scene = scene;
-    console.log('PBR material system initialized');
   }
 
   /**
@@ -116,11 +115,8 @@ export class PBRMaterialSystem {
     // Check cache
     const cached = this.materialCache.get(config.name);
     if (cached != null) {
-      console.log(`Using cached material: ${config.name}`);
       return cached;
     }
-
-    console.log(`Creating PBR material: ${config.name}`);
 
     // Create new PBR material
     const material = new BABYLON.PBRMaterial(config.name, this.scene);
@@ -197,7 +193,6 @@ export class PBRMaterialSystem {
     if (config.freeze !== false) {
       // Default to freezing
       material.freeze();
-      console.log(`Material frozen: ${config.name}`);
     }
 
     // Cache material
@@ -226,11 +221,9 @@ export class PBRMaterialSystem {
         BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
         () => {
           this.textureCache.set(url, texture);
-          console.log(`Texture loaded: ${url}`);
           resolve(texture);
         },
         (message) => {
-          console.error(`Failed to load texture: ${url}`, message);
           reject(new Error(`Failed to load texture: ${url}`));
         }
       );
@@ -273,8 +266,6 @@ export class PBRMaterialSystem {
    * Pre-load common materials
    */
   public preloadCommonMaterials(): void {
-    console.log('Pre-loading common materials...');
-
     const commonMaterials = [
       // Basic colors
       { name: 'white', color: new BABYLON.Color3(1, 1, 1), metallic: 0, roughness: 1 },
@@ -297,8 +288,6 @@ export class PBRMaterialSystem {
     for (const config of commonMaterials) {
       this.createSimpleMaterial(config.name, config.color, config.metallic, config.roughness);
     }
-
-    console.log(`Pre-loaded ${commonMaterials.length} common materials`);
   }
 
   /**
@@ -308,7 +297,6 @@ export class PBRMaterialSystem {
     const material = this.materialCache.get(name);
     if (material != null) {
       material.unfreeze();
-      console.log(`Material unfrozen: ${name}`);
     }
   }
 
@@ -319,7 +307,6 @@ export class PBRMaterialSystem {
     const material = this.materialCache.get(name);
     if (material != null) {
       material.freeze();
-      console.log(`Material frozen: ${name}`);
     }
   }
 
@@ -368,8 +355,6 @@ export class PBRMaterialSystem {
       texture.dispose();
     }
     this.textureCache.clear();
-
-    console.log('PBR material cache cleared');
   }
 
   /**
@@ -377,6 +362,5 @@ export class PBRMaterialSystem {
    */
   public dispose(): void {
     this.clearCache();
-    console.log('PBR material system disposed');
   }
 }

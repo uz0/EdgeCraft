@@ -44,11 +44,17 @@
     "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "no-console": "off",
+    "no-console": "error",
     "prefer-const": "error",
     "no-var": "error"
   },
   "overrides": [
+    {
+      "files": ["scripts/**/*.ts", "scripts/**/*.js", "scripts/**/*.cjs", "scripts/**/*.mjs"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
     {
       "files": ["src/config/**/*.ts"],
       "rules": {

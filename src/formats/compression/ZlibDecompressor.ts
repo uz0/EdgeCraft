@@ -24,47 +24,28 @@ export class ZlibDecompressor implements IDecompressor {
         const compressedArray = new Uint8Array(compressed);
 
         // Log first 16 bytes for debugging
-        const previewBytes = Array.from(
+        const _previewBytes = Array.from(
           compressedArray.slice(0, Math.min(16, compressedArray.length))
         )
           .map((b) => b.toString(16).padStart(2, '0'))
           .join(' ');
-        console.log(
-          `[ZlibDecompressor] 🔍 Input: ${compressedArray.length} bytes, first 16: ${previewBytes}`
-        );
-        console.log(`[ZlibDecompressor] Expected output: ${uncompressedSize} bytes`);
 
         // Detect ZLIB header (0x78 in first byte indicates ZLIB wrapper)
         const firstByte = compressedArray.length > 0 ? (compressedArray[0] ?? 0) : 0;
-        const hasZlibWrapper = (firstByte & 0x0f) === 0x08 && (firstByte & 0xf0) !== 0;
-        console.log(
-          `[ZlibDecompressor] First byte: 0x${firstByte.toString(16)}, hasZlibWrapper: ${hasZlibWrapper}`
-        );
+        const _hasZlibWrapper = (firstByte & 0x0f) === 0x08 && (firstByte & 0xf0) !== 0;
 
         // Try raw deflate first (PKZIP style - no zlib wrapper)
         let decompressedArray: Uint8Array;
         try {
-          console.log('[ZlibDecompressor] Trying inflateRaw (PKZIP/raw DEFLATE)...');
           decompressedArray = pako.inflateRaw(compressedArray);
-          console.log(
-            `[ZlibDecompressor] ✅ inflateRaw succeeded: ${decompressedArray.byteLength} bytes`
-          );
         } catch (rawError) {
           // If raw deflate fails, try with zlib wrapper
-          const rawErrorMsg = rawError instanceof Error ? rawError.message : String(rawError);
-          console.log(`[ZlibDecompressor] ❌ inflateRaw failed: ${rawErrorMsg}`);
-          console.log('[ZlibDecompressor] Trying inflate (with ZLIB wrapper)...');
+          const _rawErrorMsg = rawError instanceof Error ? rawError.message : String(rawError);
           decompressedArray = pako.inflate(compressedArray);
-          console.log(
-            `[ZlibDecompressor] ✅ inflate succeeded: ${decompressedArray.byteLength} bytes`
-          );
         }
 
         // Verify decompressed size
         if (decompressedArray.byteLength !== uncompressedSize) {
-          console.warn(
-            `[ZlibDecompressor] ⚠️ Size mismatch: expected ${uncompressedSize}, got ${decompressedArray.byteLength}`
-          );
         }
 
         // Convert back to ArrayBuffer
@@ -74,7 +55,6 @@ export class ZlibDecompressor implements IDecompressor {
         ) as ArrayBuffer;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error(`[ZlibDecompressor] ❌ Decompression failed: ${errorMsg}`);
         throw new Error(`ZLIB decompression failed: ${errorMsg}`);
       }
     });

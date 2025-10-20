@@ -100,23 +100,17 @@ export class CustomShaderSystem {
 
     // Precompile shader presets
     this.precompileShaders();
-
-    console.log('Custom shader system initialized');
   }
 
   /**
    * Precompile shader presets
    */
   private precompileShaders(): void {
-    console.log('Precompiling shader presets...');
-
     // Register shader presets
     this.registerWaterShader();
     this.registerForceFieldShader();
     this.registerHologramShader();
     this.registerDissolveShader();
-
-    console.log('Shader presets precompiled');
   }
 
   /**
@@ -343,11 +337,8 @@ export class CustomShaderSystem {
     // Check cache
     const cached = this.shaderCache.get(config.name);
     if (cached != null) {
-      console.log(`Using cached shader: ${config.name}`);
       return cached.material;
     }
-
-    console.log(`Creating shader: ${config.name} (${config.preset})`);
 
     let material: BABYLON.ShaderMaterial;
 
@@ -572,6 +563,5 @@ export class CustomShaderSystem {
       wrapper.material.dispose();
     }
     this.shaderCache.clear();
-    console.log('Custom shader system disposed');
   }
 }

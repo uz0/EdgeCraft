@@ -13,8 +13,6 @@ import type { SceneOptions, SceneCallbacks } from './types';
  * const manager = new SceneManager(scene);
  * manager.configure({ autoClear: false });
  * manager.setCallbacks({
- *   onBeforeRender: () => console.log('Before render'),
- *   onAfterRender: () => console.log('After render')
  * });
  * ```
  */

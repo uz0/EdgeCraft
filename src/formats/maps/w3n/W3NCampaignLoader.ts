@@ -41,9 +41,6 @@ export class W3NCampaignLoader implements IMapLoader {
 
     if (fileSize > STREAMING_THRESHOLD && file instanceof File) {
       // Large file (>100MB) - use streaming to prevent memory crashes
-      console.log(
-        `Large campaign detected (${(fileSize / 1024 / 1024).toFixed(1)} MB), using streaming mode`
-      );
       return this.parseStreaming(file);
     } else {
       // Small file (<100MB) - use traditional in-memory parsing
@@ -73,15 +70,10 @@ export class W3NCampaignLoader implements IMapLoader {
       if (w3fData) {
         const w3fParser = new W3FCampaignInfoParser(w3fData.data);
         campaignInfo = w3fParser.parse();
-        console.log('[W3NCampaignLoader] ✅ Campaign info parsed successfully');
       }
     } catch (error) {
       // Campaign info is optional, continue without it
       // This is common with corrupted campaigns or unusual compression
-      console.warn(
-        '[W3NCampaignLoader] Failed to parse campaign info (non-critical):',
-        error instanceof Error ? error.message : error
-      );
     }
 
     // Extract embedded maps
@@ -89,10 +81,6 @@ export class W3NCampaignLoader implements IMapLoader {
     try {
       embeddedMaps = await this.extractEmbeddedMaps(mpqParser);
     } catch (error) {
-      console.error(
-        '[W3NCampaignLoader] Failed to extract embedded maps:',
-        error instanceof Error ? error.message : error
-      );
       throw new Error(
         `Failed to extract embedded maps: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -108,10 +96,6 @@ export class W3NCampaignLoader implements IMapLoader {
     try {
       mapData = await this.w3xLoader.parse(firstMap.data);
     } catch (error) {
-      console.error(
-        '[W3NCampaignLoader] Failed to parse first map:',
-        error instanceof Error ? error.message : error
-      );
       throw new Error(
         `Failed to parse first map: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -143,8 +127,7 @@ export class W3NCampaignLoader implements IMapLoader {
     const reader = new StreamingFileReader(file, {
       chunkSize: 4 * 1024 * 1024, // 4MB chunks
       onProgress: (bytesRead, totalBytes): void => {
-        const percent = ((bytesRead / totalBytes) * 100).toFixed(1);
-        console.log(`Loading campaign: ${percent}%`);
+        const _percent = ((bytesRead / totalBytes) * 100).toFixed(1);
       },
     });
 
@@ -155,26 +138,17 @@ export class W3NCampaignLoader implements IMapLoader {
     // NOTE: We DON'T use extractFiles because W3N campaigns have unpredictable filenames
     // Instead, we'll iterate the block table after parsing to find embedded W3X files
     const mpqResult = await mpqParser.parseStream(reader, {
-      onProgress: (stage, progress) => {
-        console.log(`${stage}: ${progress.toFixed(1)}%`);
-      },
+      onProgress: (stage, progress) => {},
     });
 
     if (!mpqResult.success) {
-      console.warn(`[W3NCampaignLoader] Parse had issues: ${mpqResult.error}, but continuing...`);
       // Don't throw - we can still work with partial results if we have map files
     }
-
-    console.log(`Campaign parsed in ${mpqResult.parseTimeMs?.toFixed(0)}ms`);
-    console.log(`[W3NCampaignLoader] Block table entries: ${mpqResult.blockTable?.length ?? 0}`);
 
     // Find embedded W3X files by iterating block table and checking for MPQ magic
     // This is more reliable than filename-based extraction since W3N campaigns
     // have unpredictable internal filenames
     if (!mpqResult.blockTable) {
-      console.warn(
-        '[W3NCampaignLoader] Block table not available from streaming parse, trying in-memory fallback...'
-      );
       // Fallback to in-memory parsing for this file
       // This can happen with corrupted or unusual MPQ structures
       try {
@@ -188,8 +162,6 @@ export class W3NCampaignLoader implements IMapLoader {
       }
     }
 
-    console.log('[W3NCampaignLoader] Searching for embedded W3X files by size and MPQ magic...');
-
     // Find large files (>100KB compressed) that are likely W3X maps
     const largeBlocks = mpqResult.blockTable
       .map((block, index) => ({ block, index }))
@@ -200,16 +172,10 @@ export class W3NCampaignLoader implements IMapLoader {
       })
       .sort((a, b) => b.block.compressedSize - a.block.compressedSize);
 
-    console.log(`[W3NCampaignLoader] Found ${largeBlocks.length} large blocks (>100KB)`);
-
     let firstMapData: ArrayBuffer | null = null;
 
     // Check up to 30 largest blocks to find a valid W3X map
     for (const { block, index } of largeBlocks.slice(0, 30)) {
-      console.log(
-        `[W3NCampaignLoader] Checking block ${index} (${block.compressedSize} bytes compressed)...`
-      );
-
       try {
         // Read first 1KB to check for MPQ magic without extracting the whole file
         const headerData = await reader.readRange(
@@ -231,8 +197,6 @@ export class W3NCampaignLoader implements IMapLoader {
         const hasMPQMagic = magic0 === 0x1a51504d || magic512 === 0x1a51504d;
 
         if (hasMPQMagic) {
-          console.log(`[W3NCampaignLoader] ✅ Found MPQ magic in block ${index}! Extracting...`);
-
           // Extract the full file
           const mapFile = await mpqParser.extractFileByIndexStream(
             index,
@@ -241,10 +205,6 @@ export class W3NCampaignLoader implements IMapLoader {
           );
 
           if (mapFile && mapFile.data.byteLength > 0) {
-            console.log(
-              `[W3NCampaignLoader] ✅ Extracted ${mapFile.data.byteLength} bytes from block ${index}`
-            );
-
             // Validate this is an actual W3X map before accepting it
             try {
               const testParser = new MPQParser(mapFile.data);
@@ -252,31 +212,18 @@ export class W3NCampaignLoader implements IMapLoader {
               const archive = parseResult.archive;
 
               if (archive != null && archive.blockTable != null && archive.blockTable.length > 5) {
-                console.log(
-                  `[W3NCampaignLoader] ✅ Validated: block ${index} has ${archive.blockTable.length} files (likely a real W3X map)`
-                );
                 firstMapData = mapFile.data;
                 break;
               } else {
-                console.log(
-                  `[W3NCampaignLoader] ⚠️ Block ${index}: MPQ has too few files (${archive?.blockTable?.length ?? 0}), likely not a map - continuing scan...`
-                );
                 // Continue to next block
               }
             } catch (validationError) {
-              console.log(
-                `[W3NCampaignLoader] ⚠️ Block ${index}: MPQ validation failed - ${validationError instanceof Error ? validationError.message : String(validationError)} - continuing scan...`
-              );
               // Continue to next block
             }
           }
         } else {
-          console.log(
-            `[W3NCampaignLoader] Block ${index} is not an MPQ (magic: 0x${magic0.toString(16)}, 0x${magic512.toString(16)})`
-          );
         }
       } catch (error) {
-        console.warn(`[W3NCampaignLoader] Failed to check block ${index}:`, error);
         continue;
       }
     }
@@ -286,7 +233,6 @@ export class W3NCampaignLoader implements IMapLoader {
     }
 
     // Parse first map using W3XMapLoader
-    console.log(`[W3NCampaignLoader] Parsing extracted W3X map...`);
     const mapData = await this.w3xLoader.parse(firstMapData);
 
     // Override format to 'w3n'
@@ -294,8 +240,6 @@ export class W3NCampaignLoader implements IMapLoader {
       ...mapData,
       format: 'w3n',
     };
-
-    console.log(`[W3NCampaignLoader] ✅ Successfully loaded map: ${result.info.name}`);
 
     return result;
   }
@@ -339,9 +283,6 @@ export class W3NCampaignLoader implements IMapLoader {
         try {
           const mapData = await mpqParser.extractFile(mapFile);
           if (mapData && mapData.data.byteLength > 0) {
-            console.log(
-              `[W3NCampaignLoader] ✅ Extracted ${mapFile} (${mapData.data.byteLength} bytes)`
-            );
             maps.push({
               data: mapData.data,
               index,
@@ -349,25 +290,13 @@ export class W3NCampaignLoader implements IMapLoader {
             index++;
           }
         } catch (error) {
-          console.warn(
-            `[W3NCampaignLoader] Failed to extract map ${mapFile}:`,
-            error instanceof Error ? error.message : error
-          );
           // Continue trying other maps
         }
       }
-    } catch (error) {
-      console.warn(
-        '[W3NCampaignLoader] Filename-based extraction failed:',
-        error instanceof Error ? error.message : error
-      );
-    }
+    } catch (error) {}
 
     // Step 2: If filename-based extraction failed, use block scanning (robust fallback)
     if (maps.length === 0) {
-      console.log(
-        '[W3NCampaignLoader] No maps found via filenames, trying block scanning fallback...'
-      );
       return await this.extractEmbeddedMapsByBlockScan(mpqParser);
     }
 
@@ -387,13 +316,8 @@ export class W3NCampaignLoader implements IMapLoader {
     // Get the MPQ archive from parser
     const archive = mpqParser.getArchive();
     if (archive == null || archive.blockTable == null || archive.hashTable == null) {
-      console.error('[W3NCampaignLoader] No archive tables available for scanning');
       return maps;
     }
-
-    console.log(
-      `[W3NCampaignLoader] 🔍 Scanning hash table (${archive.hashTable.length} entries) for embedded W3X files...`
-    );
 
     // Collect all non-empty hash entries that point to valid blocks
     const validEntries = archive.hashTable
@@ -430,16 +354,11 @@ export class W3NCampaignLoader implements IMapLoader {
         return sizeB - sizeA;
       });
 
-    console.log(
-      `[W3NCampaignLoader] 📋 Found ${validEntries.length} valid hash entries (10KB-50MB) to scan`
-    );
-
     // Try to extract candidates
     let checked = 0;
     for (const { blockIndex, block } of validEntries) {
       // Limit scanning to avoid performance issues
       if (checked >= 50) {
-        console.log('[W3NCampaignLoader] ⚠️ Reached scan limit (50 blocks), stopping');
         break;
       }
       checked++;
@@ -447,18 +366,12 @@ export class W3NCampaignLoader implements IMapLoader {
       try {
         if (!block) continue; // Skip if block is undefined
 
-        const size = block.uncompressedSize || block.compressedSize || 0;
-        console.log(
-          `[W3NCampaignLoader] 🔍 [${checked}/${Math.min(50, validEntries.length)}] Checking block ${blockIndex} (${(size / 1024).toFixed(1)}KB)...`
-        );
+        const _size = block.uncompressedSize || block.compressedSize || 0;
 
         // Extract the file by index
         const mapData = await mpqParser.extractFileByIndex(blockIndex);
 
         if (!mapData || mapData.data.byteLength === 0) {
-          console.log(
-            `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: extraction failed or returned 0 bytes`
-          );
           continue;
         }
 
@@ -468,21 +381,13 @@ export class W3NCampaignLoader implements IMapLoader {
         const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
 
         // Log extracted data preview for debugging
-        const previewBytes = Array.from(
+        const _previewBytes = Array.from(
           new Uint8Array(mapData.data.slice(0, Math.min(16, mapData.data.byteLength)))
         )
           .map((b) => b.toString(16).padStart(2, '0'))
           .join(' ');
 
-        console.log(
-          `[W3NCampaignLoader] 📊 Block ${blockIndex}: extracted ${(mapData.data.byteLength / 1024).toFixed(1)}KB, magic0=0x${magic0.toString(16)}, magic512=0x${magic512.toString(16)}, first 16 bytes: ${previewBytes}`
-        );
-
         if (magic0 === 0x1a51504d || magic512 === 0x1a51504d) {
-          console.log(
-            `[W3NCampaignLoader] ✅ Found MPQ magic in block ${blockIndex} (${(mapData.data.byteLength / 1024).toFixed(1)}KB)!`
-          );
-
           // Validate this is an actual W3X map by checking for required files
           try {
             const testParser = new MPQParser(mapData.data);
@@ -491,9 +396,6 @@ export class W3NCampaignLoader implements IMapLoader {
 
             // Check if this MPQ has typical W3X map files
             if (archive != null && archive.blockTable != null && archive.blockTable.length > 5) {
-              console.log(
-                `[W3NCampaignLoader] ✅ Validated: block ${blockIndex} has ${archive.blockTable.length} files (likely a real W3X map)`
-              );
               maps.push({
                 data: mapData.data,
                 index: maps.length,
@@ -502,36 +404,21 @@ export class W3NCampaignLoader implements IMapLoader {
               // Only extract the first VALID map for Phase 1
               break;
             } else {
-              console.log(
-                `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: MPQ has too few files (${archive?.blockTable?.length ?? 0}), likely not a map - continuing scan...`
-              );
             }
-          } catch (validationError) {
-            console.log(
-              `[W3NCampaignLoader] ⚠️ Block ${blockIndex}: MPQ validation failed - ${validationError instanceof Error ? validationError.message : String(validationError)} - continuing scan...`
-            );
-          }
+          } catch (validationError) {}
         } else {
-          console.log(
-            `[W3NCampaignLoader] ❌ Block ${blockIndex}: Not a W3X map (MPQ magic not found)`
-          );
         }
       } catch (error) {
         // Only log decompression errors for debugging, don't clutter console with ADPCM warnings
         const errorMsg = error instanceof Error ? error.message : String(error);
         if (!errorMsg.includes('ADPCM') && !errorMsg.includes('SPARSE')) {
-          console.log(`[W3NCampaignLoader] ⚠️ Block ${blockIndex} extraction failed: ${errorMsg}`);
         }
         continue;
       }
     }
 
     if (maps.length === 0) {
-      console.error(
-        `[W3NCampaignLoader] ❌ No valid W3X maps found after scanning ${checked} blocks`
-      );
     } else {
-      console.log(`[W3NCampaignLoader] ✅ Successfully extracted ${maps.length} map(s)`);
     }
 
     return maps;
@@ -624,7 +511,6 @@ export class W3NCampaignLoader implements IMapLoader {
       const w3fParser = new W3FCampaignInfoParser(w3fData.data);
       return w3fParser.parse();
     } catch (error) {
-      console.warn('Failed to parse campaign info:', error);
       return null;
     }
   }

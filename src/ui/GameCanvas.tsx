@@ -143,11 +143,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
 
       // Log shadow stats
-      const shadowStats = shadowManager.getStats();
-      console.log('🌑 Shadow System Initialized:');
-      console.log(`   - CSM shadow casters: ${shadowStats.csmCasters}`);
-      console.log(`   - Blob shadows: ${shadowStats.blobShadows}`);
-      console.log(`   - Total objects: ${shadowStats.totalObjects}`);
+      const _shadowStats = shadowManager.getStats();
 
       // Start rendering
       engine.startRenderLoop();
@@ -164,7 +160,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to initialize engine');
-      console.error('Engine initialization error:', err);
       return undefined;
     }
   }, [onEngineReady]);
