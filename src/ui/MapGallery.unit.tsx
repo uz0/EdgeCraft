@@ -110,9 +110,7 @@ describe('MapGallery', () => {
     it('should render thumbnail image when thumbnailUrl is provided', () => {
       render(<MapGallery maps={mockMaps} onMapSelect={mockOnMapSelect} />);
 
-      const backgroundDiv = document.querySelector(
-        '[style*="https://example.com/thumb1.jpg"]'
-      );
+      const backgroundDiv = document.querySelector('[style*="https://example.com/thumb1.jpg"]');
       expect(backgroundDiv).toBeInTheDocument();
     });
 

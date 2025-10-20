@@ -14,7 +14,9 @@
   cursor: pointer;
   padding: 0;
   background: #2a2a2a;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .map-card:hover {
