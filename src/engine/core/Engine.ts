@@ -7,7 +7,8 @@
 
 import * as BABYLON from '@babylonjs/core';
 import type { EngineOptions, EngineState, IEngineCore } from './types';
-import { OptimizedRenderPipeline, QualityPreset } from '../rendering';
+import { OptimizedRenderPipeline } from '../rendering/RenderPipeline';
+import { QualityPreset } from '../rendering/types';
 
 /**
  * Main Edge Craft engine class

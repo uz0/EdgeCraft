@@ -16,15 +16,13 @@ import type {
   MPQStreamOptions,
 } from './types';
 import { StreamingFileReader } from '../../utils/StreamingFileReader';
-import {
-  LZMADecompressor,
-  ZlibDecompressor,
-  Bzip2Decompressor,
-  HuffmanDecompressor,
-  ADPCMDecompressor,
-  SparseDecompressor,
-  CompressionAlgorithm,
-} from '../compression';
+import { LZMADecompressor } from '../compression/LZMADecompressor';
+import { ZlibDecompressor } from '../compression/ZlibDecompressor';
+import { Bzip2Decompressor } from '../compression/Bzip2Decompressor';
+import { HuffmanDecompressor } from '../compression/HuffmanDecompressor';
+import { ADPCMDecompressor } from '../compression/ADPCMDecompressor';
+import { SparseDecompressor } from '../compression/SparseDecompressor';
+import { CompressionAlgorithm } from '../compression/types';
 
 /**
  * MPQ Archive parser
