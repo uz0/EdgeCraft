@@ -14,6 +14,7 @@
 - *always* use chrome devtools mcp to validate client logic
 - *never* creating tmp pages or script to test hypothesis
 - add only neccesary for debug logs, after they give info - clear them!
+- avoid early faulty generalization. split first utility layer, then dont hesistate to copy-paste, only on third case with re-use start generalization
 
 ### Pre-Commit Checks
 ```bash
@@ -41,7 +42,6 @@ src/**/*.unit.ts - all unit tests placed nearby code
 tests/ - ONLY playwrite tests here
 tests/**/*.test.ts - end-to-end tests
 
-
 ### index files
 index.js files are *FORBIDDEN*. always import with whole path from src.'
 
@@ -55,6 +55,8 @@ index.js files are *FORBIDDEN*. always import with whole path from src.'
 
 
 ## ✅ Task Completion
+
+
 ## 📎 Style & Conventions
 
 ### ZERO COMMENTS POLICY

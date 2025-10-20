@@ -10,8 +10,8 @@ export default defineConfig({
   // Test directory - E2E tests in tests/ root only
   testDir: './tests',
 
-  // ONLY match E2E tests directly in tests/ root (not subdirectories with unit tests)
-  testMatch: ['*.test.ts'],
+  // ONLY match specific E2E test files (not Jest unit tests)
+  testMatch: ['MapGallery.test.ts', 'OpenMap.test.ts'],
 
   // Baseline screenshots directory
   snapshotDir: './tests/e2e-screenshots',
