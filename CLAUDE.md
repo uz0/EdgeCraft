@@ -10,6 +10,11 @@
 
 ## 🧱 Development
 
+### Rules
+- *always* use chrome devtools mcp to validate client logic
+- *never* creating tmp pages or script to test hypothesis
+- add only neccesary for debug logs, after they give info - clear them!
+
 ### Pre-Commit Checks
 ```bash
 npm run typecheck  # TypeScript: 0 errors
@@ -38,13 +43,13 @@ tests/**/*.test.ts - end-to-end tests
 
 
 ### index files
-
+index.js files are *FORBIDDEN*. always import with whole path from src.'
 
 ## 🧪 Testing & Reliability
 
-### Testing Requirements
 - **Minimum: 80% unit test coverage** (enforced by CI/CD)
-- Test files: `*.unit.ts`, `*.unit.tsx`
+- Unit test (jest) files: `*.unit.ts`, `*.unit.tsx`
+- E2E tests (Playwright) `*.test.ts`
 - Framework: Jest + React Testing Library
 - E2E: Playwright
 

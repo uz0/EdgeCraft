@@ -33,8 +33,8 @@ describe('SC2MapLoader', () => {
       await expect(loader.parse(emptyBuffer)).rejects.toThrow('Failed to parse MPQ archive');
     });
 
-    it('should parse Ruined Citadel.SC2Map', async () => {
-      const mapPath = path.join(__dirname, '../../../../maps/Ruined Citadel.SC2Map');
+    it('should parse Starlight.SC2Map', async () => {
+      const mapPath = path.join(__dirname, '../../../../public/maps/Starlight.SC2Map');
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
@@ -56,8 +56,8 @@ describe('SC2MapLoader', () => {
       expect(result.doodads).toBeDefined();
     }, 10000); // 10 second timeout
 
-    it('should parse TheUnitTester7.SC2Map', async () => {
-      const mapPath = path.join(__dirname, '../../../../maps/TheUnitTester7.SC2Map');
+    it('should parse trigger_test.SC2Map', async () => {
+      const mapPath = path.join(__dirname, '../../../../public/maps/trigger_test.SC2Map');
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
@@ -76,8 +76,8 @@ describe('SC2MapLoader', () => {
       expect(result.terrain.height).toBeGreaterThan(0);
     }, 10000); // 10 second timeout
 
-    it('should parse Aliens Binary Mothership.SC2Map', async () => {
-      const mapPath = path.join(__dirname, '../../../../maps/Aliens Binary Mothership.SC2Map');
+    it('should parse asset_test.SC2Map', async () => {
+      const mapPath = path.join(__dirname, '../../../../public/maps/asset_test.SC2Map');
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
@@ -97,7 +97,7 @@ describe('SC2MapLoader', () => {
     }, 10000); // 10 second timeout
 
     it('should complete loading within 2 seconds for large file', async () => {
-      const mapPath = path.join(__dirname, '../../../../maps/Aliens Binary Mothership.SC2Map');
+      const mapPath = path.join(__dirname, '../../../../public/maps/trigger_test.SC2Map');
 
       // Check if file exists and is valid (not a placeholder)
       if (!fs.existsSync(mapPath) || fs.statSync(mapPath).size < 1000) {
