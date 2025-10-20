@@ -170,14 +170,11 @@ export class MapRendererCore {
     // Units and doodads need access to mapData.info.dimensions for coordinate conversion
     this.currentMap = mapData;
 
-    // Step 1: Initialize terrain
-    await this.renderTerrain(mapData.terrain);
+    // Step 1: Initialize terrain and store actual heightmap range
+    const terrainHeightRange = await this.renderTerrain(mapData.terrain);
 
-    // Store terrain height range for camera setup
-    this.terrainHeightRange = {
-      min: this.terrainRenderer?.getMesh()?.getBoundingInfo().minimum.y ?? 0,
-      max: this.terrainRenderer?.getMesh()?.getBoundingInfo().maximum.y ?? 100,
-    };
+    // Store terrain height range for camera setup (use actual heightmap values, not mesh bounds)
+    this.terrainHeightRange = terrainHeightRange;
 
     // Step 2: Initialize units
     this.renderUnits(mapData.units);
@@ -337,8 +334,11 @@ export class MapRendererCore {
 
   /**
    * Render terrain
+   * @returns Actual heightmap height range (min/max) for camera positioning
    */
-  private async renderTerrain(terrain: RawMapData['terrain']): Promise<void> {
+  private async renderTerrain(
+    terrain: RawMapData['terrain']
+  ): Promise<{ min: number; max: number }> {
     this.terrainRenderer = new TerrainRenderer(this.scene, this.assetLoader);
 
     // Convert heightmap Float32Array to a data URL for TerrainRenderer
@@ -419,6 +419,9 @@ export class MapRendererCore {
           `mesh: ${result.mesh?.name ?? 'unknown'}`
       );
     }
+
+    // Return actual heightmap range for camera positioning
+    return { min: minHeight, max: maxHeight };
   }
 
   /**
@@ -498,6 +501,15 @@ export class MapRendererCore {
    * Render units
    */
   private renderUnits(units: RawMapData['units']): void {
+    console.log(
+      `[MapRendererCore:renderUnits] 🔍 UNIT RENDERING START: ${units.length} units to render`
+    );
+
+    if (units.length === 0) {
+      console.warn('[MapRendererCore:renderUnits] ⚠️ NO UNITS PROVIDED - Units array is empty!');
+      return;
+    }
+
     this.unitRenderer = new InstancedUnitRenderer(this.scene, {
       enableInstancing: true,
       maxInstancesPerBuffer: 1000,
@@ -526,7 +538,7 @@ export class MapRendererCore {
       material.diffuseColor = unitColor;
       material.emissiveColor = unitColor.scale(0.2); // Slight glow
       box.material = material;
-      box.isVisible = false; // Hide the base mesh
+      box.isVisible = false; // Hide the base mesh (instances will be visible)
 
       // Spawn instances for each unit
       let isFirstUnit = true;
@@ -534,6 +546,7 @@ export class MapRendererCore {
         const instance = box.createInstance(
           `unit_${unit.typeId}_${unit.position.x}_${unit.position.z}`
         );
+        instance.isVisible = true; // FIX: Make instances visible!
         // W3X to Babylon.js coordinate mapping:
         // W3X: X=right, Y=forward, Z=up
         // Babylon: X=right, Y=up, Z=forward
@@ -553,10 +566,16 @@ export class MapRendererCore {
           );
         }
 
+        // Apply centering offset to align with terrain (which is centered at 0,0,0)
+        // WC3 coordinates: (0,0) = map center, ranges from [-mapWidth/2, mapWidth/2]
+        // Babylon.js: origin (0,0,0) = center, so just negate Y axis to Z axis
+        const offsetX = unit.position.x - mapWidth / 2;
+        const offsetZ = -(unit.position.y - mapHeight / 2); // FIX: Subtract, not add
+
         instance.position = new BABYLON.Vector3(
-          unit.position.x, // W3X is already centered - no offset needed
-          unit.position.z + 1, // Height + 1 to sit above terrain
-          -unit.position.y // Just negate Y for Z axis flip
+          offsetX, // Center X coordinate
+          unit.position.z, // WC3 Z is absolute height (no offset needed)
+          offsetZ // Center Z coordinate and negate Y->Z
         );
 
         if (isFirstUnit) {
@@ -612,60 +631,82 @@ export class MapRendererCore {
    * Render doodads
    */
   private async renderDoodads(doodads: RawMapData['doodads']): Promise<void> {
-    if (doodads.length === 0) {
-      console.log('No doodads to render');
-      return;
+    try {
+      console.log('[DEBUG renderDoodads] Method called with', doodads.length, 'doodads');
+
+      if (doodads.length === 0) {
+        console.log('No doodads to render');
+        return;
+      }
+
+      // Set maxDoodads to actual doodad count + 10% buffer for safety
+      const maxDoodads = Math.ceil(doodads.length * 1.1);
+
+      // Calculate map dimensions for coordinate conversion
+      const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
+      const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
+
+      console.log(
+        `[MapRendererCore] 🔍 COORDINATE DEBUG - Map dimensions: ` +
+          `tiles=${this.currentMap?.info.dimensions.width}x${this.currentMap?.info.dimensions.height}, ` +
+          `world units=${mapWidth}x${mapHeight}`
+      );
+
+      console.log('[DEBUG renderDoodads] Creating DoodadRenderer...');
+      this.doodadRenderer = new DoodadRenderer(this.scene, this.assetLoader, {
+        enableInstancing: true,
+        enableLOD: true,
+        lodDistance: 100,
+        maxDoodads,
+        mapWidth, // Pass map dimensions for coordinate centering
+        mapHeight,
+      });
+      console.log('[DEBUG renderDoodads] ✅ DoodadRenderer created successfully');
+
+      console.log(`Rendering ${doodads.length} doodads (limit: ${maxDoodads})...`);
+
+      // Collect unique doodad types
+      console.log('[DEBUG renderDoodads] Collecting unique doodad types...');
+      const uniqueTypes = new Set<string>();
+      for (const doodad of doodads) {
+        uniqueTypes.add(doodad.typeId);
+      }
+      console.log(`[DEBUG renderDoodads] ✅ Collected ${uniqueTypes.size} unique doodad types`);
+
+      // Load all doodad types in parallel
+      console.log(`Loading ${uniqueTypes.size} unique doodad types...`);
+      console.log('[DEBUG renderDoodads] Starting Promise.all for loadDoodadType...');
+      await Promise.all(
+        Array.from(uniqueTypes).map((typeId) => this.doodadRenderer!.loadDoodadType(typeId, ''))
+      );
+      console.log('[DEBUG renderDoodads] ✅ All doodad types loaded successfully');
+
+      // Add all doodads
+      console.log('[DEBUG renderDoodads] Adding doodads to renderer...');
+      for (const doodad of doodads) {
+        this.doodadRenderer.addDoodad(doodad);
+      }
+      console.log('[DEBUG renderDoodads] ✅ All doodads added successfully');
+
+      // Build instance buffers
+      console.log('[DEBUG renderDoodads] Building instance buffers...');
+      this.doodadRenderer.buildInstanceBuffers();
+      console.log('[DEBUG renderDoodads] ✅ Instance buffers built successfully');
+
+      // Log stats
+      const stats = this.doodadRenderer.getStats();
+      console.log(
+        `Doodads rendered: ${stats.totalDoodads} instances, ${stats.typesLoaded} types, ${stats.drawCalls} draw calls`
+      );
+      console.log('[DEBUG renderDoodads] ✅ Method completed successfully');
+    } catch (error) {
+      console.error('[DEBUG renderDoodads] ❌ Exception occurred:', error);
+      console.error(
+        '[DEBUG renderDoodads] Error stack:',
+        error instanceof Error ? error.stack : 'No stack'
+      );
+      throw error; // Re-throw to let upstream handlers deal with it
     }
-
-    // Set maxDoodads to actual doodad count + 10% buffer for safety
-    const maxDoodads = Math.ceil(doodads.length * 1.1);
-
-    // Calculate map dimensions for coordinate conversion
-    const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
-    const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
-
-    console.log(
-      `[MapRendererCore] 🔍 COORDINATE DEBUG - Map dimensions: ` +
-        `tiles=${this.currentMap?.info.dimensions.width}x${this.currentMap?.info.dimensions.height}, ` +
-        `world units=${mapWidth}x${mapHeight}`
-    );
-
-    this.doodadRenderer = new DoodadRenderer(this.scene, this.assetLoader, {
-      enableInstancing: true,
-      enableLOD: true,
-      lodDistance: 100,
-      maxDoodads,
-      mapWidth, // Pass map dimensions for coordinate centering
-      mapHeight,
-    });
-
-    console.log(`Rendering ${doodads.length} doodads (limit: ${maxDoodads})...`);
-
-    // Collect unique doodad types
-    const uniqueTypes = new Set<string>();
-    for (const doodad of doodads) {
-      uniqueTypes.add(doodad.typeId);
-    }
-
-    // Load all doodad types in parallel
-    console.log(`Loading ${uniqueTypes.size} unique doodad types...`);
-    await Promise.all(
-      Array.from(uniqueTypes).map((typeId) => this.doodadRenderer!.loadDoodadType(typeId, ''))
-    );
-
-    // Add all doodads
-    for (const doodad of doodads) {
-      this.doodadRenderer.addDoodad(doodad);
-    }
-
-    // Build instance buffers
-    this.doodadRenderer.buildInstanceBuffers();
-
-    // Log stats
-    const stats = this.doodadRenderer.getStats();
-    console.log(
-      `Doodads rendered: ${stats.totalDoodads} instances, ${stats.typesLoaded} types, ${stats.drawCalls} draw calls`
-    );
   }
 
   /**
@@ -745,12 +786,15 @@ export class MapRendererCore {
     const worldHeight = height * TILE_SIZE;
 
     // Calculate terrain center height (for camera target)
-    const terrainCenterY = (this.terrainHeightRange.min + this.terrainHeightRange.max) / 2;
+    // Use the actual midpoint between min and max for RTS camera target
+    const terrainMidHeight = (this.terrainHeightRange.min + this.terrainHeightRange.max) / 2;
+    const terrainCenterY = terrainMidHeight;
     const terrainHeight = this.terrainHeightRange.max - this.terrainHeightRange.min;
+    const terrainMaxHeight = this.terrainHeightRange.max;
 
     console.log(
-      `[MapRendererCore] 📷 Camera Setup - Terrain height: [${this.terrainHeightRange.min.toFixed(1)}, ${this.terrainHeightRange.max.toFixed(1)}], ` +
-        `center: ${terrainCenterY.toFixed(1)}, range: ${terrainHeight.toFixed(1)}`
+      `[MapRendererCore] 📷 Camera Setup - Terrain height: [${this.terrainHeightRange.min.toFixed(1)}, ${terrainMaxHeight.toFixed(1)}], ` +
+        `target Y: ${terrainCenterY.toFixed(1)}, range: ${terrainHeight.toFixed(1)}`
     );
 
     if (this.config.cameraMode === 'rts') {
@@ -765,6 +809,16 @@ export class MapRendererCore {
       const heightScaleFactor = Math.max(1, terrainHeight / 4000); // Scale radius if terrain is tall
       const baseRadius = mapDiagonal * 0.06 * heightScaleFactor;
 
+      console.log(
+        `[MapRendererCore] 🔍 CAMERA RADIUS CALCULATION:` +
+          `\n  worldWidth=${worldWidth.toFixed(1)}` +
+          `\n  worldHeight=${worldHeight.toFixed(1)}` +
+          `\n  mapDiagonal=${mapDiagonal.toFixed(1)}` +
+          `\n  terrainHeight=${terrainHeight.toFixed(1)}` +
+          `\n  heightScaleFactor=${heightScaleFactor.toFixed(3)}` +
+          `\n  baseRadius = ${mapDiagonal.toFixed(1)} * 0.06 * ${heightScaleFactor.toFixed(3)} = ${baseRadius.toFixed(1)}`
+      );
+
       const camera = new BABYLON.ArcRotateCamera(
         'rtsCamera',
         -Math.PI / 2, // Facing north
@@ -774,12 +828,34 @@ export class MapRendererCore {
         this.scene
       );
 
+      console.log(
+        `[MapRendererCore] 🔍 CAMERA AFTER CREATION:` +
+          `\n  camera.radius=${camera.radius.toFixed(1)}` +
+          `\n  camera.alpha=${camera.alpha.toFixed(3)}` +
+          `\n  camera.beta=${camera.beta.toFixed(3)}` +
+          `\n  camera.target=${camera.target.toString()}`
+      );
+
       camera.lowerRadiusLimit = baseRadius * 0.3;
       camera.upperRadiusLimit = baseRadius * 2.5;
+
+      console.log(
+        `[MapRendererCore] 🔍 CAMERA LIMITS SET:` +
+          `\n  lowerRadiusLimit=${camera.lowerRadiusLimit.toFixed(1)}` +
+          `\n  upperRadiusLimit=${camera.upperRadiusLimit.toFixed(1)}`
+      );
       camera.lowerBetaLimit = 0.2; // Don't allow too steep
       camera.upperBetaLimit = Math.PI / 2.2; // Don't allow below horizon
 
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
+
+      console.log(
+        `[MapRendererCore] 🔍 CAMERA AFTER attachControl:` +
+          `\n  camera.radius=${camera.radius.toFixed(1)}` +
+          `\n  camera.lowerRadiusLimit=${camera.lowerRadiusLimit.toFixed(1)}` +
+          `\n  camera.upperRadiusLimit=${camera.upperRadiusLimit.toFixed(1)}`
+      );
+
       this.camera = camera;
 
       console.log(
@@ -788,19 +864,61 @@ export class MapRendererCore {
           `limits=[${camera.lowerRadiusLimit.toFixed(1)}, ${camera.upperRadiusLimit.toFixed(1)}]`
       );
     } else if (this.config.cameraMode === 'free') {
-      // Free camera
+      // Free camera with enhanced controls
+      // Position camera ABOVE the terrain's maximum height to see the map properly
+      // CRITICAL: Camera must be above terrainMaxHeight, not based on map diagonal!
+      const mapDiagonal = Math.sqrt(worldWidth * worldWidth + worldHeight * worldHeight);
+      const cameraHeight = terrainMaxHeight + 500; // 500 units above highest terrain point
       const camera = new BABYLON.UniversalCamera(
         'freeCamera',
-        new BABYLON.Vector3(0, terrainCenterY + 100, 0),
+        new BABYLON.Vector3(0, cameraHeight, -mapDiagonal * 0.1), // Pull back 10% of diagonal on Z
         this.scene
       );
-      camera.setTarget(new BABYLON.Vector3(0, terrainCenterY, 0));
+
+      // Set camera rotation to look downward at the terrain center
+      // We want to look down at ~30 degrees toward the terrain
+      camera.rotation.x = Math.PI / 6; // 30° downward (more gentle angle)
+      camera.rotation.y = 0; // Facing forward (negative Z)
+
+      // Enhanced movement controls
+      camera.speed = 2.0; // Movement speed (WASD)
+      camera.angularSensibility = 1000; // Mouse look sensitivity (lower = more sensitive)
+
+      // Enable keyboard and mouse controls
+      camera.keysUp.push(87); // W
+      camera.keysDown.push(83); // S
+      camera.keysLeft.push(65); // A
+      camera.keysRight.push(68); // D
+      camera.keysUpward.push(69); // E (move up)
+      camera.keysDownward.push(81); // Q (move down)
+
       camera.attachControl(this.scene.getEngine().getRenderingCanvas(), true);
+
+      // Add mouse wheel zoom (adjust camera speed)
+      this.scene.onPointerObservable.add((pointerInfo) => {
+        if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERWHEEL) {
+          const event = pointerInfo.event as WheelEvent;
+          const delta = event.deltaY;
+
+          // Adjust camera speed based on mouse wheel
+          if (delta < 0) {
+            // Scroll up = speed up (zoom in feel)
+            camera.speed = Math.min(camera.speed * 1.2, 20.0);
+          } else {
+            // Scroll down = slow down (zoom out feel)
+            camera.speed = Math.max(camera.speed / 1.2, 0.5);
+          }
+
+          console.log(`[Camera] Speed adjusted: ${camera.speed.toFixed(2)}`);
+        }
+      });
+
       this.camera = camera;
 
       console.log(
-        `[MapRendererCore] 📷 Free Camera: position=(0, ${(terrainCenterY + 100).toFixed(1)}, 0), ` +
-          `target=(0, ${terrainCenterY.toFixed(1)}, 0)`
+        `[MapRendererCore] 📷 Free Camera: position=(0, ${cameraHeight.toFixed(1)}, ${(-mapDiagonal * 0.1).toFixed(1)}) [terrainMax=${terrainMaxHeight.toFixed(1)} + 500], ` +
+          `rotation=(${camera.rotation.x.toFixed(2)}, ${camera.rotation.y.toFixed(2)}, ${camera.rotation.z.toFixed(2)}), ` +
+          `speed=${camera.speed}, controls=WASD+QE+Mouse+Wheel`
       );
     }
 

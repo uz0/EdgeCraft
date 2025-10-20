@@ -113,7 +113,7 @@ export function useMapPreviews(): UseMapPreviewsResult {
 
           await Promise.all(
             batch.map(async (map) => {
-              if (!map) return;
+              if (map == null) return;
 
               // Generate funny loading message
               const loadingMessage = messageGeneratorRef.current.getNext();
@@ -130,7 +130,7 @@ export function useMapPreviews(): UseMapPreviewsResult {
                 console.log(`[useMapPreviews] 🔍 Checking cache for ${map.name}...`);
                 const cachedPreview = await cacheRef.current!.get(map.id);
 
-                if (cachedPreview) {
+                if (cachedPreview != null && cachedPreview !== '') {
                   console.log(`[useMapPreviews] ✅ Using cached preview for ${map.name}`);
                   newPreviews.set(map.id, cachedPreview);
                   newStates.set(map.id, 'success');
@@ -158,7 +158,7 @@ export function useMapPreviews(): UseMapPreviewsResult {
                 const result = await extractorRef.current!.extract(map.file, mapData);
                 const duration = performance.now() - startTime;
 
-                if (result.success && result.dataUrl) {
+                if (result.success && result.dataUrl != null && result.dataUrl !== '') {
                   console.log(
                     `[useMapPreviews] ✅ Preview ${result.source} for ${map.name} in ${duration.toFixed(0)}ms`
                   );
@@ -232,7 +232,7 @@ export function useMapPreviews(): UseMapPreviewsResult {
         // Check cache first
         const cachedPreview = await cacheRef.current.get(map.id);
 
-        if (cachedPreview) {
+        if (cachedPreview != null && cachedPreview !== '') {
           console.log(`Using cached preview for ${map.name}`);
           setPreviews((prev) => new Map(prev).set(map.id, cachedPreview));
           setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
@@ -243,7 +243,7 @@ export function useMapPreviews(): UseMapPreviewsResult {
         console.log(`Generating preview for ${map.name}...`);
         const result = await extractorRef.current.extract(map.file, mapData);
 
-        if (result.success && result.dataUrl) {
+        if (result.success && result.dataUrl != null && result.dataUrl !== '') {
           console.log(
             `Preview ${result.source} for ${map.name} (${result.extractTimeMs.toFixed(0)}ms)`
           );

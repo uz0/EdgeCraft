@@ -33,12 +33,40 @@ export class W3IParser {
    * Parse the entire w3i file
    */
   public parse(): W3IMapInfo {
+    console.error('🚨🚨🚨 NEW W3IPARSER CODE LOADED - REFORGED FIX ACTIVE 🚨🚨🚨');
+
+    // DEBUG: Log first 64 bytes of W3I buffer to diagnose StormJS extraction issue
+    const debugView = new Uint8Array(this.buffer, 0, Math.min(64, this.buffer.byteLength));
+    const hexDump = Array.from(debugView)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join(' ');
+    console.error(`[W3IParser] First 64 bytes (hex): ${hexDump}`);
+    console.error(`[W3IParser] Buffer size: ${this.buffer.byteLength} bytes`);
+
     this.offset = 0;
 
     // Read header
     const fileVersion = this.readUint32();
     const mapVersion = this.readUint32();
     const editorVersion = this.readUint32();
+
+    // CRITICAL FIX: Version 28+ has 4 additional game version fields after editorVersion
+    // Per HiveWE wiki: gameVersionMajor, gameVersionMinor, gameVersionPatch, gameVersionBuild
+    // These are MANDATORY for Reforged maps (version >= 28)
+    if (fileVersion >= 28) {
+      const gameVersionMajor = this.readUint32();
+      const gameVersionMinor = this.readUint32();
+      const gameVersionPatch = this.readUint32();
+      const gameVersionBuild = this.readUint32();
+      console.log(
+        `[W3IParser] Reforged format (v${fileVersion}) - Game version: ${gameVersionMajor}.${gameVersionMinor}.${gameVersionPatch}.${gameVersionBuild}`
+      );
+    }
+
+    // Log version numbers for format detection debugging
+    console.log(
+      `[W3IParser] Version numbers - fileVersion: ${fileVersion}, mapVersion: ${mapVersion}, editorVersion: ${editorVersion}`
+    );
 
     // Read strings
     const name = this.readString();

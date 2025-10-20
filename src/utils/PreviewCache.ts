@@ -24,13 +24,13 @@ export class PreviewCache {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => {
         this.db = request.result;
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = (event): void => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -52,8 +52,8 @@ export class PreviewCache {
       const store = transaction.objectStore(this.storeName);
       const request = store.get(mapId);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => {
         const entry = request.result as CacheEntry | undefined;
         resolve(entry?.dataUrl ?? null);
       };
@@ -83,8 +83,8 @@ export class PreviewCache {
       const store = transaction.objectStore(this.storeName);
       const request = store.put(entry);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve();
     });
   }
 
@@ -99,8 +99,8 @@ export class PreviewCache {
       const store = transaction.objectStore(this.storeName);
       const request = store.clear();
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve();
     });
   }
 
@@ -115,8 +115,8 @@ export class PreviewCache {
       const store = transaction.objectStore(this.storeName);
       const request = store.getAll();
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => {
         const entries = request.result as CacheEntry[];
         const totalSize = entries.reduce((sum, entry) => sum + entry.sizeBytes, 0);
         resolve(totalSize);
@@ -157,8 +157,8 @@ export class PreviewCache {
       const store = transaction.objectStore(this.storeName);
       const request = store.getAll();
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result as CacheEntry[]);
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve(request.result as CacheEntry[]);
     });
   }
 
@@ -170,8 +170,8 @@ export class PreviewCache {
       const store = transaction.objectStore(this.storeName);
       const request = store.delete(mapId);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
+      request.onerror = (): void => reject(request.error);
+      request.onsuccess = (): void => resolve();
     });
   }
 }

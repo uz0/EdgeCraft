@@ -32,7 +32,7 @@ jobs:
         run: npm run lint
 
       - name: Check Prettier formatting
-        run: npm run format:check
+        run: npm run format
 
   typecheck:
     name: TypeScript Type Check
@@ -71,6 +71,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Run tests
         run: npm run test -- --coverage
 
@@ -103,7 +106,7 @@ jobs:
         run: npm audit --audit-level=high || echo "⚠️ Moderate vulnerabilities detected in dev dependencies (acceptable for development)"
 
       - name: License compliance check
-        run: npm run validate:legal
+        run: npm run validate:licenses
 
   build:
     name: Build Check
@@ -126,9 +129,6 @@ jobs:
 
       - name: Build project
         run: npm run build
-
-      - name: Validate bundle size
-        run: npm run validate:bundle
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

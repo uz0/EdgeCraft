@@ -166,7 +166,7 @@ export class W3NCampaignLoader implements IMapLoader {
     }
 
     console.log(`Campaign parsed in ${mpqResult.parseTimeMs?.toFixed(0)}ms`);
-    console.log(`[W3NCampaignLoader] Block table entries: ${mpqResult.blockTable?.length || 0}`);
+    console.log(`[W3NCampaignLoader] Block table entries: ${mpqResult.blockTable?.length ?? 0}`);
 
     // Find embedded W3X files by iterating block table and checking for MPQ magic
     // This is more reliable than filename-based extraction since W3N campaigns
@@ -251,7 +251,7 @@ export class W3NCampaignLoader implements IMapLoader {
               const parseResult = testParser.parse();
               const archive = parseResult.archive;
 
-              if (archive && archive.blockTable && archive.blockTable.length > 5) {
+              if (archive != null && archive.blockTable != null && archive.blockTable.length > 5) {
                 console.log(
                   `[W3NCampaignLoader] ✅ Validated: block ${index} has ${archive.blockTable.length} files (likely a real W3X map)`
                 );
@@ -386,7 +386,7 @@ export class W3NCampaignLoader implements IMapLoader {
 
     // Get the MPQ archive from parser
     const archive = mpqParser.getArchive();
-    if (!archive || !archive.blockTable || !archive.hashTable) {
+    if (archive == null || archive.blockTable == null || archive.hashTable == null) {
       console.error('[W3NCampaignLoader] No archive tables available for scanning');
       return maps;
     }
@@ -425,8 +425,8 @@ export class W3NCampaignLoader implements IMapLoader {
       }))
       // Sort by uncompressed size (larger files more likely to be maps)
       .sort((a, b) => {
-        const sizeA = a.block?.uncompressedSize || a.block?.compressedSize || 0;
-        const sizeB = b.block?.uncompressedSize || b.block?.compressedSize || 0;
+        const sizeA = a.block?.uncompressedSize ?? a.block?.compressedSize ?? 0;
+        const sizeB = b.block?.uncompressedSize ?? b.block?.compressedSize ?? 0;
         return sizeB - sizeA;
       });
 
@@ -490,7 +490,7 @@ export class W3NCampaignLoader implements IMapLoader {
             const archive = parseResult.archive;
 
             // Check if this MPQ has typical W3X map files
-            if (archive && archive.blockTable && archive.blockTable.length > 5) {
+            if (archive != null && archive.blockTable != null && archive.blockTable.length > 5) {
               console.log(
                 `[W3NCampaignLoader] ✅ Validated: block ${blockIndex} has ${archive.blockTable.length} files (likely a real W3X map)`
               );

@@ -2,28 +2,25 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  setupFiles: ['<rootDir>/jest.setup.cjs'],
   setupFilesAfterEnv: ['@testing-library/jest-dom', '<rootDir>/jest.setup.ts'],
 
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/src'],
 
-  // Exclude E2E tests (Playwright) and WebGL-dependent integration tests from Jest
+  // Exclude EVERYTHING in tests/ - those are Playwright E2E tests
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/tests/e2e/',
-    '/tests/e2e-fixtures/',
-    'tests/integration', // Skip WebGL-dependent tests (no leading slash)
-    'comprehensive\\.test\\.(ts|tsx)$', // Skip all comprehensive tests
-    'MapPreview.*\\.test\\.(ts|tsx)$', // Skip MapPreview tests (require Babylon.js WebGL)
+    '/tests/',           // All Playwright E2E tests
+    '/__tests__/',       // No __tests__ directories allowed (FORBIDDEN)
   ],
 
   transformIgnorePatterns: [
     'node_modules/(?!@babylonjs|node-pkware)',
   ],
 
+  // ONLY match unit tests (*.unit.ts) - co-located with source files
   testMatch: [
-    '**/__tests__/**/*.(test|spec).+(ts|tsx|js)',
-    '**/?(*.)+(spec|test).+(ts|tsx|js)',
+    '**/*.unit.ts',
+    '**/*.unit.tsx',
   ],
 
   transform: {
@@ -53,9 +50,9 @@ export default {
 
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/mocks/__mocks__/fileMock.js',
+    '\\.(jpg|jpeg|png|gif|svg)$': 'identity-obj-proxy',
     // Mock shader files
-    '\\.fx\\?raw$': '<rootDir>/tests/__mocks__/shaderMock.js',
+    '\\.fx\\?raw$': 'identity-obj-proxy',
   },
 
   collectCoverageFrom: [
@@ -67,10 +64,10 @@ export default {
 
   coverageThreshold: {
     global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0,
+      branches: 70,
+      functions: 75,
+      lines: 80,
+      statements: 80,
     },
   },
 

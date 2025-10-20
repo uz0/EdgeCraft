@@ -2,6 +2,9 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import checker from 'vite-plugin-checker';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from 'path';
 
 /**
@@ -19,6 +22,22 @@ export default defineConfig(({ mode }) => {
 
     // Plugins
     plugins: [
+      // Node.js polyfills for browser
+      nodePolyfills({
+        // Enable specific polyfills needed by decompression libraries
+        include: ['stream', 'buffer', 'util', 'path'],
+        // Exclude fs - not available in browser
+        exclude: ['fs'],
+        globals: {
+          Buffer: true, // Inject Buffer global
+          process: true // Inject process global
+        }
+      }),
+
+      // WASM support (MUST be before other plugins)
+      wasm(),
+      topLevelAwait(),
+
       // React with Fast Refresh
       react({
         fastRefresh: true,
@@ -78,20 +97,6 @@ export default defineConfig(({ mode }) => {
       // CORS configuration
       cors: true,
 
-      // Proxy configuration for backend
-      proxy: {
-        '/api': {
-          target: 'http://localhost:2567',
-          changeOrigin: true,
-          secure: false
-        },
-        '/colyseus': {
-          target: 'ws://localhost:2567',
-          ws: true,
-          changeOrigin: true
-        }
-      },
-
       // File watching
       watch: {
         ignored: ['**/node_modules/**', '**/dist/**']
@@ -133,11 +138,6 @@ export default defineConfig(({ mode }) => {
             // React in separate chunk
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react';
-            }
-
-            // Networking libraries
-            if (id.includes('colyseus') || id.includes('socket')) {
-              return 'networking';
             }
 
             // Node modules vendor chunk
@@ -195,22 +195,33 @@ export default defineConfig(({ mode }) => {
       include: [
         '@babylonjs/core',
         '@babylonjs/loaders',
-        '@babylonjs/materials',
-        '@babylonjs/gui',
         'react',
-        'react-dom',
-        'colyseus.js'
+        'react-dom'
       ],
 
-      // Exclude from pre-bundling
-      exclude: ['@babylonjs/inspector']
+      // Exclude from pre-bundling (special modules only)
+      exclude: [
+        '@babylonjs/inspector'
+      ],
+
+      // ESBuild options for dependency optimization
+      esbuildOptions: {
+        // Handle both CommonJS and ESM
+        mainFields: ['module', 'main'],
+        // Inject shims for Node.js globals
+        inject: [],
+        // Target modern browsers
+        target: 'es2020'
+      }
     },
 
     // Environment variables
     define: {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '0.1.0'),
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
-      __DEV__: mode === 'development'
+      __DEV__: mode === 'development',
+      // Polyfill process.env.NODE_ENV for compatibility
+      'process.env.NODE_ENV': JSON.stringify(mode)
     },
 
     // CSS configuration
@@ -244,7 +255,11 @@ export default defineConfig(({ mode }) => {
     // Worker configuration
     worker: {
       format: 'es',
-      plugins: () => [tsconfigPaths()]
+      plugins: () => [
+        wasm(),
+        topLevelAwait(),
+        tsconfigPaths()
+      ]
     },
 
     // Preview server (for production testing)

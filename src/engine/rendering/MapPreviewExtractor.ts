@@ -6,7 +6,6 @@
  */
 
 import { MPQParser } from '../../formats/mpq/MPQParser';
-import { StormJSAdapter } from '../../formats/mpq/StormJSAdapter';
 import { TGADecoder } from './TGADecoder';
 import { MapPreviewGenerator } from './MapPreviewGenerator';
 import type { RawMapData } from '../../formats/maps/types';
@@ -160,12 +159,16 @@ export class MapPreviewExtractor {
 
     try {
       // Skip embedded extraction if forced generation
-      if (!options?.forceGenerate) {
+      if (options?.forceGenerate !== true) {
         // Try extracting embedded preview
         console.log(`[MapPreviewExtractor] Trying embedded extraction for: ${file.name}`);
         const embeddedResult = await this.extractEmbedded(file, mapData.format);
 
-        if (embeddedResult.success && embeddedResult.dataUrl) {
+        if (
+          embeddedResult.success &&
+          embeddedResult.dataUrl != null &&
+          embeddedResult.dataUrl !== ''
+        ) {
           console.log(
             `[MapPreviewExtractor] ✅ Embedded extraction SUCCESS for: ${file.name}, dataUrl length: ${embeddedResult.dataUrl.length}`
           );
@@ -185,7 +188,11 @@ export class MapPreviewExtractor {
         height: options?.height,
       });
 
-      if (generatedResult.success && generatedResult.dataUrl) {
+      if (
+        generatedResult.success &&
+        generatedResult.dataUrl != null &&
+        generatedResult.dataUrl !== ''
+      ) {
         console.log(
           `[MapPreviewExtractor] ✅ Generation SUCCESS for: ${file.name}, dataUrl length: ${generatedResult.dataUrl.length}, first 50 chars: ${generatedResult.dataUrl.substring(0, 50)}`
         );
@@ -369,11 +376,11 @@ export class MapPreviewExtractor {
                   }
 
                   // If we found TGA data, try to decode it
-                  if (tgaData) {
+                  if (tgaData != null) {
                     console.log(`[MapPreviewExtractor] W3N: Decoding TGA...`);
                     const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
 
-                    if (dataUrl) {
+                    if (dataUrl != null && dataUrl !== '') {
                       console.log(
                         `[MapPreviewExtractor] W3N: ✅ Successfully decoded TGA to data URL!`
                       );
@@ -452,9 +459,9 @@ export class MapPreviewExtractor {
         }
 
         // If we found TGA data, decode it
-        if (tgaData) {
+        if (tgaData != null) {
           const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
-          if (dataUrl) {
+          if (dataUrl != null && dataUrl !== '') {
             return { success: true, dataUrl };
           }
         }
@@ -462,51 +469,6 @@ export class MapPreviewExtractor {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.warn(`[MapPreviewExtractor] MPQParser failed: ${errorMsg}`);
-
-      // Check if this is a decompression error (Huffman, ZLIB, PKZIP, etc.)
-      const isDecompressionError =
-        errorMsg.includes('Huffman') ||
-        errorMsg.includes('Invalid distance') ||
-        errorMsg.includes('ZLIB') ||
-        errorMsg.includes('PKZIP') ||
-        errorMsg.includes('decompression') ||
-        errorMsg.includes('unknown compression method') ||
-        errorMsg.includes('incorrect header check');
-
-      if (isDecompressionError) {
-        console.log(
-          `[MapPreviewExtractor] Detected decompression error, falling back to StormJS (WASM)...`
-        );
-
-        // Try StormJS adapter as fallback
-        try {
-          const isStormJSAvailable = await StormJSAdapter.isAvailable();
-
-          if (isStormJSAvailable) {
-            for (const fileName of previewFiles) {
-              const result = await StormJSAdapter.extractFile(buffer, fileName);
-
-              if (result.success && result.data) {
-                console.log(`[MapPreviewExtractor] ✅ StormJS extracted: ${fileName}`);
-
-                // Decode TGA to data URL
-                const dataUrl = this.tgaDecoder.decodeToDataURL(result.data);
-
-                if (dataUrl) {
-                  return { success: true, dataUrl };
-                }
-              }
-            }
-          } else {
-            console.warn('[MapPreviewExtractor] StormJS not available');
-          }
-        } catch (stormError) {
-          console.error(
-            '[MapPreviewExtractor] StormJS fallback failed:',
-            stormError instanceof Error ? stormError.message : String(stormError)
-          );
-        }
-      }
     }
 
     return {

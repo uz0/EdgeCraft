@@ -108,7 +108,7 @@ export class MapPreviewGenerator {
     );
 
     // Validate engine is still valid
-    if (!this.engine || this.engine.isDisposed) {
+    if (this.engine == null || this.engine.isDisposed) {
       const error = 'Engine has been disposed';
       console.error(`[MapPreviewGenerator] ❌ ${error}`);
       return {

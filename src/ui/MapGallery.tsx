@@ -11,7 +11,7 @@ export interface MapMetadata {
   name: string;
 
   /** File format */
-  format: 'w3x' | 'w3n' | 'sc2map';
+  format: 'w3x' | 'w3m' | 'sc2map';
 
   /** File size in bytes */
   sizeBytes: number;
@@ -48,7 +48,7 @@ export interface MapGalleryProps {
 
 type SortOption = 'name' | 'size' | 'format';
 type SizeFilter = 'all' | 'small' | 'medium' | 'large';
-type FormatFilter = 'all' | 'w3x' | 'w3n' | 'sc2map';
+type FormatFilter = 'all' | 'w3x' | 'w3m' | 'sc2map';
 
 export const MapGallery: React.FC<MapGalleryProps> = ({
   maps,
@@ -158,8 +158,8 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
           aria-label="Filter by format"
         >
           <option value="all">All Formats</option>
-          <option value="w3x">Warcraft 3 Maps (.w3x)</option>
-          <option value="w3n">Warcraft 3 Campaigns (.w3n)</option>
+          <option value="w3x">Warcraft 3 Classic (.w3x)</option>
+          <option value="w3m">Warcraft 3 Reforged (.w3m)</option>
           <option value="sc2map">StarCraft 2 (.sc2map)</option>
         </select>
 
@@ -206,10 +206,10 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
           <MapCard
             key={map.id}
             map={map}
+            onSelect={() => onMapSelect(map)}
             progress={loadProgress?.get(map.id)}
             previewLoadingState={previewLoadingStates?.get(map.id)}
             previewLoadingMessage={previewLoadingMessages?.get(map.id)}
-            onClick={() => onMapSelect(map)}
           />
         ))}
       </div>
@@ -229,18 +229,18 @@ export const MapGallery: React.FC<MapGalleryProps> = ({
  */
 interface MapCardProps {
   map: MapMetadata;
+  onSelect: () => void;
   progress?: MapLoadProgress;
   previewLoadingState?: PreviewLoadingState;
   previewLoadingMessage?: string;
-  onClick: () => void;
 }
 
 const MapCard: React.FC<MapCardProps> = ({
   map,
+  onSelect,
   progress,
   previewLoadingState,
   previewLoadingMessage,
-  onClick,
 }) => {
   const formatSizeDisplay = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
@@ -249,21 +249,14 @@ const MapCard: React.FC<MapCardProps> = ({
 
   const formatLabel: Record<string, string> = {
     w3x: 'W3X',
-    w3n: 'W3N',
+    w3m: 'W3M',
     sc2map: 'SC2',
   };
 
   return (
-    <div
+    <button
+      onClick={onSelect}
       className={`map-card ${progress?.status === 'loading' ? 'loading' : ''}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onClick();
-        }
-      }}
       aria-label={`Load map: ${map.name}`}
     >
       {/* Thumbnail */}
@@ -276,7 +269,7 @@ const MapCard: React.FC<MapCardProps> = ({
             <div className="skeleton-content">
               <div className="spinner-small" />
               <span className="skeleton-text">
-                {previewLoadingMessage || 'Generating preview...'}
+                {previewLoadingMessage ?? 'Generating preview...'}
               </span>
             </div>
           </div>
@@ -303,6 +296,6 @@ const MapCard: React.FC<MapCardProps> = ({
           <span className="map-size">{formatSizeDisplay(map.sizeBytes)}</span>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
