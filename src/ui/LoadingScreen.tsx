@@ -14,8 +14,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ progress, mapName 
     <div className="loading-screen">
       <div className="loading-content">
         <div className="loading-spinner-large" />
-        <h2>Loading {mapName || 'Map'}...</h2>
-        {progress && <p className="loading-progress">{progress}</p>}
+        <h2>Loading {mapName ?? 'Map'}...</h2>
+        {progress != null && progress !== '' && <p className="loading-progress">{progress}</p>}
       </div>
 
       <style>{`

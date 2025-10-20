@@ -975,9 +975,9 @@ export class MPQParser {
         const hasAdjustedKey = (blockEntry.flags & 0x00020000) !== 0;
         let fileKey: number;
 
-        if (filename) {
+        if (filename != null && filename !== '') {
           // Calculate base key from filename (without directory path)
-          const filenameOnly = filename.split(/[/\\]/).pop() || filename;
+          const filenameOnly = filename.split(/[/\\]/).pop() ?? filename;
           fileKey = this.hashString(filenameOnly, 3); // Hash type 3 = MPQ_HASH_FILE_KEY
 
           console.log(`[MPQParser] Base file key from filename "${filenameOnly}": ${fileKey}`);

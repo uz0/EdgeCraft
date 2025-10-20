@@ -5,9 +5,9 @@ import './index.css';
 
 // Suppress noisy debug logs (keep errors and warnings)
 const originalLog = console.log;
-console.log = (...args: unknown[]) => {
+console.log = (...args: unknown[]): void => {
   // Only allow logs from Babylon.js engine
-  const message = String(args[0] || '');
+  const message = String(args[0] ?? '');
   if (message.includes('BJS -') || message.includes('Babylon.js')) {
     originalLog(...args);
   }

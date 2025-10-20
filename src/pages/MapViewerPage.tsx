@@ -115,7 +115,7 @@ export const MapViewerPage: React.FC = () => {
 
   // Load map when mapName changes
   useEffect(() => {
-    if (!mapName || !rendererRef.current) return;
+    if (mapName == null || mapName === '' || rendererRef.current == null) return;
 
     const loadMap = async (): Promise<void> => {
       const startTime = Date.now();
@@ -180,7 +180,7 @@ export const MapViewerPage: React.FC = () => {
       {isLoading && <LoadingScreen progress={loadingProgress} mapName={mapName} />}
 
       {/* Error overlay */}
-      {error && (
+      {error != null && error !== '' && (
         <div className="error-overlay">
           <div className="error-content">
             <h2>❌ Error Loading Map</h2>
@@ -193,14 +193,14 @@ export const MapViewerPage: React.FC = () => {
       )}
 
       {/* Viewer controls */}
-      {!isLoading && !error && (
+      {!isLoading && (error == null || error === '') && (
         <div className="viewer-controls">
           <button onClick={handleBackToGallery} className="btn-back">
             ← Back to Gallery
           </button>
           <div className="current-map-info">
             <strong>{mapName}</strong>
-            <span className="map-format">{getMapFormat(mapName || '').toUpperCase()}</span>
+            <span className="map-format">{getMapFormat(mapName ?? '').toUpperCase()}</span>
           </div>
           <div className="viewer-stats">
             <span className="stat">FPS: {fps}</span>

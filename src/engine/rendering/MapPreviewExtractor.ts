@@ -159,12 +159,16 @@ export class MapPreviewExtractor {
 
     try {
       // Skip embedded extraction if forced generation
-      if (!options?.forceGenerate) {
+      if (options?.forceGenerate !== true) {
         // Try extracting embedded preview
         console.log(`[MapPreviewExtractor] Trying embedded extraction for: ${file.name}`);
         const embeddedResult = await this.extractEmbedded(file, mapData.format);
 
-        if (embeddedResult.success && embeddedResult.dataUrl) {
+        if (
+          embeddedResult.success &&
+          embeddedResult.dataUrl != null &&
+          embeddedResult.dataUrl !== ''
+        ) {
           console.log(
             `[MapPreviewExtractor] ✅ Embedded extraction SUCCESS for: ${file.name}, dataUrl length: ${embeddedResult.dataUrl.length}`
           );
@@ -184,7 +188,11 @@ export class MapPreviewExtractor {
         height: options?.height,
       });
 
-      if (generatedResult.success && generatedResult.dataUrl) {
+      if (
+        generatedResult.success &&
+        generatedResult.dataUrl != null &&
+        generatedResult.dataUrl !== ''
+      ) {
         console.log(
           `[MapPreviewExtractor] ✅ Generation SUCCESS for: ${file.name}, dataUrl length: ${generatedResult.dataUrl.length}, first 50 chars: ${generatedResult.dataUrl.substring(0, 50)}`
         );
@@ -368,11 +376,11 @@ export class MapPreviewExtractor {
                   }
 
                   // If we found TGA data, try to decode it
-                  if (tgaData) {
+                  if (tgaData != null) {
                     console.log(`[MapPreviewExtractor] W3N: Decoding TGA...`);
                     const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
 
-                    if (dataUrl) {
+                    if (dataUrl != null && dataUrl !== '') {
                       console.log(
                         `[MapPreviewExtractor] W3N: ✅ Successfully decoded TGA to data URL!`
                       );
@@ -451,9 +459,9 @@ export class MapPreviewExtractor {
         }
 
         // If we found TGA data, decode it
-        if (tgaData) {
+        if (tgaData != null) {
           const dataUrl = this.tgaDecoder.decodeToDataURL(tgaData);
-          if (dataUrl) {
+          if (dataUrl != null && dataUrl !== '') {
             return { success: true, dataUrl };
           }
         }

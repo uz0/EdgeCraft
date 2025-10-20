@@ -96,9 +96,9 @@ export const MapViewer: React.FC = () => {
   // Load map when mapName changes AND renderer is ready
   useEffect(() => {
     const loadMap = async (): Promise<void> => {
-      if (!mapName || !rendererRef.current || !rendererReady) {
+      if (mapName == null || mapName === '' || rendererRef.current == null || !rendererReady) {
         console.log('[MapViewer] Skipping map load:', {
-          hasMapName: !!mapName,
+          hasMapName: mapName != null && mapName !== '',
           hasRenderer: !!rendererRef.current,
           rendererReady,
         });
@@ -157,7 +157,7 @@ export const MapViewer: React.FC = () => {
       {isLoading && (
         <LoadingScreen
           progress={loadingProgress}
-          mapName={mapName ? decodeURIComponent(mapName) : undefined}
+          mapName={mapName != null && mapName !== '' ? decodeURIComponent(mapName) : undefined}
         />
       )}
 
@@ -170,14 +170,17 @@ export const MapViewer: React.FC = () => {
         >
           ← Back to Gallery
         </button>
-        <h1>🏗️ Edge Craft - {mapName ? decodeURIComponent(mapName) : 'Map Viewer'}</h1>
+        <h1>
+          🏗️ Edge Craft -{' '}
+          {mapName != null && mapName !== '' ? decodeURIComponent(mapName) : 'Map Viewer'}
+        </h1>
         <div className="header-stats">
           <span className="stat">FPS: {fps}</span>
         </div>
       </header>
 
       <main className="viewer-main">
-        {error && (
+        {error != null && error !== '' && (
           <div className="error-overlay">
             <p>❌ {error}</p>
             <button

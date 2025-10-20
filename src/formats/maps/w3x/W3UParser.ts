@@ -395,7 +395,7 @@ export class W3UParser {
       const first = units[0];
       if (first) {
         console.log(
-          `[W3UParser] First unit: typeId="${first.typeId}", skinId="${first.skinId || 'N/A'}"`
+          `[W3UParser] First unit: typeId="${first.typeId}", skinId="${first.skinId ?? 'N/A'}"`
         );
       }
     }

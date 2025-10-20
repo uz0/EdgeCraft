@@ -269,7 +269,7 @@ const MapCard: React.FC<MapCardProps> = ({
             <div className="skeleton-content">
               <div className="spinner-small" />
               <span className="skeleton-text">
-                {previewLoadingMessage || 'Generating preview...'}
+                {previewLoadingMessage ?? 'Generating preview...'}
               </span>
             </div>
           </div>

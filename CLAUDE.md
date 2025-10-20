@@ -1,245 +1,70 @@
 # Edge Craft - AI Development Guidelines
 
-## 🎯 Project Context
-**Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with **TypeScript, React, and Babylon.js**.
+## 🎯 Project Awareness & Context
+**Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with TypeScript, React, and Babylon.js.
+- **Mondatory** identify on what PRP (Product Requirement Proposal) we are working now first, clarify user if you lost track.
+- **Always read `PRPs/*.md`** at the start of a new conversation to understand the current task goal and status.
+- **Use consistent naming conventions, file structure, and architecture patterns** as described in `CONTRIBUTING.md`.
+- for small changes or patches as exception we can user commit and branch prefixes hotfix-* and trivial-* and TRIVIAL: * and HOTFIX: *. **ONLY IF WAS ASKED FOR!**
+-
 
----
+## 🧱 Code Structure & Modularity
+## 🧪 Testing & Reliability
 
-## 🚨 CRITICAL: PRP-CENTRIC WORKFLOW (MANDATORY)
-
-### 🔴 THE GOLDEN RULE
-
-**EVERY PIECE OF WORK MUST BE TIED TO A PRP.**
-
-**IF THERE IS NO PRP, STOP AND ASK THE USER WHICH PRP THIS WORK RELATES TO.**
-
-**ALWAYS REFLECT UPDATES TO PRP**
-
-**NO EXCEPTIONS. NO WORKAROUNDS. NO SHORTCUTS.**
-
-### ⚡ EXCEPTION: HOTFIX & TRIVIAL COMMITS
-
-**ONLY** for urgent production fixes or trivial changes, commits MAY bypass PRP requirement using these prefixes:
-
-- **`HOTFIX:`** - Critical production bugs requiring immediate fix (security, data loss, system down)
-- **`TRIVIAL:`** - Typo fixes, comment updates, formatting-only changes (NO logic changes)
-
-**Requirements:**
-- Commits MUST start with prefix: `HOTFIX: Fix critical auth bypass` or `TRIVIAL: Fix typo in README`
-- Hotfixes MUST be followed by a PRP within 24 hours documenting root cause and prevention
-- Trivial changes MUST NOT modify any business logic, algorithms, or behavior
-- All other work (features, refactors, non-critical bugs) REQUIRES a PRP before starting
-
-**Examples:**
+### Pre-Commit Checks (5 steps)
 ```bash
-# ✅ ALLOWED without PRP:
-git commit -m "HOTFIX: Fix SQL injection in user login endpoint"
-git commit -m "TRIVIAL: Fix typo in CLAUDE.md (compliant → complaint)"
-
-# ❌ NOT ALLOWED without PRP:
-git commit -m "Fix user authentication bug"  # Not urgent → needs PRP
-git commit -m "Refactor login logic"  # Not trivial → needs PRP
+npm run typecheck  # TypeScript: 0 errors
+npm run lint       # ESLint: 0 errors
+npm run test       # Tests: All passing
+npm run validate   # Asset and packages Validation pipeline
 ```
 
----
+## ✅ Task Completion
+## 📎 Style & Conventions
 
-## 📋 WHAT IS A PRP?
+### ZERO COMMENTS POLICY
+**CRITICAL: ZERO COMMENTS POLICY - ABSOLUTELY NO COMMENTS**
 
-**PRP = Product Requirement Proposal**
+Comments are ONLY allowed in TWO cases:
+  1. **Workarounds** - When code does something unusual to bypass a framework/library bug
+  2. **TODO/FIXME** - Temporary markers for incomplete work (must be removed before commit)
 
-A PRP is the **ONLY** allowed format for documenting work. Every business logic change, feature, bugfix, or improvement MUST have a PRP.
+### File Size Limit
+- **HARD LIMIT: 500 lines per file**
+- Split into modules when approaching limit
 
-**PRP Directory Structure:**
+### TypeScript Standards
+```typescript
+// ✅ DO: Use explicit types
+interface UnitData {
+  id: string;
+  position: Vector3;
+  health: number;
+}
+
+// ❌ DON'T: Use 'any'
+function processUnit(unit: any) { } // FORBIDDEN
 ```
-PRPs/
-├── 2.13-complete-map-validation-closure.md
-├── w3u-reforged-parser-fix.md
-├── asset-credits-validation.md
-└── {descriptive-name}.md
-```
 
-**Rules:**
-- ✅ **Flat structure** - All PRPs directly in `PRPs/` directory
-- ✅ **Descriptive names** - `{feature-or-bugfix-description}.md`
-- ❌ **No subdirectories** - No `PRPs/phase1/`, `PRPs/features/`, etc.
+### Testing Requirements
+- **Minimum: 80% unit test coverage** (enforced by CI/CD)
+- Test files: `*.unit.ts`, `*.unit.tsx`
+- Framework: Jest + React Testing Library
+- E2E: Playwright
 
----
+**Every business logic change MUST have tests. No exceptions.**
 
-## 📝 PRP STRUCTURE (MANDATORY)
+## 📚 Documentation & Explainability
 
-Every PRP MUST contain EXACTLY these sections (no more, no less):
-
-```markdown
-# PRP: {Descriptive Title}
-
-**Status**: 📋 Planned | 🔬 Research | 🟡 In Progress | 🧪 Testing | ✅ Complete | ❌ Cancelled
-**Created**: YYYY-MM-DD
-
----
-
-## 🎯 Goal / Description
-
-{Clear, concise description of WHAT we're building and WHY}
-
-**Value**: {Why this matters}
-**Goal**: {What do we want to achieve}
-
----
-
-## 📋 Definition of Ready (DoR)
-
-**Prerequisites to START work:**
-- [ ] all test data and assets prepared
-- [ ] test data prepared
-- [ ] needed assets uploaded and legal compliant
-
----
-
-## ✅ Definition of Done (DoD)
-
-**Deliverables to COMPLETE work:**
-- [ ] all tests are passed
-- [ ] tests are written
-- [ ] prp updated
-
----
-
-## 🏗️ Implementation Breakdown
-
-**Phase 1: {Phase Name}**
-- [ ] Step 1
-- [ ] Step 2
-
-**Phase 2: {Phase Name}**
-- [ ] Step 3
-- [ ] Step 4
-
----
-
-## ⏱️ Timeline
-
-**Target Completion**: YYYY-MM-DD
-**Current Progress**: XX%
-**Phase 1**: Status
-**Phase 2**: Status
-
----
-
-## 🧪 Quality Gates (AQA)
-
-**Required checks before marking complete:**
-- [ ] Unit tests coverage >80%
-- [ ] E2E tests for critical paths
-- [ ] Manual QA test matrix passed
-- [ ] No TypeScript errors
-- [ ] No ESLint warnings
-- [ ] Performance benchmarks met
-
----
-
-## 📊 Success Metrics
-
-**How do we measure success?**
-- Metric 1: [target value]
-- Metric 2: [target value]
-
----
-
-## 📖 User Stories
-
-**As a** {user type}
-**I want** {feature}
-**So that** {benefit}
-
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-
----
-
-## 🔬 Research / Related Materials
-
-**Technical Context:**
-- [Documentation link](url)
-- [Code reference](file:line)
-- [Related RFC/ADR](link)
-
-**High-Level Design:**
-- Architecture Decision: {Decision made and why}
-- Interface Design: {Key interfaces/contracts}
-- Dependencies: {What we depend on}
-
-**Code References:**
-- `src/path/to/file.ts:123` - Description
-- `src/other/file.ts:456` - Description
-
----
-
-## 📊 Progress Tracking
-
-**Use roles, NOT individual names:**
-- **Developer** - Software engineer implementing features/fixes
-- **AQA** - Quality Assurance/Test Engineer
-- **System Analyst** - Requirements analysis and design
-- **DevOps** - Infrastructure and deployment
-
-| Date       | Role            | Change Made                          | Status      |
-|------------|-----------------|--------------------------------------|-------------|
-| YYYY-MM-DD | Developer       | Initial implementation               | In Progress |
-| YYYY-MM-DD | AQA             | E2E tests added                      | Complete    |
-| YYYY-MM-DD | Developer       | Code review feedback addressed       | Complete    |
-| YYYY-MM-DD | System Analyst  | Requirements refinement              | Complete    |
-
-**Current Blockers**: {Any blockers or issues}
-**Next Steps**: {What's next}
-
----
-
-## 🧪 Testing Evidence
-
-**Unit Tests:**
-- File: `src/path/to/test.unit.ts`
-- Coverage: 95%
-- Status: ✅ Passing
-
-**E2E Tests:**
-- File: `tests/feature.test.ts`
-- Scenarios: 5
-- Status: ✅ Passing
-
-**Manual QA:**
-- Test Matrix: [Link to test matrix]
-- Executed By: {QA Engineer}
-- Status: ✅ Passed
-
----
-
-## 📈 Review & Approval
-
-**Code Review:**
-- Reviewer: {Name}
-- Date: YYYY-MM-DD
-- Status: ✅ Approved / ⏳ Pending
-
-**Final Sign-Off:**
-- Date: YYYY-MM-DD
-- Status: ✅ Complete / 🟡 In Progress
-
----
-
-## 🚪 Exit Criteria
-
-**What signals work is DONE?**
-- [ ] All DoD items complete
-- [ ] Quality gates passing
-- [ ] Success metrics achieved
-- [ ] Code review approved
-- [ ] Documentation updated
-- [ ] PRP status updated to ✅ Complete
-
----
-
-## 🔄 PRP WORKFLOW (STRICT ENFORCEMENT)
+## 🧠 AI Behavior Rules
+- **Never assume missing context. Ask questions if uncertain.**
+- **Never hallucinate libraries or functions** – only use known, verified packages.
+- **Always confirm file paths and module names** exist before referencing them in code or tests.
+- **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `PRPs/*.md`.
+- **The PRP-Centric Workflow:**
+  1. `CLAUDE.md` ← You are here (workflow rules)
+  2. `README.md` ← Project overview
+  3. `PRPs/` ← ALL work is defined here
 
 ### Phase 1: PRP Creation (Planning)
 
@@ -325,59 +150,6 @@ Every PRP MUST contain EXACTLY these sections (no more, no less):
 - Fill "Review & Approval" section
 - Document final status in PRP
 
----
-
-## 🚦 AI AGENT WORKFLOW (MANDATORY RULES)
-
-### BEFORE STARTING ANY WORK
-
-**1. ALWAYS IDENTIFY CURRENT PRP**
-
-```
-User: "Fix the terrain texture bug"
-
-CORRECT RESPONSE:
-"Which PRP is this work related to? I need to know the PRP file name so I can:
-1. Read the PRP to understand context
-2. Update Progress Tracking
-3. Ensure my work aligns with DoD
-4. Mark appropriate checklist items
-
-Please provide the PRP filename (e.g., 'terrain-texture-splatmap-fix.md')"
-```
-
-**2. IF USER DOESN'T SPECIFY PRP**
-
-```
-User: "Add new feature X"
-
-CORRECT RESPONSE:
-"I don't see a PRP for this work. Before I start, we need to:
-
-1. Create a new PRP following the 3-phase process:
-   - System Analyst: Define goal & DoR
-   - AQA: Add quality gates & testing requirements
-   - Developer: Technical planning & design
-
-Would you like me to:
-a) Help create a new PRP for this feature?
-b) Check if there's an existing PRP this relates to?
-c) Wait while you specify the PRP filename?
-
-Note: I cannot proceed without a PRP - this is a mandatory workflow requirement."
-```
-
-**3. READ PRP BEFORE CODING**
-
-```bash
-# ALWAYS start by reading the PRP
-cat PRPs/{prp-filename}.md
-
-# Check DoR is complete
-# Review Research / Related Materials
-# Understand DoD requirements
-# Review existing Progress Tracking
-```
 
 **4. UPDATE PRP DURING WORK**
 
@@ -386,16 +158,6 @@ After EVERY significant change:
 - Check off DoD items as completed
 - Update "Current Blockers" or "Next Steps"
 - Commit PRP changes with code
-
-**5. VERIFY QUALITY BEFORE CLAIMING DONE**
-
-```bash
-# ALWAYS run before marking work complete
-npm run typecheck  # Must pass
-npm run lint       # Must pass
-npm run test:unit  # Must pass
-npm run test:e2e   # Must pass (if E2E tests exist)
-```
 
 ### DURING DEVELOPMENT
 
@@ -454,31 +216,6 @@ Assistant: "Work complete. Updated PRP with progress. All tests passing. Ready f
 
 ## 📏 CODE QUALITY RULES
 
-### File Size Limit
-- **HARD LIMIT: 500 lines per file**
-- Split into modules when approaching limit
-
-### TypeScript Standards
-```typescript
-// ✅ DO: Use explicit types
-interface UnitData {
-  id: string;
-  position: Vector3;
-  health: number;
-}
-
-// ❌ DON'T: Use 'any'
-function processUnit(unit: any) { } // FORBIDDEN
-```
-
-### Testing Requirements
-- **Minimum: 80% unit test coverage** (enforced by CI/CD)
-- Test files: `*.unit.ts`, `*.unit.tsx`
-- Framework: Jest + React Testing Library
-- E2E: Playwright
-
-**Every business logic change MUST have tests. No exceptions.**
-
 ---
 
 ## 🛡️ LEGAL COMPLIANCE
@@ -491,130 +228,3 @@ function processUnit(unit: any) { } // FORBIDDEN
 ---
 
 ## 📊 VALIDATION PIPELINE
-
-### Pre-Commit Checks (5 steps)
-```bash
-npm run typecheck          # TypeScript: 0 errors
-npm run lint               # ESLint: 0 errors
-npm run test:unit          # Tests: All passing
-npm run validate:licenses  # Licenses: 0 blocked
-npm run validate:credits   # Assets: Properly attributed
-```
-
-### CI/CD Workflows
-- **validation.yml** - TypeScript, ESLint, Unit Tests, Licenses, Credits
-- **ci.yml** - Full pipeline (Lint, Tests, Security, Build, E2E)
-- **e2e-tests.yml** - Playwright E2E tests
-
----
-
-## 🚨 WORKFLOW VIOLATIONS & ENFORCEMENT
-
-### ❌ VIOLATIONS
-
-**1. Working Without PRP**
-- **Violation**: Starting code changes without specifying PRP
-- **Action**: STOP immediately. Ask user for PRP filename.
-
-**2. Skipping Quality Gates**
-- **Violation**: Marking work complete without running tests
-- **Action**: Run all validation checks. Fix failures.
-
-**3. Not Updating PRP**
-- **Violation**: Making changes without updating Progress Tracking
-- **Action**: Update PRP before committing code.
-
-**4. Incomplete DoD**
-- **Violation**: Claiming work done with unchecked DoD items
-- **Action**: Complete all DoD items or ask for clarification.
-
-### ✅ ENFORCEMENT
-
-**AI Agent Rules:**
-1. **ALWAYS** ask for PRP if not specified
-2. **ALWAYS** read PRP before starting work
-3. **ALWAYS** update PRP during work
-4. **ALWAYS** run tests before claiming done
-5. **ALWAYS** check DoD before marking complete
-
-**If unclear which PRP to use:**
-```
-"I need clarification on which PRP this work relates to.
-
-Current PRPs in PRPs/:
-- 2.13-complete-map-validation-closure.md
-- w3u-reforged-parser-fix.md
-- asset-credits-validation.md
-
-Which PRP should I work on, or should I help create a new one?"
-```
-
----
-
-## 🎯 QUICK REFERENCE
-
-### Starting New Work
-```bash
-# 1. User specifies or I ask for PRP
-# 2. Read the PRP
-cat PRPs/{prp-name}.md
-
-# 3. Verify DoR complete
-# 4. Review Research section
-# 5. Understand DoD requirements
-
-# 6. Implement following PRP design
-# 7. Update Progress Tracking after each change
-# 8. Check off DoD items as completed
-
-# 9. Run validation before claiming done
-npm run typecheck && npm run lint && npm run test:unit
-
-# 10. Update PRP status and progress
-# 11. Commit PRP + code together
-```
-
-### Creating New PRP
-```bash
-# 1. System Analyst: Goal + DoR
-# 2. AQA: Quality Gates + Testing
-# 3. Developer: Technical Design + Research
-# 4. All review and finalize
-# 5. PRP status: 📋 Planned
-```
-
-### Daily Workflow
-- [ ] Which PRP am I working on?
-- [ ] Have I read the PRP recently?
-- [ ] Is my work aligned with PRP DoD?
-- [ ] Have I updated Progress Tracking?
-- [ ] Have I run tests?
-- [ ] Are there any blockers to document?
-
----
-
-## 📚 REMEMBER
-
-**The PRP-Centric Workflow:**
-1. `CLAUDE.md` ← You are here (workflow rules)
-2. `README.md` ← Project overview
-3. `PRPs/` ← ALL work is defined here
-
-**If it's not in a PRP, it doesn't exist.**
-
-**Every change requires:**
-- ✅ PRP defining the work
-- ✅ Progress tracking updates
-- ✅ Tests confirming functionality
-- ✅ DoD items checked off
-- ✅ Quality gates passing
-
-**This workflow ensures:**
-- 🎯 Clear objectives (PRPs define work)
-- 📊 Measurable progress (Progress Tracking)
-- 🚦 Transparent status (DoD checklists)
-- ✅ Quality assurance (Tests + validation)
-- 🔄 Continuous improvement (Review feedback)
-- 📝 Single source of truth (No doc drift)
-
-**Follow this workflow. Trust the process. Ship quality code.** 🚀

@@ -75,7 +75,14 @@ export class TGADecoder {
   public decodeToDataURL(buffer: ArrayBuffer, maxSize: number = 512): string | null {
     const result = this.decode(buffer);
 
-    if (!result.success || !result.data || !result.width || !result.height) {
+    if (
+      !result.success ||
+      result.data == null ||
+      result.width == null ||
+      result.height == null ||
+      result.width === 0 ||
+      result.height === 0
+    ) {
       return null;
     }
 

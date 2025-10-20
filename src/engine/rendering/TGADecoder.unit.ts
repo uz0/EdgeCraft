@@ -192,7 +192,7 @@ function createTGABuffer(
   // Write pixel data (BGR or BGRA)
   let offset = headerSize;
   for (const pixel of pixels) {
-    if (pixel) {
+    if (pixel != null) {
       // TGA stores as BGR(A), so reverse RGB order
       view.setUint8(offset, pixel[2] ?? 0); // B
       view.setUint8(offset + 1, pixel[1] ?? 0); // G

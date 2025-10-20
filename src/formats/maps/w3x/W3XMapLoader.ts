@@ -243,7 +243,7 @@ export class W3XMapLoader implements IMapLoader {
           const nodeBuffer = Buffer.from(unitsData.data);
           const result = UnitsTranslator.warToJson(nodeBuffer);
 
-          if (result.json && result.json.length > 0) {
+          if (result.json != null && result.json.length > 0) {
             console.log(
               `[W3XMapLoader] ✅ wc3maptranslator successfully parsed ${result.json.length} units`
             );
@@ -527,7 +527,7 @@ export class W3XMapLoader implements IMapLoader {
   private createPlaceholderMapData(availableFiles: string[]): RawMapData {
     // Determine map size from filename hints if possible
     let mapSize = 256;
-    const fileName = availableFiles.find((f) => f.includes('war3map')) || '';
+    const fileName = availableFiles.find((f) => f.includes('war3map')) ?? '';
     if (fileName.toLowerCase().includes('small')) {
       mapSize = 128;
     } else if (fileName.toLowerCase().includes('large')) {
