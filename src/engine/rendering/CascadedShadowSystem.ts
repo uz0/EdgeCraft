@@ -74,19 +74,25 @@ export class CascadedShadowSystem {
     this.shadowGenerator.numCascades = this.config.numCascades;
     this.shadowGenerator.cascadeBlendPercentage = this.config.cascadeBlendPercentage ?? 0.1;
 
-    // Configure cascade splits
     if (this.config.splitDistances) {
-      // Manual cascade splits (advanced users)
-      // Note: splitFrustum assignment and custom split distances depend on Babylon.js version
-      // @ts-expect-error - API may vary by Babylon.js version
-      this.shadowGenerator.splitFrustum = false;
-      // @ts-expect-error - API may vary by Babylon.js version
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      this.shadowGenerator.setCascadeSplitDistances(this.config.splitDistances);
+      interface ShadowGeneratorWithSplits {
+        splitFrustum?: boolean;
+        setCascadeSplitDistances?: (distances: number[]) => void;
+      }
+
+      const generator = this.shadowGenerator as unknown as ShadowGeneratorWithSplits;
+      generator.splitFrustum = false;
+
+      if (generator.setCascadeSplitDistances) {
+        generator.setCascadeSplitDistances(this.config.splitDistances);
+      }
     } else {
-      // Auto-split based on camera frustum (recommended)
-      // @ts-expect-error - API may vary by Babylon.js version
-      this.shadowGenerator.splitFrustum = true;
+      interface ShadowGeneratorWithSplits {
+        splitFrustum?: boolean;
+      }
+
+      const generator = this.shadowGenerator as unknown as ShadowGeneratorWithSplits;
+      generator.splitFrustum = true;
     }
 
     // Shadow quality settings

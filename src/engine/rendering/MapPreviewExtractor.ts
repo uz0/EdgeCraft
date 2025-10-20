@@ -110,7 +110,7 @@ export class MapPreviewExtractor {
       .sort((a, b) => b.block.uncompressedSize - a.block.uncompressedSize); // Largest first
 
     // Check each candidate
-    for (const { block, index } of candidates.slice(0, 20)) {
+    for (const { block: _block, index } of candidates.slice(0, 20)) {
       // Check top 20
       try {
         // Extract the file by index

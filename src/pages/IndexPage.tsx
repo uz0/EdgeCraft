@@ -112,8 +112,7 @@ export const IndexPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [maps]);
+  }, [maps, generatePreviews]);
 
   // Handle map selection - navigate to map viewer
   const handleMapSelect = (map: MapMetadata): void => {

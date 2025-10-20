@@ -21,8 +21,7 @@ describe('SC2MapLoader', () => {
     });
 
     it('should have a parse method', () => {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      const parseMethod = loader.parse;
+      const parseMethod = loader.parse.bind(loader);
       expect(parseMethod).toBeDefined();
       expect(typeof parseMethod).toBe('function');
     });

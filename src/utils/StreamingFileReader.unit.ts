@@ -75,7 +75,6 @@ describe('StreamingFileReader', () => {
 
       // Read chunks until position is updated
       let chunkCount = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _chunk of reader.readChunks()) {
         chunkCount++;
         if (chunkCount === 2) {
@@ -207,7 +206,6 @@ describe('StreamingFileReader', () => {
         onProgress,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _chunk of reader.readChunks()) {
         // Consume chunks
       }

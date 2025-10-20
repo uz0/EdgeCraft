@@ -22,23 +22,37 @@ export class LZMADecompressor implements IDecompressor {
    * Check if LZMA decompression is available
    */
   public isAvailable(): boolean {
-    // Check if we're in a Node.js environment
     if (typeof process !== 'undefined' && process.versions?.node) {
       try {
-        // Try to require lzma-native
         if (typeof require !== 'undefined') {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          this.lzmaModule = require('lzma-native') as LZMAModule;
-          return true;
+          try {
+            const dynamicRequire = require as NodeRequire;
+            const lzmaModuleCandidate: unknown = dynamicRequire('lzma-native');
+
+            if (this.isLZMAModule(lzmaModuleCandidate)) {
+              this.lzmaModule = lzmaModuleCandidate;
+              return true;
+            }
+            return false;
+          } catch {
+            return false;
+          }
         }
       } catch (e) {
         return false;
       }
     }
 
-    // Browser environment - LZMA not natively supported
-    // Future: Could use a WASM-based LZMA implementation
     return false;
+  }
+
+  private isLZMAModule(candidate: unknown): candidate is LZMAModule {
+    return (
+      typeof candidate === 'object' &&
+      candidate !== null &&
+      'decompress' in candidate &&
+      typeof (candidate as { decompress: unknown }).decompress === 'function'
+    );
   }
 
   /**

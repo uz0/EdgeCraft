@@ -311,7 +311,7 @@ export class AdvancedLightingSystem {
       return;
     }
 
-    for (const [lightId, pooled] of this.lightPool.entries()) {
+    for (const [_lightId, pooled] of this.lightPool.entries()) {
       if (!pooled.inUse) {
         continue;
       }
