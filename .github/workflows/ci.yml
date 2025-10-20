@@ -148,6 +148,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [typecheck, test]
     timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
 
     steps:
       - name: Checkout code
@@ -162,13 +164,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
-
       - name: Run E2E tests
         run: npm run test:e2e
         env:
           CI: true
+          HOME: /root
 
       - name: Upload Playwright HTML Report
         if: always()
