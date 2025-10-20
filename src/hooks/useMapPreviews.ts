@@ -143,7 +143,6 @@ export function useMapPreviews(): UseMapPreviewsResult {
                   return;
                 }
 
-                const _startTime = performance.now();
                 const result = await extractorRef.current!.extract(map.file, mapData);
 
                 if (result.success && result.dataUrl != null && result.dataUrl !== '') {

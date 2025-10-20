@@ -24,15 +24,13 @@ export class ZlibDecompressor implements IDecompressor {
         const compressedArray = new Uint8Array(compressed);
 
         // Log first 16 bytes for debugging
-        const _previewBytes = Array.from(
-          compressedArray.slice(0, Math.min(16, compressedArray.length))
-        )
+        Array.from(compressedArray.slice(0, Math.min(16, compressedArray.length)))
           .map((b) => b.toString(16).padStart(2, '0'))
           .join(' ');
 
         // Detect ZLIB header (0x78 in first byte indicates ZLIB wrapper)
         const firstByte = compressedArray.length > 0 ? (compressedArray[0] ?? 0) : 0;
-        const _hasZlibWrapper = (firstByte & 0x0f) === 0x08 && (firstByte & 0xf0) !== 0;
+        (firstByte & 0x0f) === 0x08 && (firstByte & 0xf0) !== 0;
 
         // Try raw deflate first (PKZIP style - no zlib wrapper)
         let decompressedArray: Uint8Array;
@@ -40,7 +38,7 @@ export class ZlibDecompressor implements IDecompressor {
           decompressedArray = pako.inflateRaw(compressedArray);
         } catch (rawError) {
           // If raw deflate fails, try with zlib wrapper
-          const _rawErrorMsg = rawError instanceof Error ? rawError.message : String(rawError);
+          rawError instanceof Error ? rawError.message : String(rawError);
           decompressedArray = pako.inflate(compressedArray);
         }
 

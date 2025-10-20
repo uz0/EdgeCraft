@@ -293,14 +293,12 @@ export class MapPreviewExtractor {
               } else {
               }
             } catch (error) {
-              const _errorMsg = error instanceof Error ? error.message : String(error);
               // Continue to next file
             }
           }
         } else {
         }
       } catch (error) {
-        const _errorMsg = error instanceof Error ? error.message : String(error);
         // Fall through to generation fallback
       }
 
@@ -345,9 +343,7 @@ export class MapPreviewExtractor {
           }
         }
       }
-    } catch (error) {
-      const _errorMsg = error instanceof Error ? error.message : String(error);
-    }
+    } catch (error) {}
 
     return {
       success: false,

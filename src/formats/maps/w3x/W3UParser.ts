@@ -14,7 +14,6 @@ export class W3UParser {
   private view: DataView;
   private offset: number = 0;
   private formatVersion: 'classic' | 'reforged' = 'classic';
-  private currentUnitNumber: number = 0;
   private isDetectingFormat: boolean = false; // Track if we're in format detection mode
 
   // W3do magic (same as doodads)
@@ -60,10 +59,8 @@ export class W3UParser {
       const maxUnitsToTest = Math.min(3, 5); // Test up to 3 units
 
       for (let i = 0; i < maxUnitsToTest; i++) {
-        const offsetBefore = this.offset;
         try {
           const unit = this.readUnit(version, subversion);
-          const _bytesConsumed = this.offset - offsetBefore;
 
           if (unit.typeId && unit.typeId.length === 4) {
             classicSuccess++;
@@ -71,7 +68,7 @@ export class W3UParser {
             break;
           }
         } catch (err) {
-          const _errorMsg = err instanceof Error ? err.message : String(err);
+          err instanceof Error ? err.message : String(err);
           break;
         }
       }
@@ -86,10 +83,8 @@ export class W3UParser {
       const maxUnitsToTest = Math.min(3, 5); // Test up to 3 units
 
       for (let i = 0; i < maxUnitsToTest; i++) {
-        const offsetBefore = this.offset;
         try {
           const unit = this.readUnit(version, subversion);
-          const _bytesConsumed = this.offset - offsetBefore;
 
           if (unit.typeId && unit.typeId.length === 4) {
             reforgedSuccess++;
@@ -97,12 +92,12 @@ export class W3UParser {
             break;
           }
         } catch (err) {
-          const _errorMsg = err instanceof Error ? err.message : String(err);
+          err instanceof Error ? err.message : String(err);
           break;
         }
       }
     } catch (err) {
-      const _errorMsg = err instanceof Error ? err.message : String(err);
+      err instanceof Error ? err.message : String(err);
     }
 
     // Reset to start
@@ -230,12 +225,7 @@ export class W3UParser {
     let failCount = 0;
 
     for (let i = 0; i < unitCount; i++) {
-      const unitStartOffset = this.offset;
-
       try {
-        // Set current unit number for DEBUG logging
-        this.currentUnitNumber = i + 1;
-
         // Check if we have enough buffer left for at least the minimum unit data
         // Minimum: 4 (typeId) + 4 (variation) + 12 (position) + 4 (rotation) + 12 (scale) + 1 (flags) = 37 bytes
         if (this.offset + 37 > this.view.byteLength) {
@@ -254,15 +244,12 @@ export class W3UParser {
 
         // Log the first successful parse with details
         if (successCount === 1) {
-          const _bytesConsumed = this.offset - unitStartOffset;
         }
       } catch (error) {
         failCount++;
 
         // Log detailed error information for the first few failures
         if (failCount <= 3) {
-          const _errorMsg = error instanceof Error ? error.message : String(error);
-
           // If this is the very first unit and it fails, the format is likely incompatible
           if (i === 0) {
           }
@@ -301,11 +288,6 @@ export class W3UParser {
    * @param subversion - File subversion (used for version-specific parsing)
    */
   private readUnit(version: number, subversion: number): W3UUnit {
-    const startOffset = this.offset;
-
-    // Get current unit number from parse() method context
-    const _unitNum = this.currentUnitNumber || 0;
-
     // Only log for units 6 and 7 to reduce noise
     // Type ID (4 chars)
     const typeId = this.read4CC();
@@ -336,7 +318,6 @@ export class W3UParser {
     this.offset += 1;
 
     // CRITICAL FIX: Unknown int32 field between flags and owner (discovered from wc3maptranslator line 121)
-    const _unknownInt = this.readUint32();
 
     // Owner (player number)
     const owner = this.readUint32();
@@ -606,9 +587,6 @@ export class W3UParser {
           this.offset += remainingSkip;
         }
       }
-
-      const offsetAfterPadding = this.offset;
-      const _totalSkipped = offsetAfterPadding - offsetBeforePadding;
     } else {
       // VERSION 8.11 SUFFIX - Classic maps have a 111-byte suffix at the END of each unit
       // CRITICAL DISCOVERY: Binary analysis shows Unit 2 starts 111 bytes AFTER where parser thinks Unit 1 ends!
@@ -622,7 +600,6 @@ export class W3UParser {
         subversion === 11 &&
         this.formatVersion === 'classic'
       ) {
-        const _offsetBeforeSuffix = this.offset;
         const suffixSize = 111;
 
         if (this.offset + suffixSize <= this.view.byteLength) {
@@ -642,8 +619,6 @@ export class W3UParser {
         }
       }
     }
-
-    const _bytesConsumed = this.offset - startOffset;
 
     return {
       typeId,

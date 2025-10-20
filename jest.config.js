@@ -73,5 +73,13 @@ export default {
 
   coverageDirectory: '<rootDir>/coverage',
 
+  coverageReporters: [
+    'text',           // Console output
+    'text-summary',   // Summary in console
+    'lcov',           // For Codecov
+    'html',           // HTML report for viewing in browser
+    'json',           // JSON for parsing
+  ],
+
   testTimeout: 10000,
 };

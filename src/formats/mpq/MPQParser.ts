@@ -928,7 +928,6 @@ export class MPQParser {
         // So we use the offsets DIRECTLY as indices into rawData
         const relativeStart = sectorOffsets[i]!;
         const relativeEnd = sectorOffsets[i + 1]!;
-        const _sectorCompressedSize = relativeEnd - relativeStart;
 
         // Sector offsets are already absolute within rawData - use them directly
         const absoluteStart = relativeStart;
@@ -1084,7 +1083,6 @@ export class MPQParser {
       flaggedAlgos.push('ADPCM_STEREO(0x80)');
 
     // Read the first byte to check if it matches the flags
-    const _firstByte = new Uint8Array(data)[0];
 
     // Skip the first byte (compression flags)
     let currentData = data.slice(1);
@@ -1158,7 +1156,6 @@ export class MPQParser {
     // Check ADPCM (0x40 mono or 0x80 stereo) - Audio data (ONLY if no standard compression found)
     if (compressionFlags & (CompressionAlgorithm.ADPCM_MONO | CompressionAlgorithm.ADPCM_STEREO)) {
       const channels = compressionFlags & CompressionAlgorithm.ADPCM_STEREO ? 2 : 1;
-      const _adpcmType = channels === 2 ? 'ADPCM_STEREO' : 'ADPCM_MONO';
       try {
         currentData = await this.adpcmDecompressor.decompress(
           currentData,
@@ -1193,9 +1190,7 @@ export class MPQParser {
     const nonEmptyEntries = this.archive.hashTable.filter(
       (entry) => entry.hashA !== 0xffffffff && entry.hashB !== 0xffffffff
     );
-    for (let i = 0; i < Math.min(10, nonEmptyEntries.length); i++) {
-      const _entry = nonEmptyEntries[i];
-    }
+    for (let i = 0; i < Math.min(10, nonEmptyEntries.length); i++) {}
 
     for (const entry of this.archive.hashTable) {
       if (entry.hashA === hashA && entry.hashB === hashB) {
@@ -1438,8 +1433,7 @@ export class MPQParser {
 
     // Log first few entries for debugging
     for (let i = 0; i < Math.min(5, blockTable.length); i++) {
-      const entry = blockTable[i];
-      const _exists = (entry?.flags ?? 0 & 0x80000000) !== 0;
+      blockTable[i];
     }
 
     return blockTable;

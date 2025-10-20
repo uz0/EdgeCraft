@@ -127,7 +127,7 @@ export class W3NCampaignLoader implements IMapLoader {
     const reader = new StreamingFileReader(file, {
       chunkSize: 4 * 1024 * 1024, // 4MB chunks
       onProgress: (bytesRead, totalBytes): void => {
-        const _percent = ((bytesRead / totalBytes) * 100).toFixed(1);
+        ((bytesRead / totalBytes) * 100).toFixed(1);
       },
     });
 
@@ -366,7 +366,7 @@ export class W3NCampaignLoader implements IMapLoader {
       try {
         if (!block) continue; // Skip if block is undefined
 
-        const _size = block.uncompressedSize || block.compressedSize || 0;
+        block.uncompressedSize || block.compressedSize || 0;
 
         // Extract the file by index
         const mapData = await mpqParser.extractFileByIndex(blockIndex);
@@ -381,9 +381,7 @@ export class W3NCampaignLoader implements IMapLoader {
         const magic512 = view.byteLength >= 516 ? view.getUint32(512, true) : 0;
 
         // Log extracted data preview for debugging
-        const _previewBytes = Array.from(
-          new Uint8Array(mapData.data.slice(0, Math.min(16, mapData.data.byteLength)))
-        )
+        Array.from(new Uint8Array(mapData.data.slice(0, Math.min(16, mapData.data.byteLength))))
           .map((b) => b.toString(16).padStart(2, '0'))
           .join(' ');
 

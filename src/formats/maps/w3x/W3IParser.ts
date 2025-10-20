@@ -35,7 +35,7 @@ export class W3IParser {
   public parse(): W3IMapInfo {
     // DEBUG: Log first 64 bytes of W3I buffer to diagnose StormJS extraction issue
     const debugView = new Uint8Array(this.buffer, 0, Math.min(64, this.buffer.byteLength));
-    const _hexDump = Array.from(debugView)
+    Array.from(debugView)
       .map((b) => b.toString(16).padStart(2, '0'))
       .join(' ');
 
@@ -50,10 +50,10 @@ export class W3IParser {
     // Per HiveWE wiki: gameVersionMajor, gameVersionMinor, gameVersionPatch, gameVersionBuild
     // These are MANDATORY for Reforged maps (version >= 28)
     if (fileVersion >= 28) {
-      const _gameVersionMajor = this.readUint32();
-      const _gameVersionMinor = this.readUint32();
-      const _gameVersionPatch = this.readUint32();
-      const _gameVersionBuild = this.readUint32();
+      this.readUint32();
+      this.readUint32();
+      this.readUint32();
+      this.readUint32();
     }
 
     // Log version numbers for format detection debugging

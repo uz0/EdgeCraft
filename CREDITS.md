@@ -247,8 +247,8 @@ npm run generate-manifest
 
 **Asset Issues or Questions?**
 - Open an issue: https://github.com/uz0/EdgeCraft/issues
-- Email: [project maintainer email]
-- Discord: [project Discord server]
+- Email: dcversus[at]gmail.com
+- Telegram: @dcversus
 
 **Incorrect Attribution?**
 If you created an asset listed here and the attribution is incorrect or you would like changes, please contact us immediately.
@@ -262,10 +262,3 @@ Special thanks to:
 - **Quaternius** - For the comprehensive CC0 3D model packs
 - **Kenney** - For decades of free game assets and tools
 - **Babylon.js Team** - For the amazing 3D engine
-- **Open-source Community** - For making projects like Edge Craft possible
-
----
-
-**Last Updated**: 2025-10-14
-**Edge Craft Version**: Phase 2 (Advanced Rendering)
-**Total Assets**: 19 terrain textures, 33 doodad models

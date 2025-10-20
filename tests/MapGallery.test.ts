@@ -32,5 +32,16 @@ test.describe('Map Gallery', () => {
     // Verify at least one map has a thumbnail or placeholder
     const images = await page.locator('img, div[class*="placeholder"]').count();
     expect(images).toBeGreaterThan(0);
+
+    // Wait for all images to finish loading (map preview thumbnails)
+    await page.waitForLoadState('networkidle');
+
+    // Wait for any animations/transitions to complete and page to stabilize
+    await page.waitForTimeout(1000);
+
+    // Take screenshot for visual regression testing
+    await expect(page).toHaveScreenshot('map-gallery.png', {
+      maxDiffPixelRatio: 0.07, // Allow up to 7% pixel difference for dynamic thumbnails and font rendering
+    });
   });
 });
