@@ -4,8 +4,6 @@ WebGL-based RTS game engine supporting classic map formats (Warcraft 3, StarCraf
 
 **Built with:** TypeScript • React • Babylon.js
 
----
-
 ## 🚀 Quick Start
 
 ```bash
@@ -26,8 +24,6 @@ npm run build            # Production build
 ```
 
 **Requirements:** Node.js 20+ • npm 10+
-
----
 
 ## 📁 Project Structure
 
@@ -58,42 +54,18 @@ PRPs/                    # Phase Requirement Proposals
 CLAUDE.md                # AI development guidelines
 ```
 
----
-
 ## 📚 Documentation
 
 - **[CLAUDE.md](./CLAUDE.md)** - AI development workflow & rules
-- **[PRPs/](./PRPs/)** - Phase requirements (ONLY allowed docs format)
-- **[Phase 1 PRP](./PRPs/phase1-foundation/1-mvp-launch-functions.md)** - Foundation & MVP
-- **[Phase 2 PRP](./PRPs/phase2-rendering/2-advanced-rendering-visual-effects.md)** - Advanced rendering (current)
-
----
-
-## 🎯 Current Status
-
-**Phase 2: Advanced Rendering & Visual Effects** ✅ Complete
-
-- ✅ Cascaded Shadow Maps (CSM)
-- ✅ Advanced Lighting System (8 point lights, 4 spot lights)
-- ✅ GPU Particle System (5,000 particles)
-- ✅ Post-Processing Pipeline (bloom, SSAO, DOF)
-- ✅ Weather Effects (rain, snow, fog)
-- ✅ PBR Materials
-- ✅ Performance: 60 FPS @ MEDIUM preset
-
-**Next:** Phase 3 - Gameplay Mechanics
-
----
+- **[PRPs/](./PRPs/)** - Product requirements
 
 ## 🛡️ Legal Compliance
 
 **Zero Tolerance Policy:**
-- ❌ No copyrighted Blizzard assets
+- ❌ No copyrighted assets
 - ✅ Only CC0/MIT licensed content
 - ✅ Clean-room implementation
 - ✅ Automated validation: `npm run validate`
-
----
 
 ## 🧪 Testing & Quality
 
@@ -110,61 +82,6 @@ npm run test:e2e               # E2E tests (Playwright)
 npm run lint:fix               # Auto-fix linting issues
 ```
 
----
-
-## 📊 Performance Targets
-
-| Metric | Target | Status |
-|--------|--------|--------|
-| FPS @ MEDIUM | 60 FPS | ✅ |
-| Terrain (256×256) | 60 FPS | ✅ |
-| Units (500 animated) | 60 FPS | ✅ |
-| GPU Particles | 5,000 | ✅ |
-| Dynamic Lights | 8 point, 4 spot | ✅ |
-| Memory (1hr session) | <2GB, no leaks | ✅ |
-
----
-
-## 🔧 Development Workflow
-
-### The Three-File Rule
-
-**ONLY 3 types of documentation:**
-1. **CLAUDE.md** - AI development guidelines
-2. **README.md** - This file (project overview)
-3. **PRPs/** - Phase Requirement Proposals (ONLY format for requirements)
-
-❌ No other `.md` files allowed (no `docs/`, `ARCHITECTURE.md`, etc.)
-
-### Phase Execution
-
-Every phase follows **4 Gates:**
-
-1. **Gate 1 (DoR)** - Prerequisites validated
-2. **Gate 2 (Implementation)** - Code + tests + benchmarks
-3. **Gate 3 (DoD)** - All deliverables complete
-4. **Gate 4 (Closure)** - Phase merged to main
-
-**Before starting work:**
-```bash
-# 1. Check current phase
-cat README.md
-
-# 2. Read the PRP
-cat PRPs/phase{N}-{slug}/{N}-{slug}.md
-
-# 3. Validate DoR
-grep "Definition of Ready" PRPs/phase{N}-{slug}/{N}-{slug}.md
-
-# 4. Implement following PRP
-# (code, tests, benchmarks)
-
-# 5. Validate
-npm run typecheck && npm run lint && npm run test:unit && npm run validate
-```
-
----
-
 ## 🤝 Contributing
 
 1. Read **[CLAUDE.md](./CLAUDE.md)** for workflow
@@ -173,14 +90,19 @@ npm run typecheck && npm run lint && npm run test:unit && npm run validate
 4. Ensure all tests pass (`npm test`)
 5. Run validation (`npm run validate`)
 
----
 
 ## 📜 License
 
-MIT - See [LICENSE](./LICENSE)
+**GNU Affero General Public License v3.0 (AGPL-3.0)**
 
-**Author:** Vasilisa Versus
+Copyright (C) 2024 Vasilisa Versus
 
----
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
 
-**Edge Craft © 2024 - Clean-room RTS engine**
+**Key Requirements:**
+- ✅ Must preserve copyright and author attribution
+- ✅ Must provide source code to network users
+- ✅ Must release modifications under AGPL-3.0
+- ✅ Cannot use in proprietary software
+
+See [LICENSE](./LICENSE) for full text.
