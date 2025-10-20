@@ -162,7 +162,12 @@ export const MapViewer: React.FC = () => {
       )}
 
       <header className="viewer-header">
-        <button onClick={() => navigate('/')} className="btn-back">
+        <button
+          onClick={(): void => {
+            void navigate('/');
+          }}
+          className="btn-back"
+        >
           ← Back to Gallery
         </button>
         <h1>🏗️ Edge Craft - {mapName ? decodeURIComponent(mapName) : 'Map Viewer'}</h1>
@@ -175,7 +180,13 @@ export const MapViewer: React.FC = () => {
         {error && (
           <div className="error-overlay">
             <p>❌ {error}</p>
-            <button onClick={() => navigate('/')}>Back to Gallery</button>
+            <button
+              onClick={(): void => {
+                void navigate('/');
+              }}
+            >
+              Back to Gallery
+            </button>
           </div>
         )}
 
