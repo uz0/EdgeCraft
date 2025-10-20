@@ -66,7 +66,7 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
     return { total, withPreviews, pending, generating, errors };
   }, [maps, previewProgress]);
 
-  const renderMapRow = (map: MapMetadata, index: number): JSX.Element => {
+  const renderMapRow = (map: MapMetadata, index: number): React.ReactElement => {
     const progress = previewProgress?.get(map.id);
     const hasPreview =
       map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '';
