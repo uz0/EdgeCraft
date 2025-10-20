@@ -85,25 +85,6 @@
           { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
         ]
       }
-    },
-    {
-      "files": [
-        "src/App.tsx",
-        "src/engine/**/*.ts",
-        "src/formats/**/*.ts",
-        "src/hooks/**/*.ts",
-        "src/main.tsx",
-        "src/pages/**/*.tsx",
-        "src/ui/**/*.tsx",
-        "src/utils/**/*.ts"
-      ],
-      "rules": {
-        "@typescript-eslint/no-explicit-any": "warn",
-        "@typescript-eslint/strict-boolean-expressions": "off",
-        "@typescript-eslint/explicit-function-return-type": "off",
-        "@typescript-eslint/explicit-module-boundary-types": "off",
-        "@typescript-eslint/no-misused-promises": "off"
-      }
     }
   ],
   "ignorePatterns": [

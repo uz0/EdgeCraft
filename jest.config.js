@@ -50,9 +50,9 @@ export default {
 
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/mocks/__mocks__/fileMock.js',
+    '\\.(jpg|jpeg|png|gif|svg)$': 'identity-obj-proxy',
     // Mock shader files
-    '\\.fx\\?raw$': '<rootDir>/tests/__mocks__/shaderMock.js',
+    '\\.fx\\?raw$': 'identity-obj-proxy',
   },
 
   collectCoverageFrom: [
@@ -64,10 +64,10 @@ export default {
 
   coverageThreshold: {
     global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0,
+      branches: 70,
+      functions: 75,
+      lines: 80,
+      statements: 80,
     },
   },
 

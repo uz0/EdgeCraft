@@ -159,7 +159,7 @@ Set up complete development environment for Edge Craft WebGL RTS engine with Typ
 
 ## 📊 Progress Tracking
 
-| Date       | Author      | Change Made                          | Status   |
+| Date       | Role        | Change Made                          | Status   |
 |------------|-------------|--------------------------------------|----------|
 | 2024-10-01 | Developer   | Initial Vite + React setup           | Complete |
 | 2024-10-02 | Developer   | TypeScript strict configuration      | Complete |

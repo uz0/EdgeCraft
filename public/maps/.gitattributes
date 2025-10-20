@@ -1,0 +1,4 @@
+*.w3m filter=lfs diff=lfs merge=lfs -text
+*.w3x filter=lfs diff=lfs merge=lfs -text
+*.SC2Map filter=lfs diff=lfs merge=lfs -text
+*.w3n filter=lfs diff=lfs merge=lfs -text

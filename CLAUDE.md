@@ -17,6 +17,30 @@
 
 **NO EXCEPTIONS. NO WORKAROUNDS. NO SHORTCUTS.**
 
+### ⚡ EXCEPTION: HOTFIX & TRIVIAL COMMITS
+
+**ONLY** for urgent production fixes or trivial changes, commits MAY bypass PRP requirement using these prefixes:
+
+- **`HOTFIX:`** - Critical production bugs requiring immediate fix (security, data loss, system down)
+- **`TRIVIAL:`** - Typo fixes, comment updates, formatting-only changes (NO logic changes)
+
+**Requirements:**
+- Commits MUST start with prefix: `HOTFIX: Fix critical auth bypass` or `TRIVIAL: Fix typo in README`
+- Hotfixes MUST be followed by a PRP within 24 hours documenting root cause and prevention
+- Trivial changes MUST NOT modify any business logic, algorithms, or behavior
+- All other work (features, refactors, non-critical bugs) REQUIRES a PRP before starting
+
+**Examples:**
+```bash
+# ✅ ALLOWED without PRP:
+git commit -m "HOTFIX: Fix SQL injection in user login endpoint"
+git commit -m "TRIVIAL: Fix typo in CLAUDE.md (compliant → complaint)"
+
+# ❌ NOT ALLOWED without PRP:
+git commit -m "Fix user authentication bug"  # Not urgent → needs PRP
+git commit -m "Refactor login logic"  # Not trivial → needs PRP
+```
+
 ---
 
 ## 📋 WHAT IS A PRP?
@@ -153,11 +177,18 @@ Every PRP MUST contain EXACTLY these sections (no more, no less):
 
 ## 📊 Progress Tracking
 
-| Date       | Author    | Change Made                          | Status      |
-|------------|-----------|--------------------------------------|-------------|
-| YYYY-MM-DD | Developer | Initial implementation               | In Progress |
-| YYYY-MM-DD | AQA       | E2E tests added                      | Complete    |
-| YYYY-MM-DD | Developer | Code review feedback addressed       | Complete    |
+**Use roles, NOT individual names:**
+- **Developer** - Software engineer implementing features/fixes
+- **AQA** - Quality Assurance/Test Engineer
+- **System Analyst** - Requirements analysis and design
+- **DevOps** - Infrastructure and deployment
+
+| Date       | Role            | Change Made                          | Status      |
+|------------|-----------------|--------------------------------------|-------------|
+| YYYY-MM-DD | Developer       | Initial implementation               | In Progress |
+| YYYY-MM-DD | AQA             | E2E tests added                      | Complete    |
+| YYYY-MM-DD | Developer       | Code review feedback addressed       | Complete    |
+| YYYY-MM-DD | System Analyst  | Requirements refinement              | Complete    |
 
 **Current Blockers**: {Any blockers or issues}
 **Next Steps**: {What's next}
@@ -368,12 +399,12 @@ npm run test:e2e   # Must pass (if E2E tests exist)
 
 ### DURING DEVELOPMENT
 
-**Update PRP Progress Table:**
+**Update PRP Progress Table (use ROLES not names):**
 ```markdown
-| Date       | Author    | Change Made                          | Status      |
+| Date       | Role      | Change Made                          | Status      |
 |------------|-----------|--------------------------------------|-------------|
-| 2025-01-19 | Claude    | Implemented terrain splatmap shader  | Complete    |
-| 2025-01-19 | Claude    | Added unit tests (coverage 92%)      | Complete    |
+| 2025-01-19 | Developer | Implemented terrain splatmap shader  | Complete    |
+| 2025-01-19 | AQA       | Added unit tests (coverage 92%)      | Complete    |
 | 2025-01-19 | Claude    | Fixed TypeScript errors              | Complete    |
 ```
 

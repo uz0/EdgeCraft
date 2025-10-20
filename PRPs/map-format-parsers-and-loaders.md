@@ -1,6 +1,6 @@
 # PRP: Map Format Parsers and Loaders
 
-**Status**: 🟡 In Progress (95% Complete - W3U parser needs rewrite)
+**Status**: 🔴 Blocked (95% Complete - W3U parser 99.7% failure rate)
 **Created**: 2024-10-10
 
 ---
@@ -139,7 +139,7 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 
 ## 📊 Progress Tracking
 
-| Date       | Author      | Change Made                          | Status   |
+| Date       | Role        | Change Made                          | Status   |
 |------------|-------------|--------------------------------------|----------|
 | 2024-10-10 | Developer   | MPQ parser implementation            | Complete |
 | 2024-10-12 | Developer   | Zlib decompression                   | Complete |

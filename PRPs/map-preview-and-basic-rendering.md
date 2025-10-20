@@ -1,6 +1,6 @@
 # PRP: Map Preview and Basic Rendering
 
-**Status**: 🟡 In Progress (70% Complete)
+**Status**: 🔴 Blocked (70% Complete - 3 Critical Issues)
 **Created**: 2024-11-10
 
 ---
@@ -159,7 +159,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 
 ## 📊 Progress Tracking
 
-| Date       | Author      | Change Made                                    | Status      |
+| Date       | Role        | Change Made                                    | Status      |
 |------------|-------------|------------------------------------------------|-------------|
 | 2024-11-10 | Developer   | Terrain renderer implementation                | Complete    |
 | 2024-11-12 | Developer   | Doodad renderer with instancing                | Complete    |
