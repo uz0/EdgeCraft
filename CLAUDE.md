@@ -6,7 +6,6 @@
 - **Always read `PRPs/*.md`** at the start of a new conversation to understand the current task goal and status.
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `CONTRIBUTING.md`.
 - for small changes or patches as exception we can user commit and branch prefixes hotfix-* and trivial-* and TRIVIAL: * and HOTFIX: *. **ONLY IF WAS ASKED FOR!**
--
 
 ## 🧱 Development
 
