@@ -8,16 +8,46 @@
 - for small changes or patches as exception we can user commit and branch prefixes hotfix-* and trivial-* and TRIVIAL: * and HOTFIX: *. **ONLY IF WAS ASKED FOR!**
 -
 
-## 🧱 Code Structure & Modularity
-## 🧪 Testing & Reliability
+## 🧱 Development
 
-### Pre-Commit Checks (5 steps)
+### Pre-Commit Checks
 ```bash
 npm run typecheck  # TypeScript: 0 errors
 npm run lint       # ESLint: 0 errors
 npm run test       # Tests: All passing
 npm run validate   # Asset and packages Validation pipeline
 ```
+
+### Folder structure
+public/assets/manifest.json - list of all assets
+public/assets - all external resources (textures, 3d models)
+public/maps - game maps
+scripts/ - utility scripts for ci and development
+src/
+src/engine - all game engine here
+src/formats - maps to scene transformations
+src/types - typescript types
+src/utils - app utils
+src/config - app config files
+src/ui - react components to build interface (for pages only!)
+src/hooks - ui react hooks (for pages only!)
+src/pages - TMP! temporary folder for map list and scene pages
+src/**/*.unit.ts - all unit tests placed nearby code
+tests/ - ONLY playwrite tests here
+tests/**/*.test.ts - end-to-end tests
+
+
+### index files
+
+
+## 🧪 Testing & Reliability
+
+### Testing Requirements
+- **Minimum: 80% unit test coverage** (enforced by CI/CD)
+- Test files: `*.unit.ts`, `*.unit.tsx`
+- Framework: Jest + React Testing Library
+- E2E: Playwright
+
 
 ## ✅ Task Completion
 ## 📎 Style & Conventions
@@ -46,11 +76,6 @@ interface UnitData {
 function processUnit(unit: any) { } // FORBIDDEN
 ```
 
-### Testing Requirements
-- **Minimum: 80% unit test coverage** (enforced by CI/CD)
-- Test files: `*.unit.ts`, `*.unit.tsx`
-- Framework: Jest + React Testing Library
-- E2E: Playwright
 
 **Every business logic change MUST have tests. No exceptions.**
 

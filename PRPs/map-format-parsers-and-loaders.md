@@ -1,6 +1,6 @@
 # PRP: Map Format Parsers and Loaders
 
-**Status**: 🔴 Blocked (95% Complete - W3U parser 99.7% failure rate)
+**Status**: 🟡 In Progress (95% Complete - W3U parser blocked)
 **Created**: 2024-10-10
 
 ---
@@ -36,8 +36,8 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (
 - [x] SC2Map loader (terrain, doodads)
 - [~] W3N campaign loader (embedded maps) - **REMOVED** (not needed for current scope)
 - [x] Unit tests >80% coverage
-- [x] All 24 test maps load successfully
-- [x] No parsing errors
+- [x] 6 test maps load successfully (W3X, W3M, SC2Map formats)
+- [ ] **BLOCKED**: No parsing errors (W3U parser has 99.7% failure rate)
 
 ---
 
@@ -186,9 +186,7 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (
 - Coverage: 82%
 
 **Integration Tests:**
-- 1 W3X map successfully parsed
-- 2 W3M maps successfully parsed
-- 3 SC2Map maps successfully parsed
+- 1 W3X map parsed, 2 W3M maps parsed, 3 SC2Map maps parsed successfully
 - All compression algorithms validated
 
 **Known Issues:**
@@ -208,7 +206,8 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (
 **Final Sign-Off:**
 - Date: Pending (W3U parser rewrite needed)
 - Status: 🟡 In Progress (95% complete)
-- Map Compatibility: 6/6 maps load (100%)
+- Map Compatibility: 6/6 maps load successfully (terrain, doodads functional)
+- Unit Parsing: ❌ Blocked (W3U parser 99.7% failure rate - needs complete rewrite)
 
 ---
 
