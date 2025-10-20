@@ -142,7 +142,7 @@ export class W3IParser {
           players.push(this.readPlayer());
         }
       }
-    } catch (err) {}
+    } catch {}
 
     // Forces (may be truncated in old/corrupted maps)
     const forces: W3IForce[] = [];
@@ -156,7 +156,7 @@ export class W3IParser {
           forces.push(this.readForce());
         }
       }
-    } catch (err) {}
+    } catch {}
 
     // All remaining fields are optional and may not be present
     // Wrap in try-catch to handle truncated files gracefully
@@ -202,7 +202,7 @@ export class W3IParser {
       if (this.offset + 4 <= this.buffer.byteLength) {
         try {
           unitTable = this.readRandomUnitTable();
-        } catch (err) {
+        } catch {
           unitTable = undefined;
         }
       }
@@ -211,11 +211,11 @@ export class W3IParser {
       if (this.offset + 4 <= this.buffer.byteLength) {
         try {
           itemTable = this.readRandomItemTable();
-        } catch (err) {
+        } catch {
           itemTable = undefined;
         }
       }
-    } catch (err) {
+    } catch {
       // If any error occurs reading optional fields, log but continue
     }
 

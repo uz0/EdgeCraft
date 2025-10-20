@@ -122,7 +122,7 @@ export class MapPreviewExtractor {
         if (this.isTGAHeader(header)) {
           return fileData.data;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -185,7 +185,7 @@ export class MapPreviewExtractor {
       return {
         success: false,
         source: 'error',
-        error: 'Failed to extract or generate preview',
+        error: generatedResult.error ?? 'Failed to extract or generate preview',
         extractTimeMs: performance.now() - startTime,
       };
     } catch (error) {
@@ -292,13 +292,13 @@ export class MapPreviewExtractor {
                 }
               } else {
               }
-            } catch (error) {
+            } catch {
               // Continue to next file
             }
           }
         } else {
         }
-      } catch (error) {
+      } catch {
         // Fall through to generation fallback
       }
 
@@ -343,7 +343,7 @@ export class MapPreviewExtractor {
           }
         }
       }
-    } catch (error) {}
+    } catch {}
 
     return {
       success: false,

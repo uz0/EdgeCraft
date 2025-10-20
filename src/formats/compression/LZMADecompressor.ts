@@ -38,7 +38,7 @@ export class LZMADecompressor implements IDecompressor {
             return false;
           }
         }
-      } catch (e) {
+      } catch {
         return false;
       }
     }

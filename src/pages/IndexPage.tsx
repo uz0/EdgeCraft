@@ -3,17 +3,26 @@
  * Shows all available maps with previews
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapGallery, type MapMetadata } from '../ui/MapGallery';
-import { MapPreviewReport } from '../ui/MapPreviewReport';
+import { MapGallery } from '../ui/MapGallery';
 import { useMapPreviews } from '../hooks/useMapPreviews';
 import { W3XMapLoader } from '../formats/maps/w3x/W3XMapLoader';
 import { SC2MapLoader } from '../formats/maps/sc2/SC2MapLoader';
 import type { RawMapData } from '../formats/maps/types';
+import './IndexPage.css';
 
-// Hardcoded map list (matching actual /maps folder)
-// W3X = Warcraft 3 Classic, W3M = Warcraft 3 Reforged, SC2Map = StarCraft 2
+export interface MapMetadata {
+  id: string;
+  name: string;
+  format: 'w3x' | 'w3m' | 'sc2map';
+  sizeBytes: number;
+  thumbnailUrl?: string;
+  file: File;
+  players: number;
+  author: string;
+}
+
 const MAP_LIST = [
   { name: '[12]MeltedCrown_1.0.w3x', format: 'w3x' as const, sizeBytes: 667 * 1024 },
   { name: 'asset_test.w3m', format: 'w3m' as const, sizeBytes: 22 * 1024 },
@@ -25,30 +34,21 @@ const MAP_LIST = [
 
 export const IndexPage: React.FC = () => {
   const navigate = useNavigate();
-  const [maps, setMaps] = useState<MapMetadata[]>([]);
-  const [viewMode, setViewMode] = useState<'gallery' | 'report'>('gallery');
 
-  const {
-    previews,
-    loadingStates,
-    loadingMessages,
-    isLoading: previewsLoading,
-    generatePreviews,
-    clearCache,
-  } = useMapPreviews();
-
-  // Load map list on mount
-  useEffect(() => {
-    const mapMetadata: MapMetadata[] = MAP_LIST.map((m) => ({
+  const [maps] = useState<MapMetadata[]>(() =>
+    MAP_LIST.map((m) => ({
       id: m.name,
       name: m.name,
       format: m.format,
       sizeBytes: m.sizeBytes,
-      file: new File([], m.name), // Placeholder
-    }));
+      file: new File([], m.name),
+      players: 1,
+      author: 'Author',
+    }))
+  );
 
-    setMaps(mapMetadata);
-  }, []);
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const { previews, generatePreviews, clearCache } = useMapPreviews();
 
   // Generate previews for maps (background process)
   useEffect(() => {
@@ -91,8 +91,8 @@ export const IndexPage: React.FC = () => {
           if (mapData) {
             mapDataMap.set(map.id, mapData);
           }
-        } catch (err) {
-          // Silently skip failed maps
+        } catch {
+          // Silently fail - map will show format badge
         }
       };
 
@@ -109,72 +109,58 @@ export const IndexPage: React.FC = () => {
 
     void loadMapsAndGeneratePreviews();
 
-    return () => {
+    return (): void => {
       cancelled = true;
     };
-  }, [maps, generatePreviews]);
+  }, [maps, generatePreviews, resetTrigger]);
 
-  // Handle map selection - navigate to map viewer
-  const handleMapSelect = (map: MapMetadata): void => {
-    void navigate(`/${encodeURIComponent(map.name)}`);
+  const handleMapSelect = (mapName: string): void => {
+    void navigate(`/${encodeURIComponent(mapName)}`);
   };
 
-  // Merge previews with maps
-  const mapsWithPreviews = useMemo(() => {
-    return maps.map((map) => ({
-      ...map,
-      thumbnailUrl: previews.get(map.id),
-    }));
-  }, [maps, previews]);
+  const handleReset = (): void => {
+    void clearCache().then(() => {
+      setResetTrigger((prev) => prev + 1);
+    });
+  };
+
+  const mapsWithPreviews: MapMetadata[] = maps.map((map) => ({
+    ...map,
+    thumbnailUrl: previews.get(map.id),
+  }));
 
   return (
     <div className="index-page">
-      <header className="app-header">
-        <h1>🏗️ Edge Craft</h1>
-        <p>Phase 2: Advanced Rendering & Visual Effects - Map Gallery</p>
-        <div className="header-stats">
-          <span className="stat">Maps: {maps.length}</span>
-        </div>
-        <div className="view-toggle">
+      <header className="index-header">
+        <div className="index-header-content">
+          <div className="index-logo">
+            <h1>EdgeCraft</h1>
+            <p>The Edge Story</p>
+          </div>
           <button
-            onClick={() => setViewMode('gallery')}
-            className={`toggle-btn ${viewMode === 'gallery' ? 'active' : ''}`}
+            className="reset-button"
+            onClick={handleReset}
+            title="Clear previews and regenerate"
           >
-            Gallery View
-          </button>
-          <button
-            onClick={() => setViewMode('report')}
-            className={`toggle-btn ${viewMode === 'report' ? 'active' : ''}`}
-          >
-            Report View
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z"
+                fill="currentColor"
+              />
+            </svg>
           </button>
         </div>
       </header>
 
-      <main className="app-main">
-        {viewMode === 'gallery' ? (
-          <MapGallery
-            maps={mapsWithPreviews}
-            onMapSelect={handleMapSelect}
-            isLoading={previewsLoading}
-            previewLoadingStates={loadingStates}
-            previewLoadingMessages={loadingMessages}
-            onClearPreviews={() => {
-              void clearCache();
-            }}
-          />
-        ) : (
-          <MapPreviewReport maps={mapsWithPreviews} />
-        )}
+      <main className="index-main">
+        <MapGallery maps={mapsWithPreviews} onMapSelect={handleMapSelect} />
       </main>
-
-      <footer className="app-footer">
-        <p>Edge Craft © 2024 - Clean-room implementation</p>
-        <p>
-          Phase 2 Complete: Post-Processing, Advanced Lighting, GPU Particles, Weather Effects, PBR
-          Materials
-        </p>
-      </footer>
     </div>
   );
 };

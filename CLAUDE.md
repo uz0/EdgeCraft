@@ -17,6 +17,7 @@
 - add only neccesary for debug logs, after they give info - clear them!
 - avoid early faulty generalization. split first utility layer, then dont hesistate to copy-paste, only on third case with re-use start generalization
 - index.js files are *FORBIDDEN*. always import with whole path from src.'
+- **NEVER use `git checkout` or `git revert` to undo changes** - Always fix issues by making forward progress with proper edits
 
 **Rules for self-documenting code instead of comments:**
 - Use descriptive variable names: `userAssessmentRun` not `run`

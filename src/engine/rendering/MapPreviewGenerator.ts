@@ -65,6 +65,7 @@ export class MapPreviewGenerator {
   private engine: BABYLON.Engine;
   private scene: BABYLON.Scene | null = null;
   private camera: BABYLON.Camera | null = null;
+  private generationLock: Promise<void> = Promise.resolve();
 
   constructor(canvas?: HTMLCanvasElement) {
     // Create offscreen canvas if not provided
@@ -93,18 +94,53 @@ export class MapPreviewGenerator {
     mapData: RawMapData,
     config?: PreviewConfig
   ): Promise<PreviewResult> {
-    const startTime = performance.now();
+    // Wait for any ongoing generation to complete (mutex/lock)
+    await this.generationLock;
 
-    // Validate engine is still valid
-    if (this.engine == null || this.engine.isDisposed) {
-      const error = 'Engine has been disposed';
+    // Create new lock for this generation
+    let releaseLock: () => void;
+    this.generationLock = new Promise<void>((resolve) => {
+      releaseLock = resolve;
+    });
+
+    try {
+      const startTime = performance.now();
+
+      // Validate engine is still valid
+      if (this.engine == null || this.engine.isDisposed) {
+        const error = 'Engine has been disposed';
+        return {
+          success: false,
+          generationTimeMs: 0,
+          error,
+        };
+      }
+
+      // Add 10-second timeout to prevent hanging
+      const timeoutPromise = new Promise<PreviewResult>((_, reject) => {
+        setTimeout(() => reject(new Error('Preview generation timeout (10s)')), 10000);
+      });
+
+      return await Promise.race([
+        this.generatePreviewInternal(mapData, config, startTime),
+        timeoutPromise,
+      ]);
+    } catch (error) {
       return {
         success: false,
         generationTimeMs: 0,
-        error,
+        error: error instanceof Error ? error.message : String(error),
       };
+    } finally {
+      releaseLock!();
     }
+  }
 
+  private async generatePreviewInternal(
+    mapData: RawMapData,
+    config: PreviewConfig | undefined,
+    startTime: number
+  ): Promise<PreviewResult> {
     const finalConfig: Required<PreviewConfig> = {
       width: config?.width ?? 512,
       height: config?.height ?? 512,
@@ -199,7 +235,7 @@ export class MapPreviewGenerator {
             try {
               const fallbackDataUrl = canvas.toDataURL(mimeType, finalConfig.quality);
               resolve(fallbackDataUrl);
-            } catch (err) {
+            } catch {
               reject(new Error('Screenshot timeout and fallback failed'));
             }
           }, 5000);
@@ -214,7 +250,7 @@ export class MapPreviewGenerator {
           clearTimeout(timeoutId);
           resolve(canvasDataUrl);
         } catch (error) {
-          reject(error);
+          reject(error instanceof Error ? error : new Error(String(error)));
         }
       });
 
@@ -223,6 +259,15 @@ export class MapPreviewGenerator {
       this.dispose();
 
       const generationTimeMs = performance.now() - startTime;
+
+      // Validate generated image isn't blank/too small
+      if (dataUrl.length < 15000) {
+        return {
+          success: false,
+          generationTimeMs,
+          error: 'Generated preview image is too small (likely blank canvas)',
+        };
+      }
 
       return {
         success: true,

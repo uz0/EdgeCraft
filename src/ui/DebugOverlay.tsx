@@ -35,7 +35,7 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ engine, updateInterv
       setState(engine.getState());
     }, updateInterval);
 
-    return () => clearInterval(interval);
+    return (): void => clearInterval(interval);
   }, [engine, updateInterval]);
 
   if (!engine) return null;

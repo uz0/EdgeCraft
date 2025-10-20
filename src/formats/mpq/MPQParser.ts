@@ -975,7 +975,7 @@ export class MPQParser {
                 currentData,
                 sectorUncompressedSize
               );
-            } catch (huffmanError) {}
+            } catch {}
           }
 
           // Step 2: SPARSE decompression (if flagged and not already at target size)
@@ -988,7 +988,7 @@ export class MPQParser {
                 currentData,
                 sectorUncompressedSize
               );
-            } catch (sparseError) {}
+            } catch {}
           }
 
           // Step 3: ADPCM decompression (if flagged and not already at target size)
@@ -1004,7 +1004,7 @@ export class MPQParser {
                 sectorUncompressedSize,
                 channels
               );
-            } catch (adpcmError) {}
+            } catch {}
           }
 
           // Step 4: Final compression layer (ZLIB/BZIP2/PKZIP - mutually exclusive)
@@ -1032,7 +1032,7 @@ export class MPQParser {
           // If no compression flags or size already correct, use as-is
           if (sectorCompressionFlags === 0) {
           }
-        } catch (error) {
+        } catch {
           // Fallback to raw data on error
           decompressedSector = actualCompressedData;
         }
@@ -1431,11 +1431,6 @@ export class MPQParser {
       offset += 16;
     }
 
-    // Log first few entries for debugging
-    for (let i = 0; i < Math.min(5, blockTable.length); i++) {
-      blockTable[i];
-    }
-
     return blockTable;
   }
 
@@ -1464,7 +1459,7 @@ export class MPQParser {
         .filter((f) => f.length > 0);
 
       return fileList;
-    } catch (error) {
+    } catch {
       // Listfile not found or error - return common names as fallback
       return this.generateCommonMapNamesForStreaming();
     }

@@ -530,7 +530,7 @@ export class CustomShaderSystem {
     for (const wrapper of this.shaderCache.values()) {
       try {
         wrapper.material.setFloat('time', this.time);
-      } catch (e) {
+      } catch {
         // Shader might not have 'time' uniform
       }
     }

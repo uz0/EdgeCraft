@@ -52,7 +52,7 @@ export class AssetLoader {
         throw new Error(`Failed to load manifest: ${response.statusText}`);
       }
       this.manifest = (await response.json()) as AssetManifest;
-    } catch (error) {
+    } catch {
       this.manifest = { textures: {}, models: {} };
     }
   }
@@ -76,7 +76,7 @@ export class AssetLoader {
       texture.name = id;
       this.loadedTextures.set(id, texture);
       return texture;
-    } catch (error) {
+    } catch {
       return this.createFallbackTexture();
     }
   }
@@ -148,7 +148,7 @@ export class AssetLoader {
       // DoodadRenderer will handle visibility
       this.loadedModels.set(id, mesh);
       return mesh; // Return the original mesh for thin instancing
-    } catch (error) {
+    } catch {
       return this.createFallbackBox();
     }
   }

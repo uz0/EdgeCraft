@@ -3,6 +3,7 @@ name: developer
 description: Senior Developer specializing in technical architecture, code design, implementation planning, and Babylon.js rendering optimization. Use for researching patterns, designing architecture, breaking down tasks, estimating timelines, and WebGL/3D rendering implementation.
 tools: Read, Write, Edit, Grep, Glob, WebSearch, Bash
 model: inherit
+color: yellow
 ---
 
 # Developer Agent

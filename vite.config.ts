@@ -51,7 +51,8 @@ export default defineConfig(({ mode }) => {
       checker({
         typescript: true,
         eslint: {
-          lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+          lintCommand: 'eslint . --ext ts,tsx',
+          useFlatConfig: true, // ESLint 9 flat config
           dev: { logLevel: ['error'], overlay: false } // Disable overlay in tests
         },
         overlay: false // Disable error overlay (prevents blocking canvas in tests)

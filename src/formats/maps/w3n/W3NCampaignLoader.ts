@@ -71,7 +71,7 @@ export class W3NCampaignLoader implements IMapLoader {
         const w3fParser = new W3FCampaignInfoParser(w3fData.data);
         campaignInfo = w3fParser.parse();
       }
-    } catch (error) {
+    } catch {
       // Campaign info is optional, continue without it
       // This is common with corrupted campaigns or unusual compression
     }
@@ -217,13 +217,13 @@ export class W3NCampaignLoader implements IMapLoader {
               } else {
                 // Continue to next block
               }
-            } catch (validationError) {
+            } catch {
               // Continue to next block
             }
           }
         } else {
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
@@ -289,11 +289,11 @@ export class W3NCampaignLoader implements IMapLoader {
             });
             index++;
           }
-        } catch (error) {
+        } catch {
           // Continue trying other maps
         }
       }
-    } catch (error) {}
+    } catch {}
 
     // Step 2: If filename-based extraction failed, use block scanning (robust fallback)
     if (maps.length === 0) {
@@ -366,8 +366,6 @@ export class W3NCampaignLoader implements IMapLoader {
       try {
         if (!block) continue; // Skip if block is undefined
 
-        block.uncompressedSize || block.compressedSize || 0;
-
         // Extract the file by index
         const mapData = await mpqParser.extractFileByIndex(blockIndex);
 
@@ -403,7 +401,7 @@ export class W3NCampaignLoader implements IMapLoader {
               break;
             } else {
             }
-          } catch (validationError) {}
+          } catch {}
         } else {
         }
       } catch (error) {
@@ -508,7 +506,7 @@ export class W3NCampaignLoader implements IMapLoader {
 
       const w3fParser = new W3FCampaignInfoParser(w3fData.data);
       return w3fParser.parse();
-    } catch (error) {
+    } catch {
       return null;
     }
   }

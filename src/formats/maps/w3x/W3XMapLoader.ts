@@ -89,8 +89,24 @@ export class W3XMapLoader implements IMapLoader {
       );
     }
 
+    // W3X/W3M files have a 512-byte header before the MPQ data
+    // Check for W3X header signature 'HM3W' or 'W3DM' (little-endian: 'W3MH' or 'MD3W')
+    const view = new DataView(buffer);
+    let mpqOffset = 0;
+
+    if (buffer.byteLength >= 4) {
+      const magic = view.getUint32(0, true);
+      // 'HM3W' (0x57334D48) or similar W3X signatures
+      if (magic === 0x57334d48 || magic === 0x4d443357) {
+        mpqOffset = 512; // Skip 512-byte W3X header
+      }
+    }
+
+    // Extract MPQ data (skip W3X header if present)
+    const mpqBuffer = mpqOffset > 0 ? buffer.slice(mpqOffset) : buffer;
+
     // Parse MPQ archive
-    const mpqParser = new MPQParser(buffer);
+    const mpqParser = new MPQParser(mpqBuffer);
     const mpqResult = mpqParser.parse();
 
     if (!mpqResult.success || !mpqResult.archive) {
@@ -115,24 +131,24 @@ export class W3XMapLoader implements IMapLoader {
       if (!w3iData) {
         w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
       }
-    } catch (err) {}
+    } catch {}
 
     try {
       w3eData = await mpqParser.extractFile('war3map.w3e');
       if (w3eData) {
       } else {
       }
-    } catch (err) {}
+    } catch {}
 
     try {
       dooData = await mpqParser.extractFile('war3map.doo');
-    } catch (err) {
+    } catch {
       // Optional file, silent fail
     }
 
     try {
       unitsData = await mpqParser.extractFile('war3mapUnits.doo');
-    } catch (err) {
+    } catch {
       // Optional file, silent fail
     }
 
@@ -164,7 +180,7 @@ export class W3XMapLoader implements IMapLoader {
         const w3dParser = new W3DParser(dooData.data);
         const w3oDoodads = w3dParser.parse();
         doodads = this.convertDoodads(w3oDoodads.doodads);
-      } catch (doodadError) {
+      } catch {
         doodads = [];
       }
     } else {
@@ -180,7 +196,7 @@ export class W3XMapLoader implements IMapLoader {
           const w3uParser = new W3UParser(unitsData.data); // Let auto-detect format (W3I version ≠ W3U format!)
           const w3uUnits = w3uParser.parse();
           units = this.convertUnits(w3uUnits.units);
-        } catch (customError) {
+        } catch {
           units = [];
         }
       } else {
@@ -194,14 +210,14 @@ export class W3XMapLoader implements IMapLoader {
           } else {
             throw new Error('wc3maptranslator returned 0 units');
           }
-        } catch (libError) {
+        } catch {
           // FALLBACK: Use custom W3UParser
 
           try {
             const w3uParser = new W3UParser(unitsData.data); // Let auto-detect format (W3I version ≠ W3U format!)
             const w3uUnits = w3uParser.parse();
             units = this.convertUnits(w3uUnits.units);
-          } catch (customError) {
+          } catch {
             units = [];
           }
         }

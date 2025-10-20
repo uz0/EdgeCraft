@@ -3,6 +3,7 @@ name: aqa-engineer
 description: AQA Engineer specializing in test automation, quality gates, and performance benchmarking. Use for defining Definition of Done (DoD), success metrics, test scenarios, and validation strategies.
 tools: Read, Edit, Grep, Glob, WebSearch
 model: inherit
+color: green
 ---
 
 # AQA Engineer Agent

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { MapMetadata } from './MapGallery';
+import type { MapMetadata } from '../pages/IndexPage';
 import './MapPreviewReport.css';
 
 export interface MapPreviewReportProps {

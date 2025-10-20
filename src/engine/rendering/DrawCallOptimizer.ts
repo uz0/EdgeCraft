@@ -153,7 +153,7 @@ export class DrawCallOptimizer {
       }
 
       return mergedMesh;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

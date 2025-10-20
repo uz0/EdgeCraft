@@ -67,12 +67,11 @@ export class W3UParser {
           } else {
             break;
           }
-        } catch (err) {
-          err instanceof Error ? err.message : String(err);
+        } catch {
           break;
         }
       }
-    } catch (err) {}
+    } catch {}
 
     // STRATEGY 2: Try parsing 3 units as REFORGED
     let reforgedSuccess = 0;
@@ -91,14 +90,11 @@ export class W3UParser {
           } else {
             break;
           }
-        } catch (err) {
-          err instanceof Error ? err.message : String(err);
+        } catch {
           break;
         }
       }
-    } catch (err) {
-      err instanceof Error ? err.message : String(err);
-    }
+    } catch {}
 
     // Reset to start
     this.offset = startOffset;
@@ -168,7 +164,7 @@ export class W3UParser {
         this.isDetectingFormat = false;
         return 'classic';
       }
-    } catch (err) {}
+    } catch {}
 
     // STRATEGY 4: Educated guess based on version ranges (per WC3MapSpecification)
     // Classic: version <= 27
@@ -245,7 +241,7 @@ export class W3UParser {
         // Log the first successful parse with details
         if (successCount === 1) {
         }
-      } catch (error) {
+      } catch {
         failCount++;
 
         // Log detailed error information for the first few failures
@@ -531,7 +527,7 @@ export class W3UParser {
       } else {
         // Not enough space for optional fields - likely an older format
       }
-    } catch (error) {
+    } catch {
       // Optional fields failed - this is okay for older formats
     }
 
@@ -577,7 +573,7 @@ export class W3UParser {
         if (this.offset + remainingPadding <= this.view.byteLength) {
           this.offset += remainingPadding;
         }
-      } catch (error) {
+      } catch {
         // If any Reforged field reading fails, skip remaining bytes to maintain alignment
         // If we got here, read4CC() may or may not have been called
         // Check current offset vs offsetBeforePadding to determine bytes already read

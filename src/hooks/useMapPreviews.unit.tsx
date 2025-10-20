@@ -6,7 +6,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useMapPreviews } from './useMapPreviews';
 import { MapPreviewExtractor } from '../engine/rendering/MapPreviewExtractor';
 import { PreviewCache } from '../utils/PreviewCache';
-import type { MapMetadata } from '../ui/MapGallery';
+import type { MapMetadata } from '../pages/IndexPage';
 import type { RawMapData } from '../formats/maps/types';
 
 // Mock modules
@@ -42,6 +42,8 @@ describe.skip('useMapPreviews', () => {
       format: 'w3x',
       sizeBytes: 1024 * 1024,
       file: new File([], 'test1.w3x'),
+      players: 2,
+      author: 'Test Author',
     },
     {
       id: 'map2',
@@ -49,6 +51,8 @@ describe.skip('useMapPreviews', () => {
       format: 'w3x',
       sizeBytes: 2 * 1024 * 1024,
       file: new File([], 'test2.w3x'),
+      players: 4,
+      author: 'Test Author 2',
     },
   ];
 

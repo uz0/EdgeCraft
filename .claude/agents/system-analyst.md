@@ -3,6 +3,7 @@ name: system-analyst
 description: System Analyst specializing in requirements analysis, business value assessment, and dependency mapping. Use for defining Definition of Ready (DoR), identifying prerequisites, and mapping dependencies across PRPs.
 tools: Read, Edit, Grep, Glob, WebSearch
 model: inherit
+color: cyan
 ---
 
 # System Analyst Agent

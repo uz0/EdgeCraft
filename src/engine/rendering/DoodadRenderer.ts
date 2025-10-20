@@ -206,7 +206,7 @@ export class DoodadRenderer {
         variations: variationMeshes.length > 0 ? variationMeshes : undefined,
         boundingRadius: 5, // TODO: Calculate from mesh bounds
       });
-    } catch (error) {
+    } catch {
       // Failed to load - use placeholder mesh
       const baseMesh = this.createPlaceholderMesh(typeId);
 

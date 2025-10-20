@@ -217,7 +217,9 @@ void main(void) {
                 });
               } catch (materialError) {
                 this.loadStatus = 'error' as TerrainLoadStatus;
-                reject(materialError);
+                reject(
+                  materialError instanceof Error ? materialError : new Error(String(materialError))
+                );
               }
             },
             updatable: false,
@@ -278,7 +280,7 @@ void main(void) {
           // Roughness map not available, use default specular
           this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
         }
-      } catch (error) {
+      } catch {
         // Fallback to default grass color
         this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
         this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
@@ -376,7 +378,9 @@ void main(void) {
                 });
               } catch (materialError) {
                 this.loadStatus = 'error' as TerrainLoadStatus;
-                reject(materialError);
+                reject(
+                  materialError instanceof Error ? materialError : new Error(String(materialError))
+                );
               }
             },
             updatable: false,
@@ -415,7 +419,7 @@ void main(void) {
         texture.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
         texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
         textures.push(texture);
-      } catch (error) {
+      } catch {
         // Create fallback colored texture
         const fallbackTexture = new BABYLON.Texture(
           this.createFallbackTextureDataUrl(i),

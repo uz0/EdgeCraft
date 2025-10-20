@@ -189,11 +189,12 @@ export class VisualSimilarity {
 
     // Try to use native ImageData if available (browser)
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const ImageDataConstructor = (globalThis as any).ImageData;
+      interface GlobalWithImageData {
+        ImageData?: new (data: Uint8ClampedArray, width: number, height: number) => ImageData;
+      }
+      const globalWithImageData = globalThis as unknown as GlobalWithImageData;
+      const ImageDataConstructor = globalWithImageData.ImageData;
       if (ImageDataConstructor !== undefined) {
-        // In Node.js environment, ImageData requires data buffer first
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
         return new ImageDataConstructor(data, width, height);
       }
     } catch {

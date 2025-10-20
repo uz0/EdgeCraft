@@ -28,17 +28,12 @@ export class ZlibDecompressor implements IDecompressor {
           .map((b) => b.toString(16).padStart(2, '0'))
           .join(' ');
 
-        // Detect ZLIB header (0x78 in first byte indicates ZLIB wrapper)
-        const firstByte = compressedArray.length > 0 ? (compressedArray[0] ?? 0) : 0;
-        (firstByte & 0x0f) === 0x08 && (firstByte & 0xf0) !== 0;
-
         // Try raw deflate first (PKZIP style - no zlib wrapper)
         let decompressedArray: Uint8Array;
         try {
           decompressedArray = pako.inflateRaw(compressedArray);
-        } catch (rawError) {
+        } catch {
           // If raw deflate fails, try with zlib wrapper
-          rawError instanceof Error ? rawError.message : String(rawError);
           decompressedArray = pako.inflate(compressedArray);
         }
 

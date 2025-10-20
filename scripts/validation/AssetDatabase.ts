@@ -145,11 +145,15 @@ export class AssetDatabase {
 
     // Filter by tags (any tag matches)
     if (criteria.tags !== undefined && criteria.tags.length > 0) {
-      candidates = candidates.filter((m) =>
-        m.original.tags?.some((tag) =>
-          criteria.tags?.some((searchTag) => tag.toLowerCase().includes(searchTag.toLowerCase()))
-        )
-      );
+      candidates = candidates.filter((m) => {
+        if (m.original.tags === undefined) return false;
+        return m.original.tags.some(
+          (tag) =>
+            criteria.tags?.some((searchTag) =>
+              tag.toLowerCase().includes(searchTag.toLowerCase())
+            ) ?? false
+        );
+      });
     }
 
     // Filter by minimum similarity

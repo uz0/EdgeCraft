@@ -36,11 +36,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<EdgeCraftEngine | null>(null);
+  const initializationAttemptedRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || initializationAttemptedRef.current) return;
+    initializationAttemptedRef.current = true;
 
     try {
       // Create engine
@@ -147,21 +149,35 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Start rendering
       engine.startRenderLoop();
 
-      setIsReady(true);
-      onEngineReady?.(engine);
+      // Mark initialization complete
+      // State update happens in separate effect to avoid cascading renders
+      queueMicrotask(() => {
+        setIsReady(true);
+      });
 
       // Cleanup
-      return () => {
+      return (): void => {
         shadowManager.dispose();
         camera.dispose();
         terrain.dispose();
         engine.dispose();
       };
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to initialize engine');
+      // Defer error state update to avoid cascading renders
+      const errorMessage = err instanceof Error ? err.message : 'Failed to initialize engine';
+      queueMicrotask(() => {
+        setError(errorMessage);
+      });
       return undefined;
     }
-  }, [onEngineReady]);
+  }, []);
+
+  // Notify parent when engine is ready
+  useEffect(() => {
+    if (isReady && engineRef.current) {
+      onEngineReady?.(engineRef.current);
+    }
+  }, [isReady, onEngineReady]);
 
   return (
     <div style={{ width, height, position: 'relative' }}>

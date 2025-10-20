@@ -84,7 +84,7 @@ export const MapViewer: React.FC = () => {
     };
     window.addEventListener('resize', handleResize);
 
-    return () => {
+    return (): void => {
       clearInterval(fpsInterval);
       window.removeEventListener('resize', handleResize);
       scene.dispose();
