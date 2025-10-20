@@ -44,12 +44,12 @@ All terrain textures sourced from **Poly Haven** (https://polyhaven.com)
   - Authors: Poly Haven team
   - License: CC0
 
-- `dirt_frozen.jpg` / `dirt_frozen_roughness.jpg`
+- `dirt_frozen.jpg` / `dirt_frozen_normal.jpg` / `dirt_frozen_roughness.jpg`
   - Source: Poly Haven "Frozen Ground" (https://polyhaven.com/a/frozen_ground)
   - Authors: Poly Haven team
   - License: CC0
 
-- `sand_desert_normal.jpg`
+- `sand_desert.jpg` / `sand_desert_normal.jpg` / `sand_desert_roughness.jpg`
   - Source: Poly Haven "Desert Sand" (https://polyhaven.com/a/desert_sand)
   - Authors: Poly Haven team
   - License: CC0
@@ -81,18 +81,18 @@ All terrain textures sourced from **Poly Haven** (https://polyhaven.com)
   - Authors: Poly Haven team
   - License: CC0
 
-- `ice.jpg` / `ice_normal.jpg`
+- `ice.jpg` / `ice_normal.jpg` / `ice_roughness.jpg`
   - Source: Poly Haven "Ice 001" (https://polyhaven.com/a/ice_001)
   - Authors: Poly Haven team
   - License: CC0
 
 ### Special Terrain Textures
-- `lava.jpg` / `lava_roughness.jpg`
+- `lava.jpg` / `lava_normal.jpg` / `lava_roughness.jpg`
   - Source: Poly Haven "Lava" (https://polyhaven.com/a/lava)
   - Authors: Poly Haven team
   - License: CC0
 
-- `volcanic_ash.jpg` / `volcanic_ash_normal.jpg`
+- `volcanic_ash.jpg` / `volcanic_ash_normal.jpg` / `volcanic_ash_roughness.jpg`
   - Source: Poly Haven "Volcanic Ash" (https://polyhaven.com/a/volcanic_ash)
   - Authors: Poly Haven team
   - License: CC0
