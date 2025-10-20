@@ -2,7 +2,7 @@
  * Unit tests for AssetLoader
  */
 
-import { AssetLoader, AssetManifest, TextureAsset, ModelAsset } from './AssetLoader';
+import { AssetLoader, AssetManifest } from './AssetLoader';
 import * as BABYLON from '@babylonjs/core';
 
 jest.mock('@babylonjs/core');
@@ -224,7 +224,7 @@ describe('AssetLoader', () => {
       } as any;
 
       let callCount = 0;
-      (BABYLON.Texture as any) = jest.fn((path: string) => {
+      (BABYLON.Texture as any) = jest.fn(() => {
         callCount++;
         const tex = callCount === 1 ? mockTexture : mockTexture2;
         return tex;
@@ -357,7 +357,7 @@ describe('AssetLoader', () => {
       loader.loadTexture('test_texture');
       loader.dispose();
 
-      const texture = loader.loadTexture('test_texture');
+      loader.loadTexture('test_texture');
       expect(BABYLON.Texture).toHaveBeenCalledTimes(2);
     });
 

@@ -123,7 +123,7 @@ describe('AssetMap', () => {
 
     it('should filter out fallback terrain ID', () => {
       const ids = getAllTerrainIDs('w3x');
-      expect(ids).not.toContain(W3X_TERRAIN_MAP._fallback);
+      expect(ids).not.toContain(W3X_TERRAIN_MAP['_fallback']);
     });
   });
 
@@ -151,16 +151,16 @@ describe('AssetMap', () => {
 
     it('should filter out fallback doodad ID', () => {
       const ids = getAllDoodadIDs('w3x');
-      expect(ids).not.toContain(W3X_DOODAD_MAP._fallback);
+      expect(ids).not.toContain(W3X_DOODAD_MAP['_fallback']);
     });
   });
 
   describe('mapping completeness', () => {
     it('should have fallback entries in all mapping tables', () => {
-      expect(W3X_TERRAIN_MAP._fallback).toBeDefined();
-      expect(W3X_DOODAD_MAP._fallback).toBeDefined();
-      expect(SC2_TERRAIN_MAP._fallback).toBeDefined();
-      expect(SC2_DOODAD_MAP._fallback).toBeDefined();
+      expect(W3X_TERRAIN_MAP['_fallback']).toBeDefined();
+      expect(W3X_DOODAD_MAP['_fallback']).toBeDefined();
+      expect(SC2_TERRAIN_MAP['_fallback']).toBeDefined();
+      expect(SC2_DOODAD_MAP['_fallback']).toBeDefined();
     });
 
     it('should have non-empty mapping tables', () => {
