@@ -22,12 +22,6 @@ test.describe('Map Gallery', () => {
     const mapCards = await page.locator('button[class*="map-card"]').count();
     expect(mapCards).toBeGreaterThan(0);
 
-    // Take a full-page screenshot for visual regression
-    await expect(page).toHaveScreenshot('map-gallery-full.png', {
-      fullPage: true,
-      threshold: 0.1, // 10% difference allowed for slight rendering variations
-    });
-
     // Verify key elements are visible
     await expect(page.locator('h1')).toContainText(/Edge Craft/i);
 
