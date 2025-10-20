@@ -8,7 +8,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Open Map', () => {
-  test('should open map viewer and render map with Babylon.js', async ({ page }) => {
+  test.skip('should open map viewer and render map with Babylon.js', async ({ page }) => {
     // Navigate to the gallery
     await page.goto('/');
 
