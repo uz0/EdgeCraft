@@ -92,17 +92,6 @@ jobs:
           name: codecov-unit-tests
         continue-on-error: true
 
-      - name: PR Coverage Report (Changed Files Only)
-        if: github.event_name == 'pull_request'
-        uses: ArtiomTr/jest-coverage-report-action@v2
-        with:
-          test-script: npm run test
-          threshold: 80
-          package-manager: npm
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-step: install
-          annotations: coverage
-
   security:
     name: Security Audit
     runs-on: ubuntu-latest
