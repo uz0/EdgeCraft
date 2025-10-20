@@ -22,8 +22,8 @@
     "validate:credits": "node scripts/validation/AssetCreditsValidator.cjs",
     "optimize": "vite optimize",
     "clean": "rm -rf dist .vite node_modules/.vite",
-    "install:hooks": "node scripts/hooks/install-hooks.js",
-    "uninstall:hooks": "node scripts/hooks/uninstall-hooks.js",
+    "install:hooks": "node scripts/hooks/install-hooks.cjs",
+    "uninstall:hooks": "node scripts/hooks/uninstall-hooks.cjs",
     "precommit": "bash scripts/hooks/pre-commit"
   },
   "dependencies": {
