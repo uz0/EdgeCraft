@@ -5,13 +5,13 @@
 const DEBUG = import.meta.env.VITE_DEBUG === 'true';
 
 export const logger = {
-  log: (...args: unknown[]) => {
+  log: (...args: unknown[]): void => {
     if (DEBUG) console.log(...args);
   },
-  warn: (...args: unknown[]) => {
+  warn: (...args: unknown[]): void => {
     console.warn(...args);
   },
-  error: (...args: unknown[]) => {
+  error: (...args: unknown[]): void => {
     console.error(...args);
   },
 };

@@ -11,7 +11,10 @@ interface MockEntry {
 }
 
 // Mock IndexedDB
-const mockIndexedDB = (() => {
+const mockIndexedDB = ((): {
+  open: jest.Mock;
+  clearStore: () => void;
+} => {
   let store: Record<string, MockEntry> = {};
 
   return {

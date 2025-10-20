@@ -50,7 +50,8 @@ export const FUNNY_LOADING_MESSAGES = [
  * Get a random funny loading message
  */
 export function getRandomLoadingMessage(): string {
-  return FUNNY_LOADING_MESSAGES[Math.floor(Math.random() * FUNNY_LOADING_MESSAGES.length)] || '';
+  const message = FUNNY_LOADING_MESSAGES[Math.floor(Math.random() * FUNNY_LOADING_MESSAGES.length)];
+  return message ?? '';
 }
 
 /**
@@ -69,7 +70,7 @@ export class LoadingMessageGenerator {
 
     // Pick a random message from available pool
     const index = Math.floor(Math.random() * this.availableMessages.length);
-    const message = this.availableMessages[index] || '';
+    const message = this.availableMessages[index] ?? '';
 
     // Remove from available and add to used
     this.availableMessages.splice(index, 1);

@@ -138,7 +138,7 @@ export class AssetLoader {
       } else {
         // Ensure existing material has visible color
         const material = mesh.material as BABYLON.StandardMaterial;
-        if (material.diffuseColor) {
+        if (material.diffuseColor != null) {
           // Check if diffuse color is black (0,0,0)
           const color = material.diffuseColor;
           if (color.r === 0 && color.g === 0 && color.b === 0) {
