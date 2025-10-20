@@ -2,15 +2,23 @@
 
 **Usage**: `/generate-prp <short-description>`
 
-**Purpose**: **FULLY AUTONOMOUS** PRP generation using 3-agent pipeline
+**Purpose**: **FULLY AUTONOMOUS** PRP generation using 3-4 agent pipeline
 
-**What happens**: Claude automatically orchestrates 3 specialized agents to create a complete PRP:
+**What happens**: Claude automatically orchestrates specialized agents to create a complete PRP:
 1. **System Analyst** → DoR, dependencies, business value
 2. **AQA Engineer** → DoD, testing strategy, metrics
 3. **Developer** → Architecture, implementation, research
+4. **Multiplayer Architect** (optional) → Networking, synchronization, anti-cheat
 
 **User provides**: Short description
 **Claude delivers**: Complete, ready-to-execute PRP
+
+**Note**: Multiplayer Architect is automatically included if the feature involves:
+- Networking or WebSocket communication
+- Real-time multiplayer gameplay
+- Client-server synchronization
+- Anti-cheat systems
+- Lobby/matchmaking features
 
 ---
 
@@ -28,12 +36,21 @@
 5. Create file: `PRPs/{feature-slug}.md`
 6. Fill basic template with placeholders
 
+**Detect if Multiplayer is needed:**
+Analyze description for keywords:
+- "multiplayer", "networking", "server", "client-server"
+- "lobby", "matchmaking", "WebSocket", "sync"
+- "anti-cheat", "deterministic", "replay"
+
+Set flag: `needsMultiplayer = true/false`
+
 **Output File Structure**:
 ```markdown
 # PRP: {Feature Name}
 **Status**: 📋 Generating...
 **Created**: {TODAY}
 **Complexity**: {Small|Medium|Large}
+**Multiplayer**: {Yes/No}
 
 ## 🎯 Goal / Description
 {User's description}
@@ -47,6 +64,11 @@
 [AQA WILL FILL]
 
 ## 🏗️ Implementation Breakdown
+
+{IF needsMultiplayer == true}
+## 🌐 Multiplayer Architecture
+[MULTIPLAYER ARCHITECT WILL FILL]
+{END IF}
 [DEVELOPER WILL FILL]
 
 ## 📚 Research / Related Materials
@@ -307,6 +329,106 @@ Save changes directly to file.`
 
 ### Step 5: Validate & Report (Main Agent)
 
+### Step 4.5: Launch Multiplayer Architect (CONDITIONAL)
+
+**🚨 ONLY IF needsMultiplayer == true - OTHERWISE SKIP TO STEP 5**
+
+Use Task tool:
+```javascript
+// Check if multiplayer flag was set in Step 1
+if (needsMultiplayer) {
+  Task({
+    subagent_type: "multiplayer-architect",
+    description: "Multiplayer Architect fills networking architecture",
+    prompt: `You are a Multiplayer Architect.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file (now has DoR, DoD, and Implementation filled)
+2. Fill "Multiplayer Architecture" section with networking design
+3. Add multiplayer-specific research materials
+4. Define networking patterns and anti-cheat strategies
+5. Update Progress Tracking table
+
+**Multiplayer Architecture Format**:
+## 🌐 Multiplayer Architecture
+
+**Networking Pattern**:
+{Client-Server | P2P | Hybrid}
+
+**Synchronization Strategy**:
+{Lockstep | State Sync | Hybrid}
+
+**Key Components**:
+- **WebSocket Communication**: {Design}
+- **State Management**: {Colyseus Schema or custom}
+- **Lag Compensation**: {Client prediction, server reconciliation}
+- **Anti-Cheat**: {Server authority, validation, checksums}
+
+**Deterministic Simulation** (if lockstep):
+\`\`\`typescript
+// Fixed timestep game loop
+class DeterministicSimulation {
+  private tick: number = 0;
+  private readonly FIXED_TIMESTEP = 16.67; // 60 Hz
+  
+  fixedUpdate(dt: number): void {
+    // Integer/fixed-point math only
+    // Deterministic command execution
+  }
+}
+\`\`\`
+
+**Network Performance**:
+- Tick Rate: {60 Hz | 30 Hz | 20 Hz}
+- Network Rate: {20 Hz | 10 Hz}
+- Target Latency: < {100ms | 150ms}
+- Bandwidth: < {10KB/s | 20KB/s} per player
+
+**Testing Strategy**:
+- Packet loss simulation ({X}%)
+- High latency testing ({X}ms)
+- Desync detection (checksum validation)
+- Load testing ({X} concurrent rooms)
+
+**Research Format**:
+## 📚 Research / Related Materials (Multiplayer)
+
+**Networking Libraries**:
+- [Colyseus]({URL}): {Usage}
+- [WebRTC]({URL}): {Usage if P2P}
+
+**Multiplayer Patterns**:
+- [Deterministic Lockstep]({URL}): {Pattern}
+- [Client Prediction]({URL}): {Pattern}
+
+**Anti-Cheat Resources**:
+- [Server Authority]({URL}): {Strategy}
+
+**Update Progress**:
+| {TODAY} | Multiplayer Architect | Completed networking architecture | Ready for Validation |
+
+**Tools**:
+- Read: Read PRP, networking code
+- WebSearch: Find networking patterns, anti-cheat strategies
+- Edit: Update PRP file
+
+**Focus Areas**:
+1. WebSearch for multiplayer patterns (lockstep, state sync)
+2. Design deterministic simulation if needed
+3. Plan anti-cheat validation
+4. Document network performance targets
+
+Save changes directly to file.`
+  });
+}
+```
+
+**Wait for completion** (if executed) ✋
+
+---
+
 After all 3 agents complete:
 
 **Actions**:
@@ -315,6 +437,7 @@ After all 3 agents complete:
    - ✅ DoR (System Analyst)
    - ✅ DoD (AQA)
    - ✅ Implementation Breakdown (Developer)
+   - ✅ Multiplayer Architecture (if applicable)
    - ✅ Research Materials (Developer)
    - ✅ Testing Strategy (AQA)
    - ✅ Timeline (Developer)
@@ -403,6 +526,39 @@ Claude: 🤖 Generating PRP for "Add user authentication with JWT"...
 
         📄 File: PRPs/add-user-authentication-jwt.md
         ⏱️  Estimated: 6 days
+
+### Multiplayer Example:
+```
+User: /generate-prp Add lobby system with room matchmaking
+
+Claude: 🤖 Generating PRP for "Add lobby system with room matchmaking"...
+        🔍 Detected: Multiplayer feature (lobby, matchmaking keywords)
+
+        📝 Creating boilerplate...
+        ✅ Boilerplate created: PRPs/add-lobby-system-with-room-matchmaking.md
+        ✅ Multiplayer flag: YES
+
+        🔄 Launching System Analyst agent...
+        ✅ System Analyst completed (DoR: 6 prerequisites)
+
+        🔄 Launching AQA Engineer agent...
+        ✅ AQA completed (DoD: 11 deliverables, 15 test scenarios)
+
+        🔄 Launching Developer agent...
+        ✅ Developer completed (18 tasks, 4 phases, 8 days estimated)
+
+        🔄 Launching Multiplayer Architect agent...
+        ✅ Multiplayer Architect completed (Networking: Client-Server, Sync: State)
+
+        🎉 PRP Ready for Implementation!
+
+        📄 File: PRPs/add-lobby-system-with-room-matchmaking.md
+        ⏱️  Estimated: 8 days
+        📊 Quality: >80% coverage, 0 errors policy
+        🌐 Multiplayer: Colyseus rooms, WebSocket, state sync
+
+        Next: /execute-prp PRPs/add-lobby-system-with-room-matchmaking.md
+```
         📊 Quality: >80% coverage, 0 errors policy
 
         Next: /execute-prp PRPs/add-user-authentication-jwt.md
