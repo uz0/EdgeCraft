@@ -32,6 +32,7 @@ const COMPATIBLE_LICENSES = [
   'Python-2.0',
   'MPL-2.0', // Weak copyleft - OK for build tools (modifications must be shared)
   'MPL-1.1', // Weak copyleft - OK for build tools
+  'Zlib', // Permissive - similar to MIT (compression library)
 ];
 
 // Licenses requiring attribution (warn but allow)
