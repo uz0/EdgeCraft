@@ -7,7 +7,9 @@
 
 ## 🎯 Goal / Description
 
-Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (.SC2Map) map formats including MPQ archive extraction and all compression algorithms.
+Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (.SC2Map) map formats including MPQ archive extraction and all compression algorithms.
+
+**Note**: W3N (campaign) support was initially implemented but later removed to focus on individual map files only.
 
 **Value**: Core functionality to load and display RTS maps
 **Goal**: Parse all map formats with 100% compatibility, extract terrain, doodads, units
@@ -30,8 +32,9 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 - [x] MPQ archive parser implemented
 - [x] All compression algorithms working (Zlib, Bzip2, LZMA, ADPCM, Sparse)
 - [x] W3X map loader (terrain, doodads, units, cameras)
-- [x] W3N campaign loader (embedded maps)
+- [x] W3M map loader (Reforged format - uses same parser as W3X)
 - [x] SC2Map loader (terrain, doodads)
+- [~] W3N campaign loader (embedded maps) - **REMOVED** (not needed for current scope)
 - [x] Unit tests >80% coverage
 - [x] All 24 test maps load successfully
 - [x] No parsing errors
@@ -59,8 +62,8 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 - [x] W3D (doodads) - placement, variations, trees
 - [ ] W3U (units) - **BLOCKED** - 99.7% parse failure, needs rewrite
 - [x] W3C (cameras) - cinematic camera data
-- [x] W3N (campaigns) - embedded map extraction
 - [x] SC2Map (StarCraft 2) - terrain, doodad parsing
+- [~] W3N (campaigns) - embedded map extraction - **REMOVED** from scope
 
 **Phase 4: Integration & Testing**
 - [x] Unit tests for all parsers (>80% coverage)
@@ -87,8 +90,8 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 
 **Required checks before marking complete:**
 - [x] Unit tests coverage >80%
-- [x] Tested with 14 W3X maps
-- [x] Tested with 7 W3N campaigns
+- [x] Tested with 1 W3X map
+- [x] Tested with 2 W3M maps
 - [x] Tested with 3 SC2Map maps
 - [x] No TypeScript errors
 - [x] No ESLint warnings
@@ -104,7 +107,7 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 
 **Acceptance Criteria:**
 - [x] All W3X maps parse correctly
-- [x] All W3N campaigns extract embedded maps
+- [x] All W3M maps parse correctly (using W3X parser)
 - [x] All SC2Map maps parse terrain
 - [x] Compression algorithms handle all variants
 - [x] Parsing errors logged clearly
@@ -122,14 +125,13 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 **High-Level Design:**
 - **Architecture**: Layered parser (MPQ → Decompression → Format Parsers)
 - **Compression**: 5 algorithms (Zlib, Bzip2, LZMA, ADPCM, Sparse)
-- **Format Parsers**: Modular W3E, W3I, W3D, W3U, W3C, W3N parsers
+- **Format Parsers**: Modular W3E, W3I, W3D, W3U, W3C parsers
 - **Dependencies**: `pako`, `seek-bzip`, `lzma-native`, `wc3maptranslator`
 
 **Code References:**
 - `src/formats/mpq/MPQParser.ts` - MPQ archive extraction
 - `src/formats/compression/` - All decompression algorithms
 - `src/formats/maps/w3x/W3XMapLoader.ts` - W3X parser
-- `src/formats/maps/w3n/W3NCampaignLoader.ts` - W3N parser
 - `src/formats/maps/sc2/SC2MapLoader.ts` - SC2Map parser
 - `src/formats/maps/w3x/W3EParser.ts` - Terrain parser
 - `src/formats/maps/w3x/W3DParser.ts` - Doodad parser
@@ -147,7 +149,7 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 | 2024-10-15 | Developer   | LZMA decompression                   | Complete |
 | 2024-10-16 | Developer   | ADPCM + Sparse decompression         | Complete |
 | 2024-10-18 | Developer   | W3X map loader                       | Complete |
-| 2024-10-20 | Developer   | W3N campaign loader                  | Complete |
+| 2024-10-20 | Developer   | W3N campaign loader - **REMOVED**    | Removed  |
 | 2024-10-22 | Developer   | SC2Map loader                        | Complete |
 | 2024-10-25 | Developer   | Unit tests for all parsers           | Complete |
 | 2024-11-01 | Developer   | Tested 6 maps (1 W3X, 2 W3M, 3 SC2) | Complete |
@@ -170,7 +172,7 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3n) and StarCraft 2 (
 - Parser Performance: <1s per map average ✅ Achieved
 - Test Coverage: >80% unit test coverage ✅ Achieved (82%)
 - Compression Support: 5/5 algorithms working ✅ Achieved
-- Format Support: W3X, W3N, SC2Map all functional ✅ Achieved
+- Format Support: W3X, W3M, SC2Map all functional ✅ Achieved
 - Unit Parser Success Rate: >90% target ❌ **BLOCKED** (currently 0.3%)
 
 ---

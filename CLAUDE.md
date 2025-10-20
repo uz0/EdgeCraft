@@ -91,7 +91,7 @@ Every PRP MUST contain EXACTLY these sections (no more, no less):
 **Prerequisites to START work:**
 - [ ] all test data and assets prepared
 - [ ] test data prepared
-- [ ] needed assets upload and legal compliant
+- [ ] needed assets uploaded and legal compliant
 
 ---
 
