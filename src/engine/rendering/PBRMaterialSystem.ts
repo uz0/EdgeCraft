@@ -223,7 +223,7 @@ export class PBRMaterialSystem {
           this.textureCache.set(url, texture);
           resolve(texture);
         },
-        (message) => {
+        (_message) => {
           reject(new Error(`Failed to load texture: ${url}`));
         }
       );

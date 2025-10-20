@@ -143,9 +143,8 @@ export function useMapPreviews(): UseMapPreviewsResult {
                   return;
                 }
 
-                const startTime = performance.now();
+                const _startTime = performance.now();
                 const result = await extractorRef.current!.extract(map.file, mapData);
-                const _duration = performance.now() - startTime;
 
                 if (result.success && result.dataUrl != null && result.dataUrl !== '') {
                   newPreviews.set(map.id, result.dataUrl);

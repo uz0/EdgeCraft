@@ -190,8 +190,8 @@ export class W3EParser {
     // Calculate stats for debugging
     let minHeight = Infinity;
     let maxHeight = -Infinity;
-    let zeroCount = 0;
-    let cliffCount = 0;
+    let _zeroCount = 0;
+    let _cliffCount = 0;
     let maxCliffLevel = 0;
 
     for (let i = 0; i < groundTiles.length; i++) {
@@ -205,13 +205,12 @@ export class W3EParser {
 
       minHeight = Math.min(minHeight, totalHeight);
       maxHeight = Math.max(maxHeight, totalHeight);
-      if (totalHeight === 0) zeroCount++;
-      if (cliffLevel > 0) cliffCount++;
+      if (totalHeight === 0) _zeroCount++;
+      if (cliffLevel > 0) _cliffCount++;
       maxCliffLevel = Math.max(maxCliffLevel, cliffLevel);
     }
 
     // Sample first 10 values for debugging
-    const _sample = Array.from(heightmap.slice(0, Math.min(10, heightmap.length)));
 
     return heightmap;
   }

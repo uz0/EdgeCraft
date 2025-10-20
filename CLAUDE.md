@@ -7,6 +7,7 @@
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `CONTRIBUTING.md`.
 - for small changes or patches as exception we can user commit and branch prefixes hotfix-* and trivial-* and TRIVIAL: * and HOTFIX: *. **ONLY IF WAS ASKED FOR!**
 - **UPDATE PRP DURING WORK** After EVERY significant change, add row to Progress Tracking table, check off DoD items as completed, update "Current Blockers" or "Next Steps"
+- PRP should contain list of affected files.
 
 ## 🧱 Development
 
@@ -100,7 +101,7 @@ tests/**/*.test.ts - end-to-end tests
 
 **Step 7: Developer Self-Check**
 - [ ] All DoD items checked
-- [ ] All tests passing (`npm run test:unit`)
+- [ ] All tests passing (`npm run test`)
 - [ ] No TypeScript errors (`npm run typecheck`)
 - [ ] No ESLint errors (`npm run lint`)
 - [ ] Code documented (JSDoc for public APIs)
@@ -137,6 +138,10 @@ tests/**/*.test.ts - end-to-end tests
 - Document final status in PRP
 
 ## 📎 Style & Conventions
+
+### **ESLINT-DISABLE NO TOLERANCE**
+- eslint-disable forbidden by default
+- eslint-disable can be placed with explanation ONLY if user allow it and it's necessity
 
 ### ZERO COMMENTS POLICY
 **CRITICAL: ZERO COMMENTS POLICY - ABSOLUTELY NO COMMENTS**

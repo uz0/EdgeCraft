@@ -416,7 +416,6 @@ void main(void) {
         texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
         textures.push(texture);
       } catch (error) {
-        const _textureId = textureIds[i] ?? '';
         // Create fallback colored texture
         const fallbackTexture = new BABYLON.Texture(
           this.createFallbackTextureDataUrl(i),
@@ -548,8 +547,8 @@ void main(void) {
 
     // DEBUG: Sample first 5 blendMap values
 
-    let nonZeroSplatmap1Count = 0;
-    let nonZeroSplatmap2Count = 0;
+    let _nonZeroSplatmap1Count = 0;
+    let _nonZeroSplatmap2Count = 0;
 
     // SC2-STYLE SMOOTH BLENDING
     // Instead of hard 0/255 values, we blend textures based on neighboring tiles
@@ -630,7 +629,7 @@ void main(void) {
           (weights[2] ?? 0) > 0 ||
           (weights[3] ?? 0) > 0
         ) {
-          nonZeroSplatmap1Count++;
+          _nonZeroSplatmap1Count++;
         }
 
         // Write to splatmap2 (textures 4-7)
@@ -645,7 +644,7 @@ void main(void) {
           (weights[6] ?? 0) > 0 ||
           (weights[7] ?? 0) > 0
         ) {
-          nonZeroSplatmap2Count++;
+          _nonZeroSplatmap2Count++;
         }
       }
     }

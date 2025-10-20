@@ -143,7 +143,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
 
       // Log shadow stats
-      const _shadowStats = shadowManager.getStats();
 
       // Start rendering
       engine.startRenderLoop();

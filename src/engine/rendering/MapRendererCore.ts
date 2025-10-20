@@ -192,7 +192,6 @@ export class MapRendererCore {
       const cam = this.scene.activeCamera;
       // Check if camera has a target (ArcRotateCamera)
       if ('target' in cam && cam.target instanceof BABYLON.Vector3) {
-        const _target = cam.target;
       }
     }
 
@@ -213,14 +212,13 @@ export class MapRendererCore {
       }
     }
 
-    for (const [prefix, count] of meshGroups) {
+    for (const [_prefix, _count] of meshGroups) {
     }
 
     // Log first 10 visible meshes in detail
     for (let i = 0; i < Math.min(10, visibleMeshes.length); i++) {
       const mesh = visibleMeshes[i];
       if (mesh) {
-        const _mat = mesh.material;
       }
     }
 
@@ -228,10 +226,7 @@ export class MapRendererCore {
     const terrainMesh = this.scene.getMeshByName('terrain');
     if (terrainMesh) {
       if (terrainMesh.material) {
-        const _mat = terrainMesh.material as BABYLON.StandardMaterial;
       }
-
-      const _bbox = terrainMesh.getBoundingInfo().boundingBox;
     } else {
     }
 
@@ -551,7 +546,6 @@ export class MapRendererCore {
       this.doodadRenderer.buildInstanceBuffers();
 
       // Log stats
-      const _stats = this.doodadRenderer.getStats();
     } catch (error) {
       throw error; // Re-throw to let upstream handlers deal with it
     }
@@ -717,7 +711,6 @@ export class MapRendererCore {
     this.scene.activeCamera = this.camera;
 
     if (this.camera) {
-      const _cam = this.camera as BABYLON.ArcRotateCamera;
     }
   }
 

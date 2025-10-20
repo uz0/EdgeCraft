@@ -138,7 +138,7 @@ export class W3NCampaignLoader implements IMapLoader {
     // NOTE: We DON'T use extractFiles because W3N campaigns have unpredictable filenames
     // Instead, we'll iterate the block table after parsing to find embedded W3X files
     const mpqResult = await mpqParser.parseStream(reader, {
-      onProgress: (stage, progress) => {},
+      onProgress: (_stage, _progress) => {},
     });
 
     if (!mpqResult.success) {

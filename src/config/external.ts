@@ -137,11 +137,11 @@ export function logExternalStatus(): void {
   const validation = validateExternalDependencies();
 
   if (validation.warnings.length > 0) {
-    validation.warnings.forEach((warning) => {});
+    validation.warnings.forEach((_warning) => {});
   }
 
   if (!validation.valid) {
-    validation.errors.forEach((error) => {});
+    validation.errors.forEach((_error) => {});
     throw new Error('External dependency configuration invalid');
   }
 }

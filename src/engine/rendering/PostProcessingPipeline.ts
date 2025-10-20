@@ -219,7 +219,7 @@ export class PostProcessingPipeline {
           }
           resolve();
         },
-        (message) => {
+        (_message) => {
           resolve(); // Don't fail, just continue without LUT
         }
       );

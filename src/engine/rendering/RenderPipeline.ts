@@ -108,12 +108,10 @@ export class OptimizedRenderPipeline {
     // 2. Material sharing
     if (this.options.enableMaterialSharing) {
       this.materialCache.optimizeMeshMaterials();
-      const _materialStats = this.materialCache.getStats();
     }
 
     // 3. Mesh merging for static objects
     if (this.options.enableMeshMerging) {
-      const _mergeResult = this.drawCallOptimizer.mergeStaticMeshes();
     }
 
     // 4. Advanced culling

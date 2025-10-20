@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "format": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\"",
     "format:fix": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
-    "typecheck": "tsc --noEmit --strict --noUnusedLocals --noUnusedParameters",
+    "typecheck": "tsc --noEmit --strict",
     "validate": "npm run validate:licenses && npm run validate:credits",
     "validate:licenses": "node scripts/validation/PackageLicenseValidator.cjs",
     "validate:credits": "node scripts/validation/AssetCreditsValidator.cjs",
