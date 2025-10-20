@@ -18,7 +18,6 @@ import type { CullingConfig, CullingStats } from './types';
  * const culling = new CullingStrategy(scene);
  * culling.enable();
  * const stats = culling.getStats();
- * console.log(`Culled ${stats.frustumCulled + stats.occlusionCulled} / ${stats.totalObjects} objects`);
  * ```
  */
 export class CullingStrategy {

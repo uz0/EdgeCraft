@@ -48,18 +48,18 @@ export const W3X_DOODAD_MAP: Record<string, string> = {
   ATtr: 'doodad_tree_oak_01', // Ashenvale Tree (primary)
   CTtr: 'doodad_tree_pine_01', // Pine Tree
   BTtw: 'doodad_tree_dead_01', // Dead Tree
-  LTtr: 'doodad_tree_oak_02', // Lordaeron Tree
+  LTtr: 'doodad_tree_oak_01', // Lordaeron Tree (use oak_01)
   ATtc: 'doodad_tree_oak_01', // Ashenvale Tree Canopy (use oak)
   ASx1: 'doodad_tree_oak_01', // Ashenvale Small Tree (use oak, scaled)
   ASx0: 'doodad_tree_oak_01', // Ashenvale Small Tree (variant)
   ASx2: 'doodad_tree_oak_01', // Ashenvale Small Tree (variant 2)
   ATwf: 'doodad_tree_pine_01', // Ashenvale Twisted Fir
-  COlg: 'doodad_tree_oak_02', // Outland Large Tree
+  COlg: 'doodad_tree_oak_01', // Outland Large Tree (use oak_01)
   CTtc: 'doodad_tree_pine_01', // Cityscape Tree Canopy
-  LOtr: 'doodad_tree_oak_02', // Lordaeron Tree (variant)
-  LOth: 'doodad_tree_oak_02', // Lordaeron Thick Tree
-  LTe1: 'doodad_tree_oak_02', // Lordaeron Elder Tree
-  LTe3: 'doodad_tree_oak_02', // Lordaeron Elder Tree (variant)
+  LOtr: 'doodad_tree_oak_01', // Lordaeron Tree (variant, use oak_01)
+  LOth: 'doodad_tree_oak_01', // Lordaeron Thick Tree (use oak_01)
+  LTe1: 'doodad_tree_oak_01', // Lordaeron Elder Tree (use oak_01)
+  LTe3: 'doodad_tree_oak_01', // Lordaeron Elder Tree (variant, use oak_01)
   LTbs: 'doodad_tree_dead_01', // Lordaeron Barren Stump
 
   // Bushes / Foliage
@@ -209,7 +209,6 @@ export function mapAssetID(
     return mappedID;
   }
 
-  console.warn(`[AssetMap] No mapping for ${format}:${assetType}:${originalID}, using fallback`);
   const fallback = mapping['_fallback'];
   return fallback !== undefined && fallback !== null && fallback !== ''
     ? fallback

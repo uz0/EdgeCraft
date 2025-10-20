@@ -166,8 +166,6 @@ void main(void) {
     // Register with Babylon.js shader store
     BABYLON.Effect.ShadersStore['terrainVertexShader'] = vertexShader;
     BABYLON.Effect.ShadersStore['terrainFragmentShader'] = fragmentShader;
-
-    console.log('[TerrainRenderer] Terrain splatmap shaders registered');
   }
 
   /**
@@ -195,9 +193,21 @@ void main(void) {
                 // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
                 // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
                 // W3X entity coordinates are also centered, so no offset needed
-                console.log(
-                  `[TerrainRenderer] Terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
-                );
+
+                // CRITICAL FIX: Ensure UV coordinates are present
+                // CreateGroundFromHeightMap should generate UVs, but verify and regenerate if missing
+                const hasUVs = mesh.isVerticesDataPresent(BABYLON.VertexBuffer.UVKind);
+                if (!hasUVs) {
+                  // Generate UV coordinates manually
+                  const subdivisions = options.subdivisions;
+                  const uvs: number[] = [];
+                  for (let y = 0; y <= subdivisions; y++) {
+                    for (let x = 0; x <= subdivisions; x++) {
+                      uvs.push(x / subdivisions, y / subdivisions);
+                    }
+                  }
+                  mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
+                }
 
                 this.applyMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
@@ -206,9 +216,10 @@ void main(void) {
                   mesh: mesh,
                 });
               } catch (materialError) {
-                console.error('[TerrainRenderer] Failed to apply material:', materialError);
                 this.loadStatus = 'error' as TerrainLoadStatus;
-                reject(materialError);
+                reject(
+                  materialError instanceof Error ? materialError : new Error(String(materialError))
+                );
               }
             },
             updatable: false,
@@ -242,7 +253,6 @@ void main(void) {
       try {
         // Map the terrain texture ID to our asset ID
         const mappedId = mapAssetID('w3x', 'terrain', options.textureId);
-        console.log(`[TerrainRenderer] Mapped texture ID: ${options.textureId} -> ${mappedId}`);
 
         // Load the diffuse texture
         const diffuseTexture = this.assetLoader.loadTexture(mappedId);
@@ -270,20 +280,13 @@ void main(void) {
           // Roughness map not available, use default specular
           this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
         }
-
-        console.log(`[TerrainRenderer] Loaded texture: ${mappedId} for terrain`);
-      } catch (error) {
-        console.warn(
-          `[TerrainRenderer] Failed to load texture for ${options.textureId}, using fallback color`,
-          error
-        );
+      } catch {
         // Fallback to default grass color
         this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
         this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
       }
     } else {
       // No textureId provided, use default grass color
-      console.log('[TerrainRenderer] No textureId provided, using default grass color');
       this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
       this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     }
@@ -291,19 +294,16 @@ void main(void) {
     // Enable backface culling for performance
     this.material.backFaceCulling = true;
 
+    // Set ambient color to white for proper texture visibility
+    // ambientColor (0,0,0) blocks texture rendering
+    this.material.ambientColor = new BABYLON.Color3(1, 1, 1);
+
     // Apply material to mesh
     mesh.material = this.material;
 
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
     mesh.doNotSyncBoundingInfo = true;
-
-    console.log(
-      `[TerrainRenderer] Material applied: mesh=${mesh.name}, ` +
-        `position=${mesh.position.toString()}, ` +
-        `visible=${mesh.isVisible}, ` +
-        `material=${this.material?.name ?? 'none'}`
-    );
   }
 
   /**
@@ -334,9 +334,41 @@ void main(void) {
                 // Keep terrain centered at origin (0, 0, 0) to match entity coordinates
                 // Babylon.js CreateGroundFromHeightMap naturally centers terrain at origin
                 // W3X entity coordinates are also centered, so no offset needed
-                console.log(
-                  `[TerrainRenderer] Multi-texture terrain mesh positioned at origin: (${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z})`
-                );
+
+                // CRITICAL FIX: Check if indices were generated
+                // If heightmap fails to load, Babylon creates vertices but NO indices
+                const indices = mesh.getIndices();
+                if (!indices || indices.length === 0) {
+                  // Calculate subdivisions from actual vertex count
+                  // For a grid: vertexCount = (subdivisions + 1)²
+                  const totalVertices = mesh.getTotalVertices();
+                  const subdivisions = Math.floor(Math.sqrt(totalVertices)) - 1;
+
+                  // Generate indices manually for grid mesh
+                  // Use Uint32Array to ensure integer indices (not floats!)
+                  const indexCount = subdivisions * subdivisions * 6; // 2 triangles per quad, 3 indices per triangle
+                  const generatedIndices = new Uint32Array(indexCount);
+                  let indexOffset = 0;
+
+                  for (let y = 0; y < subdivisions; y++) {
+                    for (let x = 0; x < subdivisions; x++) {
+                      const i0 = y * (subdivisions + 1) + x;
+                      const i1 = i0 + 1;
+                      const i2 = i0 + (subdivisions + 1);
+                      const i3 = i2 + 1;
+
+                      // Two triangles per quad
+                      generatedIndices[indexOffset++] = i0; // Triangle 1
+                      generatedIndices[indexOffset++] = i2;
+                      generatedIndices[indexOffset++] = i1;
+                      generatedIndices[indexOffset++] = i1; // Triangle 2
+                      generatedIndices[indexOffset++] = i2;
+                      generatedIndices[indexOffset++] = i3;
+                    }
+                  }
+
+                  mesh.setIndices(generatedIndices);
+                }
 
                 this.applyMultiTextureMaterial(mesh, options);
                 this.loadStatus = 'loaded' as TerrainLoadStatus;
@@ -345,12 +377,10 @@ void main(void) {
                   mesh: mesh,
                 });
               } catch (materialError) {
-                console.error(
-                  '[TerrainRenderer] Failed to apply multi-texture material:',
-                  materialError
-                );
                 this.loadStatus = 'error' as TerrainLoadStatus;
-                reject(materialError);
+                reject(
+                  materialError instanceof Error ? materialError : new Error(String(materialError))
+                );
               }
             },
             updatable: false,
@@ -379,10 +409,6 @@ void main(void) {
   ): void {
     const { textureIds, blendMap } = options;
 
-    console.log(`[TerrainRenderer] 🔍 MATERIAL DEBUG - Applying multi-texture material`);
-    console.log(`[TerrainRenderer] 🔍 Total textures requested: ${textureIds.length}`);
-    console.log(`[TerrainRenderer] 🔍 Texture IDs: [${textureIds.join(', ')}]`);
-
     // Load up to 8 textures (shader now supports 8)
     const textures: BABYLON.Texture[] = [];
     for (let i = 0; i < Math.min(8, textureIds.length); i++) {
@@ -393,22 +419,13 @@ void main(void) {
         texture.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
         texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
         textures.push(texture);
-        console.log(
-          `[TerrainRenderer] ✅ Loaded texture slot ${i}: "${textureId}" -> "${mappedId}"`
-        );
-      } catch (error) {
-        const textureId = textureIds[i] ?? '';
-        console.error(
-          `[TerrainRenderer] ❌ Failed to load texture slot ${i}: "${textureId}"`,
-          error
-        );
+      } catch {
         // Create fallback colored texture
         const fallbackTexture = new BABYLON.Texture(
           this.createFallbackTextureDataUrl(i),
           this.scene
         );
         textures.push(fallbackTexture);
-        console.log(`[TerrainRenderer] 🔶 Using fallback color for slot ${i}`);
       }
     }
 
@@ -493,10 +510,6 @@ void main(void) {
     shaderMaterial.setFloat('debugMode', debugMode);
 
     if (debugMode > 0) {
-      console.log(
-        `[TerrainRenderer] 🐛 DEBUG MODE ENABLED: ${debugMode} ` +
-          `(0=normal, 1=splatmap1, 2=splatmap2, 3=UVs)`
-      );
     }
 
     // Apply material to mesh (cast to Material to avoid type incompatibility)
@@ -508,8 +521,6 @@ void main(void) {
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
     mesh.doNotSyncBoundingInfo = true;
-
-    console.log('[TerrainRenderer] Multi-texture splatmap material applied successfully');
   }
 
   /**
@@ -533,79 +544,119 @@ void main(void) {
       maxIdx = Math.max(maxIdx, idx);
     }
 
-    console.log(
-      `[TerrainRenderer] 🔍 SPLATMAP DEBUG - Creating dual ${width}x${height} splatmaps from ${blendMap.length} tiles`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 BlendMap index range: min=${minIdx}, max=${maxIdx}, unique=${indexCounts.size}`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 Index distribution:`,
-      Array.from(indexCounts.entries())
-        .sort((a, b) => a[0] - b[0])
-        .map(
-          ([idx, count]) =>
-            `  idx${idx}=${count} (${((count / blendMap.length) * 100).toFixed(1)}%)`
-        )
-        .join('\n')
-    );
-
     // Create RGBA texture data for both splatmaps
     const splatmapSize = width * height * 4; // RGBA
     const splatmap1Data = new Uint8Array(splatmapSize); // Textures 0-3
     const splatmap2Data = new Uint8Array(splatmapSize); // Textures 4-7
 
     // DEBUG: Sample first 5 blendMap values
-    console.log(
-      `[TerrainRenderer] 🔍 First 10 blendMap values: [${Array.from(blendMap.slice(0, 10)).join(', ')}]`
-    );
 
-    let nonZeroSplatmap1Count = 0;
-    let nonZeroSplatmap2Count = 0;
+    let _nonZeroSplatmap1Count = 0;
+    let _nonZeroSplatmap2Count = 0;
 
-    for (let i = 0; i < blendMap.length; i++) {
-      const textureIndex = blendMap[i] ?? 0; // 0-7
-      const pixelOffset = i * 4;
+    // SC2-STYLE SMOOTH BLENDING
+    // Instead of hard 0/255 values, we blend textures based on neighboring tiles
+    // This creates smooth transitions like in StarCraft 2
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = y * width + x;
+        const centerTexture = blendMap[i] ?? 0;
+        const pixelOffset = i * 4;
 
-      if (textureIndex < 4) {
-        // Textures 0-3 go into splatmap1
-        splatmap1Data[pixelOffset + 0] = textureIndex === 0 ? 255 : 0; // R
-        splatmap1Data[pixelOffset + 1] = textureIndex === 1 ? 255 : 0; // G
-        splatmap1Data[pixelOffset + 2] = textureIndex === 2 ? 255 : 0; // B
-        splatmap1Data[pixelOffset + 3] = textureIndex === 3 ? 255 : 0; // A
-        if (textureIndex === 0 || textureIndex === 1 || textureIndex === 2 || textureIndex === 3) {
-          nonZeroSplatmap1Count++;
+        // SC2-style blending: Strong center weight with subtle edge softening
+        // Center dominates (80%), neighbors add subtle transitions (20% total)
+        const weights = new Float32Array(8); // Weights for each texture (0-7)
+        let totalWeight = 0;
+
+        // Subtle 3x3 kernel: Center=8.0, Edge=0.5, Corner=0.25 (sum ~11.5)
+        // This gives ~70% center weight, ~30% neighbor influence
+        const kernelWeights = [
+          0.25,
+          0.5,
+          0.25, // Top row (corners and edge)
+          0.5,
+          8.0,
+          0.5, // Middle row (CENTER DOMINATES)
+          0.25,
+          0.5,
+          0.25, // Bottom row
+        ];
+
+        const offsets = [
+          [-1, -1],
+          [0, -1],
+          [1, -1], // Top row
+          [-1, 0],
+          [0, 0],
+          [1, 0], // Middle row
+          [-1, 1],
+          [0, 1],
+          [1, 1], // Bottom row
+        ];
+
+        for (let k = 0; k < offsets.length; k++) {
+          const nx = x + (offsets[k]?.[0] ?? 0);
+          const ny = y + (offsets[k]?.[1] ?? 0);
+
+          // Clamp to bounds
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const neighborIdx = ny * width + nx;
+            const neighborTexture = blendMap[neighborIdx] ?? 0;
+            const kernelWeight = kernelWeights[k] ?? 1.0;
+
+            if (weights[neighborTexture] !== undefined) {
+              weights[neighborTexture] += kernelWeight;
+              totalWeight += kernelWeight;
+            }
+          }
         }
-        // Splatmap2 is all zeros for this tile
-      } else {
-        // Textures 4-7 go into splatmap2
-        splatmap2Data[pixelOffset + 0] = textureIndex === 4 ? 255 : 0; // R
-        splatmap2Data[pixelOffset + 1] = textureIndex === 5 ? 255 : 0; // G
-        splatmap2Data[pixelOffset + 2] = textureIndex === 6 ? 255 : 0; // B
-        splatmap2Data[pixelOffset + 3] = textureIndex === 7 ? 255 : 0; // A
-        if (textureIndex >= 4) {
-          nonZeroSplatmap2Count++;
+
+        // Normalize weights to [0, 255]
+        if (totalWeight > 0) {
+          for (let t = 0; t < 8; t++) {
+            weights[t] = ((weights[t] ?? 0) / totalWeight) * 255;
+          }
+        } else {
+          // Fallback: set center texture to full weight
+          weights[centerTexture] = 255;
         }
-        // Splatmap1 is all zeros for this tile
+
+        // Write to splatmap1 (textures 0-3)
+        splatmap1Data[pixelOffset + 0] = Math.min(255, Math.max(0, Math.round(weights[0] ?? 0)));
+        splatmap1Data[pixelOffset + 1] = Math.min(255, Math.max(0, Math.round(weights[1] ?? 0)));
+        splatmap1Data[pixelOffset + 2] = Math.min(255, Math.max(0, Math.round(weights[2] ?? 0)));
+        splatmap1Data[pixelOffset + 3] = Math.min(255, Math.max(0, Math.round(weights[3] ?? 0)));
+
+        if (
+          (weights[0] ?? 0) > 0 ||
+          (weights[1] ?? 0) > 0 ||
+          (weights[2] ?? 0) > 0 ||
+          (weights[3] ?? 0) > 0
+        ) {
+          _nonZeroSplatmap1Count++;
+        }
+
+        // Write to splatmap2 (textures 4-7)
+        splatmap2Data[pixelOffset + 0] = Math.min(255, Math.max(0, Math.round(weights[4] ?? 0)));
+        splatmap2Data[pixelOffset + 1] = Math.min(255, Math.max(0, Math.round(weights[5] ?? 0)));
+        splatmap2Data[pixelOffset + 2] = Math.min(255, Math.max(0, Math.round(weights[6] ?? 0)));
+        splatmap2Data[pixelOffset + 3] = Math.min(255, Math.max(0, Math.round(weights[7] ?? 0)));
+
+        if (
+          (weights[4] ?? 0) > 0 ||
+          (weights[5] ?? 0) > 0 ||
+          (weights[6] ?? 0) > 0 ||
+          (weights[7] ?? 0) > 0
+        ) {
+          _nonZeroSplatmap2Count++;
+        }
       }
     }
 
-    console.log(
-      `[TerrainRenderer] 🔍 Splatmap1 non-zero pixels: ${nonZeroSplatmap1Count}/${blendMap.length}`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 Splatmap2 non-zero pixels: ${nonZeroSplatmap2Count}/${blendMap.length}`
-    );
-
     // DEBUG: Sample first 20 bytes of splatmap1Data
-    console.log(
-      `[TerrainRenderer] 🔍 First 20 bytes of splatmap1Data: [${Array.from(splatmap1Data.slice(0, 20)).join(', ')}]`
-    );
-    console.log(
-      `[TerrainRenderer] 🔍 First 20 bytes of splatmap2Data: [${Array.from(splatmap2Data.slice(0, 20)).join(', ')}]`
-    );
 
     // Create textures from raw data
+    // Use BILINEAR filtering for smooth SC2-style blending between textures
     const splatmap1 = BABYLON.RawTexture.CreateRGBATexture(
       splatmap1Data,
       width,
@@ -613,7 +664,7 @@ void main(void) {
       this.scene,
       false, // generateMipMaps
       false, // invertY
-      BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
+      BABYLON.Texture.BILINEAR_SAMPLINGMODE // Smooth interpolation for SC2-style blending
     );
 
     const splatmap2 = BABYLON.RawTexture.CreateRGBATexture(
@@ -623,21 +674,7 @@ void main(void) {
       this.scene,
       false, // generateMipMaps
       false, // invertY
-      BABYLON.Texture.NEAREST_SAMPLINGMODE // Use nearest for sharp tile boundaries
-    );
-
-    console.log(`[TerrainRenderer] ✅ Created dual splatmap textures: ${width}x${height}`);
-    console.log(
-      `[TerrainRenderer] ✅ Splatmap1 (textures 0-3): ${Array.from(indexCounts.entries())
-        .filter(([idx]) => idx < 4)
-        .map(([idx, count]) => `idx${idx}=${count}`)
-        .join(', ')}`
-    );
-    console.log(
-      `[TerrainRenderer] ✅ Splatmap2 (textures 4-7): ${Array.from(indexCounts.entries())
-        .filter(([idx]) => idx >= 4)
-        .map(([idx, count]) => `idx${idx}=${count}`)
-        .join(', ')}`
+      BABYLON.Texture.BILINEAR_SAMPLINGMODE // Smooth interpolation for SC2-style blending
     );
 
     return { splatmap1, splatmap2 };

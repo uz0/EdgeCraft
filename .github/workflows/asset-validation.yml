@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Run asset validation
-        run: npm run assets:validate
+        run: npm run validate
 
       - name: Check for large files (>10MB)
         run: |

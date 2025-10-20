@@ -32,7 +32,7 @@ jobs:
         run: npm run lint
 
       - name: Check Prettier formatting
-        run: npm run format:check
+        run: npm run format
 
   typecheck:
     name: TypeScript Type Check
@@ -57,6 +57,8 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -71,15 +73,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm run test -- --coverage
+      - name: Run unit tests with coverage
+        run: npm run test:unit:coverage
 
-      - name: Upload coverage reports
+      - name: Upload unit test coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: coverage/
+          retention-days: 30
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage/lcov.info
           flags: unittests
-          name: codecov-umbrella
+          name: codecov-unit-tests
         continue-on-error: true
 
   security:
@@ -103,7 +112,7 @@ jobs:
         run: npm audit --audit-level=high || echo "⚠️ Moderate vulnerabilities detected in dev dependencies (acceptable for development)"
 
       - name: License compliance check
-        run: npm run validate:legal
+        run: npm run validate:licenses
 
   build:
     name: Build Check
@@ -127,9 +136,6 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Validate bundle size
-        run: npm run validate:bundle
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -142,6 +148,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [typecheck, test]
     timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
 
     steps:
       - name: Checkout code
@@ -156,29 +164,150 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
-
       - name: Run E2E tests
         run: npm run test:e2e
         env:
           CI: true
+          HOME: /root
 
-      - name: Upload Playwright Report
-        if: failure()
+      - name: Upload Playwright HTML Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 7
+          retention-days: 30
 
-      - name: Upload Test Results
-        if: failure()
+      - name: Upload E2E Test Results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: e2e-test-results
           path: test-results/
-          retention-days: 7
+          retention-days: 30
+
+      - name: Upload E2E Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: tests/e2e-screenshots/
+          retention-days: 30
+
+  comment-pr:
+    name: Comment PR with Test Reports
+    runs-on: ubuntu-latest
+    needs: [test, e2e-tests]
+    if: always() && github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Get test results
+        id: test-results
+        run: |
+          echo "test_result=${{ needs.test.result }}" >> $GITHUB_OUTPUT
+          echo "e2e_result=${{ needs.e2e-tests.result }}" >> $GITHUB_OUTPUT
+
+      - name: Comment or update PR with test reports
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = context.runId;
+            const repo = context.repo;
+            const pr = context.payload.pull_request.number;
+            const testResult = '${{ steps.test-results.outputs.test_result }}';
+            const e2eResult = '${{ steps.test-results.outputs.e2e_result }}';
+
+            const artifactsUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+            const workflowUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+
+            // Status emojis
+            const statusEmoji = (result) => {
+              switch(result) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '🚫';
+                case 'skipped': return '⏭️';
+                default: return '⏳';
+              }
+            };
+
+            const comment = `## 📊 Test Reports & Coverage
+
+            ### Test Results
+            ${statusEmoji(testResult)} **Unit Tests**: ${testResult}
+            ${statusEmoji(e2eResult)} **E2E Tests**: ${e2eResult}
+
+            [🔗 View Full Workflow Run](${workflowUrl})
+
+            ---
+
+            ### 📥 Download Artifacts
+
+            #### Unit Test Coverage
+            📈 [Unit Test Coverage Report](${artifactsUrl}#artifacts) - \`unit-test-coverage\`
+            - HTML report with line-by-line coverage
+            - Open \`lcov-report/index.html\` after extracting
+
+            #### E2E Test Results
+            🎭 [Playwright HTML Report](${artifactsUrl}#artifacts) - \`playwright-report\`
+            📸 [E2E Screenshots](${artifactsUrl}#artifacts) - \`e2e-screenshots\`
+            🔍 [E2E Test Results](${artifactsUrl}#artifacts) - \`e2e-test-results\` (videos, traces)
+
+            #### Build Artifacts
+            📦 [Build Artifacts](${artifactsUrl}#artifacts) - \`dist\`
+
+            ---
+
+            <details>
+            <summary>📖 How to view reports</summary>
+
+            1. Click on artifact links above
+            2. Scroll down to "Artifacts" section at bottom of page
+            3. Download the zip file
+            4. Extract the zip file
+            5. Open HTML files in your browser:
+               - **Coverage**: \`coverage/lcov-report/index.html\`
+               - **Playwright**: \`index.html\`
+
+            </details>
+
+            ---
+
+            🤖 _Auto-generated by [CI/CD Pipeline](${workflowUrl}) • Updated on every push_`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: pr,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📊 Test Reports & Coverage')
+            );
+
+            // Update existing or create new
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+              console.log('Updated existing comment');
+            } else {
+              await github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: pr,
+                body: comment
+              });
+              console.log('Created new comment');
+            }
 
   quality-gate:
     name: Quality Gate

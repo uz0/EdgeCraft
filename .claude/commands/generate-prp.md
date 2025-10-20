@@ -1,69 +1,636 @@
-# Create PRP
+# Generate PRP (Phase Requirement Proposal)
 
-## Feature file: $ARGUMENTS
+**Usage**: `/generate-prp <short-description>`
 
-Generate a complete PRP for general feature implementation with thorough research. Ensure context is passed to the AI agent to enable self-validation and iterative refinement. Read the feature file first to understand what needs to be created, how the examples provided help, and any other considerations.
+**Purpose**: **FULLY AUTONOMOUS** PRP generation using 3-4 agent pipeline
 
-The AI agent only gets the context you are appending to the PRP and training data. Assuma the AI agent has access to the codebase and the same knowledge cutoff as you, so its important that your research findings are included or referenced in the PRP. The Agent has Websearch capabilities, so pass urls to documentation and examples.
+**What happens**: Claude automatically orchestrates specialized agents to create a complete PRP:
+1. **System Analyst** → DoR, dependencies, business value
+2. **AQA Engineer** → DoD, testing strategy, metrics
+3. **Developer** → Architecture, implementation, research
+4. **Multiplayer Architect** (optional) → Networking, synchronization, anti-cheat
 
-## Research Process
+**User provides**: Short description
+**Claude delivers**: Complete, ready-to-execute PRP
 
-1. **Codebase Analysis**
-   - Search for similar features/patterns in the codebase
-   - Identify files to reference in PRP
-   - Note existing conventions to follow
-   - Check test patterns for validation approach
+**Note**: Multiplayer Architect is automatically included if the feature involves:
+- Networking or WebSocket communication
+- Real-time multiplayer gameplay
+- Client-server synchronization
+- Anti-cheat systems
+- Lobby/matchmaking features
 
-2. **External Research**
-   - Search for similar features/patterns online
-   - Library documentation (include specific URLs)
-   - Implementation examples (GitHub/StackOverflow/blogs)
-   - Best practices and common pitfalls
+---
 
-3. **User Clarification** (if needed)
-   - Specific patterns to mirror and where to find them?
-   - Integration requirements and where to find them?
+## 🤖 Autonomous Execution (NO USER INTERVENTION)
 
-## PRP Generation
+### Step 1: Generate Boilerplate (Main Agent)
 
-Using PRPs/templates/prp_base.md as template:
+**Input**: `$ARGUMENTS` (user's short description)
 
-### Critical Context to Include and pass to the AI agent as part of the PRP
-- **Documentation**: URLs with specific sections
-- **Code Examples**: Real snippets from codebase
-- **Gotchas**: Library quirks, version issues
-- **Patterns**: Existing approaches to follow
+**Actions**:
+1. Extract feature name from description
+2. Convert to kebab-case slug
+3. Estimate complexity (small/medium/large)
+4. Search for related PRPs: `grep -r "keyword" PRPs/`
+5. Create file: `PRPs/{feature-slug}.md`
+6. Fill basic template with placeholders
 
-### Implementation Blueprint
-- Start with pseudocode showing approach
-- Reference real files for patterns
-- Include error handling strategy
-- list tasks to be completed to fullfill the PRP in the order they should be completed
+**Detect if Multiplayer is needed:**
+Analyze description for keywords:
+- "multiplayer", "networking", "server", "client-server"
+- "lobby", "matchmaking", "WebSocket", "sync"
+- "anti-cheat", "deterministic", "replay"
 
-### Validation Gates (Must be Executable) eg for python
-```bash
-# Syntax/Style
-ruff check --fix && mypy .
+Set flag: `needsMultiplayer = true/false`
 
-# Unit Tests
-uv run pytest tests/ -v
+**Output File Structure**:
+```markdown
+# PRP: {Feature Name}
+**Status**: 📋 Generating...
+**Created**: {TODAY}
+**Complexity**: {Small|Medium|Large}
+**Multiplayer**: {Yes/No}
 
+## 🎯 Goal / Description
+{User's description}
+
+**Business Value**: [SYSTEM ANALYST WILL FILL]
+
+## 📋 Definition of Ready (DoR)
+[SYSTEM ANALYST WILL FILL]
+
+## ✅ Definition of Done (DoD)
+[AQA WILL FILL]
+
+## 🏗️ Implementation Breakdown
+
+{IF needsMultiplayer == true}
+## 🌐 Multiplayer Architecture
+[MULTIPLAYER ARCHITECT WILL FILL]
+{END IF}
+[DEVELOPER WILL FILL]
+
+## 📚 Research / Related Materials
+[DEVELOPER WILL FILL]
+
+## ⏱️ Timeline
+[DEVELOPER WILL FILL]
+
+## 📊 Success Metrics
+[AQA WILL FILL]
+
+## 🧪 Testing & Validation
+[AQA WILL FILL]
+
+## 📋 Progress Tracking
+| Date | Role | Change Made | Status |
+|------|------|-------------|--------|
+| {TODAY} | Main Agent | Created boilerplate | Draft |
+
+## 📈 Phase Exit Criteria
+[WILL BE CHECKED AFTER ALL AGENTS COMPLETE]
 ```
 
-*** CRITICAL AFTER YOU ARE DONE RESEARCHING AND EXPLORING THE CODEBASE BEFORE YOU START WRITING THE PRP ***
+---
 
-*** ULTRATHINK ABOUT THE PRP AND PLAN YOUR APPROACH THEN START WRITING THE PRP ***
+### Step 2: Launch System Analyst Agent ⚡ AUTOMATIC
 
-## Output
-Save as: `PRPs/{feature-name}.md`
+**🚨 CRITICAL: DO NOT WAIT FOR USER - LAUNCH IMMEDIATELY**
 
-## Quality Checklist
-- [ ] All necessary context included
-- [ ] Validation gates are executable by AI
-- [ ] References existing patterns
-- [ ] Clear implementation path
-- [ ] Error handling documented
+Use Task tool:
+```javascript
+Task({
+  subagent_type: "system-analyst",
+  description: "System Analyst fills DoR",
+  prompt: `You are a System Analyst.
 
-Score the PRP on a scale of 1-10 (confidence level to succeed in one-pass implementation using claude codes)
+**File**: PRPs/{feature-slug}.md
 
-Remember: The goal is one-pass implementation success through comprehensive context.
+**Tasks**:
+1. Read the PRP file completely
+2. Read CLAUDE.md to understand DoR requirements
+3. Search existing PRPs for dependencies: grep -r "related-keyword" PRPs/
+4. Fill "Definition of Ready (DoR)" section with 3-7 prerequisites
+5. Fill "Business Value" with user/business/strategic impact
+6. Update Progress Tracking table
+
+**DoR Format**:
+## 📋 Definition of Ready (DoR)
+**Prerequisites to START work:**
+- [ ] {Previous PRP/feature} is complete
+- [ ] {Required infrastructure/tools} ready
+- [ ] {Assets/data} available
+- [ ] {Design/specs} approved
+- [ ] {Dependencies} resolved
+
+**Business Value**:
+- User Impact: {How users benefit}
+- Business Impact: {Revenue/efficiency gain}
+- Strategic Value: {Long-term positioning}
+
+**Update Progress**:
+| {TODAY} | System Analyst | Completed DoR & business value | Ready for AQA |
+
+**Tools**:
+- Read: Read PRPs/{feature-slug}.md, CLAUDE.md, other PRPs
+- Grep: Search dependencies
+- Edit: Update the PRP file
+
+Save changes directly to file.`
+});
+```
+
+**Wait for completion** ✋
+
+---
+
+### Step 3: Launch AQA Engineer Agent ⚡ AUTOMATIC
+
+**🚨 CRITICAL: LAUNCH IMMEDIATELY AFTER STEP 2 - DO NOT ASK USER**
+
+Use Task tool:
+```javascript
+Task({
+  subagent_type: "aqa-engineer",
+  description: "AQA fills DoD and testing",
+  prompt: `You are an AQA Engineer.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file (now has DoR filled by System Analyst)
+2. Read CLAUDE.md quality requirements (>80% coverage, 0 errors policy)
+3. Fill "Definition of Done (DoD)" with 7-12 deliverables
+4. Fill "Success Metrics" with measurable targets
+5. Fill "Testing & Validation" with test scenarios and commands
+6. Update Progress Tracking table
+
+**DoD Format**:
+## ✅ Definition of Done (DoD)
+**Deliverables to COMPLETE work:**
+- [ ] {Feature X} implemented
+- [ ] Unit tests >80% coverage
+- [ ] E2E tests pass (if applicable)
+- [ ] Performance: {metric} < {threshold}
+- [ ] Zero ESLint errors/warnings
+- [ ] TypeScript strict passes
+- [ ] All validation commands pass
+- [ ] Code reviewed
+- [ ] Merged to main
+
+**Success Metrics Format**:
+## 📊 Success Metrics
+- Performance: {metric} < {target} (e.g., API <200ms P95)
+- Quality: Test coverage > 85%
+- Reliability: {uptime/error rate}
+- User Experience: {load time < 3s}
+
+**Validation**: ESLint 0 errors, TypeScript 0 errors, Tests 100% pass
+
+**Testing Format**:
+## 🧪 Testing & Validation
+
+**Unit Tests**:
+- Scenario 1: {Happy path}
+- Scenario 2: {Edge case}
+- Coverage: >80%
+
+**E2E Tests** (if needed):
+- Flow 1: {User scenario}
+
+**Validation Commands**:
+\`\`\`bash
+npm run typecheck
+npm run lint
+npm run test:unit
+npm run test:e2e  # if applicable
+npm run validate
+\`\`\`
+
+**Update Progress**:
+| {TODAY} | AQA | Completed DoD, metrics, testing | Ready for Developer |
+
+**Tools**:
+- Read: Read PRPs/{feature-slug}.md, CLAUDE.md
+- Edit: Update the PRP file
+
+Save changes directly to file.`
+});
+```
+
+**Wait for completion** ✋
+
+---
+
+### Step 4: Launch Developer Agent ⚡ AUTOMATIC
+
+**🚨 CRITICAL: LAUNCH IMMEDIATELY AFTER STEP 3 - DO NOT ASK USER**
+
+Use Task tool:
+```javascript
+Task({
+  subagent_type: "developer",
+  description: "Developer fills implementation & research",
+  prompt: `You are a Senior Developer.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file (now has DoR and DoD filled)
+2. Research codebase patterns: grep -r "similar-pattern" src/
+3. Search for related files: glob "src/**/*{keyword}*.ts"
+4. WebSearch for library documentation and examples
+5. Fill "Implementation Breakdown" with phases and tasks
+6. Fill "Research / Related Materials" with all findings
+7. Fill "Timeline" with estimates
+8. Update Progress Tracking table
+
+**Implementation Breakdown Format**:
+## 🏗️ Implementation Breakdown
+
+**Architecture Overview**:
+{High-level technical approach}
+
+**File Structure**:
+\`\`\`
+src/{module}/
+├── index.ts
+├── types.ts
+├── {Component}.tsx
+├── utils.ts
+└── {Component}.test.tsx
+\`\`\`
+
+**Phase 1: Core Implementation**
+- [ ] Create \`src/{path}/types.ts\` - Define interfaces
+  - Follow: \`src/{example}/types.ts\`
+- [ ] Create \`src/{path}/{Component}.tsx\` - Main logic
+  - Follow: \`src/{example}/{Component}.tsx\`
+- [ ] Implement {function}
+  - Edge case: {X}
+
+**Phase 2: Integration**
+- [ ] Integrate with {system} at \`src/{file}.ts:{line}\`
+
+**Phase 3: Testing**
+- [ ] Unit tests (>80% coverage)
+  - Follow: \`src/{example}/{Example}.test.tsx\`
+
+**Research Format**:
+## 📚 Research / Related Materials
+
+**Codebase References**:
+- \`src/{file}.ts:{line}\`: {Pattern to follow}
+
+**External Documentation**:
+- [{Library}]({URL}): {Section}
+- [{Example}]({URL}): {Implementation}
+
+**Similar PRPs**:
+- \`PRPs/{prp}.md\`: {Reference}
+
+**Gotchas**:
+- {Edge case/quirk}
+
+**Timeline Format**:
+## ⏱️ Timeline
+**Estimated Effort**: {X days}
+**Phase Breakdown**:
+- Phase 1: {X days}
+- Phase 2: {Y days}
+- Phase 3: {Z days}
+
+**Assumptions**: No blockers, assets available
+
+**Update Progress**:
+| {TODAY} | Developer | Completed research, architecture, breakdown | Ready for Implementation |
+
+**Tools**:
+- Read: Read PRP, code files
+- Grep: Search patterns
+- Glob: Find files
+- WebSearch: Library docs
+- Edit: Update PRP file
+
+**Research First**:
+1. grep -r "similar-pattern" src/
+2. Find library docs with WebSearch
+3. Read example implementations
+4. Document ALL findings
+
+Save changes directly to file.`
+});
+```
+
+**Wait for completion** ✋
+
+---
+
+### Step 5: Validate & Report (Main Agent)
+
+### Step 4.5: Launch Multiplayer Architect (CONDITIONAL)
+
+**🚨 ONLY IF needsMultiplayer == true - OTHERWISE SKIP TO STEP 5**
+
+Use Task tool:
+```javascript
+// Check if multiplayer flag was set in Step 1
+if (needsMultiplayer) {
+  Task({
+    subagent_type: "multiplayer-architect",
+    description: "Multiplayer Architect fills networking architecture",
+    prompt: `You are a Multiplayer Architect.
+
+**File**: PRPs/{feature-slug}.md
+
+**Tasks**:
+1. Read the PRP file (now has DoR, DoD, and Implementation filled)
+2. Fill "Multiplayer Architecture" section with networking design
+3. Add multiplayer-specific research materials
+4. Define networking patterns and anti-cheat strategies
+5. Update Progress Tracking table
+
+**Multiplayer Architecture Format**:
+## 🌐 Multiplayer Architecture
+
+**Networking Pattern**:
+{Client-Server | P2P | Hybrid}
+
+**Synchronization Strategy**:
+{Lockstep | State Sync | Hybrid}
+
+**Key Components**:
+- **WebSocket Communication**: {Design}
+- **State Management**: {Colyseus Schema or custom}
+- **Lag Compensation**: {Client prediction, server reconciliation}
+- **Anti-Cheat**: {Server authority, validation, checksums}
+
+**Deterministic Simulation** (if lockstep):
+\`\`\`typescript
+// Fixed timestep game loop
+class DeterministicSimulation {
+  private tick: number = 0;
+  private readonly FIXED_TIMESTEP = 16.67; // 60 Hz
+  
+  fixedUpdate(dt: number): void {
+    // Integer/fixed-point math only
+    // Deterministic command execution
+  }
+}
+\`\`\`
+
+**Network Performance**:
+- Tick Rate: {60 Hz | 30 Hz | 20 Hz}
+- Network Rate: {20 Hz | 10 Hz}
+- Target Latency: < {100ms | 150ms}
+- Bandwidth: < {10KB/s | 20KB/s} per player
+
+**Testing Strategy**:
+- Packet loss simulation ({X}%)
+- High latency testing ({X}ms)
+- Desync detection (checksum validation)
+- Load testing ({X} concurrent rooms)
+
+**Research Format**:
+## 📚 Research / Related Materials (Multiplayer)
+
+**Networking Libraries**:
+- [Colyseus]({URL}): {Usage}
+- [WebRTC]({URL}): {Usage if P2P}
+
+**Multiplayer Patterns**:
+- [Deterministic Lockstep]({URL}): {Pattern}
+- [Client Prediction]({URL}): {Pattern}
+
+**Anti-Cheat Resources**:
+- [Server Authority]({URL}): {Strategy}
+
+**Update Progress**:
+| {TODAY} | Multiplayer Architect | Completed networking architecture | Ready for Validation |
+
+**Tools**:
+- Read: Read PRP, networking code
+- WebSearch: Find networking patterns, anti-cheat strategies
+- Edit: Update PRP file
+
+**Focus Areas**:
+1. WebSearch for multiplayer patterns (lockstep, state sync)
+2. Design deterministic simulation if needed
+3. Plan anti-cheat validation
+4. Document network performance targets
+
+Save changes directly to file.`
+  });
+}
+```
+
+**Wait for completion** (if executed) ✋
+
+---
+
+After all 3 agents complete:
+
+**Actions**:
+1. Read completed PRP: `PRPs/{feature-slug}.md`
+2. Validate sections filled:
+   - ✅ DoR (System Analyst)
+   - ✅ DoD (AQA)
+   - ✅ Implementation Breakdown (Developer)
+   - ✅ Multiplayer Architecture (if applicable)
+   - ✅ Research Materials (Developer)
+   - ✅ Testing Strategy (AQA)
+   - ✅ Timeline (Developer)
+3. Update PRP status to "Ready for Implementation"
+4. Update Phase Exit Criteria checkboxes
+5. Report to user
+
+**Final Status Update** (edit PRP):
+```markdown
+**Status**: ✅ Ready for Implementation
+```
+
+**Output to User**:
+```
+🎉 PRP Generated Successfully!
+
+📄 File: PRPs/{feature-slug}.md
+⏱️  Time: {X} seconds
+
+✅ Completed by Agents:
+  1. System Analyst → DoR ({N} prerequisites), Business Value
+  2. AQA Engineer → DoD ({N} deliverables), Success Metrics, Testing
+  3. Developer → Implementation ({N} tasks), Research ({N} refs), Timeline ({X} days)
+
+📊 PRP Summary:
+  • Complexity: {Small|Medium|Large}
+  • Estimated Effort: {X days}
+  • Implementation Phases: {N}
+  • Codebase References: {N}
+  • External Docs: {N}
+  • Test Scenarios: {N}
+
+🎯 Status: Ready for Implementation
+
+📋 Next Steps:
+  1. Review PRP: cat PRPs/{feature-slug}.md
+  2. Start implementation: /execute-prp PRPs/{feature-slug}.md
+  3. Or customize PRP if needed
+
+💡 Tip: The PRP is complete and executable. All context has been gathered by the agents.
+```
+
+---
+
+## 🎯 Key Principles for Claude
+
+### **FULLY AUTONOMOUS** - No User Interaction Required
+
+When user runs `/generate-prp <description>`:
+
+1. **You generate boilerplate** immediately
+2. **You launch System Analyst** using Task tool (NO PERMISSION NEEDED)
+3. **You wait** for System Analyst to complete
+4. **You launch AQA** using Task tool (NO PERMISSION NEEDED)
+5. **You wait** for AQA to complete
+6. **You launch Developer** using Task tool (NO PERMISSION NEEDED)
+7. **You wait** for Developer to complete
+8. **You validate** and report final status
+
+### Each Agent:
+- Reads the PRP file
+- Fills assigned sections
+- Updates Progress Tracking
+- **Saves changes directly** to the file
+- Returns when done
+
+### User Experience:
+```
+User: /generate-prp Add user authentication with JWT
+
+Claude: 🤖 Generating PRP for "Add user authentication with JWT"...
+
+        📝 Creating boilerplate...
+        ✅ Boilerplate created: PRPs/add-user-authentication-jwt.md
+
+        🔄 Launching System Analyst agent...
+        ✅ System Analyst completed (DoR: 5 prerequisites)
+
+        🔄 Launching AQA Engineer agent...
+        ✅ AQA completed (DoD: 9 deliverables, 12 test scenarios)
+
+        🔄 Launching Developer agent...
+        ✅ Developer completed (15 tasks, 3 phases, 6 days estimated)
+
+        🎉 PRP Ready for Implementation!
+
+        📄 File: PRPs/add-user-authentication-jwt.md
+        ⏱️  Estimated: 6 days
+
+### Multiplayer Example:
+```
+User: /generate-prp Add lobby system with room matchmaking
+
+Claude: 🤖 Generating PRP for "Add lobby system with room matchmaking"...
+        🔍 Detected: Multiplayer feature (lobby, matchmaking keywords)
+
+        📝 Creating boilerplate...
+        ✅ Boilerplate created: PRPs/add-lobby-system-with-room-matchmaking.md
+        ✅ Multiplayer flag: YES
+
+        🔄 Launching System Analyst agent...
+        ✅ System Analyst completed (DoR: 6 prerequisites)
+
+        🔄 Launching AQA Engineer agent...
+        ✅ AQA completed (DoD: 11 deliverables, 15 test scenarios)
+
+        🔄 Launching Developer agent...
+        ✅ Developer completed (18 tasks, 4 phases, 8 days estimated)
+
+        🔄 Launching Multiplayer Architect agent...
+        ✅ Multiplayer Architect completed (Networking: Client-Server, Sync: State)
+
+        🎉 PRP Ready for Implementation!
+
+        📄 File: PRPs/add-lobby-system-with-room-matchmaking.md
+        ⏱️  Estimated: 8 days
+        📊 Quality: >80% coverage, 0 errors policy
+        🌐 Multiplayer: Colyseus rooms, WebSocket, state sync
+
+        Next: /execute-prp PRPs/add-lobby-system-with-room-matchmaking.md
+```
+        📊 Quality: >80% coverage, 0 errors policy
+
+        Next: /execute-prp PRPs/add-user-authentication-jwt.md
+```
+
+**NO manual steps required!**
+
+---
+
+## 📚 References & Best Practices
+
+### Anthropic Documentation:
+- **Subagents**: https://docs.claude.com/en/docs/claude-code/sub-agents
+- **Multi-Agent System**: https://www.anthropic.com/engineering/multi-agent-research-system
+- **Autonomous Workflows**: https://www.anthropic.com/news/enabling-claude-code-to-work-more-autonomously
+- **Task Tool**: https://docs.claude.com/en/docs/claude-code/sub-agents#using-task-tool
+
+### Community Resources:
+- **Agent Orchestration**: https://github.com/wshobson/agents
+- **Stream Chaining**: https://github.com/ruvnet/claude-flow/wiki/Stream-Chaining
+- **Multi-Agent Patterns**: https://medium.com/@richardhightower/claude-code-sub-agents-build-a-documentation-pipeline-in-minutes-not-weeks-c0f8f943d1d5
+
+### Key Learnings:
+1. **Sequential execution**: Wait for each agent to complete before launching next
+2. **Isolated context**: Each agent operates in its own context window
+3. **Clear prompts**: Give agents specific, actionable instructions
+4. **Tool access**: Agents can use Read, Grep, Glob, WebSearch, Edit
+5. **Progress tracking**: Each agent updates the same file incrementally
+6. **Validation**: Main agent validates final output
+
+---
+
+## 🔧 Technical Configuration
+
+### Required Files:
+- `.claude/agents/system-analyst.md` - System Analyst template
+- `.claude/agents/aqa-engineer.md` - AQA Engineer template
+- `.claude/agents/developer.md` - Developer template
+- `.claude/commands/generate-prp.md` - This file (orchestrator)
+
+### Agent Capabilities:
+Each agent has access to:
+- ✅ Read tool (read files)
+- ✅ Edit tool (update PRP file)
+- ✅ Grep tool (search codebase)
+- ✅ Glob tool (find files)
+- ✅ WebSearch tool (research docs)
+- ✅ Bash tool (run commands)
+
+### Orchestration Flow:
+```
+User Input
+   ↓
+Main Agent (generate boilerplate)
+   ↓
+Task → System Analyst (DoR, business value)
+   ↓ (wait)
+Task → AQA Engineer (DoD, testing, metrics)
+   ↓ (wait)
+Task → Developer (implementation, research, timeline)
+   ↓ (wait)
+Main Agent (validate & report)
+   ↓
+Complete PRP delivered to user
+```
+
+### Parallel vs Sequential:
+- ❌ **Not parallel** - agents depend on previous work
+- ✅ **Sequential** - each builds on the last
+- System Analyst must complete before AQA (AQA needs DoR context)
+- AQA must complete before Developer (Developer needs DoD context)
+
+---
+
+**Remember**: This is a FULLY AUTONOMOUS system. Claude handles everything from user's description to complete, executable PRP. No manual role-playing or intervention needed!

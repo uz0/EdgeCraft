@@ -184,29 +184,33 @@ export class W3EParser {
     const { width, height, groundTiles } = terrain;
     const heightmap = new Float32Array(width * height);
 
+    // W3X cliff system: each cliff level adds 128 units of height
+    const CLIFF_HEIGHT_PER_LEVEL = 128;
+
     // Calculate stats for debugging
     let minHeight = Infinity;
     let maxHeight = -Infinity;
-    let zeroCount = 0;
+    let _zeroCount = 0;
+    let _cliffCount = 0;
+    let maxCliffLevel = 0;
 
     for (let i = 0; i < groundTiles.length; i++) {
-      const height = groundTiles[i]?.groundHeight ?? 0;
-      heightmap[i] = height;
+      const tile = groundTiles[i];
+      const groundHeight = tile?.groundHeight ?? 0;
+      const cliffLevel = tile?.cliffLevel ?? 0;
 
-      minHeight = Math.min(minHeight, height);
-      maxHeight = Math.max(maxHeight, height);
-      if (height === 0) zeroCount++;
+      // Total height = base ground height + cliff level height
+      const totalHeight = groundHeight + cliffLevel * CLIFF_HEIGHT_PER_LEVEL;
+      heightmap[i] = totalHeight;
+
+      minHeight = Math.min(minHeight, totalHeight);
+      maxHeight = Math.max(maxHeight, totalHeight);
+      if (totalHeight === 0) _zeroCount++;
+      if (cliffLevel > 0) _cliffCount++;
+      maxCliffLevel = Math.max(maxCliffLevel, cliffLevel);
     }
 
     // Sample first 10 values for debugging
-    const sample = Array.from(heightmap.slice(0, Math.min(10, heightmap.length)));
-
-    console.log(
-      `[W3EParser] Heightmap created: ${width}x${height} (${groundTiles.length} tiles), ` +
-        `min=${minHeight.toFixed(2)}, max=${maxHeight.toFixed(2)}, ` +
-        `zeros=${zeroCount}/${groundTiles.length} (${((zeroCount / groundTiles.length) * 100).toFixed(1)}%), ` +
-        `sample: [${sample.map((v) => v.toFixed(1)).join(', ')}]`
-    );
 
     return heightmap;
   }

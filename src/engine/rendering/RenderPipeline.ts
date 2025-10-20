@@ -41,7 +41,6 @@ import { QualityPreset } from './types';
  *
  * // Get stats
  * const stats = pipeline.getStats();
- * console.log(`Draw calls: ${stats.performance.drawCalls}, FPS: ${stats.performance.fps}`);
  * ```
  */
 export class OptimizedRenderPipeline {
@@ -103,33 +102,20 @@ export class OptimizedRenderPipeline {
       }
     }
 
-    console.log('Initializing optimized render pipeline...');
-
     // 1. Scene-level optimizations
     this.applySceneOptimizations();
 
     // 2. Material sharing
     if (this.options.enableMaterialSharing) {
-      console.log('Optimizing materials...');
       this.materialCache.optimizeMeshMaterials();
-      const materialStats = this.materialCache.getStats();
-      console.log(
-        `Material sharing: ${materialStats.originalCount} → ${materialStats.sharedCount} (${materialStats.reductionPercent}% reduction)`
-      );
     }
 
     // 3. Mesh merging for static objects
     if (this.options.enableMeshMerging) {
-      console.log('Merging static meshes...');
-      const mergeResult = this.drawCallOptimizer.mergeStaticMeshes();
-      console.log(
-        `Mesh merging: ${mergeResult.sourceCount} meshes, saved ${mergeResult.drawCallsSaved} draw calls`
-      );
     }
 
     // 4. Advanced culling
     if (this.options.enableCulling) {
-      console.log('Enabling advanced culling...');
       this.cullingStrategy.enable();
     }
 
@@ -142,11 +128,9 @@ export class OptimizedRenderPipeline {
     });
 
     this.state.isInitialized = true;
-    console.log('Render pipeline initialized successfully');
 
     // Log initial stats
     this.updateStats();
-    console.log('Initial performance:', this.state.stats.performance);
   }
 
   /**
@@ -171,8 +155,6 @@ export class OptimizedRenderPipeline {
     // Disable unnecessary features
     this.scene.audioEnabled = false;
     this.scene.proceduralTexturesEnabled = false;
-
-    console.log('Scene-level optimizations applied');
   }
 
   /**
@@ -195,8 +177,6 @@ export class OptimizedRenderPipeline {
     // Freeze active meshes list (20-40% FPS improvement!)
     this.scene.freezeActiveMeshes();
     this.state.isFrozen = true;
-
-    console.log('Active meshes frozen');
   }
 
   /**
@@ -282,8 +262,6 @@ export class OptimizedRenderPipeline {
     if (quality === this.state.lodState.currentQuality) {
       return;
     }
-
-    console.log(`Adjusting quality: ${this.state.lodState.currentQuality} → ${quality}`);
 
     this.state.lodState.currentQuality = quality;
     this.state.lodState.lastAdjustmentTime = Date.now();
@@ -450,6 +428,5 @@ export class OptimizedRenderPipeline {
     this.scene.unfreezeActiveMeshes();
     this.materialCache.clear();
     this.drawCallOptimizer.clear();
-    console.log('Render pipeline disposed');
   }
 }

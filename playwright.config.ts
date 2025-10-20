@@ -7,8 +7,11 @@ import { defineConfig, devices } from '@playwright/test';
  * Based on: https://github.com/BarthPaleologue/BabylonPlaywrightExample
  */
 export default defineConfig({
-  // Test directory
-  testDir: './tests/e2e',
+  // Test directory - E2E tests in tests/ root only
+  testDir: './tests',
+
+  // ONLY match specific E2E test files (not Jest unit tests)
+  testMatch: ['MapGallery.test.ts', 'OpenMap.test.ts'],
 
   // Baseline screenshots directory
   snapshotDir: './tests/e2e-screenshots',

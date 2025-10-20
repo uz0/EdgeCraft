@@ -33,12 +33,30 @@ export class W3IParser {
    * Parse the entire w3i file
    */
   public parse(): W3IMapInfo {
+    // DEBUG: Log first 64 bytes of W3I buffer to diagnose StormJS extraction issue
+    const debugView = new Uint8Array(this.buffer, 0, Math.min(64, this.buffer.byteLength));
+    Array.from(debugView)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join(' ');
+
     this.offset = 0;
 
     // Read header
     const fileVersion = this.readUint32();
     const mapVersion = this.readUint32();
     const editorVersion = this.readUint32();
+
+    // CRITICAL FIX: Version 28+ has 4 additional game version fields after editorVersion
+    // Per HiveWE wiki: gameVersionMajor, gameVersionMinor, gameVersionPatch, gameVersionBuild
+    // These are MANDATORY for Reforged maps (version >= 28)
+    if (fileVersion >= 28) {
+      this.readUint32();
+      this.readUint32();
+      this.readUint32();
+      this.readUint32();
+    }
+
+    // Log version numbers for format detection debugging
 
     // Read strings
     const name = this.readString();
@@ -119,15 +137,12 @@ export class W3IParser {
         const playerCount = this.readUint32();
         for (let i = 0; i < playerCount; i++) {
           if (this.offset + 40 > this.buffer.byteLength) {
-            console.warn(`[W3IParser] Insufficient buffer for player ${i}/${playerCount}`);
             break;
           }
           players.push(this.readPlayer());
         }
       }
-    } catch (err) {
-      console.warn('[W3IParser] Error reading players (map may be truncated):', err);
-    }
+    } catch {}
 
     // Forces (may be truncated in old/corrupted maps)
     const forces: W3IForce[] = [];
@@ -136,15 +151,12 @@ export class W3IParser {
         const forceCount = this.readUint32();
         for (let i = 0; i < forceCount; i++) {
           if (this.offset + 12 > this.buffer.byteLength) {
-            console.warn(`[W3IParser] Insufficient buffer for force ${i}/${forceCount}`);
             break;
           }
           forces.push(this.readForce());
         }
       }
-    } catch (err) {
-      console.warn('[W3IParser] Error reading forces (map may be truncated):', err);
-    }
+    } catch {}
 
     // All remaining fields are optional and may not be present
     // Wrap in try-catch to handle truncated files gracefully
@@ -160,9 +172,6 @@ export class W3IParser {
         for (let i = 0; i < upgradeCount; i++) {
           // Check if we have enough buffer for this upgrade entry (4 + 4 + 4 + 4 = 16 bytes)
           if (this.offset + 16 > this.buffer.byteLength) {
-            console.warn(
-              `[W3IParser] Insufficient buffer for upgrade ${i}/${upgradeCount} at offset ${this.offset}`
-            );
             break;
           }
           upgradeAvailability.push({
@@ -180,9 +189,6 @@ export class W3IParser {
         for (let i = 0; i < techCount; i++) {
           // Check if we have enough buffer for this tech entry (4 + 4 = 8 bytes)
           if (this.offset + 8 > this.buffer.byteLength) {
-            console.warn(
-              `[W3IParser] Insufficient buffer for tech ${i}/${techCount} at offset ${this.offset}`
-            );
             break;
           }
           techAvailability.push({
@@ -196,8 +202,7 @@ export class W3IParser {
       if (this.offset + 4 <= this.buffer.byteLength) {
         try {
           unitTable = this.readRandomUnitTable();
-        } catch (err) {
-          console.warn('[W3IParser] Failed to read random unit table (optional field):', err);
+        } catch {
           unitTable = undefined;
         }
       }
@@ -206,14 +211,12 @@ export class W3IParser {
       if (this.offset + 4 <= this.buffer.byteLength) {
         try {
           itemTable = this.readRandomItemTable();
-        } catch (err) {
-          console.warn('[W3IParser] Failed to read random item table (optional field):', err);
+        } catch {
           itemTable = undefined;
         }
       }
-    } catch (err) {
+    } catch {
       // If any error occurs reading optional fields, log but continue
-      console.warn('[W3IParser] Error reading optional fields (this is OK for older maps):', err);
     }
 
     return {

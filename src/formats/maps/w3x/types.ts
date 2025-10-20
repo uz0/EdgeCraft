@@ -287,7 +287,8 @@ export interface W3UUnit {
   customColor: number;
   waygateDestination: number;
   creationNumber: number;
-  editorId: number;
+  // Reforged v1.32+ fields
+  skinId?: string; // Skin override (e.g., "hfoo" for Footman)
 }
 
 /**

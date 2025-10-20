@@ -129,7 +129,6 @@ export class AdvancedTerrainRenderer {
       throw new Error('At least one texture layer is required');
     }
     if (options.textureLayers.length > 4) {
-      console.warn('Only first 4 texture layers will be used');
     }
   }
 

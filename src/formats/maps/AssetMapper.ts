@@ -38,7 +38,6 @@ export class AssetMapper {
     const mapping = this.mappings.get(key);
 
     if (!mapping) {
-      console.warn(`No asset mapping for: ${key}`);
       return this.getPlaceholderMapping('unit');
     }
 
