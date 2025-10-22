@@ -35,22 +35,35 @@ npm run validate   # Asset and packages Validation pipeline
 ```
 
 ### Folder structure
-public/assets/manifest.json - list of all assets
-public/assets - all external resources (textures, 3d models)
-public/maps - game maps
-scripts/ - utility scripts for ci and development
+public/
+├── assets/
+│   └── manifest.json          # List of all assets
+│   └── ...                    # All external resources (textures, 3d models)
+└── maps/                      # Game maps
+
+scripts/                       # Utility scripts for CI and development
+
 src/
-src/engine - all game engine here
-src/formats - maps to scene transformations
-src/types - typescript types
-src/utils - app utils
-src/config - app config files
-src/ui - react components to build interface (for pages only!)
-src/hooks - ui react hooks (for pages only!)
-src/pages - TMP! temporary folder for map list and scene pages
-src/**/*.unit.ts - all unit tests placed nearby code
-tests/ - ONLY playwrite tests here
-tests/**/*.test.ts - end-to-end tests
+├── engine/                    # Babylon.js game engine
+│   ├── rendering/             # Advanced lighting, shadows, post-processing
+│   ├── terrain/               # Terrain rendering & LOD
+│   ├── camera/                # RTS camera system
+│   ├── core/                  # Scene & engine core
+│   └── assets/                # Asset loading & management
+├── formats/                   # File format parsers
+│   ├── mpq/                   # MPQ archive parser
+│   ├── maps/                  # W3X, W3M, W3N, SC2Map loaders
+│   └── compression/           # ZLIB, BZip2, LZMA decompression
+├── types/                     # TypeScript types
+├── utils/                     # App utils
+├── config/                    # App config files
+├── ui/                        # React components to build interface (for pages only!)
+├── hooks/                     # UI React hooks (for pages only!)
+├── pages/                     # TMP! Temporary folder for map list and scene pages
+└── **/*.unit.ts               # All unit tests placed nearby code
+
+tests/                         # ONLY Playwright tests here
+└── **/*.test.ts               # End-to-end tests
 
 ## 🧪 Testing & Reliability
 
@@ -63,18 +76,21 @@ tests/**/*.test.ts - end-to-end tests
 ## ✅ Task Completion
 
 **Step 1: System Analyst** - Define Goal & DoR
+- 🤖 **USE AGENT**: Launch `system-analyst` agent for this step!
 - Write clear goal/description
 - Define business value
 - List prerequisites (DoR)
 - Create initial DoD outline
 
 **Step 2: AQA (Automation QA Engineer)** - Add Quality Gates
+- 🤖 **USE AGENT**: Launch `aqa-engineer` agent for this step!
 - Complete DoD with quality criteria
 - Define required test coverage
 - List validation checks
 - Specify performance benchmarks
 
 **Step 3: Developer** - Technical Planning
+- 🤖 **USE AGENT**: Launch `developer` agent for this step!
 - Research technical approach
 - Document high-level design (ADR style)
 - List code references and dependencies
@@ -82,12 +98,14 @@ tests/**/*.test.ts - end-to-end tests
 - Add interface design
 - Link related documentation
 
-**Step 4: Finalization preparaion**
+**Step 4: Finalization preparation**
+- 🚀 **PARALLEL AGENTS**: Run all 3 agents together for faster results!
 - All three roles review and finalize PRP
 - PRP status: 📋 Planned → 🔬 Research
 - PRP is now **executable**
 
 **Step 5: Developer Research**
+- 🤖 **USE AGENT**: Launch `developer` agent for deep research!
 - Review all materials in PRP
 - Conduct additional research if needed
 - Update "Research / Related Materials" section
@@ -181,3 +199,40 @@ function processUnit(unit: any) { } // FORBIDDEN
   1. `CLAUDE.md` ← You are here (workflow rules)
   2. `README.md` ← Project overview
   3. `PRPs/` ← ALL work is defined here
+
+## 🤖 USE SUBAGENTS
+
+**RULE: Always delegate to specialist subagents. Your role is ORCHESTRATOR.**
+
+### Quick Agent Match
+
+| Task Type | Agent | Trigger Words |
+|-----------|-------|---------------|
+| PRP work, DoR/DoD, requirements | `system-analyst` | "rework PRP", "create PRP", "as system analyst" |
+| Technical research, architecture | `developer` | "research format", "design architecture", "as developer" |
+| Tests, quality gates, benchmarks | `aqa-engineer` | "define tests", "quality gates", "as AQA" |
+| Assets, licenses, compliance | `legal-compliance` | "validate assets", "check licenses" |
+| Networking, multiplayer | `multiplayer-architect` | "netcode", "synchronization" |
+| Binary parsing, formats | `format-parser` | "parse MPQ", "extract W3X" |
+| Babylon.js, rendering, shaders | `babylon-renderer` | "render terrain", "optimize scene" |
+
+### Self-Check
+
+Before doing ANY task:
+1. **Does it match an agent's specialty?** → Use that agent
+2. **Am I writing DoR/DoD?** → Use system-analyst
+3. **Am I researching tech specs?** → Use developer
+4. **Am I defining tests?** → Use aqa-engineer
+
+**If yes to any: STOP and launch the agent!**
+
+### Parallel Pattern
+
+```typescript
+// ✅ Run subagents in parallel for multi-domain tasks
+Task(system-analyst): "Define DoR/DoD/user stories"
+Task(developer): "Research binary formats"
+Task(aqa-engineer): "Define quality gates"
+
+// ❌ Don't do specialist work yourself
+```

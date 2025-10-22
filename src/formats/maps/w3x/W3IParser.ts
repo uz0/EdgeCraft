@@ -219,7 +219,7 @@ export class W3IParser {
       // If any error occurs reading optional fields, log but continue
     }
 
-    return {
+    const result = {
       fileVersion,
       mapVersion,
       editorVersion,
@@ -247,6 +247,8 @@ export class W3IParser {
       unitTable,
       itemTable,
     };
+
+    return result;
   }
 
   /**

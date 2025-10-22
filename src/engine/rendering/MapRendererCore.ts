@@ -161,6 +161,16 @@ export class MapRendererCore {
     // Store terrain height range for camera setup (use actual heightmap values, not mesh bounds)
     this.terrainHeightRange = terrainHeightRange;
 
+    // Step 1b: Render water (if present)
+    if (mapData.terrain.water) {
+      this.renderWater(mapData.terrain);
+    }
+
+    // Step 1c: Render cliffs (if present)
+    if (mapData.terrain.cliffs && mapData.terrain.cliffs.length > 0) {
+      this.renderCliffs(mapData.terrain, terrainHeightRange);
+    }
+
     // Step 2: Initialize units
     this.renderUnits(mapData.units);
 
@@ -387,6 +397,93 @@ export class MapRendererCore {
       minHeight,
       maxHeight,
     };
+  }
+
+  /**
+   * Render water plane
+   */
+  private renderWater(terrain: RawMapData['terrain']): void {
+    if (!terrain.water) return;
+
+    const TILE_SIZE = 128;
+    const waterWidth = terrain.width * TILE_SIZE;
+    const waterHeight = terrain.height * TILE_SIZE;
+
+    const waterPlane = BABYLON.MeshBuilder.CreateGround(
+      'water',
+      {
+        width: waterWidth,
+        height: waterHeight,
+        subdivisions: 1,
+      },
+      this.scene
+    );
+
+    // mdx-m3-viewer formula: use waterHeight directly (NO multiplication)
+    // waterLevel from W3E is already in world coordinates
+    const waterY = terrain.water.level;
+    waterPlane.position.y = waterY;
+
+    const waterMaterial = new BABYLON.StandardMaterial('waterMaterial', this.scene);
+    const waterColor = terrain.water.color;
+    waterMaterial.diffuseColor = new BABYLON.Color3(
+      waterColor.r / 255,
+      waterColor.g / 255,
+      waterColor.b / 255
+    );
+    waterMaterial.alpha = (waterColor.a ?? 180) / 255;
+    waterMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+    waterMaterial.specularPower = 64;
+
+    waterPlane.material = waterMaterial;
+  }
+
+  /**
+   * Render cliff meshes
+   * Cliffs are vertical walls placed at elevation changes (layerHeight boundaries)
+   */
+  private renderCliffs(
+    terrain: RawMapData['terrain'],
+    terrainHeightRange: { min: number; max: number }
+  ): void {
+    if (!terrain.cliffs || terrain.cliffs.length === 0) return;
+
+    const TILE_SIZE = 128;
+
+    // mdx-m3-viewer renders cliffs as elevation changes in the terrain mesh itself
+    // The cliffs array from our W3XMapLoader just marks where cliff edges are
+    // For now, we'll render simple boxes at the cliff tier heights
+    // The height is: (layerHeight - 2) * 128 relative to base terrain
+
+    for (const cliff of terrain.cliffs) {
+      // Each cliff level is one 128-unit step
+      const cliffHeightWorld = (cliff.level - 2) * 128;
+
+      const x = cliff.x * TILE_SIZE - (terrain.width * TILE_SIZE) / 2;
+      const z = -(cliff.y * TILE_SIZE - (terrain.height * TILE_SIZE) / 2);
+
+      const cliffBox = BABYLON.MeshBuilder.CreateBox(
+        `cliff_${cliff.x}_${cliff.y}`,
+        {
+          width: TILE_SIZE,
+          height: 128, // One cliff tier height
+          depth: TILE_SIZE,
+        },
+        this.scene
+      );
+
+      cliffBox.position.x = x;
+      cliffBox.position.y = terrainHeightRange.min + cliffHeightWorld + 64; // +64 to center the box
+      cliffBox.position.z = z;
+
+      const cliffMaterial = new BABYLON.StandardMaterial(
+        `cliffMat_${cliff.x}_${cliff.y}`,
+        this.scene
+      );
+      cliffMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.4, 0.3);
+      cliffMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+      cliffBox.material = cliffMaterial;
+    }
   }
 
   /**
@@ -675,7 +772,7 @@ export class MapRendererCore {
       camera.rotation.y = 0; // Facing forward (negative Z)
 
       // Enhanced movement controls
-      camera.speed = 2.0; // Movement speed (WASD)
+      camera.speed = 100.0; // Movement speed (WASD)
       camera.angularSensibility = 1000; // Mouse look sensitivity (lower = more sensitive)
 
       // Enable keyboard and mouse controls

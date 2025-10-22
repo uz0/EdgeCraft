@@ -18,6 +18,7 @@ import type {
   TerrainData,
   UnitPlacement,
   DoodadPlacement,
+  CliffData,
   PlayerInfo,
 } from '../types';
 
@@ -299,25 +300,68 @@ export class W3XMapLoader implements IMapLoader {
    * Convert W3E terrain to generic TerrainData
    */
   private convertTerrain(w3e: ReturnType<W3EParser['parse']>): TerrainData {
-    // Convert ground tiles to heightmap
+    // Convert ground tiles to heightmap using W3E formula
     const heightmap = W3EParser.toHeightmap(w3e);
 
     // Extract texture indices
     const textureIndices = W3EParser.getTextureIndices(w3e);
 
-    // Extract water levels
-    const waterLevels = W3EParser.getWaterLevels(w3e);
-
     // Find if there's water
+    // In W3E: waterLevel < groundHeight means water is present
     let water: TerrainData['water'] | undefined;
-    const hasWater = waterLevels.some((level) => level > 0);
+    let waterTileCount = 0;
+    let waterLevelSum = 0;
 
-    if (hasWater) {
-      const avgWaterLevel = waterLevels.reduce((sum, level) => sum + level, 0) / waterLevels.length;
+    for (let i = 0; i < w3e.groundTiles.length; i++) {
+      const tile = w3e.groundTiles[i];
+      if (!tile) continue;
+
+      // Water exists when waterLevel < groundHeight
+      if (tile.waterLevel < tile.groundHeight) {
+        waterTileCount++;
+        waterLevelSum += tile.waterLevel;
+      }
+    }
+
+    if (waterTileCount > 0) {
+      const avgWaterLevel = waterLevelSum / waterTileCount;
+      // Water level is already normalized during parsing
+      // Don't multiply by 128 - let Babylon's heightmap scaling handle it
       water = {
         level: avgWaterLevel,
         color: { r: 0, g: 100, b: 200, a: 180 },
       };
+    }
+
+    // Extract cliff data from ground tiles
+    // Only render cliffs where there's an elevation change with neighbors
+    const cliffs: CliffData[] = [];
+
+    for (let i = 0; i < w3e.groundTiles.length; i++) {
+      const tile = w3e.groundTiles[i];
+      if (!tile) continue;
+
+      const y = Math.floor(i / w3e.width);
+      const x = i % w3e.width;
+      const currentLevel = tile.cliffLevel;
+
+      // Check all 4 neighbors for cliff level differences
+      const hasCliffEdge =
+        (x > 0 && w3e.groundTiles[i - 1]?.cliffLevel !== currentLevel) || // left
+        (x < w3e.width - 1 && w3e.groundTiles[i + 1]?.cliffLevel !== currentLevel) || // right
+        (y > 0 && w3e.groundTiles[i - w3e.width]?.cliffLevel !== currentLevel) || // top
+        (y < w3e.height - 1 && w3e.groundTiles[i + w3e.width]?.cliffLevel !== currentLevel); // bottom
+
+      // Only add tiles that have a cliff edge (elevation change)
+      if (hasCliffEdge && currentLevel !== 0) {
+        cliffs.push({
+          type: `cliff`,
+          level: currentLevel,
+          texture: `cliff_texture`,
+          x,
+          y,
+        });
+      }
     }
 
     // CRITICAL FIX: Use groundTextureIds array (e.g., ["Adrt", "Ldrt", "Agrs", "Arok"])
@@ -348,6 +392,7 @@ export class W3XMapLoader implements IMapLoader {
       heightmap,
       textures,
       water,
+      cliffs,
     };
   }
 

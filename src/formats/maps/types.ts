@@ -128,6 +128,8 @@ export interface CliffData {
   type: string;
   level: number;
   texture: string;
+  x: number;
+  y: number;
 }
 
 /**

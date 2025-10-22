@@ -23,75 +23,77 @@ export class W3EParser {
 
   /**
    * Parse the entire w3e file
-   * @param mapWidth - Map width from W3I file (optional, will be calculated if not provided)
-   * @param mapHeight - Map height from W3I file (optional, will be calculated if not provided)
    */
-  public parse(mapWidth?: number, mapHeight?: number): W3ETerrain {
+  public parse(): W3ETerrain {
     this.offset = 0;
 
-    // Read and validate magic
     const magic = this.read4CC();
     if (magic !== W3EParser.W3E_MAGIC) {
       throw new Error(`Invalid W3E file magic: ${magic}`);
     }
 
-    // Read version
     const version = this.readUint32();
 
-    // Read tileset
+    if (version === 11 || version === 12) {
+      return this.parseTerrain(version);
+    } else {
+      throw new Error(`Unsupported W3E version: ${version}`);
+    }
+  }
+
+  /**
+   * Parse W3E terrain (v11 Classic/TFT or v12 Reforged)
+   *
+   * Key v12 differences (discovered by Luashine):
+   * - Tile size: 7 bytes → 8 bytes
+   * - Height calculation: (w3eWidth - 1) × w3eHeight → (w3eWidth - 1) × (w3eHeight - 1)
+   * - Texture/Flags: byte → ushort (supports 64 textures instead of 16)
+   *
+   * Source: https://github.com/ChiefOfGxBxL/WC3MapSpecification/pull/11
+   * Credit: @Luashine for reverse-engineering the v12 Reforged format
+   */
+  private parseTerrain(version: number): W3ETerrain {
     const tilesetChar = String.fromCharCode(this.view.getUint8(this.offset));
     this.offset += 1;
 
-    // Custom tileset flag
     const customTileset = this.readUint32() === 1;
 
-    // Read ground texture list (version 11+)
     const groundTextureCount = this.readUint32();
-
-    // Read ground texture IDs (4 bytes each, like "Adrt", "Ldrt", etc.)
     const groundTextureIds: string[] = [];
     for (let i = 0; i < groundTextureCount; i++) {
-      const textureId = this.read4CC();
-      groundTextureIds.push(textureId);
+      groundTextureIds.push(this.read4CC());
     }
 
-    // Calculate ground tile count
-    // If we have valid dimensions from W3I, use them. Otherwise calculate from buffer.
-    let groundTileCount: number;
-    if (mapWidth !== undefined && mapHeight !== undefined && mapWidth > 0 && mapHeight > 0) {
-      groundTileCount = mapWidth * mapHeight;
-    } else {
-      // Fallback: Each ground tile is 7 bytes (2 + 2 + 1 + 1 + 1)
-      const remainingBytes = this.buffer.byteLength - this.offset;
-      groundTileCount = Math.floor(remainingBytes / 7);
+    const cliffTextureCount = this.readUint32();
+    const cliffTextureIds: string[] = [];
+    for (let i = 0; i < cliffTextureCount; i++) {
+      cliffTextureIds.push(this.read4CC());
     }
 
+    const w3eWidth = this.readUint32();
+    const w3eHeight = this.readUint32();
+    this.offset += 4;
+    this.offset += 4;
+
+    const width = w3eWidth - 1;
+    const height = version === 11 ? w3eHeight : w3eHeight - 1;
+
+    const expectedTileCount = width * height;
+    const tileByteSize = version === 11 ? 7 : 8;
     const groundTiles: W3EGroundTile[] = [];
 
-    for (let i = 0; i < groundTileCount; i++) {
-      groundTiles.push(this.readGroundTile());
+    for (
+      let i = 0;
+      i < expectedTileCount && this.offset + tileByteSize <= this.buffer.byteLength;
+      i++
+    ) {
+      const tile = this.readGroundTile(version);
+      groundTiles.push(tile);
     }
 
-    // Calculate dimensions from map info or tile count
-    let width: number;
-    let height: number;
-
-    if (mapWidth !== undefined && mapHeight !== undefined && mapWidth > 0 && mapHeight > 0) {
-      // Use dimensions from W3I file (most accurate)
-      width = mapWidth;
-      height = mapHeight;
-    } else {
-      // Fallback: Calculate dimensions from tile count (for corrupted W3I or maps without W3I)
-      const totalTiles = groundTileCount;
-      width = Math.floor(Math.sqrt(totalTiles));
-      height = Math.ceil(totalTiles / width);
-    }
-
-    // Read cliff tiles (optional, version-dependent)
     let cliffTiles: W3ECliffTile[] | undefined;
-    if (this.offset + 4 <= this.buffer.byteLength) {
+    if (version === 11 && this.offset + 4 <= this.buffer.byteLength) {
       const cliffTileCount = this.readUint32();
-      // Check if we have enough space for the cliff tiles
       if (cliffTileCount > 0 && this.offset + cliffTileCount * 3 <= this.buffer.byteLength) {
         cliffTiles = [];
         for (let i = 0; i < cliffTileCount; i++) {
@@ -113,37 +115,56 @@ export class W3EParser {
   }
 
   /**
-   * Read ground tile data
+   * Read ground tile data (version-dependent format)
+   *
+   * v11 (Classic/TFT): 7 bytes per tile
+   * - Texture/Flags: 1 byte (4 bits texture, 4 bits flags) → max 16 textures
+   *
+   * v12 (Reforged): 8 bytes per tile
+   * - Texture/Flags: 2 bytes (6 bits texture, 10 bits flags) → max 64 textures
+   *
+   * v12 changes discovered by @Luashine:
+   * https://github.com/ChiefOfGxBxL/WC3MapSpecification/pull/11
    */
-  private readGroundTile(): W3EGroundTile {
-    this.checkBounds(7); // 2 + 2 + 1 + 1 + 1 = 7 bytes
+  private readGroundTile(version: number): W3EGroundTile {
+    const tileByteSize = version === 11 ? 7 : 8;
+    this.checkBounds(tileByteSize);
 
-    // Ground height (16-bit signed, divided by 4 for actual height)
-    const rawHeight = this.view.getInt16(this.offset, true);
+    // Read raw height values WITHOUT normalization
+    // Keep the original values for Babylon to scale
+    const groundHeight = this.view.getInt16(this.offset, true);
     this.offset += 2;
-    const groundHeight = rawHeight / 4;
 
-    // Water level (16-bit signed, divided by 4 for actual height, relative to ground)
-    const rawWaterLevel = this.view.getInt16(this.offset, true);
+    const waterLevel = this.view.getInt16(this.offset, true);
     this.offset += 2;
-    const waterLevel = rawWaterLevel / 4;
 
-    // Tile flags
-    const flags = this.view.getUint8(this.offset);
+    let flags: number;
+    let groundTexture: number;
+
+    if (version === 11) {
+      const flagsAndGroundTexture = this.view.getUint8(this.offset);
+      this.offset += 1;
+      flags = flagsAndGroundTexture & 0xf0;
+      groundTexture = flagsAndGroundTexture & 0x0f;
+      this.offset += 1;
+    } else {
+      const flagsAndGroundTexture = this.view.getUint16(this.offset, true);
+      this.offset += 2;
+      groundTexture = flagsAndGroundTexture & 0x3f;
+      flags = (flagsAndGroundTexture & 0xffc0) >> 6;
+    }
+
+    const cliffTextureAndLayerHeight = this.view.getUint8(this.offset);
     this.offset += 1;
+    const layerHeight = cliffTextureAndLayerHeight & 0x0f;
 
-    // Ground texture index
-    const groundTexture = this.view.getUint8(this.offset);
-    this.offset += 1;
+    if (version === 12) {
+      this.offset += 1;
+    }
 
-    // Cliff and layer data (packed into single byte)
-    const cliffLayerData = this.view.getUint8(this.offset);
-    this.offset += 1;
+    const cliffLevel = layerHeight;
 
-    const cliffLevel = cliffLayerData & 0x0f; // Lower 4 bits
-    const layerHeight = (cliffLayerData & 0xf0) >> 4; // Upper 4 bits
-
-    return {
+    const tile = {
       groundHeight,
       waterLevel,
       flags,
@@ -151,6 +172,8 @@ export class W3EParser {
       cliffLevel,
       layerHeight,
     };
+
+    return tile;
   }
 
   /**
@@ -176,41 +199,38 @@ export class W3EParser {
   }
 
   /**
-   * Convert ground tiles to heightmap
+   * Convert ground tiles to heightmap using mdx-m3-viewer formula
+   *
+   * mdx-m3-viewer formula: cornerHeight = (groundHeight + layerHeight - 2) * 128
+   * - groundHeight: base terrain height (raw Int16 value from W3E)
+   * - layerHeight: cliff tier (0-15)
+   * - The "- 2" offset adjusts the base level
+   * - The "* 128" converts from W3E units to world coordinates
+   *
+   * However, since Babylon's CreateGroundFromHeightMap will scale the values
+   * using minHeight/maxHeight parameters, we store the unscaled height here
+   * and let Babylon handle the * 128 scaling.
+   *
+   * Source: mdx-m3-viewer/src/viewer/handlers/w3x/map.js
+   * - cornerHeights[index] = bottomLeft.groundHeight + bottomLeft.layerHeight - 2;
+   *
    * @param terrain - Parsed W3E terrain data
-   * @returns Float32Array heightmap
+   * @returns Float32Array heightmap with terrain + cliff heights combined
    */
   public static toHeightmap(terrain: W3ETerrain): Float32Array {
     const { width, height, groundTiles } = terrain;
     const heightmap = new Float32Array(width * height);
 
-    // W3X cliff system: each cliff level adds 128 units of height
-    const CLIFF_HEIGHT_PER_LEVEL = 128;
-
-    // Calculate stats for debugging
-    let minHeight = Infinity;
-    let maxHeight = -Infinity;
-    let _zeroCount = 0;
-    let _cliffCount = 0;
-    let maxCliffLevel = 0;
-
-    for (let i = 0; i < groundTiles.length; i++) {
+    for (let i = 0; i < groundTiles.length && i < heightmap.length; i++) {
       const tile = groundTiles[i];
-      const groundHeight = tile?.groundHeight ?? 0;
-      const cliffLevel = tile?.cliffLevel ?? 0;
+      if (!tile) {
+        heightmap[i] = 0;
+        continue;
+      }
 
-      // Total height = base ground height + cliff level height
-      const totalHeight = groundHeight + cliffLevel * CLIFF_HEIGHT_PER_LEVEL;
-      heightmap[i] = totalHeight;
-
-      minHeight = Math.min(minHeight, totalHeight);
-      maxHeight = Math.max(maxHeight, totalHeight);
-      if (totalHeight === 0) _zeroCount++;
-      if (cliffLevel > 0) _cliffCount++;
-      maxCliffLevel = Math.max(maxCliffLevel, cliffLevel);
+      // mdx-m3-viewer formula (without * 128, Babylon will scale it)
+      heightmap[i] = tile.groundHeight + tile.layerHeight - 2;
     }
-
-    // Sample first 10 values for debugging
 
     return heightmap;
   }
@@ -218,30 +238,18 @@ export class W3EParser {
   /**
    * Extract texture indices for splatmap generation
    *
-   * IMPORTANT: The groundTexture field in W3E is a packed byte (0-255) that encodes:
-   * - Upper 4 bits (>> 4): Texture ID (0-15) → index into groundTextureIds array
-   * - Lower 4 bits (& 0xF): Variation/rotation (0-15) → for visual randomness
-   *
-   * We only need the texture ID for splatmap rendering, so we extract the upper nibble.
-   *
-   * Example:
-   * - groundTexture=0x00 (0)  → textureId=0, variation=0
-   * - groundTexture=0x04 (4)  → textureId=0, variation=4
-   * - groundTexture=0x10 (16) → textureId=1, variation=0
-   * - groundTexture=0x61 (97) → textureId=6, variation=1
+   * IMPORTANT: The groundTexture field is already extracted as lower 4 bits (0-15)
+   * from byte 4 of the tile data. It directly indexes into the groundTextureIds array.
    *
    * @param terrain - Parsed W3E terrain data
-   * @returns Uint8Array of texture indices (0-15, typically 0-7 for 8 textures)
+   * @returns Uint8Array of texture indices (0-15)
    */
   public static getTextureIndices(terrain: W3ETerrain): Uint8Array {
     const textureIndices = new Uint8Array(terrain.groundTiles.length);
 
     for (let i = 0; i < terrain.groundTiles.length; i++) {
       const groundTexture = terrain.groundTiles[i]?.groundTexture ?? 0;
-
-      // Extract texture ID from upper 4 bits (0-15)
-      // This maps to groundTextureIds[textureId]
-      textureIndices[i] = groundTexture >> 4;
+      textureIndices[i] = groundTexture;
     }
 
     return textureIndices;
