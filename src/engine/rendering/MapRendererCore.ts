@@ -263,6 +263,9 @@ export class MapRendererCore {
     }
   }
 
+  private originalMinHeight = 0;
+  private originalMaxHeight = 0;
+
   /**
    * Render terrain
    * @returns Actual heightmap height range (min/max) for camera positioning
@@ -279,6 +282,9 @@ export class MapRendererCore {
       maxHeight,
     } = this.createHeightmapDataUrl(terrain.heightmap, terrain.width, terrain.height);
 
+    this.originalMinHeight = minHeight;
+    this.originalMaxHeight = maxHeight;
+
     // Check if we have multi-texture terrain (W3X maps with groundTextureIds)
     const hasMultiTexture =
       terrain.textures.length > 1 && terrain.textures[0]?.blendMap !== undefined;
@@ -294,14 +300,22 @@ export class MapRendererCore {
 
       // W3X world coordinates: 128 units per tile
       const TILE_SIZE = 128;
+
+      // Scale heights: W3X heights are in range ~8000-10000, scale to reasonable values
+      // Center terrain around Y=0 to match mdx-m3-viewer coordinate system
+      const HEIGHT_SCALE = 0.25;
+      const heightRange = (maxHeight - minHeight) * HEIGHT_SCALE;
+      const scaledMinHeight = -heightRange / 2;
+      const scaledMaxHeight = heightRange / 2;
+
       const result = await this.terrainRenderer.loadHeightmapMultiTexture(heightmapUrl, {
         width: terrain.width * TILE_SIZE, // World dimensions for mesh
         height: terrain.height * TILE_SIZE,
         splatmapWidth: terrain.width, // Tile dimensions for splatmap (1 pixel per tile)
         splatmapHeight: terrain.height,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-        minHeight, // Use actual heightmap min
-        maxHeight, // Use actual heightmap max
+        minHeight: scaledMinHeight,
+        maxHeight: scaledMaxHeight,
         textureIds,
         blendMap,
       });
@@ -315,12 +329,20 @@ export class MapRendererCore {
 
       // W3X world coordinates: 128 units per tile
       const TILE_SIZE = 128;
+
+      // Scale heights: W3X heights are in range ~8000-10000, scale to reasonable values
+      // Center terrain around Y=0 to match mdx-m3-viewer coordinate system
+      const HEIGHT_SCALE = 0.25;
+      const heightRange = (maxHeight - minHeight) * HEIGHT_SCALE;
+      const scaledMinHeight = -heightRange / 2;
+      const scaledMaxHeight = heightRange / 2;
+
       const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
         width: terrain.width * TILE_SIZE,
         height: terrain.height * TILE_SIZE,
         subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-        minHeight, // Use actual heightmap min
-        maxHeight, // Use actual heightmap max
+        minHeight: scaledMinHeight,
+        maxHeight: scaledMaxHeight,
         textureId,
       });
 
@@ -329,8 +351,10 @@ export class MapRendererCore {
       }
     }
 
-    // Return actual heightmap range for camera positioning
-    return { min: minHeight, max: maxHeight };
+    // Return centered heightmap range for camera positioning
+    const HEIGHT_SCALE = 0.25;
+    const heightRange = (maxHeight - minHeight) * HEIGHT_SCALE;
+    return { min: -heightRange / 2, max: heightRange / 2 };
   }
 
   /**
@@ -419,9 +443,9 @@ export class MapRendererCore {
       this.scene
     );
 
-    // mdx-m3-viewer formula: use waterHeight directly (NO multiplication)
-    // waterLevel from W3E is already in world coordinates
-    const waterY = terrain.water.level;
+    const HEIGHT_SCALE = 0.25;
+    const heightRange = (this.originalMaxHeight - this.originalMinHeight) * HEIGHT_SCALE;
+    const waterY = (terrain.water.level - this.originalMinHeight) * HEIGHT_SCALE - heightRange / 2;
     waterPlane.position.y = waterY;
 
     const waterMaterial = new BABYLON.StandardMaterial('waterMaterial', this.scene);
@@ -771,6 +795,10 @@ export class MapRendererCore {
       camera.rotation.x = Math.PI / 6; // 30° downward (more gentle angle)
       camera.rotation.y = 0; // Facing forward (negative Z)
 
+      // Set camera view frustum for large maps
+      camera.minZ = 1;
+      camera.maxZ = 200000; // Support very large maps
+
       // Enhanced movement controls
       camera.speed = 100.0; // Movement speed (WASD)
       camera.angularSensibility = 1000; // Mouse look sensitivity (lower = more sensitive)
@@ -864,6 +892,13 @@ export class MapRendererCore {
       doodads: this.doodadRenderer?.getStats() ?? null,
       phase2: this.qualityManager.getStats(),
     };
+  }
+
+  /**
+   * Get the active camera
+   */
+  public getCamera(): BABYLON.Camera | null {
+    return this.camera;
   }
 
   /**
