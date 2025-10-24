@@ -391,8 +391,10 @@ export class W3XMapLoader implements IMapLoader {
       height: w3e.height,
       heightmap,
       textures,
+      textureIndices,
       water,
       cliffs,
+      raw: w3e,
     };
   }
 

@@ -1,21 +1,17 @@
-/**
- * App - Main Application with React Router
- * Routes:
- * - / : Index page with map gallery
- * - /:mapName : Map viewer page
- */
+import './App.css';
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { IndexPage } from './pages/IndexPage';
+import { ComparisonPage } from './pages/ComparisonPage';
 import { MapViewerPage } from './pages/MapViewerPage';
-import './App.css';
 
 const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<IndexPage />} />
       <Route path="/:mapName" element={<MapViewerPage />} />
+      <Route path="/comparison" element={<ComparisonPage />} />
     </Routes>
   );
 };

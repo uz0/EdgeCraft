@@ -17,7 +17,10 @@ describe('Map Parser Integration Tests', () => {
       const buffer = await fs.readFile(mapPath);
 
       const loader = new W3XMapLoader();
-      const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+      const arrayBuffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      ) as ArrayBuffer;
       const mapData = await loader.parse(arrayBuffer);
 
       // Verify map data structure
@@ -35,9 +38,7 @@ describe('Map Parser Integration Tests', () => {
       expect(mapData.terrain.width).toBeGreaterThan(0);
       expect(mapData.terrain.height).toBeGreaterThan(0);
       expect(mapData.terrain.heightmap).toBeInstanceOf(Float32Array);
-      expect(mapData.terrain.heightmap.length).toBe(
-        mapData.terrain.width * mapData.terrain.height
-      );
+      expect(mapData.terrain.heightmap.length).toBe(mapData.terrain.width * mapData.terrain.height);
 
       // Verify textures
       expect(mapData.terrain.textures).toBeDefined();
@@ -55,7 +56,10 @@ describe('Map Parser Integration Tests', () => {
       const buffer = await fs.readFile(mapPath);
 
       const loader = new W3XMapLoader();
-      const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+      const arrayBuffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      ) as ArrayBuffer;
       const mapData = await loader.parse(arrayBuffer);
 
       expect(mapData).toBeDefined();
@@ -71,7 +75,10 @@ describe('Map Parser Integration Tests', () => {
       const buffer = await fs.readFile(mapPath);
 
       const loader = new W3XMapLoader();
-      const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+      const arrayBuffer = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      ) as ArrayBuffer;
       const mapData = await loader.parse(arrayBuffer);
 
       expect(mapData).toBeDefined();
@@ -95,11 +102,17 @@ describe('Map Parser Integration Tests', () => {
 
       console.log('=== trigger_test.w3m Height Analysis ===');
       console.log('Dimensions:', mapData.terrain.width, 'x', mapData.terrain.height);
-      console.log('First 10 heights:', first10.map((h) => h.toFixed(2)));
+      console.log(
+        'First 10 heights:',
+        first10.map((h) => h.toFixed(2))
+      );
       console.log('Min height:', minHeight);
       console.log('Max height:', maxHeight);
       console.log('Range:', maxHeight - minHeight);
-      console.log('Unique heights (first 20):', uniqueHeights.slice(0, 20).map((h) => h.toFixed(2)));
+      console.log(
+        'Unique heights (first 20):',
+        uniqueHeights.slice(0, 20).map((h) => h.toFixed(2))
+      );
       console.log('Total unique heights:', uniqueHeights.length);
 
       console.log('\nExpected: Flat terrain (trigger_test.w3m SHOULD BE FLAT!)');

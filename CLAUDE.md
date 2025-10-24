@@ -1,5 +1,16 @@
 # Edge Craft - AI Development Guidelines
 
+IMPORTANT!
+our woring directory is /Users/dcversus/conductor/edgecraft/.conductor/lahore work only here
+i need you use as example render mdx-m3-viewer in all cameras at http://localhost:3000/comparison page, your goal is achive exact render in the left. cameras idealy aligned and also scene has red cube to prof that, you can rely on camera positions and DONT edit cameras!
+You need start reworking terrain and water, use all source code of mdx-m3-viewer possible to gather nuances and details. step by step re-implement terrain render (use the same textures and doodads from https://www.hiveworkshop.com/casc-contents?path= Temporary, we will replace them later). then terrain complitly matched, then work with cliffs, i need you exact reproduce all cliffs with shaders etc, they should look and work exactly. then after cliffs done i need you work on doodas and units, you need render them as the same and in the same positions. after you need adjust light and shaders to look closer.
+
+in src/vendor/mdx-m3-viewer/src/viewer/handlers/w3x/map.ts you can find DISABLED comment what turned off cliffs, units and doodas in mdx-m3-viewer, after you finishes with terrain and water - uncomment and continue work. i need you use tests/comparison-pixel-perfect.test.ts test to ensure what all pixel perfect matches, you need work untill test will pass with units/cliffs/doodas/terrain match. we need make Our Renderer look exactly same as right render mdx-m3-viewer
+
+DONT edit or modify src/pages/ComparisonPage.tsx, so we can rely on camera matching. its work perfect.
+EDIT mdx-m3-viewer initialisation/camera etc is FORBIDDEN! its our example and source of truth.
+IMPORTANT!
+
 ## 🎯 Project Awareness & Context
 **Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with TypeScript, React, and Babylon.js.
 - **Mondatory** identify on what PRP (Product Requirement Proposal) we are working now first, clarify user if you lost track.

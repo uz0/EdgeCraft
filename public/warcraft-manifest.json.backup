@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "description": "Warcraft 3 asset manifest - TEMPORARY hiveworkshop links. MUST be replaced with free-license assets before public release.",
+  "license": "TEMPORARY - Blizzard copyrighted content via hiveworkshop CASC. See POST RELEASE NOTES in PRPs/warcraft3-terrain-rendering.md",
+
+  "terrain": {
+    "textures": {
+      "Adrt": {
+        "name": "Ashenvale Dirt",
+        "dir": "TerrainArt/Ashenvale",
+        "file": "Ashen_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Ashenvale/Ashen_Dirt.dds",
+        "extended": false
+      },
+      "Agrs": {
+        "name": "Ashenvale Grass",
+        "dir": "TerrainArt/Ashenvale",
+        "file": "Ashen_Grass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Ashenvale/Ashen_Grass.dds",
+        "extended": false
+      },
+      "Avin": {
+        "name": "Ashenvale Vines",
+        "dir": "TerrainArt/Ashenvale",
+        "file": "Ashen_Vines",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Ashenvale/Ashen_Vines.dds",
+        "extended": false
+      },
+      "Arck": {
+        "name": "Ashenvale Rock",
+        "dir": "TerrainArt/Ashenvale",
+        "file": "Ashen_Rock",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Ashenvale/Ashen_Rock.dds",
+        "extended": false
+      },
+      "Bdrt": {
+        "name": "Barrens Dirt",
+        "dir": "TerrainArt/Barrens",
+        "file": "Barrens_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Barrens/Barrens_Dirt.dds",
+        "extended": false
+      },
+      "Bdrh": {
+        "name": "Barrens Dark Dirt",
+        "dir": "TerrainArt/Barrens",
+        "file": "Barrens_DirtRough",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Barrens/Barrens_DirtRough.dds",
+        "extended": false
+      },
+      "Bdrr": {
+        "name": "Barrens Rock",
+        "dir": "TerrainArt/Barrens",
+        "file": "Barrens_Pebbles",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Barrens/Barrens_Pebbles.dds",
+        "extended": false
+      },
+      "Bdrg": {
+        "name": "Barrens Grass",
+        "dir": "TerrainArt/Barrens",
+        "file": "Barrens_DirtGrass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Barrens/Barrens_DirtGrass.dds",
+        "extended": false
+      },
+      "Zdrt": {
+        "name": "Dalaran Dirt",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_Dirt.dds",
+        "extended": false
+      },
+      "Zdtr": {
+        "name": "Dalaran Dark Tile",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_DarkTile",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_DarkTile.dds",
+        "extended": false
+      },
+      "Zdrg": {
+        "name": "Dalaran Dark Grass",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_DarkGrass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_DarkGrass.dds",
+        "extended": false
+      },
+      "Zbks": {
+        "name": "Dalaran Black Squares",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_BlackSquares",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_BlackSquares.dds",
+        "extended": false
+      },
+      "Zsan": {
+        "name": "Dalaran Sandstone",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_Sandstone",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_Sandstone.dds",
+        "extended": false
+      },
+      "Zbkl": {
+        "name": "Dalaran Black Marble",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_BlackMarble",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_BlackMarble.dds",
+        "extended": false
+      },
+      "Ztil": {
+        "name": "Dalaran Tile",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_Tile",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_Tile.dds",
+        "extended": false
+      },
+      "Zgrs": {
+        "name": "Dalaran Grass",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_Grass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_Grass.dds",
+        "extended": false
+      },
+      "Zvin": {
+        "name": "Dalaran Vines",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_Vines",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_Vines.dds",
+        "extended": false
+      },
+      "Cdrt": {
+        "name": "Cityscape Dirt",
+        "dir": "TerrainArt/Cityscape",
+        "file": "City_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Cityscape/City_Dirt.dds",
+        "extended": false
+      },
+      "Cpos": {
+        "name": "Cityscape White Stones",
+        "dir": "TerrainArt/Cityscape",
+        "file": "City_WhiteStones",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Cityscape/City_WhiteStones.dds",
+        "extended": false
+      },
+      "Crbk": {
+        "name": "Cityscape Round Brick",
+        "dir": "TerrainArt/Cityscape",
+        "file": "City_RoundBrick",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Cityscape/City_RoundBrick.dds",
+        "extended": false
+      },
+      "Csbk": {
+        "name": "Cityscape Square Brick",
+        "dir": "TerrainArt/Cityscape",
+        "file": "City_SquareBrick",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Cityscape/City_SquareBrick.dds",
+        "extended": false
+      },
+      "Dlvc": {
+        "name": "Dalaran White Marble",
+        "dir": "TerrainArt/Dalaran",
+        "file": "Dalaran_WhiteMarble",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dalaran/Dalaran_WhiteMarble.dds",
+        "extended": false
+      },
+      "Ddrt": {
+        "name": "Dungeon Dirt",
+        "dir": "TerrainArt/Dungeon",
+        "file": "Dungeon_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dungeon/Dungeon_Dirt.dds",
+        "extended": false
+      },
+      "Dbrk": {
+        "name": "Dungeon Brick",
+        "dir": "TerrainArt/Dungeon",
+        "file": "Dungeon_Brick",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dungeon/Dungeon_Brick.dds",
+        "extended": false
+      },
+      "Drds": {
+        "name": "Dungeon Red Stone",
+        "dir": "TerrainArt/Dungeon",
+        "file": "Dungeon_RedStone",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dungeon/Dungeon_RedStone.dds",
+        "extended": false
+      },
+      "Dsqd": {
+        "name": "Dungeon Square Tiles",
+        "dir": "TerrainArt/Dungeon",
+        "file": "Dungeon_SquareTiles",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Dungeon/Dungeon_SquareTiles.dds",
+        "extended": false
+      },
+      "Ldrt": {
+        "name": "Lordaeron Dirt",
+        "dir": "TerrainArt/LordaeronSummer",
+        "file": "Lords_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/LordaeronSummer/Lords_Dirt.dds",
+        "extended": false
+      },
+      "Lgrs": {
+        "name": "Lordaeron Grass",
+        "dir": "TerrainArt/LordaeronSummer",
+        "file": "Lords_Grass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/LordaeronSummer/Lords_Grass.dds",
+        "extended": false
+      },
+      "Lrok": {
+        "name": "Lordaeron Rock",
+        "dir": "TerrainArt/LordaeronSummer",
+        "file": "Lords_Rock",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/LordaeronSummer/Lords_Rock.dds",
+        "extended": false
+      },
+      "Lgrd": {
+        "name": "Lordaeron Dark Grass",
+        "dir": "TerrainArt/LordaeronSummer",
+        "file": "Lords_GrassDark",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/LordaeronSummer/Lords_GrassDark.dds",
+        "extended": false
+      },
+      "Ndrt": {
+        "name": "Northrend Dirt",
+        "dir": "TerrainArt/Northrend",
+        "file": "North_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Northrend/North_Dirt.dds",
+        "extended": false
+      },
+      "Nrck": {
+        "name": "Northrend Dark Ice",
+        "dir": "TerrainArt/Northrend",
+        "file": "North_DarkIce",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Northrend/North_DarkIce.dds",
+        "extended": false
+      },
+      "Nice": {
+        "name": "Northrend Ice",
+        "dir": "TerrainArt/Northrend",
+        "file": "North_Ice",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Northrend/North_Ice.dds",
+        "extended": false
+      },
+      "Nsnw": {
+        "name": "Northrend Snow",
+        "dir": "TerrainArt/Northrend",
+        "file": "North_Snow",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Northrend/North_Snow.dds",
+        "extended": false
+      },
+      "Vdrt": {
+        "name": "Village Dirt",
+        "dir": "TerrainArt/Village",
+        "file": "Village_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Village/Village_Dirt.dds",
+        "extended": false
+      },
+      "Vgrs": {
+        "name": "Village Grass",
+        "dir": "TerrainArt/Village",
+        "file": "Village_Grass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Village/Village_Grass.dds",
+        "extended": false
+      },
+      "Vrck": {
+        "name": "Village Rock",
+        "dir": "TerrainArt/Village",
+        "file": "Village_Rock",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Village/Village_Rock.dds",
+        "extended": false
+      },
+      "Vcrp": {
+        "name": "Village Crops",
+        "dir": "TerrainArt/Village",
+        "file": "Village_Crops",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Village/Village_Crops.dds",
+        "extended": false
+      },
+      "Wdrt": {
+        "name": "Felwood Dirt",
+        "dir": "TerrainArt/Felwood",
+        "file": "Felwood_Dirt",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Felwood/Felwood_Dirt.dds",
+        "extended": false
+      },
+      "Wgrs": {
+        "name": "Felwood Grass",
+        "dir": "TerrainArt/Felwood",
+        "file": "Felwood_Grass",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Felwood/Felwood_Grass.dds",
+        "extended": false
+      },
+      "Wrck": {
+        "name": "Felwood Rock",
+        "dir": "TerrainArt/Felwood",
+        "file": "Felwood_Rock",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Felwood/Felwood_Rock.dds",
+        "extended": false
+      },
+      "Wvin": {
+        "name": "Felwood Vines",
+        "dir": "TerrainArt/Felwood",
+        "file": "Felwood_Vines",
+        "url": "https://www.hiveworkshop.com/casc-contents?path=TerrainArt/Felwood/Felwood_Vines.dds",
+        "extended": false
+      }
+    }
+  }
+}

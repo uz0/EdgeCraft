@@ -23,6 +23,7 @@ import * as BABYLON from '@babylonjs/core';
 import type { RawMapData } from '../../formats/maps/types';
 import { MapLoaderRegistry } from '../../formats/maps/MapLoaderRegistry';
 import { TerrainRenderer } from '../terrain/TerrainRenderer';
+import { W3xSimpleTerrainRenderer } from '../terrain/W3xSimpleTerrainRenderer';
 import { InstancedUnitRenderer } from './InstancedUnitRenderer';
 import { DoodadRenderer } from './DoodadRenderer';
 import { QualityPresetManager } from './QualityPresetManager';
@@ -69,6 +70,7 @@ export class MapRendererCore {
   private assetLoader: AssetLoader;
 
   private terrainRenderer: TerrainRenderer | null = null;
+  private w3xTerrainRenderer: W3xSimpleTerrainRenderer | null = null;
   private unitRenderer: InstancedUnitRenderer | null = null;
   private doodadRenderer: DoodadRenderer | null = null;
   private camera: BABYLON.Camera | null = null;
@@ -155,21 +157,23 @@ export class MapRendererCore {
     // Units and doodads need access to mapData.info.dimensions for coordinate conversion
     this.currentMap = mapData;
 
-    // Step 1: Initialize terrain and store actual heightmap range
-    const terrainHeightRange = await this.renderTerrain(mapData.terrain);
+    // Step 1: Initialize W3x terrain renderer (mdx-m3-viewer style)
+    this.w3xTerrainRenderer = new W3xSimpleTerrainRenderer(this.scene);
+    await this.w3xTerrainRenderer.renderTerrain(mapData.terrain);
 
-    // Store terrain height range for camera setup (use actual heightmap values, not mesh bounds)
-    this.terrainHeightRange = terrainHeightRange;
+    // Store terrain height range for camera setup (use default for now)
+    this.terrainHeightRange = { min: 0, max: 512 };
 
     // Step 1b: Render water (if present)
-    if (mapData.terrain.water) {
-      this.renderWater(mapData.terrain);
-    }
+    // if (mapData.terrain.water) {
+    //   this.renderWater(mapData.terrain);
+    // }
 
     // Step 1c: Render cliffs (if present)
-    if (mapData.terrain.cliffs && mapData.terrain.cliffs.length > 0) {
-      this.renderCliffs(mapData.terrain, terrainHeightRange);
-    }
+    // DISABLED: Removing all terrain rendering for step-by-step rebuild
+    // if (mapData.terrain.cliffs && mapData.terrain.cliffs.length > 0) {
+    //   this.renderCliffs(mapData.terrain, this.terrainHeightRange);
+    // }
 
     // Step 2: Initialize units
     this.renderUnits(mapData.units);
@@ -263,13 +267,12 @@ export class MapRendererCore {
     }
   }
 
-  private originalMinHeight = 0;
-  private originalMaxHeight = 0;
+  // DISABLED: Unused by old terrain renderer
+  // private originalMinHeight = 0;
+  // private originalMaxHeight = 0;
 
-  /**
-   * Render terrain
-   * @returns Actual heightmap height range (min/max) for camera positioning
-   */
+  // DISABLED: Old terrain renderer - will be replaced with step-by-step implementation
+  /*
   private async renderTerrain(
     terrain: RawMapData['terrain']
   ): Promise<{ min: number; max: number }> {
@@ -357,10 +360,7 @@ export class MapRendererCore {
     return { min: -heightRange / 2, max: heightRange / 2 };
   }
 
-  /**
-   * Convert heightmap Float32Array to data URL
-   * @returns Object with url (data URL), minHeight, and maxHeight
-   */
+  /*
   private createHeightmapDataUrl(
     heightmap: Float32Array,
     width: number,
@@ -422,10 +422,9 @@ export class MapRendererCore {
       maxHeight,
     };
   }
+  */
 
-  /**
-   * Render water plane
-   */
+  /*
   private renderWater(terrain: RawMapData['terrain']): void {
     if (!terrain.water) return;
 
@@ -461,11 +460,9 @@ export class MapRendererCore {
 
     waterPlane.material = waterMaterial;
   }
+  */
 
-  /**
-   * Render cliff meshes
-   * Cliffs are vertical walls placed at elevation changes (layerHeight boundaries)
-   */
+  /*
   private renderCliffs(
     terrain: RawMapData['terrain'],
     terrainHeightRange: { min: number; max: number }
@@ -509,6 +506,7 @@ export class MapRendererCore {
       cliffBox.material = cliffMaterial;
     }
   }
+  */
 
   /**
    * Render units
@@ -676,7 +674,7 @@ export class MapRendererCore {
    * Apply map environment settings (lighting, fog, ambient)
    */
   private applyEnvironment(environment: RawMapData['info']['environment']): void {
-    const { tileset, fog } = environment;
+    const { fog } = environment;
 
     // Remove all existing lights to prevent accumulation
     const existingLights = this.scene.lights.slice(); // Copy array to avoid modification during iteration
@@ -713,21 +711,7 @@ export class MapRendererCore {
       );
     }
 
-    // Background color (based on tileset)
-    const tilesetColors: Record<string, BABYLON.Color3> = {
-      ashenvale: new BABYLON.Color3(0.2, 0.3, 0.2),
-      barrens: new BABYLON.Color3(0.4, 0.3, 0.2),
-      felwood: new BABYLON.Color3(0.1, 0.2, 0.1),
-      dungeon: new BABYLON.Color3(0.1, 0.1, 0.1),
-      default: new BABYLON.Color3(0.3, 0.4, 0.5),
-    };
-
-    const tilesetColor =
-      tilesetColors[tileset.toLowerCase()] ??
-      tilesetColors['default'] ??
-      new BABYLON.Color3(0.3, 0.4, 0.5);
-
-    this.scene.clearColor = new BABYLON.Color4(tilesetColor.r, tilesetColor.g, tilesetColor.b, 1.0);
+    this.scene.clearColor = new BABYLON.Color4(0.0, 0.0, 0.0, 1.0);
   }
 
   /**
@@ -747,6 +731,11 @@ export class MapRendererCore {
     const terrainCenterY = terrainMidHeight;
     const terrainHeight = this.terrainHeightRange.max - this.terrainHeightRange.min;
     const terrainMaxHeight = this.terrainHeightRange.max;
+
+    if (this.scene.activeCamera) {
+      this.camera = this.scene.activeCamera;
+      return;
+    }
 
     if (this.config.cameraMode === 'rts') {
       // RTS camera with classic perspective (like Warcraft 3)
@@ -908,6 +897,11 @@ export class MapRendererCore {
     if (this.terrainRenderer != null) {
       this.terrainRenderer.dispose();
       this.terrainRenderer = null;
+    }
+
+    if (this.w3xTerrainRenderer != null) {
+      this.w3xTerrainRenderer.dispose();
+      this.w3xTerrainRenderer = null;
     }
 
     if (this.unitRenderer != null) {

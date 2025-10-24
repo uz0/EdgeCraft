@@ -97,9 +97,11 @@ export interface TerrainData {
   height: number;
   heightmap: Float32Array;
   textures: TerrainTexture[];
+  textureIndices?: Uint8Array;
   water?: WaterData;
   cliffs?: CliffData[];
   pathingMap?: Uint8Array;
+  raw?: unknown;
 }
 
 /**

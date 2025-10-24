@@ -70,21 +70,19 @@ export class W3EParser {
       cliffTextureIds.push(this.read4CC());
     }
 
-    const w3eWidth = this.readUint32();
-    const w3eHeight = this.readUint32();
-    this.offset += 4;
-    this.offset += 4;
+    const columns = this.readUint32();
+    const rows = this.readUint32();
 
-    const width = w3eWidth - 1;
-    const height = version === 11 ? w3eHeight : w3eHeight - 1;
+    const centerOffsetX = this.readFloat32();
+    const centerOffsetY = this.readFloat32();
 
-    const expectedTileCount = width * height;
-    const tileByteSize = version === 11 ? 7 : 8;
+    const expectedCornerCount = columns * rows;
+    const cornerByteSize = version === 11 ? 7 : 8;
     const groundTiles: W3EGroundTile[] = [];
 
     for (
       let i = 0;
-      i < expectedTileCount && this.offset + tileByteSize <= this.buffer.byteLength;
+      i < expectedCornerCount && this.offset + cornerByteSize <= this.buffer.byteLength;
       i++
     ) {
       const tile = this.readGroundTile(version);
@@ -107,10 +105,12 @@ export class W3EParser {
       tileset: tilesetChar,
       customTileset,
       groundTextureIds,
-      width,
-      height,
+      width: columns,
+      height: rows,
+      centerOffset: [centerOffsetX, centerOffsetY],
       groundTiles,
       cliffTiles,
+      blightTextureIndex: groundTextureIds.length > 0 ? groundTextureIds.length - 1 : 0,
     };
   }
 
@@ -130,47 +130,58 @@ export class W3EParser {
     const tileByteSize = version === 11 ? 7 : 8;
     this.checkBounds(tileByteSize);
 
-    // Read raw height values WITHOUT normalization
-    // Keep the original values for Babylon to scale
-    const groundHeight = this.view.getInt16(this.offset, true);
+    const rawGroundHeight = this.view.getInt16(this.offset, true);
     this.offset += 2;
+    const groundHeight = (rawGroundHeight - 8192) / 512;
 
-    const waterLevel = this.view.getInt16(this.offset, true);
+    const rawWaterLevel = this.view.getInt16(this.offset, true);
     this.offset += 2;
+    const waterLevel = (rawWaterLevel - 8192) / 512;
 
     let flags: number;
     let groundTexture: number;
+    let groundVariation: number;
 
     if (version === 11) {
       const flagsAndGroundTexture = this.view.getUint8(this.offset);
       this.offset += 1;
       flags = flagsAndGroundTexture & 0xf0;
       groundTexture = flagsAndGroundTexture & 0x0f;
+
+      groundVariation = this.view.getUint8(this.offset);
       this.offset += 1;
     } else {
       const flagsAndGroundTexture = this.view.getUint16(this.offset, true);
       this.offset += 2;
       groundTexture = flagsAndGroundTexture & 0x3f;
       flags = (flagsAndGroundTexture & 0xffc0) >> 6;
+
+      groundVariation = this.view.getUint8(this.offset);
+      this.offset += 1;
     }
 
     const cliffTextureAndLayerHeight = this.view.getUint8(this.offset);
     this.offset += 1;
     const layerHeight = cliffTextureAndLayerHeight & 0x0f;
+    const cliffTexture = (cliffTextureAndLayerHeight & 0xf0) >> 4;
 
     if (version === 12) {
       this.offset += 1;
     }
 
     const cliffLevel = layerHeight;
+    const blight = (flags & 0x10) !== 0;
 
     const tile = {
       groundHeight,
       waterLevel,
       flags,
       groundTexture,
+      groundVariation,
       cliffLevel,
       layerHeight,
+      cliffTexture,
+      blight,
     };
 
     return tile;
@@ -294,6 +305,16 @@ export class W3EParser {
     );
     this.offset += 4;
     return chars;
+  }
+
+  /**
+   * Helper: Read float32
+   */
+  private readFloat32(): number {
+    this.checkBounds(4);
+    const value = this.view.getFloat32(this.offset, true);
+    this.offset += 4;
+    return value;
   }
 
   /**

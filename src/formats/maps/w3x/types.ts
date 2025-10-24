@@ -168,8 +168,10 @@ export interface W3ETerrain {
   groundTextureIds?: string[]; // v11+ texture list
   width: number;
   height: number;
+  centerOffset: [number, number]; // [X, Y] offset to center terrain at world origin
   groundTiles: W3EGroundTile[];
   cliffTiles?: W3ECliffTile[];
+  blightTextureIndex?: number;
 }
 
 /**
@@ -180,8 +182,11 @@ export interface W3EGroundTile {
   waterLevel: number;
   flags: number;
   groundTexture: number;
+  groundVariation: number;
   cliffLevel: number;
   layerHeight: number;
+  cliffTexture: number;
+  blight: boolean;
 }
 
 /**
