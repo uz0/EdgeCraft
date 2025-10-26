@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-26T17:29:32.226Z",
+  "timestamp": "2025-10-26T17:43:39.221Z",
   "parameters": {
     "iterations": 6,
     "elements": 60
@@ -7,8 +7,8 @@
   "results": [
     {
       "library": "edgecraft",
-      "elapsedMs": 2.4,
-      "opsPerMs": 150,
+      "elapsedMs": 2.7,
+      "opsPerMs": 133.33,
       "samples": 360,
       "metadata": {
         "domNodes": 60,
@@ -17,25 +17,25 @@
       }
     },
     {
-      "library": "babylonGui",
-      "elapsedMs": 4.1,
-      "opsPerMs": 87.8,
-      "samples": 360,
-      "metadata": {
-        "exportedKeys": 88,
-        "weight": 1.9,
-        "accumulator": -113272.0717
-      }
-    },
-    {
       "library": "wcardinalUi",
-      "elapsedMs": 4.5,
-      "opsPerMs": 80,
+      "elapsedMs": 4.7,
+      "opsPerMs": 76.6,
       "samples": 360,
       "metadata": {
         "moduleKeys": 0,
         "weight": 2.4,
         "accumulator": -102129.9883
+      }
+    },
+    {
+      "library": "babylonGui",
+      "elapsedMs": 5.4,
+      "opsPerMs": 66.67,
+      "samples": 360,
+      "metadata": {
+        "exportedKeys": 88,
+        "weight": 1.9,
+        "accumulator": -113272.0717
       }
     }
   ],
@@ -43,20 +43,20 @@
     {
       "place": 1,
       "library": "edgecraft",
-      "elapsedMs": 2.4,
-      "opsPerMs": 150
+      "elapsedMs": 2.7,
+      "opsPerMs": 133.33
     },
     {
       "place": 2,
-      "library": "babylonGui",
-      "elapsedMs": 4.1,
-      "opsPerMs": 87.8
+      "library": "wcardinalUi",
+      "elapsedMs": 4.7,
+      "opsPerMs": 76.6
     },
     {
       "place": 3,
-      "library": "wcardinalUi",
-      "elapsedMs": 4.5,
-      "opsPerMs": 80
+      "library": "babylonGui",
+      "elapsedMs": 5.4,
+      "opsPerMs": 66.67
     }
   ]
 }
