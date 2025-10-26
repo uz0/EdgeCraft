@@ -165,11 +165,13 @@ export interface W3ETerrain {
   version: number;
   tileset: string;
   customTileset: boolean;
-  groundTextureIds?: string[]; // v11+ texture list
+  groundTextureIds?: string[];
+  cliffTextureIds?: string[];
   width: number;
   height: number;
   centerOffset: [number, number]; // [X, Y] offset to center terrain at world origin
   groundTiles: W3EGroundTile[];
+  corners: W3EGroundTile[][]; // 2D array for mdx-m3-viewer compatibility
   cliffTiles?: W3ECliffTile[];
   blightTextureIndex?: number;
 }
@@ -186,6 +188,7 @@ export interface W3EGroundTile {
   cliffLevel: number;
   layerHeight: number;
   cliffTexture: number;
+  cliffVariation: number;
   blight: boolean;
 }
 

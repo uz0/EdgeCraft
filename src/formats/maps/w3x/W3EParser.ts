@@ -100,15 +100,43 @@ export class W3EParser {
       }
     }
 
+    const corners: W3EGroundTile[][] = [];
+    for (let y = 0; y < rows; y++) {
+      const row: W3EGroundTile[] = [];
+      for (let x = 0; x < columns; x++) {
+        const index = y * columns + x;
+        const tile = groundTiles[index];
+        if (tile) {
+          row.push(tile);
+        } else {
+          row.push({
+            groundHeight: 0,
+            waterLevel: 0,
+            flags: 0,
+            groundTexture: 0,
+            groundVariation: 0,
+            cliffVariation: 0,
+            cliffTexture: 0,
+            layerHeight: 0,
+            cliffLevel: 0,
+            blight: false,
+          });
+        }
+      }
+      corners.push(row);
+    }
+
     return {
       version,
       tileset: tilesetChar,
       customTileset,
       groundTextureIds,
+      cliffTextureIds,
       width: columns,
       height: rows,
       centerOffset: [centerOffsetX, centerOffsetY],
       groundTiles,
+      corners,
       cliffTiles,
       blightTextureIndex: groundTextureIds.length > 0 ? groundTextureIds.length - 1 : 0,
     };
@@ -141,6 +169,7 @@ export class W3EParser {
     let flags: number;
     let groundTexture: number;
     let groundVariation: number;
+    let cliffVariation: number;
 
     if (version === 11) {
       const flagsAndGroundTexture = this.view.getUint8(this.offset);
@@ -148,7 +177,9 @@ export class W3EParser {
       flags = flagsAndGroundTexture & 0xf0;
       groundTexture = flagsAndGroundTexture & 0x0f;
 
-      groundVariation = this.view.getUint8(this.offset);
+      const variationByte = this.view.getUint8(this.offset);
+      cliffVariation = (variationByte & 0b11100000) >>> 5;
+      groundVariation = variationByte & 0b00011111;
       this.offset += 1;
     } else {
       const flagsAndGroundTexture = this.view.getUint16(this.offset, true);
@@ -156,7 +187,9 @@ export class W3EParser {
       groundTexture = flagsAndGroundTexture & 0x3f;
       flags = (flagsAndGroundTexture & 0xffc0) >> 6;
 
-      groundVariation = this.view.getUint8(this.offset);
+      const variationByte = this.view.getUint8(this.offset);
+      cliffVariation = (variationByte & 0b11100000) >>> 5;
+      groundVariation = variationByte & 0b00011111;
       this.offset += 1;
     }
 
@@ -181,6 +214,7 @@ export class W3EParser {
       cliffLevel,
       layerHeight,
       cliffTexture,
+      cliffVariation,
       blight,
     };
 

@@ -3,6 +3,8 @@ import type { TerrainData } from '../../formats/maps/types';
 import type { W3ETerrain } from '../../formats/maps/w3x/types';
 import { TerrainTextureBuilder } from './TerrainTextureBuilder';
 import { TerrainTextureManager } from './TerrainTextureManager';
+import { CliffRenderer } from './CliffRenderer';
+import { CliffTypesLoader } from './CliffTypesLoader';
 
 /**
  * Simple terrain renderer matching mdx-m3-viewer's approach exactly
@@ -13,11 +15,15 @@ export class W3xSimpleTerrainRenderer {
   private terrainMesh: BABYLON.Mesh | null = null;
   private textureBuilder: TerrainTextureBuilder;
   private textureManager: TerrainTextureManager;
+  private cliffRenderer: CliffRenderer;
+  private cliffTypesLoader: CliffTypesLoader;
 
   constructor(scene: BABYLON.Scene) {
     this.scene = scene;
     this.textureBuilder = new TerrainTextureBuilder();
     this.textureManager = new TerrainTextureManager(scene);
+    this.cliffRenderer = new CliffRenderer(scene);
+    this.cliffTypesLoader = CliffTypesLoader.getInstance();
   }
 
   public async renderTerrain(terrain: TerrainData): Promise<void> {
@@ -27,34 +33,64 @@ export class W3xSimpleTerrainRenderer {
 
     const w3e = terrain.raw as W3ETerrain | undefined;
     if (!w3e) {
-      console.error('W3E terrain data not available');
       return;
     }
 
     const textureIds = w3e.groundTextureIds ?? [];
-    const textureExtendedMap = await this.textureManager.getTextureExtendedMap(textureIds);
+    const loadedTextures = await this.textureManager.createTextureAtlas(textureIds);
+    const textureExtendedMap = this.textureManager.getTextureExtendedMap(
+      textureIds,
+      loadedTextures
+    );
 
-    const { cornerTextures, cornerVariations, cornerExtended, tileCount } =
-      this.textureBuilder.buildTextureArrays(w3e, textureExtendedMap);
+    const { cornerTextures, cornerVariations } = this.textureBuilder.buildTextureArrays(
+      w3e,
+      textureExtendedMap
+    );
+
+    // Debug: Log texture usage statistics
+    const textureUsage = new Map<number, number>();
+    for (let i = 0; i < cornerTextures.length; i++) {
+      const tex = cornerTextures[i];
+      if (tex !== undefined && tex > 0) {
+        textureUsage.set(tex, (textureUsage.get(tex) ?? 0) + 1);
+      }
+    }
 
     // Create positions for unit quad (0,0) to (1,1) that will be repeated
     const quadPositions = [
-      0, 0, 0,  // Bottom-left
-      1, 0, 0,  // Bottom-right
-      0, 0, 1,  // Top-left
-      1, 0, 1,  // Top-right
+      0,
+      0,
+      0, // Bottom-left
+      1,
+      0,
+      0, // Bottom-right
+      0,
+      0,
+      1, // Top-left
+      1,
+      0,
+      1, // Top-right
     ];
 
     const quadUVs = [
-      0, 0,  // Bottom-left
-      1, 0,  // Bottom-right
-      0, 1,  // Top-left
-      1, 1,  // Top-right
+      0,
+      0, // Bottom-left
+      1,
+      0, // Bottom-right
+      0,
+      1, // Top-left
+      1,
+      1, // Top-right
     ];
 
     const quadIndices = [
-      0, 1, 2,  // First triangle
-      2, 1, 3,  // Second triangle
+      0,
+      1,
+      2, // First triangle
+      2,
+      1,
+      3, // Second triangle
     ];
 
     // Now build full terrain mesh - one quad per tile
@@ -67,9 +103,8 @@ export class W3xSimpleTerrainRenderer {
     // Custom attributes for texture data (4 vertices per quad)
     const vertexTextures = new Float32Array(totalQuads * 4 * 4); // 4 texture indices per vertex
     const vertexVariations = new Float32Array(totalQuads * 4 * 4); // 4 variations per vertex
-    const vertexExtended = new Float32Array(totalQuads * 4 * 4); // 4 extended flags per vertex
 
-    const centerOffset = w3e.centerOffset || [0, 0];
+    const centerOffset = w3e.centerOffset ?? [0, 0];
     const offsetX = centerOffset[0];
     const offsetZ = centerOffset[1];
 
@@ -93,11 +128,6 @@ export class W3xSimpleTerrainRenderer {
         const var1 = cornerVariations[tileIndex * 4 + 1] ?? 0;
         const var2 = cornerVariations[tileIndex * 4 + 2] ?? 0;
         const var3 = cornerVariations[tileIndex * 4 + 3] ?? 0;
-
-        const ext0 = cornerExtended[tileIndex * 4] ?? 0;
-        const ext1 = cornerExtended[tileIndex * 4 + 1] ?? 0;
-        const ext2 = cornerExtended[tileIndex * 4 + 2] ?? 0;
-        const ext3 = cornerExtended[tileIndex * 4 + 3] ?? 0;
 
         // Position each quad vertex
         for (let v = 0; v < 4; v++) {
@@ -126,11 +156,6 @@ export class W3xSimpleTerrainRenderer {
           vertexVariations[textureOffset + v * 4 + 1] = var1;
           vertexVariations[textureOffset + v * 4 + 2] = var2;
           vertexVariations[textureOffset + v * 4 + 3] = var3;
-
-          vertexExtended[textureOffset + v * 4] = ext0;
-          vertexExtended[textureOffset + v * 4 + 1] = ext1;
-          vertexExtended[textureOffset + v * 4 + 2] = ext2;
-          vertexExtended[textureOffset + v * 4 + 3] = ext3;
         }
 
         // Set indices for this quad
@@ -154,19 +179,12 @@ export class W3xSimpleTerrainRenderer {
     vertexData.applyToMesh(mesh);
 
     // Apply height data if available
-    if (terrain.heightmap) {
-      this.applyHeightmap(mesh, terrain.heightmap, columns, rows);
+    if (terrain.heightmap !== undefined) {
+      this.applyHeightmap(mesh, terrain.heightmap, columns, rows, w3e);
     }
-
     // Set custom vertex attributes for texture data
     mesh.setVerticesData('cornerTextures', vertexTextures, false, 4);
     mesh.setVerticesData('cornerVariations', vertexVariations, false, 4);
-    mesh.setVerticesData('cornerExtended', vertexExtended, false, 4);
-
-    // Load textures
-    const textures = await this.textureManager.createTextureAtlas(
-      terrain.textures.map((t) => t.id)
-    );
 
     // Create shader material
     const shaderMaterial = new BABYLON.ShaderMaterial(
@@ -177,19 +195,25 @@ export class W3xSimpleTerrainRenderer {
         fragmentSource: this.getFragmentShader(),
       },
       {
-        attributes: [
-          'position',
-          'normal',
-          'uv',
-          'cornerTextures',
-          'cornerVariations',
-          'cornerExtended',
-        ],
+        attributes: ['position', 'normal', 'uv', 'cornerTextures', 'cornerVariations'],
         uniforms: [
           'worldViewProjection',
           'world',
-          'terrainSize',
-          'baseTileset',
+          'u_extended[0]',
+          'u_extended[1]',
+          'u_extended[2]',
+          'u_extended[3]',
+          'u_extended[4]',
+          'u_extended[5]',
+          'u_extended[6]',
+          'u_extended[7]',
+          'u_extended[8]',
+          'u_extended[9]',
+          'u_extended[10]',
+          'u_extended[11]',
+          'u_extended[12]',
+          'u_extended[13]',
+          'u_extended[14]',
         ],
         samplers: [
           'u_tileset_0',
@@ -211,27 +235,51 @@ export class W3xSimpleTerrainRenderer {
       }
     );
 
-    // Bind textures
-    for (let i = 0; i < textures.length && i < 15; i++) {
-      if (textures[i]) {
-        shaderMaterial.setTexture(`u_tileset_${i}`, textures[i]);
+    // Bind textures and set extended flags
+    for (let i = 0; i < 15; i++) {
+      const texture = loadedTextures[i];
+      if (texture) {
+        shaderMaterial.setTexture(`u_tileset_${i}`, texture);
+        const isExtended = texture.getBaseSize().width > texture.getBaseSize().height;
+        shaderMaterial.setFloat(`u_extended[${i}]`, isExtended ? 1.0 : 0.0);
+      } else {
+        shaderMaterial.setFloat(`u_extended[${i}]`, 0.0);
       }
     }
 
-    shaderMaterial.setVector2('terrainSize', new BABYLON.Vector2(columns, rows));
-    shaderMaterial.setFloat('baseTileset', 0); // First batch of textures (0-14)
     shaderMaterial.backFaceCulling = false;
 
     mesh.material = shaderMaterial as unknown as BABYLON.Material;
 
     this.terrainMesh = mesh;
+
+    await this.initializeCliffs(w3e, columns, rows, loadedTextures);
+  }
+
+  private async initializeCliffs(
+    w3e: W3ETerrain,
+    columns: number,
+    rows: number,
+    _terrainTextures: (BABYLON.Texture | null)[]
+  ): Promise<void> {
+    const centerOffset = w3e.centerOffset ?? [0, 0];
+
+    const cliffTypesData = await this.cliffTypesLoader.load();
+
+    await this.cliffRenderer.initialize(
+      w3e,
+      cliffTypesData,
+      { width: columns, height: rows },
+      { x: centerOffset[0], y: centerOffset[1] }
+    );
   }
 
   private applyHeightmap(
     mesh: BABYLON.Mesh,
     heightmap: Float32Array,
     columns: number,
-    rows: number
+    rows: number,
+    w3e: W3ETerrain
   ): void {
     const positions = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     if (!positions) return;
@@ -240,6 +288,8 @@ export class W3xSimpleTerrainRenderer {
     let vertexIndex = 0;
     for (let y = 0; y < rows - 1; y++) {
       for (let x = 0; x < columns - 1; x++) {
+        const isCliff = this.detectCliff(w3e, x, y);
+
         // Each quad has 4 vertices
         for (let v = 0; v < 4; v++) {
           const vx = v === 1 || v === 3 ? 1 : 0;
@@ -249,7 +299,32 @@ export class W3xSimpleTerrainRenderer {
           const heightY = Math.min(y + vy, rows - 1);
           const heightIndex = heightY * columns + heightX;
 
-          const height = (heightmap[heightIndex] ?? 0) * 128.0;
+          let height = (heightmap[heightIndex] ?? 0) * 128.0;
+
+          // For cliff tiles, use the minimum height for the base
+          // This creates the sharp edge effect we see in mdx-m3-viewer
+          if (isCliff) {
+            // Get all four corner heights
+            const h00 = (heightmap[y * columns + x] ?? 0) * 128.0;
+            const h10 = (heightmap[y * columns + Math.min(x + 1, columns - 1)] ?? 0) * 128.0;
+            const h01 = (heightmap[Math.min(y + 1, rows - 1) * columns + x] ?? 0) * 128.0;
+            const h11 =
+              (heightmap[Math.min(y + 1, rows - 1) * columns + Math.min(x + 1, columns - 1)] ?? 0) *
+              128.0;
+
+            // Use the minimum height for the base of the cliff
+            const minHeight = Math.min(h00, h10, h01, h11);
+
+            // Only use the actual height if it's significantly higher than the minimum
+            if (height - minHeight > 128) {
+              // This vertex is on the top of the cliff
+              // Keep the original height
+            } else {
+              // This vertex is at the base of the cliff
+              height = minHeight;
+            }
+          }
+
           positions[vertexIndex * 3 + 1] = height;
           vertexIndex++;
         }
@@ -258,6 +333,32 @@ export class W3xSimpleTerrainRenderer {
 
     mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
     mesh.createNormals(true);
+  }
+
+  private detectCliff(w3e: W3ETerrain, x: number, y: number): boolean {
+    const tiles = w3e.groundTiles;
+    const width = w3e.width;
+
+    if (tiles === undefined || x >= width - 1 || y >= w3e.height - 1) {
+      return false;
+    }
+
+    const bottomLeft = tiles[y * width + x];
+    const bottomRight = tiles[y * width + x + 1];
+    const topLeft = tiles[(y + 1) * width + x];
+    const topRight = tiles[(y + 1) * width + x + 1];
+
+    if (!bottomLeft || !bottomRight || !topLeft || !topRight) {
+      return false;
+    }
+
+    // Check if any adjacent tiles have different layerHeight (cliff level)
+    const baseLayer = bottomLeft.layerHeight;
+    return (
+      bottomRight.layerHeight !== baseLayer ||
+      topLeft.layerHeight !== baseLayer ||
+      topRight.layerHeight !== baseLayer
+    );
   }
 
   private getVertexShader(): string {
@@ -271,13 +372,11 @@ export class W3xSimpleTerrainRenderer {
       attribute vec2 uv;
       attribute vec4 cornerTextures;
       attribute vec4 cornerVariations;
-      attribute vec4 cornerExtended;
 
       // Uniforms
       uniform mat4 worldViewProjection;
       uniform mat4 world;
-      uniform vec2 terrainSize;
-      uniform float baseTileset;
+      uniform float u_extended[15];
 
       // Varyings to fragment shader
       varying vec2 v_uv[4];
@@ -309,26 +408,41 @@ export class W3xSimpleTerrainRenderer {
       }
 
       void main() {
-        // Transform position
-        gl_Position = worldViewProjection * vec4(position, 1.0);
+        // Check if tile has any textures (matches mdx-m3-viewer)
+        if (cornerTextures[0] > 0.5 || cornerTextures[1] > 0.5 || cornerTextures[2] > 0.5 || cornerTextures[3] > 0.5) {
+          // Transform position
+          gl_Position = worldViewProjection * vec4(position, 1.0);
 
-        // Use the UV directly as tile-local position (0-1 within tile)
-        vec2 localPos = uv;
+          // Use the UV directly as tile-local position (0-1 within tile)
+          vec2 localPos = uv;
 
-        // Adjust texture indices by baseTileset (for texture batching)
-        vec4 textures = cornerTextures - baseTileset;
+          // Calculate UVs for each texture layer with extended flag from uniform
+          // Use -0.6 offset for texture index (matching mdx-m3-viewer precision handling)
+          int tex0 = int(cornerTextures[0] - 0.6);
+          int tex1 = int(cornerTextures[1] - 0.6);
+          int tex2 = int(cornerTextures[2] - 0.6);
+          int tex3 = int(cornerTextures[3] - 0.6);
 
-        // Calculate UVs for each texture layer with extended flag
-        v_uv[0] = getUV(localPos, cornerExtended.x > 0.5, cornerVariations.x);
-        v_uv[1] = getUV(localPos, cornerExtended.y > 0.5, cornerVariations.y);
-        v_uv[2] = getUV(localPos, cornerExtended.z > 0.5, cornerVariations.z);
-        v_uv[3] = getUV(localPos, cornerExtended.w > 0.5, cornerVariations.w);
+          v_uv[0] = getUV(localPos, cornerTextures[0] > 0.5 && u_extended[tex0] > 0.5, cornerVariations.x);
+          v_uv[1] = getUV(localPos, cornerTextures[1] > 0.5 && u_extended[tex1] > 0.5, cornerVariations.y);
+          v_uv[2] = getUV(localPos, cornerTextures[2] > 0.5 && u_extended[tex2] > 0.5, cornerVariations.z);
+          v_uv[3] = getUV(localPos, cornerTextures[3] > 0.5 && u_extended[tex3] > 0.5, cornerVariations.w);
 
-        // Pass adjusted texture indices to fragment shader
-        v_tilesets = textures;
+          // Pass texture indices to fragment shader
+          v_tilesets = cornerTextures;
 
-        // Transform normal
-        v_normal = normalize((world * vec4(normal, 0.0)).xyz);
+          // Transform normal
+          v_normal = normalize((world * vec4(normal, 0.0)).xyz);
+        } else {
+          // No textures - zero out everything (matches mdx-m3-viewer)
+          v_tilesets = vec4(0.0);
+          v_uv[0] = vec2(0.0);
+          v_uv[1] = vec2(0.0);
+          v_uv[2] = vec2(0.0);
+          v_uv[3] = vec2(0.0);
+          v_normal = vec3(0.0);
+          gl_Position = vec4(0.0);
+        }
       }
     `;
   }
@@ -393,6 +507,13 @@ export class W3xSimpleTerrainRenderer {
       }
 
       void main() {
+        // Check if we have any texture at all
+        if (v_tilesets[0] < 0.5) {
+          // No textures - output transparent black
+          gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+          return;
+        }
+
         // mdx-m3-viewer always samples first texture (no check)
         vec4 color = sampleTexture(v_tilesets[0], v_uv[0]);
 
@@ -421,5 +542,6 @@ export class W3xSimpleTerrainRenderer {
     this.terrainMesh?.dispose();
     this.terrainMesh = null;
     this.textureManager.dispose();
+    this.cliffRenderer.dispose();
   }
 }

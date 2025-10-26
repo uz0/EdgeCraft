@@ -56,6 +56,13 @@ const CAMERA_PRESETS = [
     radius: 25000,
     description: '45° angle from top-right corner',
   },
+  {
+    name: 'Terrain',
+    alpha: -Math.PI / 2,
+    beta: Math.PI / 3,
+    radius: 1100,
+    description: 'Close-up view of terrain tiles for variant comparison',
+  },
 ];
 
 export const ComparisonPage: React.FC = () => {
@@ -111,7 +118,8 @@ export const ComparisonPage: React.FC = () => {
     sceneRef.current = scene;
 
     scene.imageProcessingConfiguration.toneMappingEnabled = false;
-    scene.imageProcessingConfiguration.contrastEnabled = false;
+    scene.imageProcessingConfiguration.contrast = 1.0;
+    scene.imageProcessingConfiguration.exposure = 1.0;
     scene.imageProcessingConfiguration.colorGradingEnabled = false;
 
     scene.ambientColor = new BABYLON.Color3(1, 1, 1);
@@ -132,6 +140,9 @@ export const ComparisonPage: React.FC = () => {
     camera.attachControl(canvas, true);
     camera.minZ = 1;
     camera.maxZ = 200000;
+    camera.wheelPrecision = 0.1; // More sensitive scroll zoom
+    camera.lowerRadiusLimit = 100; // Minimum zoom distance
+    camera.upperRadiusLimit = 100000; // Maximum zoom distance
 
     (window as unknown as WindowWithViewer).babylonScene = scene;
     (window as unknown as WindowWithViewer).babylonCamera = camera;
@@ -159,7 +170,7 @@ export const ComparisonPage: React.FC = () => {
       setFps((prev) => ({ ...prev, ours: Math.round(engine.getFps()) }));
 
       // Update camera position
-      if (cameraRef.current && cameraRef.current.position) {
+      if (cameraRef.current !== null && cameraRef.current.position !== undefined) {
         const pos = cameraRef.current.position;
         setCameraPos((prev) => ({
           ...prev,
@@ -229,7 +240,10 @@ export const ComparisonPage: React.FC = () => {
         lastTime = now;
 
         // Update mdx camera position
-        if (simpleOrbitCameraRef.current && simpleOrbitCameraRef.current.position) {
+        if (
+          simpleOrbitCameraRef.current !== null &&
+          simpleOrbitCameraRef.current.position !== undefined
+        ) {
           const pos = simpleOrbitCameraRef.current.position;
           setCameraPos((prev) => ({
             ...prev,
@@ -308,6 +322,7 @@ export const ComparisonPage: React.FC = () => {
 
           const preset = CAMERA_PRESETS[0]!;
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
           const simpleCamera = setupCamera(mapViewer.map.worldScene, {
             distance: preset.radius,
             target: [mapCenterX, 500, mapCenterZ],
@@ -402,7 +417,7 @@ export const ComparisonPage: React.FC = () => {
         mdxCanvasRef.current.height = rect.height * window.devicePixelRatio;
 
         const viewer = war3MapViewerRef.current;
-        if (viewer.webgl && viewer.webgl.gl) {
+        if (viewer.webgl !== undefined && viewer.webgl.gl !== undefined) {
           viewer.webgl.gl.viewport(0, 0, mdxCanvasRef.current.width, mdxCanvasRef.current.height);
         }
       }
@@ -410,7 +425,7 @@ export const ComparisonPage: React.FC = () => {
 
     // Resize after a short delay to ensure layout has updated
     const timeoutId = setTimeout(resizeCanvases, 100);
-    return () => clearTimeout(timeoutId);
+    return (): void => clearTimeout(timeoutId);
   }, [overlayMode]);
 
   return (

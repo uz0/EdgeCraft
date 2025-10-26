@@ -71,14 +71,15 @@ export default defineConfig({
   },
 
   // Configure Vite dev server
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000', // Port 3000 is Vite's default
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000, // 2 minutes to start
-    stdout: 'pipe', // Log server output for debugging
-    stderr: 'pipe',
-  },
+  // Disabled: Start dev server manually with `npm run dev`
+  // webServer: {
+  //   command: 'npm run dev',
+  //   url: 'http://localhost:3000', // Port 3000 is Vite's default
+  //   reuseExistingServer: !process.env.CI,
+  //   timeout: 120000, // 2 minutes to start
+  //   stdout: 'pipe', // Log server output for debugging
+  //   stderr: 'pipe',
+  // },
 
   // Test projects for different browsers
   projects: [

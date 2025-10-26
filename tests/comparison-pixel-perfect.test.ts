@@ -36,17 +36,74 @@ const CAMERA_PRESETS: CameraPreset[] = [
     buttonSelector: 'button:has-text("45° View")',
     description: '45-degree angled view',
   },
+  {
+    name: 'terrain',
+    buttonSelector: 'button:has-text("Terrain")',
+    description: 'Close-up view of terrain tiles',
+  },
 ];
 
 async function waitForRenderersReady(page: Page): Promise<void> {
   await page.getByText('Our Renderer').waitFor({ timeout: 10000 });
   await page.getByText('mdx-m3-viewer').waitFor({ timeout: 10000 });
 
-  await page.waitForFunction(() => {
-    const allText = document.body.textContent || '';
-    const hasFPS = allText.includes('FPS:') && allText.match(/FPS:\s*\d+/g);
-    return hasFPS && hasFPS.length >= 2;
-  }, { timeout: 10000 });
+  await page.waitForFunction(
+    () => {
+      const allText = document.body.textContent || '';
+      const hasFPS = allText.includes('FPS:') && allText.match(/FPS:\s*\d+/g);
+      return hasFPS && hasFPS.length >= 2;
+    },
+    { timeout: 10000 }
+  );
+}
+
+async function waitForCliffLoading(page: Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      return (window as any).__cliffLoadingComplete === true;
+    },
+    { timeout: 30000 }
+  );
+
+  await page.waitForTimeout(5000);
+}
+
+async function hideFPSPanels(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const allDivs = document.querySelectorAll('div');
+    allDivs.forEach((div) => {
+      const textContent = div.textContent || '';
+      if (
+        textContent.includes('FPS:') ||
+        textContent.includes('Renderer') ||
+        textContent.includes('viewer')
+      ) {
+        const computedStyle = window.getComputedStyle(div);
+        if (computedStyle.position === 'absolute' && computedStyle.zIndex === '10') {
+          (div as HTMLElement).style.visibility = 'hidden';
+        }
+      }
+    });
+  });
+}
+
+async function showFPSPanels(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const allDivs = document.querySelectorAll('div');
+    allDivs.forEach((div) => {
+      const textContent = div.textContent || '';
+      if (
+        textContent.includes('FPS:') ||
+        textContent.includes('Renderer') ||
+        textContent.includes('viewer')
+      ) {
+        const computedStyle = window.getComputedStyle(div);
+        if (computedStyle.position === 'absolute' && computedStyle.zIndex === '10') {
+          (div as HTMLElement).style.visibility = 'visible';
+        }
+      }
+    });
+  });
 }
 
 async function captureRendererScreenshot(
@@ -54,9 +111,12 @@ async function captureRendererScreenshot(
   side: 'left' | 'right',
   outputPath: string
 ): Promise<void> {
-  const canvas = side === 'left'
-    ? await page.locator('canvas').first()
-    : await page.locator('canvas').nth(1);
+  await hideFPSPanels(page);
+
+  await page.waitForTimeout(100);
+
+  const canvas =
+    side === 'left' ? await page.locator('canvas').first() : await page.locator('canvas').nth(1);
 
   const boundingBox = await canvas.boundingBox();
   if (!boundingBox) {
@@ -72,6 +132,8 @@ async function captureRendererScreenshot(
       height: boundingBox.height,
     },
   });
+
+  await showFPSPanels(page);
 }
 
 function extractPixelSamples(
@@ -104,9 +166,7 @@ function extractPixelSamples(
   console.log(`\n${label} pixel samples:`);
   for (let i = 0; i < samples.length; i++) {
     const s = samples[i]!;
-    console.log(
-      `  [${i}] (${s.x}, ${s.y}): RGB(${s.r}, ${s.g}, ${s.b}) A=${s.a}`
-    );
+    console.log(`  [${i}] (${s.x}, ${s.y}): RGB(${s.r}, ${s.g}, ${s.b}) A=${s.a}`);
   }
 
   return samples;
@@ -139,14 +199,7 @@ function compareImages(
     console.log(`  Sample ${i} diff: R=${rDiff} G=${gDiff} B=${bDiff} (avg=${avgDiff.toFixed(1)})`);
   }
 
-  const diffPixels = pixelmatch(
-    img1.data,
-    img2.data,
-    diff.data,
-    width,
-    height,
-    { threshold: 0.1 }
-  );
+  const diffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.1 });
 
   fs.writeFileSync(diffPath, PNG.sync.write(diff));
 
@@ -214,6 +267,7 @@ test.describe('Renderer Comparison - Pixel Perfect Camera Matching', () => {
     test(`Camera positions should match exactly for ${preset.name}`, async ({ page }) => {
       await page.goto(COMPARISON_URL);
       await waitForRenderersReady(page);
+      await waitForCliffLoading(page);
 
       await page.click(preset.buttonSelector);
       await page.waitForTimeout(WAIT_AFTER_CAMERA_CHANGE);
@@ -225,14 +279,21 @@ test.describe('Renderer Comparison - Pixel Perfect Camera Matching', () => {
       );
 
       console.log(`✓ ${preset.name} camera positions match:`);
-      console.log(`  Babylon: [${cameraData.babylonPos.x.toFixed(2)}, ${cameraData.babylonPos.y.toFixed(2)}, ${cameraData.babylonPos.z.toFixed(2)}]`);
-      console.log(`  MDX (Z-up): [${cameraData.mdxPos[0].toFixed(2)}, ${cameraData.mdxPos[1].toFixed(2)}, ${cameraData.mdxPos[2].toFixed(2)}]`);
-      console.log(`  Expected Babylon: [${cameraData.expectedBabylon.x.toFixed(2)}, ${cameraData.expectedBabylon.y.toFixed(2)}, ${cameraData.expectedBabylon.z.toFixed(2)}]`);
+      console.log(
+        `  Babylon: [${cameraData.babylonPos.x.toFixed(2)}, ${cameraData.babylonPos.y.toFixed(2)}, ${cameraData.babylonPos.z.toFixed(2)}]`
+      );
+      console.log(
+        `  MDX (Z-up): [${cameraData.mdxPos[0].toFixed(2)}, ${cameraData.mdxPos[1].toFixed(2)}, ${cameraData.mdxPos[2].toFixed(2)}]`
+      );
+      console.log(
+        `  Expected Babylon: [${cameraData.expectedBabylon.x.toFixed(2)}, ${cameraData.expectedBabylon.y.toFixed(2)}, ${cameraData.expectedBabylon.z.toFixed(2)}]`
+      );
     });
 
     test(`Visual comparison for ${preset.name}`, async ({ page }) => {
       await page.goto(COMPARISON_URL);
       await waitForRenderersReady(page);
+      await waitForCliffLoading(page);
 
       await page.click(preset.buttonSelector);
       await page.waitForTimeout(WAIT_AFTER_CAMERA_CHANGE);
@@ -244,24 +305,21 @@ test.describe('Renderer Comparison - Pixel Perfect Camera Matching', () => {
       await captureRendererScreenshot(page, 'left', leftScreenshotPath);
       await captureRendererScreenshot(page, 'right', rightScreenshotPath);
 
-      const comparison = compareImages(
-        leftScreenshotPath,
-        rightScreenshotPath,
-        diffScreenshotPath
-      );
+      const comparison = compareImages(leftScreenshotPath, rightScreenshotPath, diffScreenshotPath);
 
       console.log(`\n${preset.name} Visual Comparison:`);
       console.log(`  Diff pixels: ${comparison.diffPixels} / ${comparison.totalPixels}`);
       console.log(`  Diff percentage: ${comparison.diffPercentage.toFixed(2)}%`);
       console.log(`  Screenshots saved to: ${SCREENSHOT_DIR}`);
 
-      expect(comparison.diffPercentage).toBeLessThan(50);
+      expect(comparison.diffPercentage).toBe(0);
     });
   }
 
   test('All camera presets should cycle correctly', async ({ page }) => {
     await page.goto(COMPARISON_URL);
     await waitForRenderersReady(page);
+    await waitForCliffLoading(page);
 
     const results: Array<{
       preset: string;

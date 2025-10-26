@@ -38,11 +38,9 @@ export class TerrainTextureManager {
       if (!response.ok) {
         throw new Error(`Failed to load warcraft-manifest.json: ${response.statusText}`);
       }
-      const data = await response.json();
+      const data = (await response.json()) as TerrainTextureManifest;
       this.manifest = data;
-      console.log('Warcraft manifest loaded:', Object.keys(data.terrain.textures).length, 'textures');
     } catch (error) {
-      console.error('Failed to load warcraft-manifest.json:', error);
       throw error;
     }
   }
@@ -111,26 +109,25 @@ export class TerrainTextureManager {
 
   /**
    * Get texture extended info for variation mapping
-   * Extended textures (512x256) use different variation cells than non-extended (256x512)
+   * Extended textures (512x256) use different variation cells than non-extended (256x256)
+   * Following mdx-m3-viewer: extended = texture.width > texture.height (map.ts:938)
    */
-  public async getTextureExtendedMap(textureIds: string[]): Promise<Map<number, boolean>> {
-    await this.loadManifest();
+  public getTextureExtendedMap(
+    textureIds: string[],
+    loadedTextures: BABYLON.Texture[]
+  ): Map<number, boolean> {
     const extendedMap = new Map<number, boolean>();
 
-    for (let i = 0; i < textureIds.length; i++) {
-      const textureId = textureIds[i];
-      if (!textureId || !this.manifest) {
+    for (let i = 0; i < Math.min(textureIds.length, loadedTextures.length); i++) {
+      const texture = loadedTextures[i];
+      if (!texture) {
         extendedMap.set(i, false);
         continue;
       }
 
-      const textureInfo = this.manifest.terrain.textures[textureId];
-      if (!textureInfo) {
-        extendedMap.set(i, false);
-        continue;
-      }
-
-      extendedMap.set(i, textureInfo.extended);
+      const size = texture.getSize();
+      const isExtended = size.width > size.height;
+      extendedMap.set(i, isExtended);
     }
 
     return extendedMap;
@@ -148,7 +145,12 @@ export class TerrainTextureManager {
 
     for (let i = 0; i < Math.min(textureIds.length, 15); i++) {
       const textureId = textureIds[i];
-      if (!textureId || !this.manifest) {
+      if (
+        textureId === undefined ||
+        textureId === null ||
+        textureId === '' ||
+        this.manifest === null
+      ) {
         texturePromises.push(Promise.resolve(this.createPlaceholderTexture(`placeholder_${i}`, i)));
         continue;
       }
@@ -159,7 +161,7 @@ export class TerrainTextureManager {
         continue;
       }
 
-      const texturePromise = new Promise<BABYLON.Texture>((resolve, reject) => {
+      const texturePromise = new Promise<BABYLON.Texture>((resolve, _reject) => {
         const texture = new BABYLON.Texture(
           textureInfo.url,
           this.scene,
@@ -170,10 +172,10 @@ export class TerrainTextureManager {
             texture.name = `${textureId}_${textureInfo.name}`;
             texture.wrapU = BABYLON.Texture.WRAP_ADDRESSMODE;
             texture.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
+            texture.gammaSpace = false;
             resolve(texture);
           },
-          (message) => {
-            console.warn(`Failed to load texture ${textureId} from ${textureInfo.url}: ${message}`);
+          () => {
             resolve(this.createPlaceholderTexture(textureId, i));
           }
         );
@@ -185,40 +187,6 @@ export class TerrainTextureManager {
     const textures = await Promise.all(texturePromises);
     return textures;
   }
-
-  private drawPlaceholderTile(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    size: number,
-    index: number
-  ): void {
-    const colors = [
-      '#8B7355',
-      '#6B8E23',
-      '#556B2F',
-      '#8B7D6B',
-      '#D2B48C',
-      '#8B6914',
-      '#A0522D',
-      '#9ACD32',
-      '#6B8E23',
-    ];
-
-    const color = colors[index % colors.length] ?? '#808080';
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, size, size);
-
-    ctx.fillStyle = '#00000040';
-    for (let py = 0; py < size; py += 32) {
-      for (let px = 0; px < size; px += 32) {
-        if ((px / 32 + py / 32) % 2 === 0) {
-          ctx.fillRect(x + px, y + py, 32, 32);
-        }
-      }
-    }
-  }
-
 
   /**
    * Dispose all cached textures

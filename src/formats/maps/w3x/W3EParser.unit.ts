@@ -56,7 +56,7 @@ describe('W3EParser', () => {
     view.setFloat32(offset, -128, true);
     offset += 4;
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
       view.setInt16(offset, 8192, true);
       offset += 2;
       view.setInt16(offset, 8192, true);
@@ -135,7 +135,7 @@ describe('W3EParser', () => {
     view.setFloat32(offset, -128, true);
     offset += 4;
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 9; i++) {
       view.setInt16(offset, 8104, true);
       offset += 2;
       view.setInt16(offset, 8192, true);
@@ -143,7 +143,7 @@ describe('W3EParser', () => {
       view.setUint16(offset, 0x0140, true);
       offset += 2;
       view.setUint8(offset++, 0x01);
-      view.setUint8(offset++, 0x00);
+      view.setUint8(offset++, 0x01);
     }
 
     return buffer;
@@ -184,11 +184,11 @@ describe('W3EParser', () => {
     expect(terrain.tileset).toBe('L');
     expect(terrain.customTileset).toBe(false);
     expect(terrain.groundTextureIds).toEqual(['Ldrt', 'Lgrs']);
-    expect(terrain.width).toBe(2);
+    expect(terrain.width).toBe(3);
     expect(terrain.height).toBe(2);
-    expect(terrain.groundTiles).toHaveLength(4);
-    expect(terrain.groundTiles[0]?.groundHeight).toBe(8192);
-    expect(terrain.groundTiles[0]?.waterLevel).toBe(8192);
+    expect(terrain.groundTiles).toHaveLength(6);
+    expect(terrain.groundTiles[0]?.groundHeight).toBe(0);
+    expect(terrain.groundTiles[0]?.waterLevel).toBe(0);
     expect(terrain.groundTiles[0]?.flags).toBe(0x40);
     expect(terrain.groundTiles[0]?.cliffLevel).toBe(1);
     expect(terrain.cliffTiles).toBeDefined();
@@ -207,11 +207,11 @@ describe('W3EParser', () => {
     expect(terrain.tileset).toBe('I');
     expect(terrain.customTileset).toBe(false);
     expect(terrain.groundTextureIds).toEqual(['Idrt', 'Isnw', 'Iice']);
-    expect(terrain.width).toBe(2);
-    expect(terrain.height).toBe(2);
-    expect(terrain.groundTiles).toHaveLength(4);
-    expect(terrain.groundTiles[0]?.groundHeight).toBe(8104);
-    expect(terrain.groundTiles[0]?.waterLevel).toBe(8192);
+    expect(terrain.width).toBe(3);
+    expect(terrain.height).toBe(3);
+    expect(terrain.groundTiles).toHaveLength(9);
+    expect(terrain.groundTiles[0]?.groundHeight).toBe(-0.171875);
+    expect(terrain.groundTiles[0]?.waterLevel).toBe(0);
     expect(terrain.groundTiles[0]?.groundTexture).toBe(0);
     expect(terrain.groundTiles[0]?.flags).toBe(5);
     expect(terrain.groundTiles[0]?.cliffLevel).toBe(1);

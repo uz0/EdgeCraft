@@ -1,24 +1,38 @@
 # Edge Craft - AI Development Guidelines
 
-IMPORTANT!
-our woring directory is /Users/dcversus/conductor/edgecraft/.conductor/lahore work only here
-i need you use as example render mdx-m3-viewer in all cameras at http://localhost:3000/comparison page, your goal is achive exact render in the left. cameras idealy aligned and also scene has red cube to prof that, you can rely on camera positions and DONT edit cameras!
-You need start reworking terrain and water, use all source code of mdx-m3-viewer possible to gather nuances and details. step by step re-implement terrain render (use the same textures and doodads from https://www.hiveworkshop.com/casc-contents?path= Temporary, we will replace them later). then terrain complitly matched, then work with cliffs, i need you exact reproduce all cliffs with shaders etc, they should look and work exactly. then after cliffs done i need you work on doodas and units, you need render them as the same and in the same positions. after you need adjust light and shaders to look closer.
-
-in src/vendor/mdx-m3-viewer/src/viewer/handlers/w3x/map.ts you can find DISABLED comment what turned off cliffs, units and doodas in mdx-m3-viewer, after you finishes with terrain and water - uncomment and continue work. i need you use tests/comparison-pixel-perfect.test.ts test to ensure what all pixel perfect matches, you need work untill test will pass with units/cliffs/doodas/terrain match. we need make Our Renderer look exactly same as right render mdx-m3-viewer
-
-DONT edit or modify src/pages/ComparisonPage.tsx, so we can rely on camera matching. its work perfect.
-EDIT mdx-m3-viewer initialisation/camera etc is FORBIDDEN! its our example and source of truth.
-IMPORTANT!
-
 ## 🎯 Project Awareness & Context
 **Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with TypeScript, React, and Babylon.js.
 - **Mondatory** identify on what PRP (Product Requirement Proposal) we are working now first, clarify user if you lost track.
 - **Always read `PRPs/*.md`** at the start of a new conversation to understand the current task goal and status.
+- **Always before context summarization leave comment with current status in related `PRPs/*.md`**.
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `CONTRIBUTING.md`.
 - for small changes or patches as exception we can user commit and branch prefixes hotfix-* and trivial-* and TRIVIAL: * and HOTFIX: *. **ONLY IF WAS ASKED FOR!**
 - **UPDATE PRP DURING WORK** After EVERY significant change, add row to Progress Tracking table, check off DoD items as completed, update "Current Blockers" or "Next Steps"
 - PRP should contain list of affected files
+
+
+## Current status context (put here lattest user messages what looks like requirements or request to change UX/DX)
+
+our woring directory is /Users/dcversus/conductor/edgecraft/.conductor/lahore work only here
+i need you use as example render mdx-m3-viewer in all cameras at http://localhost:3000/comparison page, your goal is achive exact render in the left. cameras idealy aligned and also scene has red cube to prof that, you can rely on camera positions and DONT edit cameras!
+You need start implement cliffs and water, use all source code of mdx-m3-viewer possible to gather nuances and details. step by step re-implement cliffs (use the same textures and doodads from https://www.hiveworkshop.com/casc-contents?path= Temporary, we will replace them later). then cliffs complitly matched and tests show 100% match, then enable water and implement it, i need you exact reproduce all nuances with shaders etc, they should look and work exactly the same. then after water done i need you work on doodas and units, you need render them as the same and in the same positions. after you need adjust light and shaders to look closer.
+
+in src/vendor/mdx-m3-viewer/src/viewer/handlers/w3x/map.ts you can find DISABLED comment what turned off units and doodas in mdx-m3-viewer, after you finishes with water - uncomment and continue work. i need you use tests/comparison-pixel-perfect.test.ts test to ensure what all pixel perfect matches, you need work untill test will pass with terrain/cliffs/doodas/units match. we need make Our Renderer look exactly same as right render mdx-m3-viewer
+
+DONT edit or modify src/pages/ComparisonPage.tsx, so we can rely on camera matching. its work perfect.
+EDIT mdx-m3-viewer initialisation/camera etc is FORBIDDEN! its our example and source of truth.
+most actual public info about details can be explained in https://867380699.github.io/blog/2019/05/09/W3X_Files_Format#war3mapw3e or https://github.com/stijnherfst/HiveWE/wiki
+
+- 2025-10-26: npm run typecheck fails (unused local in W3xWarcraftTerrainRenderer), npm run lint reports 295 errors in scripts/extract-warcraft-gamedata.ts and other terrain files, npm run test fails W3EParser width expectation (2 vs 3). Need fixes before committing terrain overhaul.
+
+## 🧭 Local Terrain Renderer Cheatsheet
+- Mirror `War3MapViewerMap.loadTerrainCliffsAndWater()` from `src/vendor/mdx-m3-viewer/src/viewer/handlers/w3x/map.ts` to drive everything off the parsed `war3map.w3e` corners (257×257 grid, tile = 128 world units). Reuse the center offset and map size to align Babylon scene bounds.
+- Build shared height data first: `cornerHeights`, `cliffHeights`, `waterHeights`, and `waterFlags` exactly like the viewer (Float32Array per corner, Uint8Array per tile). Upload them as `ALPHA` textures with `NEAREST` sampling so shaders can reconstruct normals and detect water without gaps.
+- Port `cornerTexture()` and `getVariation()` logic into a TypeScript `TerrainTextureBuilder` that produces `cornerTextures` and `cornerVariations` (4 entries per tile). Preserve the `unique(...).sort()` order to keep texture layers deterministic.
+- Create one instanced mesh for the 256×256 tiles: instance ID indexes into the textures/variations buffers, vertex buffer stays `[0,0,1,0,0,1,1,1]`, index buffer `[0,1,2,1,3,2]`. Derive tile XY from `instanceId` the same way mdx-m3-viewer does (`mod`/`floor`) so UVs match.
+- Drive cliffs and water from the same pass: cliffs come from the `cliffs` accumulator (path → locations + texture index). After terrain arrays match, hand off to the cliff shader equivalents and stream `TerrainModel` instances per unique MDX.
+- Use mdx-m3-viewer shader sources as the template: vertex shader samples height map neighbors to compute normals, fragment shader blends up to 4 terrain textures plus optional blight. Keep water flow uniforms (`waterIncreasePerFrame`, shallow/deep colors, texture cycle) identical.
+- Validate after every change with `npm run test -- tests/comparison-pixel-perfect.test.ts` and visually via `http://localhost:3000/comparison`. Target diff <0.02%. Reference docs: HiveWE heightmap notes, Stijn Herfst blog, and mdx-m3-viewer commit history around `terrainmodel.ts`.
 
 ## 🧱 Development
 

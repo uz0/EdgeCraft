@@ -160,8 +160,7 @@ export function useMapPreviews(): UseMapPreviewsResult {
                 continue;
               }
 
-              // Extract or generate
-              const result = await extractor.extract(map.file, mapData);
+              const result = await extractor.extract(map.file, mapData.format);
 
               if (result.success && result.dataUrl != null && result.dataUrl !== '') {
                 newPreviews.set(map.id, result.dataUrl);
@@ -171,7 +170,6 @@ export function useMapPreviews(): UseMapPreviewsResult {
                 setLoadingStates(new Map(newStates));
                 setLoadingMessages(new Map(newMessages));
 
-                // Cache for future use (non-blocking)
                 void cache.set(map.id, result.dataUrl);
               } else {
                 newStates.set(map.id, 'error');
@@ -206,11 +204,9 @@ export function useMapPreviews(): UseMapPreviewsResult {
         return;
       }
 
-      // Set loading state
       setLoadingStates((prev) => new Map(prev).set(map.id, 'loading'));
 
       try {
-        // Check cache first
         const cachedPreview = await cacheRef.current.get(map.id);
 
         if (cachedPreview != null && cachedPreview !== '') {
@@ -219,15 +215,13 @@ export function useMapPreviews(): UseMapPreviewsResult {
           return;
         }
 
-        // Not cached - extract or generate
-        const result = await extractorRef.current.extract(map.file, mapData);
+        const result = await extractorRef.current.extract(map.file, mapData.format);
 
         if (result.success && result.dataUrl != null && result.dataUrl !== '') {
-          const dataUrl = result.dataUrl; // Type narrowing
+          const dataUrl = result.dataUrl;
           setPreviews((prev) => new Map(prev).set(map.id, dataUrl));
           setLoadingStates((prev) => new Map(prev).set(map.id, 'success'));
 
-          // Cache for future use
           await cacheRef.current.set(map.id, dataUrl);
         } else {
           setLoadingStates((prev) => new Map(prev).set(map.id, 'error'));
