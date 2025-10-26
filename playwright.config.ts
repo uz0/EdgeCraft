@@ -11,7 +11,7 @@ export default defineConfig({
   testDir: './tests',
 
   // ONLY match specific E2E test files (not Jest unit tests)
-  testMatch: ['MapGallery.test.ts', 'OpenMap.test.ts'],
+  testMatch: ['MapGallery.test.ts', 'OpenMap.test.ts', 'BenchmarkComparison.test.ts'],
 
   // Baseline screenshots directory
   snapshotDir: './tests/e2e-screenshots',
@@ -38,11 +38,7 @@ export default defineConfig({
   workers: 1,
 
   // Reporter configuration
-  reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['list'],
-    process.env.CI ? ['github'] : ['line'],
-  ],
+  reporter: process.env.CI ? [['list']] : [['line']],
 
   // Shared settings for all tests
   use: {
@@ -76,6 +72,9 @@ export default defineConfig({
     timeout: 120000, // 2 minutes to start
     stdout: 'pipe', // Log server output for debugging
     stderr: 'pipe',
+    env: {
+      VITE_OPEN_BROWSER: 'false',
+    },
   },
 
   // Test projects for different browsers

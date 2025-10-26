@@ -342,12 +342,15 @@ export class W3XMapLoader implements IMapLoader {
       blendMap: textureIndices, // Same blendMap shared by all textures (indices point into textureIds array)
     }));
 
+    const cliffLevels = W3EParser.getCliffLevels(w3e);
+
     return {
       width: w3e.width,
       height: w3e.height,
       heightmap,
       textures,
       water,
+      cliffLevels,
     };
   }
 

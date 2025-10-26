@@ -319,6 +319,25 @@ export class MapRendererCore {
       }
     }
 
+    const mapFormat = this.currentMap?.format;
+    if (mapFormat === 'w3x' || mapFormat === 'w3m') {
+      const tileSize = 128;
+      const shaderSystem = this.qualityManager.getSystems().shaders ?? null;
+      this.terrainRenderer.renderWarcraftLayers({
+        width: terrain.width,
+        height: terrain.height,
+        tileSize,
+        heightmap: terrain.heightmap,
+        cliffLevels: terrain.cliffLevels,
+        water: terrain.water,
+        minHeight,
+        maxHeight,
+        shaderSystem,
+      });
+    } else {
+      this.terrainRenderer.clearAdditionalLayers();
+    }
+
     // Return actual heightmap range for camera positioning
     return { min: minHeight, max: maxHeight };
   }

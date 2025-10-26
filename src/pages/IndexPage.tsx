@@ -4,7 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+const BenchmarkHarness = React.lazy(async () => {
+  const module = await import('./BenchmarkPage');
+  return { default: module.BenchmarkPage };
+});
 import { MapGallery } from '../ui/MapGallery';
 import { useMapPreviews } from '../hooks/useMapPreviews';
 import { W3XMapLoader } from '../formats/maps/w3x/W3XMapLoader';
@@ -33,6 +37,7 @@ const MAP_LIST = [
 ];
 
 export const IndexPage: React.FC = () => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [maps] = useState<MapMetadata[]>(() =>
@@ -49,6 +54,8 @@ export const IndexPage: React.FC = () => {
 
   const [resetTrigger, setResetTrigger] = useState(0);
   const { previews, generatePreviews, clearCache } = useMapPreviews();
+
+  const benchmarkMode = new URLSearchParams(location.search).get('mode') === 'ci';
 
   // Generate previews for maps (background process)
   useEffect(() => {
@@ -129,6 +136,14 @@ export const IndexPage: React.FC = () => {
     thumbnailUrl: previews.get(map.id),
   }));
 
+  if (benchmarkMode) {
+    return (
+      <React.Suspense fallback={<main data-testid="benchmark-loading" />}>
+        <BenchmarkHarness />
+      </React.Suspense>
+    );
+  }
+
   return (
     <div className="index-page">
       <header className="index-header">
@@ -137,24 +152,32 @@ export const IndexPage: React.FC = () => {
             <h1>EdgeCraft</h1>
             <p>The Edge Story</p>
           </div>
-          <button
-            className="reset-button"
-            onClick={handleReset}
-            title="Clear previews and regenerate"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="index-header-actions">
+            <Link className="index-link" to="/benchmark">
+              Benchmark Harness
+            </Link>
+            <Link className="index-link" to="/comparison">
+              Comparison
+            </Link>
+            <button
+              className="reset-button"
+              onClick={handleReset}
+              title="Clear previews and regenerate"
             >
-              <path
-                d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 

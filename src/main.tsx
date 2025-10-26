@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
+import './benchmarks';
 
 // React 18 root creation
 const rootElement = document.getElementById('root');
