@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-26T14:01:19.138Z",
+  "timestamp": "2025-10-26T14:48:17.493Z",
   "parameters": {
     "iterations": 6,
     "elements": 60
@@ -7,8 +7,8 @@
   "results": [
     {
       "library": "edgecraft",
-      "elapsedMs": 2.3,
-      "opsPerMs": 156.52,
+      "elapsedMs": 2.5,
+      "opsPerMs": 144,
       "samples": 360,
       "metadata": {
         "domNodes": 60,
@@ -18,8 +18,8 @@
     },
     {
       "library": "babylonGui",
-      "elapsedMs": 4,
-      "opsPerMs": 90,
+      "elapsedMs": 4.1,
+      "opsPerMs": 87.8,
       "samples": 360,
       "metadata": {
         "exportedKeys": 88,
@@ -29,8 +29,8 @@
     },
     {
       "library": "wcardinalUi",
-      "elapsedMs": 4.8,
-      "opsPerMs": 75,
+      "elapsedMs": 4.6,
+      "opsPerMs": 78.26,
       "samples": 360,
       "metadata": {
         "moduleKeys": 0,
@@ -43,20 +43,20 @@
     {
       "place": 1,
       "library": "edgecraft",
-      "elapsedMs": 2.3,
-      "opsPerMs": 156.52
+      "elapsedMs": 2.5,
+      "opsPerMs": 144
     },
     {
       "place": 2,
       "library": "babylonGui",
-      "elapsedMs": 4,
-      "opsPerMs": 90
+      "elapsedMs": 4.1,
+      "opsPerMs": 87.8
     },
     {
       "place": 3,
       "library": "wcardinalUi",
-      "elapsedMs": 4.8,
-      "opsPerMs": 75
+      "elapsedMs": 4.6,
+      "opsPerMs": 78.26
     }
   ]
 }

@@ -38,10 +38,19 @@ export const MapViewerPage: React.FC = () => {
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const engine = new BABYLON.Engine(canvas, true, {
-      preserveDrawingBuffer: true,
-      stencil: true,
-    });
+
+    let engine: BABYLON.Engine;
+    try {
+      engine = new BABYLON.Engine(canvas, true, {
+        preserveDrawingBuffer: true,
+        stencil: true,
+      });
+    } catch (err) {
+      console.error('Failed to initialize Babylon.js engine:', err);
+      setError(`WebGL initialization failed: ${err instanceof Error ? err.message : String(err)}`);
+      setIsLoading(false);
+      return;
+    }
 
     engineRef.current = engine;
 
