@@ -40,16 +40,6 @@ export const IndexPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const benchmarkMode = new URLSearchParams(location.search).get('mode') === 'ci';
-
-  if (benchmarkMode) {
-    return (
-      <React.Suspense fallback={<main data-testid="benchmark-loading" />}>
-        <BenchmarkHarness />
-      </React.Suspense>
-    );
-  }
-
   const [maps] = useState<MapMetadata[]>(() =>
     MAP_LIST.map((m) => ({
       id: m.name,
@@ -64,6 +54,8 @@ export const IndexPage: React.FC = () => {
 
   const [resetTrigger, setResetTrigger] = useState(0);
   const { previews, generatePreviews, clearCache } = useMapPreviews();
+
+  const benchmarkMode = new URLSearchParams(location.search).get('mode') === 'ci';
 
   // Generate previews for maps (background process)
   useEffect(() => {
@@ -143,6 +135,14 @@ export const IndexPage: React.FC = () => {
     ...map,
     thumbnailUrl: previews.get(map.id),
   }));
+
+  if (benchmarkMode) {
+    return (
+      <React.Suspense fallback={<main data-testid="benchmark-loading" />}>
+        <BenchmarkHarness />
+      </React.Suspense>
+    );
+  }
 
   return (
     <div className="index-page">

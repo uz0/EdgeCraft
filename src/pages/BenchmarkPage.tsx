@@ -23,7 +23,7 @@ export const BenchmarkPage: React.FC = () => {
     global['__edgecraftBenchmarkLastResult'] = null;
     global['__edgecraftBenchmarkReady'] = true;
 
-    const handler = async (event: Event) => {
+    const handler = async (event: Event): Promise<void> => {
       if (!(event instanceof CustomEvent)) {
         return;
       }
@@ -42,12 +42,12 @@ export const BenchmarkPage: React.FC = () => {
         library,
         iterations,
         elements,
-        container: containerRef.current
+        container: containerRef.current,
       });
 
       setSummary((prev) => ({
         history: [...prev.history, result],
-        last: result
+        last: result,
       }));
 
       (window as typeof window & Record<string, unknown>)['__edgecraftBenchmarkLastResult'] =
@@ -55,9 +55,13 @@ export const BenchmarkPage: React.FC = () => {
       window.dispatchEvent(new CustomEvent(BENCHMARK_COMPLETE_EVENT, { detail: result }));
     };
 
-    window.addEventListener(BENCHMARK_EVENT, handler);
-    return () => {
-      window.removeEventListener(BENCHMARK_EVENT, handler);
+    window.addEventListener(BENCHMARK_EVENT, (event: Event) => {
+      void handler(event);
+    });
+    return (): void => {
+      window.removeEventListener(BENCHMARK_EVENT, (event: Event) => {
+        void handler(event);
+      });
       global['__edgecraftBenchmarkReady'] = false;
     };
   }, []);
@@ -93,7 +97,11 @@ export const BenchmarkPage: React.FC = () => {
       </section>
 
       <section className="BenchmarkPage__stage" data-testid="benchmark-stage">
-        <div ref={containerRef} aria-label="Benchmark container" data-testid="benchmark-container" />
+        <div
+          ref={containerRef}
+          aria-label="Benchmark container"
+          data-testid="benchmark-container"
+        />
       </section>
 
       {!ciMode && (

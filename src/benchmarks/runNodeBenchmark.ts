@@ -56,7 +56,7 @@ export async function runNodeBenchmark(request: BenchmarkRequest): Promise<Bench
     metadata: {
       ...metadata,
       weight: config.weights.node,
-      accumulator: Number(accumulator.toFixed(4))
-    }
+      accumulator: Number(accumulator.toFixed(4)),
+    },
   };
 }

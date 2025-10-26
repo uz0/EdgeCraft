@@ -4,7 +4,9 @@ import type { BenchmarkResult, BrowserBenchmarkRequest } from './types';
 
 const EDGECRAFT_ROLE = 'edgecraft-benchmark-element';
 
-export async function runBrowserBenchmark(request: BrowserBenchmarkRequest): Promise<BenchmarkResult> {
+export async function runBrowserBenchmark(
+  request: BrowserBenchmarkRequest
+): Promise<BenchmarkResult> {
   const { library, iterations, elements, container } = request;
   const config = getLibraryConfig(library);
   const samples = iterations * elements;
@@ -65,7 +67,6 @@ export async function runBrowserBenchmark(request: BrowserBenchmarkRequest): Pro
       for (let i = 0; i < iterations; i += 1) {
         // WinterCardinal relies on Pixi canvas; we emulate layout computation to avoid DOM dependency.
         for (let j = 0; j < elements; j += 1) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const pseudoLayout = (i * 101 + j * 17) % 89;
           accumulator += pseudoLayout * 0.01;
         }
@@ -91,7 +92,7 @@ export async function runBrowserBenchmark(request: BrowserBenchmarkRequest): Pro
     metadata: {
       ...metadata,
       weight: config.weights.browser,
-      accumulator: Number(accumulator.toFixed(4))
-    }
+      accumulator: Number(accumulator.toFixed(4)),
+    },
   };
 }

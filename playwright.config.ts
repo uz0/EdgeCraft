@@ -73,8 +73,8 @@ export default defineConfig({
     stdout: 'pipe', // Log server output for debugging
     stderr: 'pipe',
     env: {
-      VITE_OPEN_BROWSER: 'false'
-    }
+      VITE_OPEN_BROWSER: 'false',
+    },
   },
 
   // Test projects for different browsers
