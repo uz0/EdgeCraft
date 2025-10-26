@@ -364,6 +364,35 @@ Design and implement blockchain infrastructure and token economics for EdgeCraft
    - Yield farming strategies (earn interest on treasury)
    - Risk management (hedging, insurance)
 
+## 📚 Research / Related Materials (2025-10-27)
+
+### Privacy Network Comparison
+- **Aztec**: Upcoming Aztec Network (Noir-based, private-by-default) targets ~200 TPS with hybrid rollup design; Connect sunset (2024) means production timeline uncertain, so pilot would rely on devnet/testnet and requires running our own sequencer/relayer. Strength: programmable privacy (shielded transfers, on-chain anonymity). Risk: immature tooling, limited wallet support; compliance review needed because fully private flows trigger regulatory scrutiny.
+- **Polygon zkEVM**: Public, high compatibility with Ethereum tooling, ~30-50 TPS today, no native privacy. Could pair with third-party privacy layer (Railgun, zkMoney) for optional shielding but adds UX friction. Good for mainnet readiness and exchange liquidity.
+- **Starknet**: Cairo-based, ~20 TPS currently with roadmap to higher throughput; account abstraction native (helpful for gas sponsorship). Privacy currently absent, though projects like ZKLend exploring. Needs custom Cairo dev skills.
+- **zkSync Era**: EVM-like via LLVM transpilation, 2000+ TPS target, ecosystem growing; offers `zkPorter` for hybrid data availability but not privacy. Easiest path if anonymity requirement can be scoped to off-chain mixing.
+- **Manta Pacific / Secret Network**: Provide privacy features (Celestia DA for Manta, TEE-based for Secret) but smaller ecosystems; TEEs raise trust concerns for AGPL alignment.
+
+### Currency Architecture Insights
+- For the 40% gameplay reward pool, model emissions using `rewardPerBlock = (annualRewardPool / blocksPerYear)` with dynamic difficulty: scale rewards by `playerShare = individualContribution / totalContribution`, where contribution = verified LLM token allotments + in-game time. Apply anti-sybil caps by binding contributions to soulbound reputation NFTs or staked collateral.
+- Implement dual-bucket treasury: 40% player rewards (streamed via vesting contract), 30% community grants (map creators), 20% operations, 10% reserve. Vesting contracts should be upgrade-resistant (use OpenZeppelin `CliffVesting` + timelock governor).
+- Anonymous payouts require relayer-operated shielded pools (Aztec or alternative). If Aztec unavailable, consider building on Polygon with Semaphore-style zero-knowledge claims: players submit proofs of weekly activity to claim payouts without exposing addresses.
+
+### NFT Pilot Considerations
+- Prefer ERC-1155 for inventory attachments (stackable items, skins). Metadata stored on IPFS/Arweave with hashes recorded in manifest; ensure all art is original or procedurally generated to comply with legal PRP.
+- Implement opt-in bridging: NFTs only unlock cosmetic inventory slots; gameplay effects remain server-authoritative to avoid pay-to-win perceptions.
+- Track provenance in `PlaySession` structs so rewards can reference both fungible tokens and optional NFT drops from the same proof-of-play attestation.
+
+### UX & Compliance Notes
+- Account abstraction (EIP-4337) or Sequencer-sponsored transactions needed for frictionless onboarding; evaluate Biconomy or native Starknet AA depending on chosen chain.
+- Integrate privacy disclosures and parental controls: shielded currency must allow voluntary transparency (view keys) when required by law or tournaments.
+- Draft fallback plan: if privacy chain not production-ready, release on public L2 with obfuscation limited to off-chain reward escrow until compliance counsel signs off on full anonymity.
+
+### Open Questions
+- Can we source or operate a compliant relayer network that keeps user data anonymous while still blocking sanctioned addresses?
+- What oracle infrastructure will attest to “LLM token sharing” without revealing proprietary usage data? Explore ZK-proof-of-resource.
+- How do we sunset or migrate tokens if privacy chain changes (Aztec delays)? Need upgrade/migration clause in yellowpaper.
+
 ---
 
 ## ✅ Definition of Done (DoD)
@@ -408,6 +437,7 @@ Design and implement blockchain infrastructure and token economics for EdgeCraft
 |------|------|-------------|--------|
 | 2025-10-26 | System Analyst | Created PRP with comprehensive DoR checklist | Planned |
 | 2025-10-27 | System Analyst | Added key goals for anonymous currency strategy, yellowpaper scope, and NFT pilot dependencies | Planned |
+| 2025-10-27 | Developer Research | Compiled privacy L2 comparison, emission modeling approach, and NFT pilot considerations | Planned |
 | _TBD_ | CEO | Answer prerequisite questions | Pending |
 | _TBD_ | Legal Team | Determine token classification | Blocked by PRP 1 |
 | _TBD_ | Developer | Research blockchain platforms | Pending |

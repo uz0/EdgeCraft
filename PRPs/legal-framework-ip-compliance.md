@@ -260,6 +260,31 @@ Establish comprehensive legal framework for EdgeCraft organization addressing:
    - Identify low-risk replacements (generic textures like "grass", "dirt")
    - Estimate artist time: hours per texture/model
 
+## 📚 Research / Related Materials (2025-10-27)
+
+### Legal Precedent Digest
+- *Sega v. Accolade* (1992) and *Sony v. Connectix* (1999) confirm that reverse-engineering for interoperability is lawful if no copyrighted assets are redistributed, reinforcing our clean-room stance for file formats and engine behaviour replication.
+- *Micro Star v. FormGen* (1998) ruled that distributing user levels bundled with original art constituted an infringing derivative work, underscoring that any Warcraft III port must exclude Blizzard textures, models, music, and lore verbatim.
+- *Blizzard v. Valve* (2012) over the DOTA trademark illustrates that custom map authors can convey rights to their unique contributions but do not gain ownership over Blizzard IP; we must secure explicit contributor assignments for any legacy campaign imports.
+- *Lewis Galoob v. Nintendo* (1992) highlighted that ephemeral gameplay modifications are permissible when no fixed copy is created, meaning we can mirror mechanics (damage formulas, ability behaviour) so long as no Blizzard expressive content ships with EdgeCraft.
+- EU idea/expression doctrine and US case law both protect abstract mechanics and game systems, but names, storylines, and distinctive visual/audio elements remain off-limits without licensing.
+
+### Safe Porting & Contributor Controls
+- Require contributor representations that they own (or have retained) the rights to all non-Blizzard creative content in the map; provide a templated assignment granting EdgeCraft a perpetual, irrevocable license to redistribute converted materials under AGPL-compatible terms.
+- Build an ingestion checklist that automatically strips or blocks Blizzard BLP/DDS textures, MDX models, voice lines, music, scripted dialog, and canonical lore strings during conversion.
+- Maintain provenance logs for every imported map to document author identity, original publication date, and proof of consent, creating a defensible audit trail if takedown claims arise.
+- Document the “red line” matrix: mechanics logic, numeric balance, trigger flow, unit stats = ✅; art assets, cinematics, Warcraft race names, campaign text, music cues, hero likenesses = 🚫 unless independently recreated.
+
+### Licensing & AGPL Interface Notes
+- Core engine and tooling remain AGPL; optional blockchain connectors or proprietary asset packs must interact via network/service boundaries to avoid copyleft contamination.
+- Provide dual-license guidance for community submissions: code contributions under AGPL, creative assets under CC-BY or custom permissive terms that allow redistribution within EdgeCraft while avoiding Blizzard dependencies.
+- Coordinate with blockchain PRP so smart contracts, NFT metadata, and token reward systems never encode Blizzard-owned identifiers or textures, preventing accidental derivative works through on-chain data.
+
+### Open Questions
+- Confirm whether ported custom campaign authors retained rights if their work incorporated Blizzard cinematics or voice lines (likely no); need legal review before allowing such imports.
+- Validate DMCA 1201(f) applicability when distributing tooling that parses SLK data but not the original files—counsel opinion required.
+- Determine if localization text databases require redaction (Warcraft-specific jargon) or if generic replacements suffice for first release.
+
 ---
 
 ## ✅ Definition of Done (DoD)
@@ -300,6 +325,7 @@ Establish comprehensive legal framework for EdgeCraft organization addressing:
 |------|------|-------------|--------|
 | 2025-10-26 | System Analyst | Created PRP with comprehensive DoR checklist | Planned |
 | 2025-10-27 | System Analyst | Added cross-PRP key goals for Warcraft mechanic reproduction and compliance alignment | Planned |
+| 2025-10-27 | Legal Research | Logged precedent findings on mechanics replication, contributor controls, and AGPL interfaces | Planned |
 | _TBD_ | CEO | Answer prerequisite questions | Pending |
 | _TBD_ | Legal Team | Research jurisdiction options | Pending |
 | _TBD_ | Developer | Complete asset inventory | Pending |
