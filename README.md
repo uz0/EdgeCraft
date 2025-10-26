@@ -58,6 +58,8 @@ CLAUDE.md                # AI development guidelines
 
 - **[CLAUDE.md](./CLAUDE.md)** - AI development workflow & rules
 - **[PRPs/](./PRPs/)** - Product requirements
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Human contributor workflow
+- **[SECURITY.md](./SECURITY.md)** - Responsible disclosure policy
 
 ## 🛡️ Legal Compliance
 
@@ -82,13 +84,23 @@ npm run test:e2e               # E2E tests (Playwright)
 npm run lint:fix               # Auto-fix linting issues
 ```
 
+## 🤖 Automation & Workflows
+
+- **CI/CD Pipeline:** `.github/workflows/ci.yml` for lint, typecheck, unit, e2e, build, and report comments.
+- **Asset Validation:** `.github/workflows/asset-validation.yml` verifies licenses, attribution, and manifest integrity.
+- **Stale Issue Locking:** `.github/workflows/lock-closed-issues.yml` locks closed issues after 14 days to focus triage on new reports.
+- **Claude Code Integrations:** `.github/workflows/claude.yml` and `.github/workflows/claude-code-review.yml` enable AI assistance on PRs and reviews.
+- **E2E Snapshot Refresh:** `.github/workflows/update-e2e-snapshots.yml` regenerates Playwright artifacts on demand.
+
 ## 🤝 Contributing
 
 1. Read **[CLAUDE.md](./CLAUDE.md)** for workflow
-2. Find current PRP in **PRPs/** directory
-3. Follow **Definition of Done (DoD)** checklist
-4. Ensure all tests pass (`npm test`)
-5. Run validation (`npm run validate`)
+2. Review **[CONTRIBUTING.md](./CONTRIBUTING.md)** for human workflow details
+3. Find current PRP in **PRPs/** directory
+4. File issues using the templates in `.github/ISSUE_TEMPLATE/`
+5. Follow **Definition of Done (DoD)** checklist and complete the PR template
+6. Ensure all tests pass (`npm test`)
+7. Run validation (`npm run validate`)
 
 
 ## 📜 License

@@ -8,3 +8,21 @@ export type {
   BenchmarkResult,
   BrowserBenchmarkRequest
 } from './types';
+
+declare global {
+  interface Window {
+    __edgecraftBenchmarkExports?: {
+      runBrowserBenchmark: typeof runBrowserBenchmark;
+      listBenchmarkLibraries: typeof listBenchmarkLibraries;
+      getLibraryConfig: typeof getLibraryConfig;
+    };
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__edgecraftBenchmarkExports = {
+    runBrowserBenchmark,
+    listBenchmarkLibraries,
+    getLibraryConfig
+  };
+}

@@ -1,0 +1,141 @@
+name: 🐛 Bug Report
+description: Report a defect in the Edge Craft engine, tooling, or automation.
+title: "[BUG] "
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Edge Craft!
+
+        Before filing, please:
+        - Pull the latest `main` branch and reinstall dependencies
+        - Read the active PRP to confirm the behaviour is actually supported
+        - Search [open issues](https://github.com/dcversus/edgecraft/issues?q=is%3Aissue+is%3Aopen+label%3Abug) to avoid duplicates
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Preflight Checklist
+      options:
+        - label: I searched existing Edge Craft issues and discussions
+          required: true
+        - label: I reproduced this bug on the current `main` commit
+          required: true
+        - label: I captured a minimal reproduction (map, script, or CLI steps)
+          required: true
+        - label: This is not a support question or feature request
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What broke?
+      description: Describe the unexpected behaviour in one or two sentences.
+      placeholder: Terrain tiles flicker when switching Babylon.js camera modes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include exact CLI commands, map filenames, and any additional assets required to reproduce.
+      placeholder: |
+        1. Checkout commit 1234abcd and run `npm run dev`
+        2. Load `public/maps/ashenvale.w3x`
+        3. Rotate the camera 180°
+        4. Observe both specular and shadow artifacts on cliff meshes
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What should happen instead?
+      placeholder: Mesh normals stay stable while rotating the camera.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Paste screenshots, logs, stack traces, or CLI output. This field is rendered as code.
+      render: shell
+      placeholder: |
+        [engine] GL ERROR: drawElements instanced lighting pipeline failed...
+    validations:
+      required: true
+
+  - type: textarea
+    id: regression_notes
+    attributes:
+      label: Regression context
+      description: If this previously worked, list the last known good commit or release.
+      placeholder: Worked on commit 2ab4c89 (September 18), broken since 3dff102.
+
+  - type: input
+    id: commit
+    attributes:
+      label: Edge Craft commit hash
+      description: Output of `git rev-parse HEAD` from your reproduction environment.
+      placeholder: 3dff1025a9b0c893f0c5be02f1a0b9327495d1cc
+    validations:
+      required: true
+
+  - type: input
+    id: map_assets
+    attributes:
+      label: Map or asset references
+      description: Provide filenames and locations (e.g., `public/maps/ashenvale.w3x`).
+      placeholder: public/maps/ashenvale.w3x
+
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime environment
+      description: Where does the bug manifest?
+      options:
+        - Dev server (npm run dev)
+        - Production build (npm run build && npm run preview)
+        - Automated tests (npm run test / npm run validate)
+        - GitHub Actions workflow
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating_system
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Ubuntu/Debian Linux
+        - Other Linux
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser_gpu
+    attributes:
+      label: Rendering stack
+      options:
+        - Chromium-based (Chrome, Edge, Brave)
+        - Firefox
+        - Safari/WebKit
+        - Headless (Playwright)
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Additional context
+      description: Link related issues, PRPs, or attach small code snippets that help diagnose the bug.

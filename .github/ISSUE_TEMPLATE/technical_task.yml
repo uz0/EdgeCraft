@@ -1,0 +1,53 @@
+name: 🧱 Technical Task
+description: Track refactors, automation changes, or infrastructure work.
+title: "[TASK] "
+labels:
+  - chore
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for infrastructure, automation, or refactor work that does not directly surface as a user-facing feature.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Task summary
+      description: Describe the work in one or two sentences.
+      placeholder: Adopt GitHub issue templates and lock workflow from claude-code project.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Explain why this task is necessary. Reference metrics, incidents, or PRPs.
+      placeholder: Lack of templates creates inconsistent bug reports and slows triage.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope & deliverables
+      description: List the concrete outputs (files, workflows, scripts) expected from this task.
+      placeholder: |
+        - Add .github/ISSUE_TEMPLATE suite
+        - Create CONTRIBUTING.md summarizing automation expectations
+        - Document new workflows in README
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Validation plan
+      description: How will we verify this change? List tests, dry-runs, or CI jobs to run.
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & mitigation
+      description: Note potential regressions or operational overhead.

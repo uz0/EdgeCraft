@@ -17,7 +17,7 @@ const App: React.FC = () => {
     <Routes>
       <Route path="/" element={<IndexPage />} />
       <Route path="/benchmark" element={<BenchmarkPage />} />
-      <Route path="/:mapName" element={<MapViewerPage />} />
+      <Route path="/:mapName(.+\\.(w3x|w3m|sc2map))" element={<MapViewerPage />} />
     </Routes>
   );
 };

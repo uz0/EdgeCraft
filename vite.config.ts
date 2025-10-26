@@ -15,6 +15,9 @@ import path from 'path';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
+  const shouldAutoOpen = (env.VITE_OPEN_BROWSER ?? 'true') !== 'false';
+  const isCI = process.env.CI === 'true';
+
   return {
     // Base configuration
     base: '/',
@@ -79,7 +82,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: env.PORT ? parseInt(env.PORT) : 3000, // Use PORT env var or default to 3000
       host: true,
-      open: true,
+      open: shouldAutoOpen && !isCI,
 
       // Disable caching in development to prevent stale code issues
       headers: {
@@ -267,7 +270,7 @@ export default defineConfig(({ mode }) => {
     preview: {
       port: 4173,
       strictPort: false,
-      open: true
+      open: shouldAutoOpen && !isCI
     },
 
     // Logging

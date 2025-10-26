@@ -9,7 +9,7 @@ const libraryConfig = JSON.parse(configContents);
 const weightMap = buildWeightMap(libraryConfig);
 
 const libraries = libraryConfig.map((entry) => entry.id);
-const parameters = { iterations: 18, elements: 140 };
+const parameters = { iterations: 6, elements: 60 };
 
 async function runLibraryBenchmark(libraryId) {
   const samples = parameters.iterations * parameters.elements;

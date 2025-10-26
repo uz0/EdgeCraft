@@ -4,7 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+const BenchmarkHarness = React.lazy(async () => {
+  const module = await import('./BenchmarkPage');
+  return { default: module.BenchmarkPage };
+});
 import { MapGallery } from '../ui/MapGallery';
 import { useMapPreviews } from '../hooks/useMapPreviews';
 import { W3XMapLoader } from '../formats/maps/w3x/W3XMapLoader';
@@ -33,7 +37,18 @@ const MAP_LIST = [
 ];
 
 export const IndexPage: React.FC = () => {
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const benchmarkMode = new URLSearchParams(location.search).get('mode') === 'ci';
+
+  if (benchmarkMode) {
+    return (
+      <React.Suspense fallback={<main data-testid="benchmark-loading" />}>
+        <BenchmarkHarness />
+      </React.Suspense>
+    );
+  }
 
   const [maps] = useState<MapMetadata[]>(() =>
     MAP_LIST.map((m) => ({

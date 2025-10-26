@@ -20,7 +20,7 @@ export async function runBrowserBenchmark(request: BrowserBenchmarkRequest): Pro
         for (let j = 0; j < elements; j += 1) {
           const node = document.createElement('button');
           node.textContent = `Edge ${i}-${j}`;
-          node.dataset.role = EDGECRAFT_ROLE;
+          node.dataset['role'] = EDGECRAFT_ROLE;
           fragment.appendChild(node);
         }
 

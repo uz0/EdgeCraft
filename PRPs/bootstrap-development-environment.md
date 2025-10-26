@@ -13,6 +13,7 @@
 - 2024-10-20: CI/CD, quality gates, and legal automation finished; PRP delivered.
 - 2025-01-19: Maintenance sweep removed unused npm packages and fixed license validator.
 - 2025-10-24: Standardized PRP framing and bootstrap documentation to keep onboarding and future environment work aligned.
+- 2025-10-26: Adopted issue and PR templates, security policy, and stale issue automation aligned with claude-code references.
 
 ## 🛠️ Results / Plan
 - Development environment remains the single source of truth for build/test pipelines.
@@ -170,6 +171,8 @@
 | 2024-10-15 | Developer   | Legal compliance validation          | Complete |
 | 2025-01-19 | Claude      | Removed 18 unused npm packages       | Complete |
 | 2025-01-19 | Claude      | Fixed license validation (0 blocked) | Complete |
+| 2025-10-26 | Developer   | Added GitHub templates, SECURITY policy, stale issue workflow | Complete |
+| 2025-10-26 | Developer   | Documented new automation in README and CLAUDE guidelines | Complete |
 
 **Current Blockers**: None
 **Next Steps**: Maintenance only
