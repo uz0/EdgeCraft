@@ -1,0 +1,6 @@
+# device,os,browser,avg_capture_bitrate_mbps,max_gpu_temp_c
+Windows11-RTX3060,Windows 11,Chrome 129,192,68
+iPhone15Pro,iOS 18,Safari 17,140,41
+Pixel9Pro,Android 15,Chrome 129,125,48
+MacBookPro-M2Pro,macOS 14,Chrome 129,188,62
+iPadPro-M2,iPadOS 18,Safari 17,150,45

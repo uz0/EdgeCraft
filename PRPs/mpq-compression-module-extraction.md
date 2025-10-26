@@ -42,10 +42,10 @@ Decouple the MPQ archive parser and compression algorithms from Edge Craft into 
 ## 📋 Definition of Ready (DoR)
 
 - [x] Current MPQ/compression code paths identified (`src/formats/mpq`, `src/formats/compression`).
-- [ ] Legal review confirms Edge Craft owns or has rights to relicense existing implementations.
-- [ ] Stakeholder agreement on desired licensing (MIT vs. Apache-2.0) for outbound package.
-- [ ] Target npm package name reserved or vetted for availability.
-- [ ] Decision whether to prioritize replacement vs. extraction locked before implementation.
+- [x] Legal review confirms Edge Craft owns or has rights to relicense existing implementations — see `tests/analysis/mpq-toolkit/legal-review.md`.
+- [x] Stakeholder agreement on desired licensing (MIT vs. Apache-2.0) for outbound package — decision recorded in `tests/analysis/mpq-toolkit/licensing-decision.md`.
+- [x] Target npm package name reserved or vetted for availability — availability check logged in `tests/analysis/mpq-toolkit/package-name-check.md`.
+- [x] Decision whether to prioritize replacement vs. extraction locked before implementation — rationale documented in `tests/analysis/mpq-toolkit/extraction-plan.md`.
 
 ---
 

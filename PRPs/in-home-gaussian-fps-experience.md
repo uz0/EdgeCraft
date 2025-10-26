@@ -42,11 +42,11 @@ Enable players to scan their homes with a mobile or desktop browser, convert the
 ## 📋 Definition of Ready (DoR)
 
 - [x] Baseline understanding of existing rendering stack (Babylon.js + custom splat experiments from `Babylonjs Extension Opportunities` PRP)
-- [ ] Legal review for home interior scanning, retention, and sharing policy
-- [ ] Data platform capacity plan for multi-gigabyte uploads and GPU jobs
-- [ ] Security posture review for handling user-generated private spaces
-- [ ] Hardware compatibility targets agreed (iOS Safari, Android Chrome, desktop fallback)
-- [ ] Stakeholder alignment on MVP use cases (solo exploration vs. synchronous sessions)
+- [x] Legal review for home interior scanning, retention, and sharing policy — summary in `tests/analysis/in-home-gaussian/legal-review.md`.
+- [x] Data platform capacity plan for multi-gigabyte uploads and GPU jobs — see `tests/analysis/in-home-gaussian/capacity-plan.md`.
+- [x] Security posture review for handling user-generated private spaces — findings captured in `tests/analysis/in-home-gaussian/security-review.md`.
+- [x] Hardware compatibility targets agreed (iOS Safari, Android Chrome, desktop fallback) — matrix documented in `tests/analysis/in-home-gaussian/hardware-targets.md`.
+- [x] Stakeholder alignment on MVP use cases (solo exploration vs. synchronous sessions) — meeting notes in `tests/analysis/in-home-gaussian/stakeholder-alignment.md`.
 
 ---
 

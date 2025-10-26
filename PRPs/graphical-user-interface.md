@@ -46,11 +46,11 @@ Deliver the full Edge Craft RTS interface—research through implementation—wi
 ## 📋 Definition of Ready (DoR)
 
 - [x] Babylon GUI capability baseline documented in this PRP (performance metrics, control inventory, evaluation criteria)  
-- [ ] React component inventory documented (existing HUD, gallery, settings)  
-- [ ] Babylon render loop budgets confirmed (target ≤16 ms frame, ≤3 ms UI allocation)  
-- [ ] Target device matrix agreed (desktop Win/macOS, high-refresh monitors, optional touch support)  
-- [ ] Reference capture library assembled (Warcraft III Classic/Reforged, StarCraft II, Galaxy Editor, Age of Empires IV HUD)  
-- [ ] Trigger system data requirements gathered (dynamic text, timers, progress bars, choice dialogs)  
+- [x] React component inventory documented (existing HUD, gallery, settings) — see `tests/analysis/gui/react-component-inventory.md`.  
+- [x] Babylon render loop budgets confirmed (target ≤16 ms frame, ≤3 ms UI allocation) — benchmark summary in `tests/analysis/gui/render-loop-budgets.md`.  
+- [x] Target device matrix agreed (desktop Win/macOS, high-refresh monitors, optional touch support) — DX matrix stored in `tests/analysis/in-home-gaussian/hardware-targets.md`.  
+- [x] Reference capture library assembled (Warcraft III Classic/Reforged, StarCraft II, Galaxy Editor, Age of Empires IV HUD) — catalogued in `tests/analysis/gui/reference-capture-library.md`.  
+- [x] Trigger system data requirements gathered (dynamic text, timers, progress bars, choice dialogs) — requirements captured in `tests/analysis/gui/trigger-system-data.md`.  
 
 ---
 
