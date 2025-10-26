@@ -1,12 +1,6 @@
 # PRP: Map Format Parsers and Loaders
 
-**Status**: 🟡 In Progress (95% Complete - W3U parser blocked)
-**Created**: 2024-10-10
-
----
-
-## 🎯 Goal / Description
-
+## 🎯 Goal
 Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (.SC2Map) map formats including MPQ archive extraction and all compression algorithms.
 
 **Note**: W3N (campaign) support was initially implemented but later removed to focus on individual map files only.
@@ -16,28 +10,37 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (
 
 ---
 
-## 📋 Definition of Ready (DoR)
+## 📌 Status
+- **State**: 🟡 In Progress
+- **Created**: 2024-10-10
+- **Notes**: 95% complete; final blocker is W3U unit parser rewrite.
 
-**Prerequisites to START work:**
-- [x] Babylon.js integrated
-- [x] TypeScript configured
-- [x] Test maps available for validation
-- [x] Legal compliance for map files verified
+## 📈 Progress
+- MPQ archive parsing, compression algorithms, and primary map loaders delivered (Oct 10–22).
+- Integration tests and coverage (>80%) completed (Oct 25–Nov 1).
+- W3U parser failure identified; rewrite pending to close PRP.
 
----
+## 🛠️ Results / Plan
+- Immediate focus: rebuild W3U parser with robust offset handling and version detection.
+- After W3U fix: re-run regression suite across 24 map corpus, document release notes, and update DoD.
+- Optional stretch: add format version telemetry and optional field handling once critical blocker cleared.
 
-## ✅ Definition of Done (DoD)
-
-**Deliverables to COMPLETE work:**
+## ✅ Definition of Done
 - [x] MPQ archive parser implemented
 - [x] All compression algorithms working (Zlib, Bzip2, LZMA, ADPCM, Sparse)
 - [x] W3X map loader (terrain, doodads, units, cameras)
 - [x] W3M map loader (Reforged format - uses same parser as W3X)
 - [x] SC2Map loader (terrain, doodads)
-- [~] W3N campaign loader (embedded maps) - **REMOVED** (not needed for current scope)
+- [ ] W3U unit parser rewritten with <1% error rate on test corpus
 - [x] Unit tests >80% coverage
 - [x] 6 test maps load successfully (W3X, W3M, SC2Map formats)
-- [ ] **BLOCKED**: No parsing errors (W3U parser has 99.7% failure rate)
+- [ ] No parsing errors on benchmark suite (W3U currently blocking)
+
+## 📋 Definition of Ready
+- [x] Babylon.js integrated
+- [x] TypeScript configured
+- [x] Test maps available for validation
+- [x] Legal compliance for map files verified
 
 ---
 

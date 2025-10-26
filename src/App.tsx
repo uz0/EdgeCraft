@@ -9,12 +9,14 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { IndexPage } from './pages/IndexPage';
 import { MapViewerPage } from './pages/MapViewerPage';
+import { BenchmarkPage } from './pages/BenchmarkPage';
 import './App.css';
 
 const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<IndexPage />} />
+      <Route path="/benchmark" element={<BenchmarkPage />} />
       <Route path="/:mapName" element={<MapViewerPage />} />
     </Routes>
   );

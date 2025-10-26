@@ -1,0 +1,42 @@
+.BenchmarkPage {
+  display: grid;
+  gap: 1.5rem;
+  padding: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.BenchmarkPage__intro {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.BenchmarkPage__library-list {
+  margin: 1rem 0 1.5rem;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.BenchmarkPage__stage {
+  border: 1px dashed var(--benchmark-border, #ccc);
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--benchmark-background, rgba(0, 0, 0, 0.02));
+}
+
+.BenchmarkPage__stage div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.BenchmarkPage__history {
+  font-size: 0.9rem;
+}
+
+.BenchmarkPage__history ol {
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+}

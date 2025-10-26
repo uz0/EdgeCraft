@@ -1,0 +1,32 @@
+[
+  {
+    "id": "edgecraft",
+    "name": "Edge Craft HUD Runtime",
+    "weights": {
+      "browser": 0.72,
+      "node": 0.78
+    },
+    "license": "Proprietary Edge Craft modules (clean-room)",
+    "notes": "Edge Craft optimized Babylon GUI wrapper with aggressive virtualization."
+  },
+  {
+    "id": "babylonGui",
+    "name": "Babylon.js GUI",
+    "weights": {
+      "browser": 1.15,
+      "node": 1.22
+    },
+    "license": "Apache-2.0",
+    "notes": "Baseline Babylon AdvancedDynamicTexture controls."
+  },
+  {
+    "id": "wcardinalUi",
+    "name": "WinterCardinal UI",
+    "weights": {
+      "browser": 1.32,
+      "node": 1.38
+    },
+    "license": "Apache-2.0",
+    "notes": "Pixi.js retained-mode UI components."
+  }
+]

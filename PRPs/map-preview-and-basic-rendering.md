@@ -1,12 +1,6 @@
 # PRP: Map Preview and Basic Rendering
 
-**Status**: 🔴 Blocked (70% Complete - 3 Critical Issues)
-**Created**: 2024-11-10
-
----
-
-## 🎯 Goal / Description
-
+## 🎯 Goal
 Implement basic map rendering with terrain, doodads, and automated map preview generation for Map Gallery UI. Focus on visual correctness, not gameplay.
 
 **Value**: Users can browse and preview RTS maps before playing
@@ -14,28 +8,37 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 
 ---
 
-## 📋 Definition of Ready (DoR)
+## 📌 Status
+- **State**: 🔴 Blocked
+- **Created**: 2024-11-10
+- **Notes**: Terrain splatmap shader, unit rendering, and doodad asset coverage blocking completion (currently ~70% complete).
 
-**Prerequisites to START work:**
+## 📈 Progress
+- Core rendering pipeline, camera controls, and preview generation delivered.
+- Doodad rendering partially mapped (34/93 assets) with instancing and caching in place.
+- Blockers tied to terrain shader parity, W3U unit parser dependency, and asset ingestion backlog.
+
+## 🛠️ Results / Plan
+- Resolve terrain splatmap shader and unit parser dependency (requires Map Format PRP deliverable).
+- Expand doodad asset mappings to full coverage and bake visual regression baselines for six target maps.
+- After blockers cleared, rerun performance benchmarks and finalize visual regression gating.
+
+## ✅ Definition of Done
+- [ ] Terrain multi-texture splatmap renders correctly (no single-texture fallback)
+- [ ] Doodad rendering implemented (coverage target ≥90% mapped assets)
+- [ ] Unit rendering enabled with ≥90% parser success rate
+- [x] RTS camera controls (pan, zoom, rotate)
+- [x] Map preview auto-generation
+- [x] Map Gallery UI with thumbnails
+- [x] E2E tests for rendering flows
+- [x] Performance: ≥60 FPS @ 256×256 terrain
+- [ ] All 6 benchmark maps render correctly end-to-end
+
+## 📋 Definition of Ready
 - [x] Map parsers working (W3X, W3N, SC2Map)
 - [x] Babylon.js rendering engine integrated
 - [x] Legal asset library available (textures, models)
 - [x] Test maps available for validation
-
----
-
-## ✅ Definition of Done (DoD)
-
-**Deliverables to COMPLETE work:**
-- [ ] **BLOCKED**: Terrain multi-texture splatmap (currently single texture fallback)
-- [x] Doodad rendering (37% coverage, 34/93 types)
-- [ ] **BLOCKED**: Unit rendering (0.3% parse success rate)
-- [x] RTS camera controls (pan, zoom, rotate)
-- [x] Map preview auto-generation
-- [x] Map Gallery UI with thumbnails
-- [x] E2E tests for rendering
-- [x] Performance: 60 FPS @ 256x256 terrain
-- [ ] **INCOMPLETE**: All 6 maps render correctly (currently broken terrain textures)
 
 ---
 
