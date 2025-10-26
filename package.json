@@ -35,14 +35,15 @@
     "@babylonjs/loaders": "^8.32.2",
     "@types/lzma-native": "^4.0.4",
     "@types/pako": "^2.0.4",
+    "@wcardinal/wcardinal-ui": "^0.457.1",
     "lzma-native": "^8.0.6",
-    "pixi.js": "5.3.12",
     "pako": "^2.1.0",
+    "pixi.js": "5.3.12",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.4",
     "seek-bzip": "^2.0.0",
-    "@wcardinal/wcardinal-ui": "^0.457.1",
+    "tslib": "^2.8.1",
     "wc3maptranslator": "^4.0.4"
   },
   "devDependencies": {
