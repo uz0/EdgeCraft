@@ -993,6 +993,8 @@ npm run benchmark -- terrain-render
 | 2025-10-26 | Developer | BLOCKER: Only one hardcoded cliff texture rendering, not matching actual cliff variations | Blocked |
 | 2025-10-26 | Developer | REQUIREMENT: Need 100% pixel-perfect match for cliffs (correct textures, all variations) | Pending |
 | 2025-10-26 | Developer | Current code checkpoint ready for commit: terrain cuts + CliffRenderer integration working | Complete |
+| 2025-10-27 | Developer | Resolved `/comparison` routing (route ordering) and added unit coverage | Complete |
+| 2025-10-26 | Developer | Kicked off dev session to run local comparison build and validate rendering | In Progress |
 
 ## 🎯 Current Blockers
 

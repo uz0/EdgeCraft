@@ -236,8 +236,6 @@ export class W3xWarcraftTerrainRenderer {
 
     this.groundMesh = mesh;
   }
-
-
   private getGroundVertexShader(): string {
     return `
       precision highp float;

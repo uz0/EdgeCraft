@@ -10,8 +10,8 @@ const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<IndexPage />} />
-      <Route path="/:mapName" element={<MapViewerPage />} />
       <Route path="/comparison" element={<ComparisonPage />} />
+      <Route path="/:mapName" element={<MapViewerPage />} />
     </Routes>
   );
 };
