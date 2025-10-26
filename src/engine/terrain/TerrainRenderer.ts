@@ -6,12 +6,26 @@ import * as BABYLON from '@babylonjs/core';
 import type { TerrainOptions, TerrainLoadResult, TerrainLoadStatus } from './types';
 import type { AssetLoader } from '../assets/AssetLoader';
 import { mapAssetID } from '../assets/AssetMap';
+import type { CustomShaderSystem } from '../rendering/CustomShaderSystem';
+import type { WaterData } from '../../formats/maps/types';
 
 // Extend Window interface for debug mode
 declare global {
   interface Window {
     terrainDebugMode?: number;
   }
+}
+
+interface WarcraftLayerOptions {
+  width: number;
+  height: number;
+  tileSize: number;
+  heightmap: Float32Array;
+  cliffLevels?: Uint8Array | null;
+  water?: WaterData;
+  minHeight: number;
+  maxHeight: number;
+  shaderSystem?: CustomShaderSystem | null;
 }
 
 /**
@@ -32,8 +46,11 @@ declare global {
 export class TerrainRenderer {
   private scene: BABYLON.Scene;
   private assetLoader: AssetLoader;
-  private mesh?: BABYLON.GroundMesh;
-  private material?: BABYLON.StandardMaterial;
+  private mesh?: BABYLON.Mesh;
+  private material?: BABYLON.Material;
+  private cliffMesh?: BABYLON.Mesh;
+  private waterMesh?: BABYLON.Mesh;
+  private waterMaterial?: BABYLON.Material;
   private loadStatus: TerrainLoadStatus = 'idle' as TerrainLoadStatus;
   private static shadersRegistered = false;
 
@@ -246,7 +263,8 @@ void main(void) {
    * Apply material and textures to terrain
    */
   private applyMaterial(mesh: BABYLON.GroundMesh, options: TerrainOptions): void {
-    this.material = new BABYLON.StandardMaterial('terrainMaterial', this.scene);
+    const material = new BABYLON.StandardMaterial('terrainMaterial', this.scene);
+    this.material = material;
 
     // Try to load texture from AssetLoader if textureId is provided
     if (options.textureId !== undefined && options.textureId !== null && options.textureId !== '') {
@@ -258,14 +276,14 @@ void main(void) {
         const diffuseTexture = this.assetLoader.loadTexture(mappedId);
         diffuseTexture.uScale = 16;
         diffuseTexture.vScale = 16;
-        this.material.diffuseTexture = diffuseTexture;
+        material.diffuseTexture = diffuseTexture;
 
         // Try to load normal map (if available)
         try {
           const normalTexture = this.assetLoader.loadTexture(`${mappedId}_normal`);
           normalTexture.uScale = 16;
           normalTexture.vScale = 16;
-          this.material.bumpTexture = normalTexture;
+          material.bumpTexture = normalTexture;
         } catch {
           // Normal map not available, continue without it
         }
@@ -275,31 +293,31 @@ void main(void) {
           const roughnessTexture = this.assetLoader.loadTexture(`${mappedId}_roughness`);
           roughnessTexture.uScale = 16;
           roughnessTexture.vScale = 16;
-          this.material.specularTexture = roughnessTexture;
+          material.specularTexture = roughnessTexture;
         } catch {
           // Roughness map not available, use default specular
-          this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+          material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
         }
       } catch {
         // Fallback to default grass color
-        this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
-        this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+        material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
+        material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
       }
     } else {
       // No textureId provided, use default grass color
-      this.material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
-      this.material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+      material.diffuseColor = new BABYLON.Color3(0.3, 0.6, 0.3);
+      material.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     }
 
     // Enable backface culling for performance
-    this.material.backFaceCulling = true;
+    material.backFaceCulling = true;
 
     // Set ambient color to white for proper texture visibility
     // ambientColor (0,0,0) blocks texture rendering
-    this.material.ambientColor = new BABYLON.Color3(1, 1, 1);
+    material.ambientColor = new BABYLON.Color3(1, 1, 1);
 
     // Apply material to mesh
-    mesh.material = this.material;
+    mesh.material = material;
 
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
@@ -514,9 +532,9 @@ void main(void) {
 
     // Apply material to mesh (cast to Material to avoid type incompatibility)
     // ShaderMaterial is a valid Material but has different method signatures
-    mesh.material = shaderMaterial as BABYLON.Material;
-    // Store reference
-    this.material = shaderMaterial as unknown as BABYLON.StandardMaterial;
+    const assignedMaterial = shaderMaterial as unknown as BABYLON.Material;
+    mesh.material = assignedMaterial;
+    this.material = assignedMaterial;
 
     // Optimize for static terrain
     mesh.freezeWorldMatrix();
@@ -711,11 +729,7 @@ void main(void) {
   /**
    * Create flat terrain (for testing)
    */
-  public createFlatTerrain(
-    width: number,
-    height: number,
-    subdivisions: number
-  ): BABYLON.GroundMesh {
+  public createFlatTerrain(width: number, height: number, subdivisions: number): BABYLON.Mesh {
     this.mesh = BABYLON.MeshBuilder.CreateGround(
       'flatTerrain',
       {
@@ -727,9 +741,10 @@ void main(void) {
     );
 
     // Apply default material
-    this.material = new BABYLON.StandardMaterial('flatTerrainMaterial', this.scene);
-    this.material.diffuseColor = new BABYLON.Color3(0.4, 0.5, 0.4);
-    this.mesh.material = this.material;
+    const material = new BABYLON.StandardMaterial('flatTerrainMaterial', this.scene);
+    material.diffuseColor = new BABYLON.Color3(0.4, 0.5, 0.4);
+    this.material = material;
+    this.mesh.material = material;
 
     this.loadStatus = 'loaded' as TerrainLoadStatus;
     return this.mesh;
@@ -738,14 +753,14 @@ void main(void) {
   /**
    * Get terrain mesh
    */
-  public getMesh(): BABYLON.GroundMesh | undefined {
+  public getMesh(): BABYLON.Mesh | undefined {
     return this.mesh;
   }
 
   /**
    * Get terrain material
    */
-  public getMaterial(): BABYLON.StandardMaterial | undefined {
+  public getMaterial(): BABYLON.Material | undefined {
     return this.material;
   }
 
@@ -772,10 +787,179 @@ void main(void) {
    * Update terrain texture
    */
   public updateTexture(textureUrl: string): void {
-    if (!this.material) return;
+    if (!(this.material instanceof BABYLON.StandardMaterial)) {
+      return;
+    }
 
     this.material.diffuseTexture?.dispose();
     this.material.diffuseTexture = new BABYLON.Texture(textureUrl, this.scene);
+  }
+
+  public renderWarcraftLayers(options: WarcraftLayerOptions): void {
+    this.disposeLayers();
+    if (options.width <= 0 || options.height <= 0) {
+      return;
+    }
+    this.createCliffMesh(options);
+    this.createWaterMesh(options);
+  }
+
+  public clearAdditionalLayers(): void {
+    this.disposeLayers();
+  }
+
+  private disposeLayers(): void {
+    this.cliffMesh?.dispose();
+    this.cliffMesh = undefined;
+    this.waterMesh?.dispose();
+    this.waterMesh = undefined;
+    this.waterMaterial?.dispose();
+    this.waterMaterial = undefined;
+  }
+
+  private createCliffMesh(options: WarcraftLayerOptions): void {
+    const width = options.width | 0;
+    const height = options.height | 0;
+    if (width === 0 || height === 0) {
+      return;
+    }
+
+    const tileSize = options.tileSize;
+    const worldWidth = width * tileSize;
+    const worldHeight = height * tileSize;
+    const originX = -worldWidth / 2;
+    const originZ = -worldHeight / 2;
+    const threshold = tileSize * 0.45;
+    const thickness = Math.max(3, tileSize * 0.04);
+    const material = new BABYLON.StandardMaterial('terrainCliffMaterial', this.scene);
+    material.diffuseColor = new BABYLON.Color3(0.32, 0.28, 0.24);
+    material.specularColor = BABYLON.Color3.Black();
+    material.backFaceCulling = false;
+
+    const meshes: BABYLON.Mesh[] = [];
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = y * width + x;
+        const currentHeight = options.heightmap[index] ?? 0;
+
+        if (x < width - 1) {
+          const neighborHeight = options.heightmap[index + 1] ?? currentHeight;
+          const diff = neighborHeight - currentHeight;
+          if (Math.abs(diff) >= threshold) {
+            const lower = diff > 0 ? currentHeight : neighborHeight;
+            const heightSpan = Math.abs(diff);
+            const edgeX = originX + (x + 1) * tileSize;
+            const offsetX = diff > 0 ? -thickness / 2 : thickness / 2;
+            const centerZ = originZ + y * tileSize + tileSize / 2;
+            const centerY = lower + heightSpan / 2;
+            const box = BABYLON.MeshBuilder.CreateBox(
+              `cliff-east-${x}-${y}`,
+              {
+                width: thickness,
+                height: heightSpan,
+                depth: tileSize,
+              },
+              this.scene
+            );
+            box.position.set(edgeX + offsetX, centerY, centerZ);
+            meshes.push(box);
+          }
+        }
+        if (y < height - 1) {
+          const neighborHeight = options.heightmap[index + width] ?? currentHeight;
+          const diff = neighborHeight - currentHeight;
+          if (Math.abs(diff) >= threshold) {
+            const lower = diff > 0 ? currentHeight : neighborHeight;
+            const heightSpan = Math.abs(diff);
+            const edgeZ = originZ + (y + 1) * tileSize;
+            const offsetZ = diff > 0 ? -thickness / 2 : thickness / 2;
+            const centerX = originX + x * tileSize + tileSize / 2;
+            const centerY = lower + heightSpan / 2;
+            const box = BABYLON.MeshBuilder.CreateBox(
+              `cliff-south-${x}-${y}`,
+              {
+                width: tileSize,
+                height: heightSpan,
+                depth: thickness,
+              },
+              this.scene
+            );
+            box.position.set(centerX, centerY, edgeZ + offsetZ);
+            meshes.push(box);
+          }
+        }
+      }
+    }
+
+    if (meshes.length === 0) {
+      material.dispose();
+      return;
+    }
+
+    for (const mesh of meshes) {
+      mesh.material = material;
+    }
+
+    const merged = BABYLON.Mesh.MergeMeshes(meshes, true, true, undefined, false, true);
+    if (!merged) {
+      material.dispose();
+      return;
+    }
+
+    merged.name = 'terrainCliffs';
+    merged.isPickable = false;
+    merged.material = material;
+    merged.freezeWorldMatrix();
+    merged.doNotSyncBoundingInfo = true;
+    this.cliffMesh = merged;
+  }
+
+  private createWaterMesh(options: WarcraftLayerOptions): void {
+    const water = options.water;
+    if (!water) {
+      return;
+    }
+
+    const width = options.width * options.tileSize;
+    const height = options.height * options.tileSize;
+    const mesh = BABYLON.MeshBuilder.CreateGround(
+      'terrainWater',
+      {
+        width,
+        height,
+        subdivisions: 32,
+      },
+      this.scene
+    );
+
+    mesh.isPickable = false;
+    mesh.position.y = water.level - 0.5;
+
+    const shader = options.shaderSystem?.createShader({
+      name: `terrainWaterShader-${Date.now()}`,
+      preset: 'water',
+    });
+
+    if (shader) {
+      mesh.material = shader as unknown as BABYLON.Material;
+    } else {
+      const material = new BABYLON.StandardMaterial('terrainWaterMaterial', this.scene);
+      const diffuse = new BABYLON.Color3(
+        water.color.r / 255,
+        water.color.g / 255,
+        water.color.b / 255
+      );
+      material.diffuseColor = diffuse;
+      material.alpha = (water.color.a ?? 200) / 255;
+      material.specularColor = BABYLON.Color3.Black();
+      material.backFaceCulling = false;
+      mesh.material = material;
+      this.waterMaterial = material;
+    }
+
+    mesh.freezeWorldMatrix();
+    this.waterMesh = mesh;
   }
 
   /**
@@ -784,6 +968,7 @@ void main(void) {
   public dispose(): void {
     this.material?.dispose();
     this.mesh?.dispose();
+    this.disposeLayers();
     this.loadStatus = 'idle' as TerrainLoadStatus;
   }
 }

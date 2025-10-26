@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { listBenchmarkLibraries, runBrowserBenchmark } from '../benchmarks';
 import type { BenchmarkLibraryId, BenchmarkResult } from '../benchmarks';
+import {
+  BENCHMARK_COMPLETE_EVENT,
+  BENCHMARK_RUN_EVENT,
+  BENCHMARK_STORAGE_KEY,
+} from '../benchmarks/events';
+import { readBenchmarkHistory, writeBenchmarkHistory } from '../utils/benchmarkStorage';
 import './BenchmarkPage.css';
 
 interface BenchmarkSummary {
@@ -8,15 +14,39 @@ interface BenchmarkSummary {
   last?: BenchmarkResult;
 }
 
-const BENCHMARK_EVENT = 'edgecraft-benchmark:run';
-const BENCHMARK_COMPLETE_EVENT = 'edgecraft-benchmark:completed';
-
 export const BenchmarkPage: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [summary, setSummary] = useState<BenchmarkSummary>({ history: [] });
+  const [summary, setSummary] = useState<BenchmarkSummary>(() => {
+    const history = readBenchmarkHistory();
+    return {
+      history,
+      last: history.length > 0 ? history[history.length - 1] : undefined,
+    };
+  });
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
   const ciMode = query.get('mode') === 'ci';
   const libraryMetadata = useMemo(() => listBenchmarkLibraries(), []);
+
+  useEffect(() => {
+    if (ciMode) {
+      return;
+    }
+
+    const handleStorage = (event: StorageEvent): void => {
+      if (event.key === BENCHMARK_STORAGE_KEY) {
+        const history = readBenchmarkHistory();
+        setSummary({
+          history,
+          last: history.length > 0 ? history[history.length - 1] : undefined,
+        });
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return (): void => {
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [ciMode]);
 
   useEffect(() => {
     const global = window as typeof window & Record<string, unknown>;
@@ -45,26 +75,32 @@ export const BenchmarkPage: React.FC = () => {
         container: containerRef.current,
       });
 
-      setSummary((prev) => ({
-        history: [...prev.history, result],
-        last: result,
-      }));
+      setSummary((prev): BenchmarkSummary => {
+        const nextHistory = [...prev.history, result];
+        if (!ciMode) {
+          writeBenchmarkHistory(nextHistory);
+        }
+        return {
+          history: nextHistory,
+          last: result,
+        };
+      });
 
       (window as typeof window & Record<string, unknown>)['__edgecraftBenchmarkLastResult'] =
         result;
       window.dispatchEvent(new CustomEvent(BENCHMARK_COMPLETE_EVENT, { detail: result }));
     };
 
-    window.addEventListener(BENCHMARK_EVENT, (event: Event) => {
+    const listener = (event: Event): void => {
       void handler(event);
-    });
+    };
+
+    window.addEventListener(BENCHMARK_RUN_EVENT, listener);
     return (): void => {
-      window.removeEventListener(BENCHMARK_EVENT, (event: Event) => {
-        void handler(event);
-      });
+      window.removeEventListener(BENCHMARK_RUN_EVENT, listener);
       global['__edgecraftBenchmarkReady'] = false;
     };
-  }, []);
+  }, [ciMode]);
 
   return (
     <main className="BenchmarkPage" data-testid="benchmark-page">
@@ -73,7 +109,7 @@ export const BenchmarkPage: React.FC = () => {
         {!ciMode && (
           <>
             <p className="BenchmarkPage__intro">
-              Dispatch a <code>{BENCHMARK_EVENT}</code> custom event with <code>library</code>,{' '}
+              Dispatch a <code>{BENCHMARK_RUN_EVENT}</code> custom event with <code>library</code>,{' '}
               <code>iterations</code>, and <code>elements</code> to execute comparisons inside the
               live scene. Results are emitted using <code>{BENCHMARK_COMPLETE_EVENT}</code>.
             </p>

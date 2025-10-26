@@ -180,6 +180,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 | 2024-12-10 | Developer   | Performance optimization (60 FPS achieved)     | Complete    |
 | 2025-01-15 | Developer   | Visual regression test framework (Playwright)  | Complete    |
 | 2025-10-26 | System Analyst | Audited MapRendererCore vs MapPreviewGenerator parity; documented scanning child tasks | Complete |
+| 2025-10-26 | Developer   | Added Warcraft cliffs and water meshes to runtime terrain renderer | Complete |
 
 **Current Blockers**:
 1. **P0 CRITICAL**: Terrain multi-texture splatmap broken (single texture fallback)
