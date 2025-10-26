@@ -78,7 +78,7 @@
     "**/*.test.tsx",
     "**/__tests__/**/*",
     "tests/**/*",
-    "src/vendor/**/*"
+    "src/vendor/mdx-m3-viewer/**/*"
   ],
 
   "references": [

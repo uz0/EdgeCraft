@@ -9,7 +9,6 @@ import * as BABYLON from '@babylonjs/core';
 import { MapRendererCore } from '../engine/rendering/MapRendererCore';
 import { QualityPresetManager } from '../engine/rendering/QualityPresetManager';
 import { viewer } from '../vendor/mdx-m3-viewer/src';
-// @ts-expect-error - mdx-m3-viewer is JavaScript without type definitions
 import { setupCamera } from '../vendor/mdx-m3-viewer/clients/shared/camera';
 
 const War3MapViewer = viewer.handlers.War3MapViewer;
@@ -322,7 +321,6 @@ export const ComparisonPage: React.FC = () => {
 
           const preset = CAMERA_PRESETS[0]!;
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
           const simpleCamera = setupCamera(mapViewer.map.worldScene, {
             distance: preset.radius,
             target: [mapCenterX, 500, mapCenterZ],

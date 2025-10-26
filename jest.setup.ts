@@ -5,8 +5,10 @@
  * - Node.js polyfills (TextEncoder, crypto, etc.)
  * - WebGL/Canvas mocks for Babylon.js
  * - Visual regression testing (jest-image-snapshot)
+ * - DOM testing matchers (@testing-library/jest-dom)
  */
 
+import '@testing-library/jest-dom';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
 
 // Extend Jest matchers with image snapshot functionality
