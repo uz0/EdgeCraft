@@ -24,19 +24,27 @@ test.describe('Open Map', () => {
     // Wait for navigation to map viewer
     await page.waitForURL(/\/.+/); // Should navigate to /mapname
 
-    // Check if there's an error message (WebGL might not be available in CI)
-    const errorVisible = await page.locator('.error-overlay').isVisible().catch(() => false);
+    // Wait for either canvas or error overlay to appear
+    try {
+      await Promise.race([
+        page.waitForSelector('canvas', { timeout: 10000, state: 'visible' }),
+        page.waitForSelector('.error-overlay', { timeout: 10000, state: 'visible' }),
+      ]);
+    } catch (err) {
+      // Neither appeared - take screenshot for debugging
+      await page.screenshot({ path: 'test-results/openmap-debug.png' });
+      throw new Error('Neither canvas nor error overlay appeared');
+    }
+
+    // Check if error overlay is showing (WebGL might not be available in CI)
+    const errorVisible = await page.locator('.error-overlay').isVisible();
     if (errorVisible) {
       const errorText = await page.locator('.error-content p').textContent();
-      console.log('WebGL initialization error detected:', errorText);
 
       // If WebGL isn't available, skip the test gracefully
       test.skip(true, `WebGL not available in CI: ${errorText}`);
       return;
     }
-
-    // Wait for Babylon.js canvas to be present
-    await page.waitForSelector('canvas', { timeout: 10000 });
 
     // Wait for Babylon.js engine to initialize (exposed for testing)
     await page.waitForFunction(

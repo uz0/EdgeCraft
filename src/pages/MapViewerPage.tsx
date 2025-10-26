@@ -46,7 +46,6 @@ export const MapViewerPage: React.FC = () => {
         stencil: true,
       });
     } catch (err) {
-      console.error('Failed to initialize Babylon.js engine:', err);
       setError(`WebGL initialization failed: ${err instanceof Error ? err.message : String(err)}`);
       setIsLoading(false);
       return;
