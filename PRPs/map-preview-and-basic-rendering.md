@@ -71,6 +71,11 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 - [ ] **PENDING**: Visual regression tests for 6 maps
 - [x] Performance benchmarks (60 FPS achieved @ 256x256)
 
+**Child Task Outline (Renderer Parity & Scanning)**
+- [ ] Confirm runtime renderer combines `TerrainRenderer`, `InstancedUnitRenderer`, and `DoodadRenderer` to build the Babylon scene (`src/engine/rendering/MapRendererCore.ts`).
+- [ ] Verify preview renderer reuses `TerrainRenderer` and scope follow-up to close the doodad/unit parity gap for thumbnails (`src/engine/rendering/MapPreviewGenerator.ts`).
+- [ ] Track map preview extraction scanning responsibilities, including block-table fallback heuristics for embedded previews (`src/engine/rendering/MapPreviewExtractor.ts`).
+
 ---
 
 ## ⏱️ Timeline
@@ -174,6 +179,7 @@ Implement basic map rendering with terrain, doodads, and automated map preview g
 | 2024-12-05 | Developer   | Tested 6 maps - identified 3 critical issues  | In Progress |
 | 2024-12-10 | Developer   | Performance optimization (60 FPS achieved)     | Complete    |
 | 2025-01-15 | Developer   | Visual regression test framework (Playwright)  | Complete    |
+| 2025-10-26 | System Analyst | Audited MapRendererCore vs MapPreviewGenerator parity; documented scanning child tasks | Complete |
 
 **Current Blockers**:
 1. **P0 CRITICAL**: Terrain multi-texture splatmap broken (single texture fallback)

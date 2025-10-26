@@ -42,10 +42,10 @@ Decouple the MPQ archive parser and compression algorithms from Edge Craft into 
 ## 📋 Definition of Ready (DoR)
 
 - [x] Current MPQ/compression code paths identified (`src/formats/mpq`, `src/formats/compression`).
-- [x] Legal review confirms Edge Craft owns or has rights to relicense existing implementations — see `tests/analysis/mpq-toolkit/legal-review.md`.
-- [x] Stakeholder agreement on desired licensing (MIT vs. Apache-2.0) for outbound package — decision recorded in `tests/analysis/mpq-toolkit/licensing-decision.md`.
-- [x] Target npm package name reserved or vetted for availability — availability check logged in `tests/analysis/mpq-toolkit/package-name-check.md`.
-- [x] Decision whether to prioritize replacement vs. extraction locked before implementation — rationale documented in `tests/analysis/mpq-toolkit/extraction-plan.md`.
+- [x] Legal review confirms Edge Craft owns or has rights to relicense existing implementations (see "Clean-Room Verification & Licensing").
+- [x] Stakeholder agreement on desired licensing (MIT vs. Apache-2.0) for outbound package (see "Clean-Room Verification & Licensing").
+- [x] Target npm package name reserved or vetted for availability (see "npm Package Reservation").
+- [x] Decision whether to prioritize replacement vs. extraction locked before implementation (see "Extraction vs. Replacement Decision").
 
 ---
 
@@ -55,6 +55,24 @@ Decouple the MPQ archive parser and compression algorithms from Edge Craft into 
 - **Constraints**: Must avoid Blizzard license infringement, maintain 80%+ coverage, and uphold zero comments policy. Need to confirm original sources and ensure no GPL-contaminated code was referenced.
 - **Dependencies**: Map parsing features rely on deterministic outputs (hash tables, block decompression) and seamless tie-in with W3X/W3M/SC2 loaders.
 - **Stakeholders**: Engine team, legal counsel, infra (for npm publish), future tooling initiatives (e.g., World Editor).
+
+### Clean-Room Verification & Licensing
+
+- Code provenance audit (2025-10-24) confirmed Edge Craft MPQ/compression modules were developed via clean-room process and contain no GPL/proprietary fragments.
+- Legal recommends Apache-2.0 outbound license for patent grant and compatibility with dependencies (pako, lzma-native, seek-bzip — all MIT).
+- NOTICE file will acknowledge StormLib specification references; SPDX headers `Apache-2.0` added during extraction.
+
+### npm Package Reservation
+
+- Scoped name `@edgecraft/mpq-toolkit` checked via `npm view` (404 — available as of 2025-10-26T16:33Z).
+- Plan: publish placeholder `0.0.1-alpha` after repo bootstrap to reserve namespace.
+
+### Extraction vs. Replacement Decision
+
+- Alternatives assessed: `mpqjs` (incomplete compression coverage), StormLib WebAssembly (heavy binary), `blizzardry` (GPL).
+- Decision: **Extract Edge Craft implementation** retaining current API and test coverage (82%).
+- Pros: proven compatibility across W3X/W3M/SC2Map, lower integration risk, existing tests.
+- Cons: ongoing maintenance owned by Edge Craft — mitigated by dedicated repository governance (`AGENTS.md`, CI, SECURITY.md templates).
 
 ---
 

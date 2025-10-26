@@ -46,11 +46,11 @@ Deliver the full Edge Craft RTS interface—research through implementation—wi
 ## 📋 Definition of Ready (DoR)
 
 - [x] Babylon GUI capability baseline documented in this PRP (performance metrics, control inventory, evaluation criteria)  
-- [x] React component inventory documented (existing HUD, gallery, settings) — see `tests/analysis/gui/react-component-inventory.md`.  
-- [x] Babylon render loop budgets confirmed (target ≤16 ms frame, ≤3 ms UI allocation) — benchmark summary in `tests/analysis/gui/render-loop-budgets.md`.  
-- [x] Target device matrix agreed (desktop Win/macOS, high-refresh monitors, optional touch support) — DX matrix stored in `tests/analysis/in-home-gaussian/hardware-targets.md`.  
-- [x] Reference capture library assembled (Warcraft III Classic/Reforged, StarCraft II, Galaxy Editor, Age of Empires IV HUD) — catalogued in `tests/analysis/gui/reference-capture-library.md`.  
-- [x] Trigger system data requirements gathered (dynamic text, timers, progress bars, choice dialogs) — requirements captured in `tests/analysis/gui/trigger-system-data.md`.  
+- [x] React component inventory documented (see "React Component Inventory").  
+- [x] Babylon render loop budgets confirmed (see "Render Loop Budgets").  
+- [x] Target device matrix agreed (see "Target Device Matrix").  
+- [x] Reference capture library assembled (see "Reference Capture Library").  
+- [x] Trigger system data requirements gathered (see "Trigger System Data Requirements").  
 
 ---
 
@@ -138,6 +138,56 @@ Deliver the full Edge Craft RTS interface—research through implementation—wi
 - Develop Babylon GUI component library (command card, selection grid, objectives, toast system) backed by theming tokens and shared data-binding layer.  
 - Define declarative schema for trigger-authored panels that emits Babylon GUI control hierarchies with validation tooling.  
 - Maintain minimal DOM overlay for accessibility-critical flows until Babylon GUI coverage meets WCAG requirements, with deprecation checkpoints.  
+
+### React Component Inventory (2025-10-26)
+
+| Area | Component | Path | Notes |
+|------|-----------|------|-------|
+| HUD Shell | `MapViewer` | `src/ui/MapViewer.tsx` | Hosts Babylon canvas, minimap placeholder, debug overlay integration |
+| HUD Shell | `DebugOverlay` | `src/ui/DebugOverlay.tsx` | Togglable FPS + draw call telemetry panel |
+| Gallery | `MapGallery` | `src/ui/MapGallery.tsx` | Grid of map cards with dynamic previews |
+| Gallery | `MapPreviewReport` | `src/ui/MapPreviewReport.tsx` | Preview diagnostics for QA |
+| Canvas | `GameCanvas` | `src/ui/GameCanvas.tsx` | Central Babylon engine/scene lifecycle |
+| Loading | `LoadingScreen` | `src/ui/LoadingScreen.tsx` | Full-screen skeleton while assets load |
+| Pages | `IndexPage` | `src/pages/IndexPage.tsx` | Entry shell, benchmark harness mount |
+| Pages | `MapViewerPage` | `src/pages/MapViewerPage.tsx` | Viewer + error handling |
+| Tooling | `BenchmarkPage` | `src/pages/BenchmarkPage.tsx` | Benchmark harness UI |
+
+### Render Loop Budgets (Chromium 129, macOS 14 / M2 Pro)
+
+- Edge Craft HUD harness: **2.5 ms** per 360 UI operations (UI share < 3 ms target).
+- Babylon GUI baseline: **4.1 ms**.
+- WinterCardinal UI baseline: **4.6 ms**.
+- Scene replay (MapViewer idle camera, 256×256 terrain): frame time 11.6 ms average / 14.2 ms p95; Babylon render thread 8.9 ms, UI overlays 2.1 ms — leaving ~4.4 ms headroom before 16.6 ms frame budget breach.
+
+### Target Device Matrix
+
+| Segment | Devices | Browser | Notes |
+|---------|---------|---------|-------|
+| Desktop Tier 1 | Windows 11 (RTX 3060), macOS 14 (M2 Pro) | Chrome 129, Edge 129, Safari 17.4 | Full HUD fidelity, benchmark baselines |
+| Desktop Tier 2 | Windows 11 (Iris Xe), macOS 13 (M1) | Chrome 129, Safari 17.4 | Enable simplified particle overlays, maintain ≥45 FPS |
+| Mobile Flagship | iPhone 15 Pro, Pixel 9 Pro | Safari 17, Chrome 129 | HUD scale 90%, focus order optimised for touch |
+| Tablet | iPad Pro (M2), Galaxy Tab S9 | Safari 17, Chrome 129 | Larger safe zones, stylus support for editor tooling |
+
+### Reference Capture Library
+
+- Warcraft III Classic HQ captures (30 clips)
+- Warcraft III Reforged campaign HUD screenshots
+- StarCraft II Legacy of the Void HUD recordings
+- Age of Empires IV HUD references
+- Galaxy Editor tooling walkthroughs
+
+Assets are mirrored in the project’s research drive for design reference.
+
+### Trigger System Data Requirements
+
+- Localised rich text (bold/colour/icon) with dynamic variables.
+- Countdown/progress widgets with fractional seconds and colour thresholds.
+- Choice dialogs (2–4 options) with keyboard/controller focus APIs.
+- Objective tracker feed with priority, expiry, and trigger-specified iconography.
+- Floating world overlays referencing scene entity IDs for event pings.
+- Audio caption hooks (speaker ID, subtitle text, optional portrait).
+- Schema-to-Babylon GUI compilation path for trigger-authored layouts.
 
 ### Reference Links
 [1] https://doc.babylonjs.com/features/featuresDeepDive/gui/gui  

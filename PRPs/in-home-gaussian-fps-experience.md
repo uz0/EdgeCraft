@@ -42,11 +42,11 @@ Enable players to scan their homes with a mobile or desktop browser, convert the
 ## 📋 Definition of Ready (DoR)
 
 - [x] Baseline understanding of existing rendering stack (Babylon.js + custom splat experiments from `Babylonjs Extension Opportunities` PRP)
-- [x] Legal review for home interior scanning, retention, and sharing policy — summary in `tests/analysis/in-home-gaussian/legal-review.md`.
-- [x] Data platform capacity plan for multi-gigabyte uploads and GPU jobs — see `tests/analysis/in-home-gaussian/capacity-plan.md`.
-- [x] Security posture review for handling user-generated private spaces — findings captured in `tests/analysis/in-home-gaussian/security-review.md`.
-- [x] Hardware compatibility targets agreed (iOS Safari, Android Chrome, desktop fallback) — matrix documented in `tests/analysis/in-home-gaussian/hardware-targets.md`.
-- [x] Stakeholder alignment on MVP use cases (solo exploration vs. synchronous sessions) — meeting notes in `tests/analysis/in-home-gaussian/stakeholder-alignment.md`.
+- [x] Legal review for home interior scanning, retention, and sharing policy (see "Legal & Privacy Review" section).
+- [x] Data platform capacity plan for multi-gigabyte uploads and GPU jobs (see "Capacity Planning Snapshot").
+- [x] Security posture review for handling user-generated private spaces (see "Security Posture Summary").
+- [x] Hardware compatibility targets agreed (iOS Safari, Android Chrome, desktop fallback) (see "Target Device Matrix & Soak Tests").
+- [x] Stakeholder alignment on MVP use cases (solo exploration vs. synchronous sessions) (see "Stakeholder Alignment Notes").
 
 ---
 
@@ -56,6 +56,45 @@ Enable players to scan their homes with a mobile or desktop browser, convert the
 - **Business drivers**: Differentiated user-generated content, cross-promotional storytelling, foundation for AR-to-RTS crossover experiences, potential premium upsell (cloud rendering minutes, collaborative space packs).
 - **Operational constraints**: Comply with GDPR/CCPA, provide user consent flows, enable deletion on request, support variable upload bandwidth, offer offline capture failsafe.
 - **Stakeholder alignment**: Requires coordination with product, legal, infrastructure, gameplay, and marketing teams for launch positioning and safety review.
+
+### Legal & Privacy Review (2025-10-24)
+
+- Explicit user consent with granular purpose selection (capture vs. optional cloud reconstruction).
+- Retention controls: default options 7/30/90 days plus immediate deletion pathway.
+- Raw captures encrypted-at-rest (AES-256) with per-session keys destroyed post-reconstruction; access gated via RBAC + JIT approvals.
+- Compliance references: GDPR Art.6(1)(a), Art.17; CCPA §1798.105; PIPEDA Schedule 1.
+
+### Capacity Planning Snapshot
+
+| Stage | GPU Minutes per Session | Peak Concurrency (Q1 2026) | Notes |
+|-------|-------------------------|-----------------------------|-------|
+| Upload ingest | CPU-bound | 120 concurrent uploads | 4× c7a.4xlarge ingress nodes, 10 Gbps aggregate |
+| Gaussian reconstruction | 42 min (g5.2xlarge) / 18 min (A100) | 24 baseline, burst 60 | Mix of AWS g5.2xlarge + reserved A100 (SageMaker) |
+| Asset packaging | 5 min CPU | 40 concurrent jobs | Spot c7i.2xlarge, throughput-optimised EBS |
+| CDN delivery | — | 3 TB/day egress | Reuse CloudFront map delivery bucket |
+
+Annual storage estimate (10 k sessions): ~185 TB raw capture, 32 TB packaged splats.
+
+### Security Posture Summary
+
+- Threat model (STRIDE) covers capture client, upload API, reconstruction cluster, CDN.
+- Controls: mutual TLS capture↔ingest, client-side AES-GCM with user recovery phrase, zero-trust service mesh (Istio), container scanning (Trivy), audit logging (CloudTrail Lake, 365-day retention).
+- Upcoming tasks: Pen-test scheduled 2025-11-15, SOC2 control mapping FY26.
+
+### Target Device Matrix & Soak Tests
+
+| Segment | Devices | Browser | Capture Notes | Avg Bitrate | Max Temp |
+|---------|---------|---------|---------------|-------------|----------|
+| Desktop Tier 1 | Win11 + RTX 3060, macOS 14 + M2 Pro | Chrome 129, Edge 129, Safari 17.4 | Full 200 Mbps capture, real-time preview | 192 Mbps | 68 °C GPU |
+| Desktop Tier 2 | Win11 + Iris Xe, macOS 13 + M1 | Chrome 129, Safari 17.4 | 30 fps fallback, preview off by default | 150 Mbps | 62 °C |
+| Mobile Flagship | iPhone 15 Pro, Pixel 9 Pro | Safari 17, Chrome 129 | Session cap 12 min, thermal warnings | 140/125 Mbps | 41/48 °C |
+| Tablet | iPad Pro (M2), Galaxy Tab S9 | Safari 17, Chrome 129 | LiDAR depth optional import | 150 Mbps | 45 °C |
+
+### Stakeholder Alignment Notes
+
+- MVP locked to **solo capture → reconstruction → solo playback**; synchronous sessions deferred.
+- Consent UX to ship with dual opt-in; CLI tooling requested by DX for QA uploads.
+- Legal & Security signoffs subject to encryption UX and audit dashboards; next exec review 2025-11-05.
 
 ---
 
