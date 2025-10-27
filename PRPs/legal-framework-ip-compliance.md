@@ -285,6 +285,28 @@ Establish comprehensive legal framework for EdgeCraft organization addressing:
 - Validate DMCA 1201(f) applicability when distributing tooling that parses SLK data but not the original files—counsel opinion required.
 - Determine if localization text databases require redaction (Warcraft-specific jargon) or if generic replacements suffice for first release.
 
+### Third-Party License Attributions (Last Updated: 2025-10-26)
+
+**Apache-2.0 Licensed Dependencies**:
+- Babylon.js (@babylonjs/core@8.32.2, @babylonjs/loaders@8.32.2) - https://www.babylonjs.com/
+- TypeScript (typescript@5.9.3) - https://www.typescriptlang.org/
+- Playwright (playwright@1.56.1, @playwright/test@1.56.1) - https://playwright.dev/
+- SWC (@swc/core@1.13.5 and platform packages) - https://swc.rs/
+- ESLint (eslint@latest and plugins) - https://eslint.org/
+- Testing Library dependencies (aria-query@5.3.2) - https://testing-library.com/
+- Jest Image Snapshot (jest-image-snapshot@6.5.1) - https://github.com/americanexpress/jest-image-snapshot
+- Other Apache-2.0: @eslint/*, @humanfs/*, @humanwhocodes/*, babylonjs-gltf2interface@8.32.2, baseline-browser-mapping@2.8.18, bser@2.1.1, fast-diff@1.3.0, fb-watchman@2.0.2, human-signals@2.1.0, intn@1.0.0, walker@1.0.8, xml-name-validator@4.0.0
+
+**Creative Commons**:
+- Can I Use (caniuse-lite@1.0.30001751) - CC-BY-4.0 - https://caniuse.com/
+
+**Dual-Licensed**:
+- Harmony Reflect (harmony-reflect@1.6.2) - Apache-2.0 OR MPL-1.1 - https://github.com/tvcutsem/harmony-reflect
+
+**Game Assets**:
+- All assets are original creations, CC0/MIT/Apache-2.0 licensed, or temporary placeholders
+- Temporary: Warcraft III terrain textures and cliff models from https://www.hiveworkshop.com/casc-contents (development only, planned replacement before public release)
+
 ---
 
 ## ✅ Definition of Done (DoD)

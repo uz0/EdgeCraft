@@ -703,6 +703,18 @@ test('terrain rendering matches mdx-m3-viewer pixel-perfect', async ({ page }) =
    - Full fragment shader analysis (texture sampling, alpha blending)
    - Texture atlas layout (standard 4×4, extended 8×4)
 
+4. **Cliff Rendering Implementation Research** (2025-10-26)
+   - **Cliff Detection**: `isCliff()` compares 4 corner `layerHeight` values - cliffs exist where heights differ
+   - **Cliff Filenames**: Encoded as 4-letter strings (e.g., "AABB") representing relative heights (A=base, B=+1, etc.)
+   - **Terrain Cutting**: Cliff tiles have `cornerTextures = [0,0,0,0]`, ground shader skips via `gl_Position = vec4(0.0)` (GPU-side filtering)
+   - **Cliff Models**: Loaded from `Doodads\Terrain\{dir}\{dir}{fileName}{variation}.mdx` (from CliffTypes.slk)
+   - **Cliff Positioning**: X=`(column+1)*128`, Y=`row*128`, Z=`(base-2)*128` (right edge, bottom edge, -2 layer offset)
+   - **Heightmap Sharing**: Cliff shader samples SAME heightmap texture as ground shader for perfect alignment (bilinear interpolation)
+   - **Variations**: Clamped by `cliffVariations` or `cityCliffVariations` lookup tables (67 entries)
+   - **CliffTypes.slk**: Maps cliff texture indices to model directories and associated ground textures
+   - **Instance Batching**: Group by MDX path → `locations[]` + `textures[]` arrays → instanced rendering via `TerrainModel`
+   - **Key Files**: `map.ts:932-944` (isCliff), `map.ts:893-906` (cliffFileName), `terrainmodel.ts` (rendering), `cliffs.vert/frag.ts` (shaders)
+
 ### Codebase References
 
 1. **`src/vendor/mdx-m3-viewer/src/viewer/handlers/w3x/map.ts`**
