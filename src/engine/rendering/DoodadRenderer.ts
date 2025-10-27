@@ -236,31 +236,16 @@ export class DoodadRenderer {
       return;
     }
 
-    // W3X to Babylon.js coordinate mapping:
-    // W3X: X=right, Y=forward, Z=up
-    // Babylon: X=right, Y=up, Z=forward
-    // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
-    //
-    // IMPORTANT: W3X uses absolute world coordinates (0 to mapWidth/mapHeight),
-    // but Babylon.js CreateGroundFromHeightMap centers terrain at origin (0, 0, 0).
-    // Therefore, we must subtract half the map dimensions to align doodads with terrain.
-
-    // Apply centering offset to align with terrain (which is centered at 0,0,0)
-    // This is the SAME transformation used for units in MapRendererCore.ts
     const offsetX = placement.position.x - this.config.mapWidth / 2;
-    const offsetZ = -(placement.position.y - this.config.mapHeight / 2); // Negate for Babylon Z axis
+    const offsetY = placement.position.y - this.config.mapHeight / 2;
 
     const instance: DoodadInstance = {
       id: placement.id,
       typeId: placement.typeId,
       variation: placement.variation ?? 0,
-      position: new BABYLON.Vector3(
-        offsetX, // Center X coordinate
-        placement.position.z, // WC3 Z is absolute height (no offset needed)
-        offsetZ // Center Z coordinate and negate Y->Z
-      ),
+      position: new BABYLON.Vector3(offsetX, offsetY, placement.position.z),
       rotation: placement.rotation,
-      scale: new BABYLON.Vector3(placement.scale.x, placement.scale.z, placement.scale.y),
+      scale: new BABYLON.Vector3(placement.scale.x, placement.scale.y, placement.scale.z),
     };
 
     this.instances.set(instance.id, instance);
@@ -337,7 +322,7 @@ export class DoodadRenderer {
 
       const mesh = doodadType.mesh.clone(`doodad_${instance.id}`);
       mesh.position = instance.position;
-      mesh.rotation.y = instance.rotation;
+      mesh.rotation.z = instance.rotation;
       mesh.scaling = instance.scale;
       mesh.setEnabled(true);
     });

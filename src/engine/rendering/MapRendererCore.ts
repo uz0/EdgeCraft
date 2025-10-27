@@ -22,7 +22,7 @@
 import * as BABYLON from '@babylonjs/core';
 import type { RawMapData } from '../../formats/maps/types';
 import { MapLoaderRegistry } from '../../formats/maps/MapLoaderRegistry';
-import { TerrainRenderer } from '../terrain/TerrainRenderer';
+import { W3xWarcraftTerrainRenderer } from '../terrain/W3xWarcraftTerrainRenderer';
 import { InstancedUnitRenderer } from './InstancedUnitRenderer';
 import { DoodadRenderer } from './DoodadRenderer';
 import { QualityPresetManager } from './QualityPresetManager';
@@ -68,7 +68,7 @@ export class MapRendererCore {
   private loaderRegistry: MapLoaderRegistry;
   private assetLoader: AssetLoader;
 
-  private terrainRenderer: TerrainRenderer | null = null;
+  private w3xTerrainRenderer: W3xWarcraftTerrainRenderer | null = null;
   private unitRenderer: InstancedUnitRenderer | null = null;
   private doodadRenderer: DoodadRenderer | null = null;
   private camera: BABYLON.Camera | null = null;
@@ -155,11 +155,23 @@ export class MapRendererCore {
     // Units and doodads need access to mapData.info.dimensions for coordinate conversion
     this.currentMap = mapData;
 
-    // Step 1: Initialize terrain and store actual heightmap range
-    const terrainHeightRange = await this.renderTerrain(mapData.terrain);
+    // Step 1: Initialize W3x terrain renderer (unified warcraft renderer)
+    this.w3xTerrainRenderer = new W3xWarcraftTerrainRenderer(this.scene);
+    await this.w3xTerrainRenderer.renderTerrain(mapData.terrain);
 
-    // Store terrain height range for camera setup (use actual heightmap values, not mesh bounds)
-    this.terrainHeightRange = terrainHeightRange;
+    // Store terrain height range for camera setup (use default for now)
+    this.terrainHeightRange = { min: 0, max: 512 };
+
+    // Step 1b: Render water (if present)
+    // if (mapData.terrain.water) {
+    //   this.renderWater(mapData.terrain);
+    // }
+
+    // Step 1c: Render cliffs (if present)
+    // DISABLED: Removing all terrain rendering for step-by-step rebuild
+    // if (mapData.terrain.cliffs && mapData.terrain.cliffs.length > 0) {
+    //   this.renderCliffs(mapData.terrain, this.terrainHeightRange);
+    // }
 
     // Step 2: Initialize units
     this.renderUnits(mapData.units);
@@ -254,161 +266,6 @@ export class MapRendererCore {
   }
 
   /**
-   * Render terrain
-   * @returns Actual heightmap height range (min/max) for camera positioning
-   */
-  private async renderTerrain(
-    terrain: RawMapData['terrain']
-  ): Promise<{ min: number; max: number }> {
-    this.terrainRenderer = new TerrainRenderer(this.scene, this.assetLoader);
-
-    // Convert heightmap Float32Array to a data URL for TerrainRenderer
-    const {
-      url: heightmapUrl,
-      minHeight,
-      maxHeight,
-    } = this.createHeightmapDataUrl(terrain.heightmap, terrain.width, terrain.height);
-
-    // Check if we have multi-texture terrain (W3X maps with groundTextureIds)
-    const hasMultiTexture =
-      terrain.textures.length > 1 && terrain.textures[0]?.blendMap !== undefined;
-
-    if (hasMultiTexture) {
-      // Multi-texture splatmap rendering (W3X maps with 4-8 textures)
-      const textureIds = terrain.textures.map((t) => t.id);
-      const blendMap = terrain.textures[0]?.blendMap;
-
-      if (!blendMap) {
-        throw new Error('[MapRendererCore] BlendMap is required for multi-texture terrain');
-      }
-
-      // W3X world coordinates: 128 units per tile
-      const TILE_SIZE = 128;
-      const result = await this.terrainRenderer.loadHeightmapMultiTexture(heightmapUrl, {
-        width: terrain.width * TILE_SIZE, // World dimensions for mesh
-        height: terrain.height * TILE_SIZE,
-        splatmapWidth: terrain.width, // Tile dimensions for splatmap (1 pixel per tile)
-        splatmapHeight: terrain.height,
-        subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-        minHeight, // Use actual heightmap min
-        maxHeight, // Use actual heightmap max
-        textureIds,
-        blendMap,
-      });
-
-      if ('error' in result) {
-        throw new Error(`Multi-texture terrain loading failed: ${result.error}`);
-      }
-    } else {
-      // Single texture rendering (fallback or simple maps)
-      const textureId = terrain.textures.length > 0 ? terrain.textures[0]?.id : undefined;
-
-      // W3X world coordinates: 128 units per tile
-      const TILE_SIZE = 128;
-      const result = await this.terrainRenderer.loadHeightmap(heightmapUrl, {
-        width: terrain.width * TILE_SIZE,
-        height: terrain.height * TILE_SIZE,
-        subdivisions: Math.min(128, Math.max(32, terrain.width / 4)),
-        minHeight, // Use actual heightmap min
-        maxHeight, // Use actual heightmap max
-        textureId,
-      });
-
-      if ('error' in result) {
-        throw new Error(`Terrain loading failed: ${result.error}`);
-      }
-    }
-
-    const mapFormat = this.currentMap?.format;
-    if (mapFormat === 'w3x' || mapFormat === 'w3m') {
-      const tileSize = 128;
-      const shaderSystem = this.qualityManager.getSystems().shaders ?? null;
-      this.terrainRenderer.renderWarcraftLayers({
-        width: terrain.width,
-        height: terrain.height,
-        tileSize,
-        heightmap: terrain.heightmap,
-        cliffLevels: terrain.cliffLevels,
-        water: terrain.water,
-        minHeight,
-        maxHeight,
-        shaderSystem,
-      });
-    } else {
-      this.terrainRenderer.clearAdditionalLayers();
-    }
-
-    // Return actual heightmap range for camera positioning
-    return { min: minHeight, max: maxHeight };
-  }
-
-  /**
-   * Convert heightmap Float32Array to data URL
-   * @returns Object with url (data URL), minHeight, and maxHeight
-   */
-  private createHeightmapDataUrl(
-    heightmap: Float32Array,
-    width: number,
-    height: number
-  ): { url: string; minHeight: number; maxHeight: number } {
-    // Create canvas to encode heightmap as image
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
-
-    if (ctx == null) {
-      throw new Error('Failed to get canvas 2D context');
-    }
-
-    // Create ImageData
-    const imageData = ctx.createImageData(width, height);
-
-    // Convert heightmap to grayscale (0-255)
-    let minHeight = Infinity;
-    let maxHeight = -Infinity;
-
-    for (let i = 0; i < heightmap.length; i++) {
-      minHeight = Math.min(minHeight, heightmap[i] ?? 0);
-      maxHeight = Math.max(maxHeight, heightmap[i] ?? 0);
-    }
-
-    const range = maxHeight - minHeight;
-
-    // Handle flat terrain (when all heights are the same)
-    if (range === 0) {
-      // Use mid-gray (127) for flat terrain so it renders at mid-height
-      for (let i = 0; i < heightmap.length; i++) {
-        const idx = i * 4;
-        imageData.data[idx] = 127; // R
-        imageData.data[idx + 1] = 127; // G
-        imageData.data[idx + 2] = 127; // B
-        imageData.data[idx + 3] = 255; // A
-      }
-    } else {
-      // Normal heightmap with variation
-      for (let i = 0; i < heightmap.length; i++) {
-        const normalizedHeight = ((heightmap[i] ?? 0) - minHeight) / range;
-        const grayscale = Math.floor(normalizedHeight * 255);
-
-        const idx = i * 4;
-        imageData.data[idx] = grayscale; // R
-        imageData.data[idx + 1] = grayscale; // G
-        imageData.data[idx + 2] = grayscale; // B
-        imageData.data[idx + 3] = 255; // A
-      }
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-
-    return {
-      url: canvas.toDataURL('image/png'),
-      minHeight,
-      maxHeight,
-    };
-  }
-
-  /**
    * Render units
    */
   private renderUnits(units: RawMapData['units']): void {
@@ -449,41 +306,25 @@ export class MapRendererCore {
         const instance = box.createInstance(
           `unit_${unit.typeId}_${unit.position.x}_${unit.position.z}`
         );
-        instance.isVisible = true; // FIX: Make instances visible!
-        // W3X to Babylon.js coordinate mapping:
-        // W3X: X=right, Y=forward, Z=up
-        // Babylon: X=right, Y=up, Z=forward
-        // Therefore: Babylon.X = W3X.X, Babylon.Y = W3X.Z, Babylon.Z = -W3X.Y (negated)
-        //
-        // IMPORTANT: W3X uses absolute world coordinates (0 to mapWidth/mapHeight),
-        // but Babylon.js CreateGroundFromHeightMap centers terrain at origin (0, 0, 0).
-        // Therefore, we must subtract half the map dimensions to align entities with terrain.
+        instance.isVisible = true;
         const mapWidth = (this.currentMap?.info.dimensions.width ?? 0) * 128;
         const mapHeight = (this.currentMap?.info.dimensions.height ?? 0) * 128;
 
         if (isFirstUnit) {
         }
 
-        // Apply centering offset to align with terrain (which is centered at 0,0,0)
-        // WC3 coordinates: (0,0) = map center, ranges from [-mapWidth/2, mapWidth/2]
-        // Babylon.js: origin (0,0,0) = center, so just negate Y axis to Z axis
         const offsetX = unit.position.x - mapWidth / 2;
-        const offsetZ = -(unit.position.y - mapHeight / 2); // FIX: Subtract, not add
+        const offsetY = unit.position.y - mapHeight / 2;
 
-        instance.position = new BABYLON.Vector3(
-          offsetX, // Center X coordinate
-          unit.position.z, // WC3 Z is absolute height (no offset needed)
-          offsetZ // Center Z coordinate and negate Y->Z
-        );
+        instance.position = new BABYLON.Vector3(offsetX, offsetY, unit.position.z);
 
         if (isFirstUnit) {
           isFirstUnit = false;
         }
 
-        instance.rotation.y = unit.rotation;
-        // Handle optional scale (default to 1,1,1 if undefined)
+        instance.rotation.z = unit.rotation;
         const scale = unit.scale ?? { x: 1, y: 1, z: 1 };
-        instance.scaling = new BABYLON.Vector3(scale.x, scale.z, scale.y);
+        instance.scaling = new BABYLON.Vector3(scale.x, scale.y, scale.z);
       }
     }
   }
@@ -574,7 +415,7 @@ export class MapRendererCore {
    * Apply map environment settings (lighting, fog, ambient)
    */
   private applyEnvironment(environment: RawMapData['info']['environment']): void {
-    const { tileset, fog } = environment;
+    const { fog } = environment;
 
     // Remove all existing lights to prevent accumulation
     const existingLights = this.scene.lights.slice(); // Copy array to avoid modification during iteration
@@ -611,21 +452,7 @@ export class MapRendererCore {
       );
     }
 
-    // Background color (based on tileset)
-    const tilesetColors: Record<string, BABYLON.Color3> = {
-      ashenvale: new BABYLON.Color3(0.2, 0.3, 0.2),
-      barrens: new BABYLON.Color3(0.4, 0.3, 0.2),
-      felwood: new BABYLON.Color3(0.1, 0.2, 0.1),
-      dungeon: new BABYLON.Color3(0.1, 0.1, 0.1),
-      default: new BABYLON.Color3(0.3, 0.4, 0.5),
-    };
-
-    const tilesetColor =
-      tilesetColors[tileset.toLowerCase()] ??
-      tilesetColors['default'] ??
-      new BABYLON.Color3(0.3, 0.4, 0.5);
-
-    this.scene.clearColor = new BABYLON.Color4(tilesetColor.r, tilesetColor.g, tilesetColor.b, 1.0);
+    this.scene.clearColor = new BABYLON.Color4(0.0, 0.0, 0.0, 1.0);
   }
 
   /**
@@ -645,6 +472,11 @@ export class MapRendererCore {
     const terrainCenterY = terrainMidHeight;
     const terrainHeight = this.terrainHeightRange.max - this.terrainHeightRange.min;
     const terrainMaxHeight = this.terrainHeightRange.max;
+
+    if (this.scene.activeCamera) {
+      this.camera = this.scene.activeCamera;
+      return;
+    }
 
     if (this.config.cameraMode === 'rts') {
       // RTS camera with classic perspective (like Warcraft 3)
@@ -688,13 +520,15 @@ export class MapRendererCore {
         this.scene
       );
 
-      // Set camera rotation to look downward at the terrain center
-      // We want to look down at ~30 degrees toward the terrain
-      camera.rotation.x = Math.PI / 6; // 30° downward (more gentle angle)
-      camera.rotation.y = 0; // Facing forward (negative Z)
+      camera.rotation.x = Math.PI / 6;
+      camera.rotation.z = 0;
+
+      // Set camera view frustum for large maps
+      camera.minZ = 1;
+      camera.maxZ = 200000; // Support very large maps
 
       // Enhanced movement controls
-      camera.speed = 2.0; // Movement speed (WASD)
+      camera.speed = 100.0; // Movement speed (WASD)
       camera.angularSensibility = 1000; // Mouse look sensitivity (lower = more sensitive)
 
       // Enable keyboard and mouse controls
@@ -781,7 +615,7 @@ export class MapRendererCore {
     phase2: unknown;
   } {
     return {
-      terrain: this.terrainRenderer?.getLoadStatus() ?? null,
+      terrain: null,
       units: this.unitRenderer?.getStats() ?? null,
       doodads: this.doodadRenderer?.getStats() ?? null,
       phase2: this.qualityManager.getStats(),
@@ -789,12 +623,19 @@ export class MapRendererCore {
   }
 
   /**
+   * Get the active camera
+   */
+  public getCamera(): BABYLON.Camera | null {
+    return this.camera;
+  }
+
+  /**
    * Dispose all resources
    */
   public dispose(): void {
-    if (this.terrainRenderer != null) {
-      this.terrainRenderer.dispose();
-      this.terrainRenderer = null;
+    if (this.w3xTerrainRenderer != null) {
+      this.w3xTerrainRenderer.dispose();
+      this.w3xTerrainRenderer = null;
     }
 
     if (this.unitRenderer != null) {

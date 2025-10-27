@@ -97,10 +97,12 @@ export interface TerrainData {
   height: number;
   heightmap: Float32Array;
   textures: TerrainTexture[];
+  textureIndices?: Uint8Array;
   water?: WaterData;
   cliffs?: CliffData[];
   cliffLevels?: Uint8Array;
   pathingMap?: Uint8Array;
+  raw?: unknown;
 }
 
 /**
@@ -129,6 +131,8 @@ export interface CliffData {
   type: string;
   level: number;
   texture: string;
+  x: number;
+  y: number;
 }
 
 /**

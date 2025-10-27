@@ -70,7 +70,7 @@ export class RTSCamera {
         z: this.camera.target.z,
       },
       zoom: this.camera.position.length(),
-      rotation: this.camera.rotation.y,
+      rotation: this.camera.rotation.z,
     };
   }
 

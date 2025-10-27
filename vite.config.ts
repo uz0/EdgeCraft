@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
     plugins: [
       // Node.js polyfills for browser
       nodePolyfills({
-        // Enable specific polyfills needed by decompression libraries
-        include: ['stream', 'buffer', 'util', 'path'],
+        // Enable specific polyfills needed by decompression libraries and mdx-m3-viewer
+        include: ['stream', 'buffer', 'util', 'path', 'os'],
         // Exclude fs - not available in browser
         exclude: ['fs'],
         globals: {

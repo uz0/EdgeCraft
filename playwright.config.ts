@@ -11,7 +11,14 @@ export default defineConfig({
   testDir: './tests',
 
   // ONLY match specific E2E test files (not Jest unit tests)
-  testMatch: ['MapGallery.test.ts', 'OpenMap.test.ts', 'BenchmarkComparison.test.ts'],
+  testMatch: [
+    'MapGallery.test.ts',
+    'OpenMap.test.ts',
+    'BenchmarkComparison.test.ts',
+    'render-parity.test.ts',
+    'red-square-alignment.test.ts',
+    'comparison-pixel-perfect.test.ts',
+  ],
 
   // Baseline screenshots directory
   snapshotDir: './tests/e2e-screenshots',
@@ -38,7 +45,7 @@ export default defineConfig({
   workers: 1,
 
   // Reporter configuration
-  reporter: process.env.CI ? [['list']] : [['line']],
+  reporter: process.env.CI ? [['list']] : [['html', { outputFolder: 'playwright-report' }], ['list'], ['line']],
 
   // Shared settings for all tests
   use: {

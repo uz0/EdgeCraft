@@ -1,0 +1,1 @@
+Take the current In Progress PRP and analyze it, run tests, then read all uncommitted changes and report current status into the PRP. Commit current progress if all checks pass with the right message describing what was done. If tests/lint/typescript checks fail, put a short summary of blockers into CLAUDE.md Current status context section.

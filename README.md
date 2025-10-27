@@ -103,6 +103,30 @@ npm run lint:fix               # Auto-fix linting issues
 7. Run validation (`npm run validate`)
 
 
+## 🙏 Credits
+
+### Asset Authors
+
+**Terrain Textures:**
+- [Poly Haven](https://polyhaven.com) - CC0 terrain textures (grass, dirt, rock, snow, ice, lava, etc.)
+
+**3D Models:**
+- [Quaternius](https://quaternius.com) - CC0 doodad models (trees, rocks, plants)
+- [Kenney](https://kenney.nl) - CC0 structural models (crates, fences, buildings)
+
+### Technical Resources
+
+**Map Format Specifications:**
+- [ChiefOfGxBxL](https://github.com/ChiefOfGxBxL) - WC3 Map Specification ([WC3MapSpecification](https://github.com/ChiefOfGxBxL/WC3MapSpecification))
+- [Luashine](https://github.com/Luashine) - v12 Reforged terrain format discovery ([PR #11](https://github.com/ChiefOfGxBxL/WC3MapSpecification/pull/11))
+
+**Libraries:**
+- [Babylon.js](https://www.babylonjs.com) - 3D rendering engine (Apache 2.0)
+- [React](https://reactjs.org) - UI framework (MIT)
+- [TypeScript](https://www.typescriptlang.org) - Type-safe JavaScript (Apache 2.0)
+
+See full attribution in asset manifest: `public/assets/manifest.json`
+
 ## 📜 License
 
 **GNU Affero General Public License v3.0 (AGPL-3.0)**

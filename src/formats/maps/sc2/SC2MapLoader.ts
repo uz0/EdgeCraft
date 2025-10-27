@@ -41,20 +41,61 @@ export class SC2MapLoader implements IMapLoader {
    * @param file - Map file, ArrayBuffer, or Node.js Buffer
    * @returns Raw map data in common format
    */
-  public async parse(file: File | ArrayBuffer | Buffer): Promise<RawMapData> {
-    // Convert to ArrayBuffer if needed
+  public async parse(file: File | ArrayBuffer): Promise<RawMapData> {
+    // Convert to ArrayBuffer
     let buffer: ArrayBuffer;
-    if (file instanceof ArrayBuffer) {
-      buffer = file;
-    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(file)) {
-      // Node.js Buffer - convert to ArrayBuffer (only in Node environment)
-      // Create a new ArrayBuffer and copy the data to avoid SharedArrayBuffer issues
-      buffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as ArrayBuffer;
-    } else if (file instanceof File) {
+
+    // Type guard for objects with buffer property (Node.js Buffer or TypedArray)
+    interface BufferLike {
+      buffer: ArrayBuffer;
+      byteOffset: number;
+      byteLength: number;
+    }
+
+    // Type guard for File-like objects
+    interface FileLike {
+      arrayBuffer: () => Promise<ArrayBuffer>;
+    }
+
+    function hasBuffer(obj: unknown): obj is BufferLike {
+      return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'buffer' in obj &&
+        'byteOffset' in obj &&
+        typeof obj.byteOffset === 'number' &&
+        'byteLength' in obj &&
+        typeof obj.byteLength === 'number'
+      );
+    }
+
+    function hasArrayBuffer(obj: unknown): obj is FileLike {
+      return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'arrayBuffer' in obj &&
+        typeof obj.arrayBuffer === 'function'
+      );
+    }
+
+    // Check type more carefully
+    const isArrayBuffer =
+      file instanceof ArrayBuffer ||
+      Object.prototype.toString.call(file) === '[object ArrayBuffer]';
+
+    if (isArrayBuffer) {
+      // Already an ArrayBuffer
+      buffer = file as ArrayBuffer;
+    } else if (hasBuffer(file)) {
+      // Node.js Buffer or TypedArray - extract the underlying ArrayBuffer
+      buffer = file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength);
+    } else if (hasArrayBuffer(file)) {
       // File object - use arrayBuffer() method
       buffer = await file.arrayBuffer();
     } else {
-      throw new Error('Invalid input type: expected File, ArrayBuffer, or Buffer');
+      throw new Error(
+        `Invalid input type: expected File, ArrayBuffer, or Buffer. Got ${Object.prototype.toString.call(file)}`
+      );
     }
 
     // Parse MPQ archive (same container as W3X)
