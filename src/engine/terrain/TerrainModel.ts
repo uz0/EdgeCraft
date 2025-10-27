@@ -18,17 +18,13 @@ export class TerrainModel {
     parser.load(arrayBuffer);
 
     if (parser.geosets === undefined || parser.geosets.length === 0) {
-      console.error('[TerrainModel] MDX has no geosets');
       return;
     }
 
     const geoset = parser.geosets[0];
     if (!geoset) {
-      console.error('[TerrainModel] First geoset is undefined');
       return;
     }
-
-    console.log(`[TerrainModel] Parsing MDX with ${geoset.vertices.length / 3} vertices, ${geoset.faces.length / 3} faces`);
 
     const vertices = geoset.vertices;
     const normals = geoset.normals;
@@ -41,12 +37,6 @@ export class TerrainModel {
       uvs === undefined ||
       faces === undefined
     ) {
-      console.error('[TerrainModel] Missing required geoset data:', {
-        hasVertices: vertices !== undefined,
-        hasNormals: normals !== undefined,
-        hasUVs: uvs !== undefined,
-        hasFaces: faces !== undefined
-      });
       return;
     }
 
