@@ -100,6 +100,7 @@ export interface TerrainData {
   textureIndices?: Uint8Array;
   water?: WaterData;
   cliffs?: CliffData[];
+  cliffLevels?: Uint8Array;
   pathingMap?: Uint8Array;
   raw?: unknown;
 }

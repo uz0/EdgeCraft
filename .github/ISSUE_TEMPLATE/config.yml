@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📋 Current PRPs
+    url: https://github.com/dcversus/edgecraft/tree/main/PRPs
+    about: Review product requirement proposals before opening a new issue.
+  - name: 🧠 AI Contributor Workflow
+    url: https://github.com/dcversus/edgecraft/blob/main/CLAUDE.md
+    about: Follow these rules when collaborating with AI agents on Edge Craft.
+  - name: 📚 Project README
+    url: https://github.com/dcversus/edgecraft#readme
+    about: Learn about architecture, tasks, and validation requirements.

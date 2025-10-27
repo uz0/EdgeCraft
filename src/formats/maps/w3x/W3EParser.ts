@@ -316,6 +316,21 @@ export class W3EParser {
   }
 
   /**
+   * Extract cliff levels
+   * @param terrain - Parsed W3E terrain data
+   * @returns Uint8Array of cliff levels
+   */
+  public static getCliffLevels(terrain: W3ETerrain): Uint8Array {
+    const levels = new Uint8Array(terrain.groundTiles.length);
+
+    for (let i = 0; i < terrain.groundTiles.length; i++) {
+      levels[i] = terrain.groundTiles[i]?.cliffLevel ?? 0;
+    }
+
+    return levels;
+  }
+
+  /**
    * Helper: Check if we can read 'size' bytes from current offset
    */
   private checkBounds(size: number): void {

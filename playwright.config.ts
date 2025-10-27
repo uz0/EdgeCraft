@@ -14,6 +14,7 @@ export default defineConfig({
   testMatch: [
     'MapGallery.test.ts',
     'OpenMap.test.ts',
+    'BenchmarkComparison.test.ts',
     'render-parity.test.ts',
     'red-square-alignment.test.ts',
     'comparison-pixel-perfect.test.ts',
@@ -44,7 +45,7 @@ export default defineConfig({
   workers: 1,
 
   // Reporter configuration
-  reporter: [['html', { outputFolder: 'playwright-report' }], ['list'], ['line']],
+  reporter: process.env.CI ? [['list']] : [['html', { outputFolder: 'playwright-report' }], ['list'], ['line']],
 
   // Shared settings for all tests
   use: {
@@ -71,15 +72,17 @@ export default defineConfig({
   },
 
   // Configure Vite dev server
-  // Disabled: Start dev server manually with `npm run dev`
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3000', // Port 3000 is Vite's default
-  //   reuseExistingServer: !process.env.CI,
-  //   timeout: 120000, // 2 minutes to start
-  //   stdout: 'pipe', // Log server output for debugging
-  //   stderr: 'pipe',
-  // },
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000', // Port 3000 is Vite's default
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000, // 2 minutes to start
+    stdout: 'pipe', // Log server output for debugging
+    stderr: 'pipe',
+    env: {
+      VITE_OPEN_BROWSER: 'false',
+    },
+  },
 
   // Test projects for different browsers
   projects: [

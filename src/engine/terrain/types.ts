@@ -40,6 +40,8 @@ export interface TerrainData {
   heightData: Float32Array;
   /** Texture paths */
   textures: string[];
+  /** Cliff level map */
+  cliffLevels?: Uint8Array;
 }
 
 /**
