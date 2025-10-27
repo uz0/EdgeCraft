@@ -31,6 +31,8 @@ export class CliffRenderer {
     const detector = new CliffDetector(w3e);
     const cliffs: Record<string, { locations: number[]; textures: number[] }> = {};
 
+    console.log(`[CliffRenderer] Starting cliff detection on ${mapSize.width}x${mapSize.height} map`);
+
     for (let y = 0; y < mapSize.height - 1; y++) {
       for (let x = 0; x < mapSize.width - 1; x++) {
         if (!detector.isCliff(x, y)) {
@@ -92,26 +94,46 @@ export class CliffRenderer {
       }
     }
 
+    const totalCliffTiles = Object.values(cliffs).reduce((sum, data) => sum + data.locations.length / 3, 0);
+    console.log(`[CliffRenderer] Detected ${totalCliffTiles} cliff tiles across ${Object.keys(cliffs).length} unique models`);
+
     this.createCliffHeightMap(w3e, mapSize.width, mapSize.height);
     this.createShaderMaterial(mapSize, centerOffset);
 
+    console.log(`[CliffRenderer] Loading ${Object.keys(cliffs).length} unique cliff models`);
+
     const cliffPromises = Object.entries(cliffs).map(async ([path, data]) => {
       const { locations, textures } = data;
+      const instanceCount = locations.length / 3;
+      console.log(`[CliffRenderer] Attempting to load: ${path} (${instanceCount} instances, ${textures.length} textures)`);
+
       try {
         const url = `https://www.hiveworkshop.com/casc-contents?path=${path.toLowerCase()}`;
         const response = await fetch(url);
         if (!response.ok) {
+          console.error(`[CliffRenderer] Failed to fetch ${path}: ${response.status} ${response.statusText}`);
           return null;
         }
         const arrayBuffer = await response.arrayBuffer();
-        return new TerrainModel(
+        console.log(`[CliffRenderer] Loaded ${arrayBuffer.byteLength} bytes for ${path}`);
+
+        const model = new TerrainModel(
           this.scene,
           arrayBuffer,
           locations,
           textures,
           this.cliffShaderMaterial!
         );
-      } catch {
+
+        if (!model.mesh) {
+          console.error(`[CliffRenderer] TerrainModel failed to create mesh for ${path}`);
+          return null;
+        }
+
+        console.log(`[CliffRenderer] Successfully created mesh for ${path} with ${model.instances} instances`);
+        return model;
+      } catch (error) {
+        console.error(`[CliffRenderer] Exception loading ${path}:`, error);
         return null;
       }
     });
@@ -119,17 +141,34 @@ export class CliffRenderer {
     const models = await Promise.all(cliffPromises);
     this.cliffModels = models.filter((m): m is TerrainModel => m !== null);
 
+    const successCount = this.cliffModels.length;
+    const failCount = Object.keys(cliffs).length - successCount;
+    console.log(`[CliffRenderer] Initialization complete: ${successCount} models loaded, ${failCount} failed`);
+
+    if (failCount > 0) {
+      console.warn(`[CliffRenderer] ${failCount} cliff models failed to load - check errors above`);
+    }
+
     (window as unknown as { __cliffLoadingComplete: boolean }).__cliffLoadingComplete = true;
   }
 
   private async loadCliffTextures(w3e: W3ETerrain, cliffTypesData: CliffTypesData): Promise<void> {
     const cliffTextureIds = w3e.cliffTextureIds || [];
+    console.log(`[CliffRenderer] Loading ${cliffTextureIds.length} cliff texture types:`, cliffTextureIds);
 
     for (const cliffID of cliffTextureIds) {
       const row = cliffTypesData.getRow(cliffID);
-      if (row) {
-        this.cliffTypeRows.push(row);
+      if (!row) {
+        console.warn(`[CliffRenderer] Missing cliff type in CliffTypes.slk: ${cliffID}`);
+        continue;
       }
+      console.log(`[CliffRenderer] Loaded cliff type ${cliffID}:`, {
+        cliffModelDir: row.cliffModelDir,
+        texDir: row.texDir,
+        texFile: row.texFile,
+        groundTile: row.groundTile
+      });
+      this.cliffTypeRows.push(row);
     }
 
     const texturePromises = this.cliffTypeRows.map(async (row) => {
@@ -151,6 +190,10 @@ export class CliffRenderer {
 
     const textures = await Promise.all(texturePromises);
     this.cliffTextures = textures.filter((t): t is BABYLON.Texture => t !== null);
+
+    const textureSuccessCount = this.cliffTextures.length;
+    const textureFailCount = this.cliffTypeRows.length - textureSuccessCount;
+    console.log(`[CliffRenderer] Cliff textures loaded: ${textureSuccessCount} success, ${textureFailCount} failed`);
   }
 
   private createCliffHeightMap(w3e: W3ETerrain, columns: number, rows: number): void {
