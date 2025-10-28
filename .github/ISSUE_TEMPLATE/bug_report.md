@@ -79,7 +79,7 @@ assignees: ''
 
 ### Frequency
 - [ ] Always reproducible
-- [ ] Intermittent (happens sometimes)
+- [ ] Intermittent (sometimes happens)
 - [ ] Rare (happened once or twice)
 
 ---

@@ -149,9 +149,10 @@ tests/**/*.test.ts - end-to-end tests
 ### ZERO COMMENTS POLICY
 **CRITICAL: ZERO COMMENTS POLICY - ABSOLUTELY NO COMMENTS**
 
-Comments are ONLY allowed in TWO cases:
+Comments are ONLY allowed in THREE cases:
   1. **Workarounds** - When code does something unusual to bypass a framework/library bug
   2. **TODO/FIXME** - Temporary markers for incomplete work (must be removed before commit)
+  3. **Config Files** - Minimal explanatory comments in configuration files (jest.config.js, vite.config.ts, etc.) for clarity
 
 ### File Size Limit
 - **HARD LIMIT: 500 lines per file**
