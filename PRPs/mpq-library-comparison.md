@@ -282,7 +282,7 @@ if (result.success) {
 
 ### Files to Extract
 
-```
+```text
 @edgecraft/mpq-toolkit/
 ├── src/
 │   ├── mpq/

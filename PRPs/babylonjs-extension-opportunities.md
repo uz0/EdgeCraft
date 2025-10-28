@@ -358,9 +358,9 @@
 1. GPU-Driven Instancing, LOD, and Culling Toolkit (4-8 weeks)
 2. Fog of War + Minimap GPU Suite (1.5-3 weeks)
 
-**Can be parallelized**: Yes (different engineers can work on each)
+**Parallelizable**: Yes, different engineers can work on each component in parallel.
 
-**Business Impact**: Core RTS features that differentiate EdgeCraft
+**Business Impact**: Core RTS features that differentiate EdgeCraft from competitors.
 
 ---
 
@@ -369,9 +369,9 @@
 3. Gaussian Splatting Renderer (2-4 weeks)
 4. Lightweight Frame Graph Orchestrator (3-5 weeks)
 
-**Can be parallelized**: Yes
+**Parallelizable**: Yes, each component can be developed independently.
 
-**Business Impact**: Marketing/PR value, addresses top BabylonJS requests
+**Business Impact**: Marketing/PR value, addresses top BabylonJS community requests.
 
 ---
 
@@ -381,9 +381,9 @@
 6. PBR Area Lights via LTC (1-2 weeks)
 7. KTX2 Texture Pipeline (1-2 weeks)
 
-**Can be parallelized**: Yes
+**Parallelizable**: Yes, these tools can be developed concurrently by separate teams.
 
-**Business Impact**: Sellable to broader BabylonJS community, widens market
+**Business Impact**: Sellable to broader BabylonJS community, widens market reach.
 
 ---
 

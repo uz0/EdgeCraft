@@ -255,7 +255,7 @@ Compare results to baseline (`benchmarks/mpq-baseline-2025-10-28.json`):
 npm run dev
 ```
 
-1. Open http://localhost:5173
+1. Open <http://localhost:5173>
 2. Navigate to Map Gallery
 3. Load each test map (W3X, SC2, SCM)
 4. Verify terrain renders
@@ -328,10 +328,11 @@ Before clicking "Merge":
 
 ### Merge Method
 
-**Use: Squash and Merge**
+#### Use: Squash and Merge
 
-**Commit Message:**
-```
+#### Commit Message
+
+```text
 refactor: Extract MPQ parser into @edgecraft/mpq-toolkit package (#XXX)
 
 - Add @edgecraft/mpq-toolkit@^1.0.0 dependency
