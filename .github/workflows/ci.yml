@@ -41,11 +41,12 @@ jobs:
           fi
 
           # Check for scattered markdown files in root
-          scattered_md=$(find . -maxdepth 1 -type f -name "*.md" ! -name "README.md" ! -name "CLAUDE.md" ! -name "CONTRIBUTING.md" ! -name "LICENSE.md" | wc -l)
+          # Allowed files: README.md, CLAUDE.md, CONTRIBUTING.md, LICENSE.md, SECURITY.md, CREDITS.md, AGENTS.md
+          scattered_md=$(find . -maxdepth 1 -type f -name "*.md" ! -name "README.md" ! -name "CLAUDE.md" ! -name "CONTRIBUTING.md" ! -name "LICENSE.md" ! -name "SECURITY.md" ! -name "CREDITS.md" ! -name "AGENTS.md" | wc -l)
           if [ "$scattered_md" -gt 0 ]; then
             echo "❌ SIGNAL: Scattered Documentation Files (7/10 CRITICAL)"
             echo "Found forbidden .md files in root directory"
-            find . -maxdepth 1 -type f -name "*.md" ! -name "README.md" ! -name "CLAUDE.md" ! -name "CONTRIBUTING.md" ! -name "LICENSE.md"
+            find . -maxdepth 1 -type f -name "*.md" ! -name "README.md" ! -name "CLAUDE.md" ! -name "CONTRIBUTING.md" ! -name "LICENSE.md" ! -name "SECURITY.md" ! -name "CREDITS.md" ! -name "AGENTS.md"
             exit 1
           fi
 
