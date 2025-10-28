@@ -337,12 +337,15 @@ Implement comprehensive Signals System for workflow enforcement, violation detec
 | 2025-10-28 | Fixed jest.setup.ts types | jest.setup.ts | ESM imports, globalThis |
 | 2025-10-28 | Updated coverage thresholds | jest.config.js | 80% all metrics |
 | 2025-10-28 | AQA validation passed | All code | Typecheck, lint, unit tests ✅ |
+| 2025-10-28 | Fixed nitpicks batch 1 | 4 files | Template fixes, markdown cleanup |
+| 2025-10-28 | Fixed nitpicks batch 2 | 4 files | Config comments, language simplification |
+| 2025-10-28 | Final validation passed | All code | Typecheck ✅, lint ✅ |
 
 ---
 
 ## 🔍 Current Blockers
 
-**None** - All critical issues resolved, awaiting:
+**None** - All critical and high-priority nitpicks resolved, awaiting:
 1. CodeRabbit docstring generation completion
 2. Final code review approval
 3. Merge authorization
