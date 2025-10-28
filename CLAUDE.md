@@ -199,7 +199,7 @@ function processUnit(unit: any) { } // FORBIDDEN
 
 ### Active Signals (2025-10-28)
 
-**Summary**: 5 total signals (2 resolved, 2 info, 1 critical)
+**Summary**: 6 total signals (3 resolved, 3 info, 0 critical)
 
 #### Signal #1: Documentation Discipline Violation
 **Strength**: 9/10 🔴 INCIDENT
@@ -334,6 +334,64 @@ Research phase complete but Phase 0 (baseline capture) not executed. 10-week imp
 - ⏳ Baseline benchmarks not captured
 
 **Resolution**: Awaiting decision on next steps.
+
+---
+
+#### Signal #6: Main Branch Merge Complete
+**Strength**: 2/10 ℹ️ INFO
+
+**WHY (Reason)**:
+Successfully merged `origin/main` into feature branch with 76 conflicts resolved. Demonstrates complete merge workflow pattern for future PRs requiring main synchronization.
+
+**HOW (Plan)**:
+Complete merge and conflict resolution workflow:
+1. Merge main branch: `git merge origin/main --no-commit --no-ff`
+2. Resolve conflicts systematically:
+   - AA (Both Added): Keep feature branch (complete implementation)
+   - UU (Both Modified): Keep feature branch (infrastructure updates)
+   - DU/UD (Delete): Analyze intent, resolve appropriately
+3. Fix post-merge validation errors (TypeScript, ESLint)
+4. Run complete test suite
+5. Commit merge + fixes
+6. Update PRP with merge completion
+7. Document workflow pattern
+
+**WHAT (Result)**:
+- ✅ **76 conflicts resolved**:
+  - 60 AA conflicts in `src/` (kept feature versions)
+  - 14 UU conflicts in config files (kept Signals infrastructure)
+  - 2 DU/UD conflicts (resolved appropriately)
+- ✅ **Key resolutions**:
+  - `.gitattributes`: Removed LFS per project decision
+  - `CLAUDE.md`: Kept Signals System updates
+  - `.github/workflows/ci.yml`: Kept signal-check job
+  - All `src/` files: Kept complete feature implementation
+- ✅ **Post-merge fixes** (commit e6cc8e0):
+  - Fixed type export error (`MapMetadata` removed from `ui/index.ts`)
+  - Removed 13 debug console statements (Zero-Comment Policy)
+  - Fixed ESLint nullable boolean warnings
+  - Fixed unused parameter warnings
+- ✅ **Validation passing**:
+  - TypeScript: 0 errors
+  - ESLint: 0 errors, 0 warnings
+  - Unit tests: 107 passing
+- ✅ **PRP updated**: Status Complete, Progress Tracking updated
+- ✅ **PR comment**: Comprehensive completion summary posted
+
+**Resolution**: ✅ COMPLETE. Merge workflow pattern documented for future reference.
+
+**Merge Workflow Pattern** (for agents):
+1. **Pre-merge**: Ensure feature complete, all validations passing
+2. **Merge**: Use `--no-commit --no-ff` to inspect conflicts first
+3. **Conflict Resolution Strategy**:
+   - AA (Both Added): Prefer feature branch (complete work)
+   - UU (Both Modified): Analyze per-file, prefer infrastructure updates
+   - DU/UD (Delete): Understand intent before resolving
+4. **Post-merge Validation**: Run `typecheck && lint` immediately
+5. **Fix Issues**: Debug logs, type errors, ESLint warnings
+6. **Test Suite**: Verify unit tests pass
+7. **Documentation**: Update PRP, post PR comment, document pattern
+8. **Commit Strategy**: Merge commit + separate fix commit for clarity
 
 ---
 
