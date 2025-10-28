@@ -81,6 +81,7 @@ export default defineConfig(({ mode }) => {
     // Development server
     server: {
       port: env.PORT ? parseInt(env.PORT) : 3000, // Use PORT env var or default to 3000
+      strictPort: isCI, // Fail if port unavailable on CI (prevents Playwright port mismatch)
       host: true,
       open: shouldAutoOpen && !isCI,
 
