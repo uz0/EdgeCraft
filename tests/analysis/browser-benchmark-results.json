@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-10-26T18:14:33.827Z",
+  "parameters": {
+    "iterations": 6,
+    "elements": 60
+  },
+  "results": [
+    {
+      "library": "edgecraft",
+      "elapsedMs": 3.7,
+      "opsPerMs": 97.3,
+      "samples": 360,
+      "metadata": {
+        "domNodes": 60,
+        "weight": 0.7,
+        "accumulator": -28409.9881
+      }
+    },
+    {
+      "library": "babylonGui",
+      "elapsedMs": 3.9,
+      "opsPerMs": 92.31,
+      "samples": 360,
+      "metadata": {
+        "exportedKeys": 88,
+        "weight": 1.9,
+        "accumulator": -113272.0717
+      }
+    },
+    {
+      "library": "wcardinalUi",
+      "elapsedMs": 4.8,
+      "opsPerMs": 75,
+      "samples": 360,
+      "metadata": {
+        "moduleKeys": 0,
+        "weight": 2.4,
+        "accumulator": -102129.9883
+      }
+    }
+  ],
+  "ranking": [
+    {
+      "place": 1,
+      "library": "edgecraft",
+      "elapsedMs": 3.7,
+      "opsPerMs": 97.3
+    },
+    {
+      "place": 2,
+      "library": "babylonGui",
+      "elapsedMs": 3.9,
+      "opsPerMs": 92.31
+    },
+    {
+      "place": 3,
+      "library": "wcardinalUi",
+      "elapsedMs": 4.8,
+      "opsPerMs": 75
+    }
+  ]
+}

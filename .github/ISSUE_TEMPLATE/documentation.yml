@@ -1,0 +1,45 @@
+name: 📚 Documentation Update
+description: Improve Edge Craft documentation, guides, or automations.
+title: "[DOCS] "
+labels:
+  - documentation
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help keep our documentation accurate and automation workflows understandable.
+
+  - type: checkboxes
+    id: doc_checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I reviewed the current document and confirmed it is outdated or unclear.
+          required: true
+        - label: I linked relevant PRPs or code paths that require updated documentation.
+          required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: What needs to change?
+      description: Provide the impacted docs or workflows and the desired updates.
+      placeholder: Update README quick start to reference new automation templates.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Why does it matter?
+      description: Explain how the change improves onboarding, QA, or compliance.
+      placeholder: Missing instructions cause new contributors to skip asset validation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Link PRs, issues, or example text to copy.

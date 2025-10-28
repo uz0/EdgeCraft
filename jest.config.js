@@ -2,18 +2,23 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
 
-  setupFiles: ['<rootDir>/jest.setup.js'],
   setupFilesAfterEnv: ['@testing-library/jest-dom', '<rootDir>/jest.setup.ts'],
 
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/src'],
+
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/',
+    '/__tests__/',
+  ],
 
   transformIgnorePatterns: [
-    'node_modules/(?!@babylonjs)',
+    'node_modules/(?!@babylonjs|node-pkware)',
   ],
 
   testMatch: [
-    '**/__tests__/**/*.(test|spec).+(ts|tsx|js)',
-    '**/?(*.)+(spec|test).+(ts|tsx|js)',
+    '**/*.unit.ts',
+    '**/*.unit.tsx',
   ],
 
   transform: {
@@ -41,11 +46,9 @@ export default {
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@types/(.*)$': '<rootDir>/src/types/$1',
 
-    // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/mocks/__mocks__/fileMock.js',
-    // Mock shader files
-    '\\.fx\\?raw$': '<rootDir>/tests/__mocks__/shaderMock.js',
+    '\\.(jpg|jpeg|png|gif|svg)$': 'identity-obj-proxy',
+    '\\.fx\\?raw$': 'identity-obj-proxy',
   },
 
   collectCoverageFrom: [
@@ -57,14 +60,22 @@ export default {
 
   coverageThreshold: {
     global: {
-      branches: 0,
-      functions: 0,
-      lines: 0,
-      statements: 0,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
 
   coverageDirectory: '<rootDir>/coverage',
+
+  coverageReporters: [
+    'text',
+    'text-summary',
+    'lcov',
+    'html',
+    'json',
+  ],
 
   testTimeout: 10000,
 };

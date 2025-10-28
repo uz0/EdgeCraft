@@ -8,6 +8,7 @@ import { W3IParser } from './W3IParser';
 import { W3EParser } from './W3EParser';
 import { W3DParser } from './W3DParser';
 import { W3UParser } from './W3UParser';
+import { UnitsTranslator } from 'wc3maptranslator';
 import type { W3ODoodad } from './types';
 import type { W3UUnit } from './types';
 import type {
@@ -88,20 +89,32 @@ export class W3XMapLoader implements IMapLoader {
       );
     }
 
+    // W3X/W3M files have a 512-byte header before the MPQ data
+    // Check for W3X header signature 'HM3W' or 'W3DM' (little-endian: 'W3MH' or 'MD3W')
+    const view = new DataView(buffer);
+    let mpqOffset = 0;
+
+    if (buffer.byteLength >= 4) {
+      const magic = view.getUint32(0, true);
+      // 'HM3W' (0x57334D48) or similar W3X signatures
+      if (magic === 0x57334d48 || magic === 0x4d443357) {
+        mpqOffset = 512; // Skip 512-byte W3X header
+      }
+    }
+
+    // Extract MPQ data (skip W3X header if present)
+    const mpqBuffer = mpqOffset > 0 ? buffer.slice(mpqOffset) : buffer;
+
     // Parse MPQ archive
-    const mpqParser = new MPQParser(buffer);
+    const mpqParser = new MPQParser(mpqBuffer);
     const mpqResult = mpqParser.parse();
 
     if (!mpqResult.success || !mpqResult.archive) {
       throw new Error(`Failed to parse MPQ archive: ${mpqResult.error}`);
     }
 
-    // Debug: List all files in archive
-    const allFiles = mpqParser.listFiles();
-    console.log(
-      `[W3XMapLoader] Files in archive (${allFiles.length} total):`,
-      allFiles.slice(0, 20)
-    );
+    // List all files in archive
+    const allFiles = await mpqParser.listFiles();
 
     // Try to extract files, but catch errors (multi-compression, encryption, etc.)
     let w3iData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;
@@ -113,53 +126,48 @@ export class W3XMapLoader implements IMapLoader {
       // Try different case variations for war3map.w3i
       w3iData = await mpqParser.extractFile('war3map.w3i');
       if (!w3iData) {
-        console.log('[W3XMapLoader] Trying uppercase: war3map.W3I');
         w3iData = await mpqParser.extractFile('war3map.W3I');
       }
       if (!w3iData) {
-        console.log('[W3XMapLoader] Trying all caps: WAR3MAP.W3I');
         w3iData = await mpqParser.extractFile('WAR3MAP.W3I');
       }
-    } catch (err) {
-      console.warn(
-        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3i:',
-        err instanceof Error ? err.message : String(err)
-      );
-    }
+    } catch {}
 
     try {
       w3eData = await mpqParser.extractFile('war3map.w3e');
-    } catch (err) {
-      console.warn(
-        '[W3XMapLoader] ⚠️ Failed to extract war3map.w3e:',
-        err instanceof Error ? err.message : String(err)
-      );
-    }
+      if (w3eData) {
+      } else {
+      }
+    } catch {}
 
     try {
       dooData = await mpqParser.extractFile('war3map.doo');
-    } catch (err) {
+    } catch {
       // Optional file, silent fail
     }
 
     try {
       unitsData = await mpqParser.extractFile('war3mapUnits.doo');
-    } catch (err) {
+    } catch {
       // Optional file, silent fail
     }
 
     // If extraction fails (likely due to multi-compression not being supported),
     // create placeholder data so we can still generate SOME preview
     if (!w3iData || !w3eData) {
-      console.warn('[W3XMapLoader] ⚠️ Failed to extract W3X map files (likely multi-compression)');
-      console.warn('[W3XMapLoader] Creating placeholder map data for preview generation...');
-
       return this.createPlaceholderMapData(allFiles);
     }
 
     // Parse map info
     const w3iParser = new W3IParser(w3iData.data);
     const w3iInfo = w3iParser.parse();
+
+    // HIGH-LEVEL FORMAT DETECTION (User's insight!)
+    // Use W3I version numbers to detect Reforged format BEFORE parsing units
+    // CRITICAL FIX: fileVersion >= 28 indicates Reforged (v1.32+), NOT >= 25!
+    // Version 25 is The Frozen Throne (TFT), which uses Classic W3U format (no 16-byte padding).
+    // Version 28+ adds 4 game version fields in W3I AND 16-byte padding in W3U.
+    const mapFormat: 'classic' | 'reforged' = w3iInfo.fileVersion >= 28 ? 'reforged' : 'classic';
 
     // Parse terrain
     const w3eParser = new W3EParser(w3eData.data);
@@ -168,21 +176,56 @@ export class W3XMapLoader implements IMapLoader {
     // Parse doodads (optional)
     let doodads: DoodadPlacement[] = [];
     if (dooData) {
-      const w3dParser = new W3DParser(dooData.data);
-      const w3oDoodads = w3dParser.parse();
-      doodads = this.convertDoodads(w3oDoodads.doodads);
+      try {
+        const w3dParser = new W3DParser(dooData.data);
+        const w3oDoodads = w3dParser.parse();
+        doodads = this.convertDoodads(w3oDoodads.doodads);
+      } catch {
+        doodads = [];
+      }
+    } else {
     }
 
     // Parse units (optional)
     let units: UnitPlacement[] = [];
     if (unitsData) {
-      const w3uParser = new W3UParser(unitsData.data);
-      const w3uUnits = w3uParser.parse();
-      units = this.convertUnits(w3uUnits.units);
+      // CRITICAL FIX: wc3maptranslator doesn't support Reforged format (version >= 25)
+      // Skip it entirely for Reforged maps and go straight to W3UParser
+      if (mapFormat === 'reforged') {
+        try {
+          const w3uParser = new W3UParser(unitsData.data); // Let auto-detect format (W3I version ≠ W3U format!)
+          const w3uUnits = w3uParser.parse();
+          units = this.convertUnits(w3uUnits.units);
+        } catch {
+          units = [];
+        }
+      } else {
+        // Classic map - try wc3maptranslator first, then W3UParser as fallback
+        try {
+          const nodeBuffer = Buffer.from(unitsData.data);
+          const result = UnitsTranslator.warToJson(nodeBuffer);
+
+          if (result.json != null && result.json.length > 0) {
+            units = this.convertUnitsFromWc3MapTranslator(result.json);
+          } else {
+            throw new Error('wc3maptranslator returned 0 units');
+          }
+        } catch {
+          // FALLBACK: Use custom W3UParser
+
+          try {
+            const w3uParser = new W3UParser(unitsData.data); // Let auto-detect format (W3I version ≠ W3U format!)
+            const w3uUnits = w3uParser.parse();
+            units = this.convertUnits(w3uUnits.units);
+          } catch {
+            units = [];
+          }
+        }
+      }
     }
 
     // Convert to RawMapData
-    const mapInfo = this.convertMapInfo(w3iInfo);
+    const mapInfo = this.convertMapInfo(w3iInfo, w3eTerrain);
     const terrainData = this.convertTerrain(w3eTerrain);
 
     return {
@@ -196,8 +239,14 @@ export class W3XMapLoader implements IMapLoader {
 
   /**
    * Convert W3I map info to generic MapInfo
+   *
+   * @param w3i - Parsed W3I data
+   * @param w3e - Parsed W3E data (used as fallback for dimensions if W3I is corrupt)
    */
-  private convertMapInfo(w3i: ReturnType<W3IParser['parse']>): MapInfo {
+  private convertMapInfo(
+    w3i: ReturnType<W3IParser['parse']>,
+    w3e: ReturnType<W3EParser['parse']>
+  ): MapInfo {
     const players: PlayerInfo[] = w3i.players.map((p) => ({
       id: p.playerNumber,
       name: p.name,
@@ -211,16 +260,28 @@ export class W3XMapLoader implements IMapLoader {
       },
     }));
 
+    // CRITICAL FIX: Detect garbage W3I dimensions (happens with format version 25+)
+    // If dimensions are unreasonably large (> 1000), use W3E dimensions as fallback
+    const isGarbageDimensions = w3i.playableWidth > 1000 || w3i.playableHeight > 1000;
+
+    let width = w3i.playableWidth;
+    let height = w3i.playableHeight;
+
+    if (isGarbageDimensions) {
+      width = w3e.width;
+      height = w3e.height;
+    }
+
     return {
       name: w3i.name,
       author: w3i.author,
       description: w3i.description,
       players,
       dimensions: {
-        width: w3i.playableWidth,
-        height: w3i.playableHeight,
-        playableWidth: w3i.playableWidth,
-        playableHeight: w3i.playableHeight,
+        width,
+        height,
+        playableWidth: width,
+        playableHeight: height,
       },
       environment: {
         tileset: w3i.mainTileType,
@@ -259,17 +320,37 @@ export class W3XMapLoader implements IMapLoader {
       };
     }
 
+    // CRITICAL FIX: Use groundTextureIds array (e.g., ["Adrt", "Ldrt", "Agrs", "Arok"])
+    // instead of tileset name (e.g., "A"). The textureIndices (blendMap) point into this array.
+    //
+    // Example:
+    // - groundTextureIds = ["Adrt", "Agrs", "Arok", "Avin"]
+    // - textureIndices[i] = 0 → use groundTextureIds[0] = "Adrt" (dirt)
+    // - textureIndices[i] = 1 → use groundTextureIds[1] = "Agrs" (grass)
+    // - textureIndices[i] = 2 → use groundTextureIds[2] = "Arok" (rock)
+    //
+    // If groundTextureIds is empty (shouldn't happen, but defensive), fall back to tileset.
+    const textureIds =
+      w3e.groundTextureIds && w3e.groundTextureIds.length > 0
+        ? w3e.groundTextureIds
+        : [w3e.tileset];
+
+    // Create a TerrainTexture for each ground texture in the map
+    // The blendMap (textureIndices) determines which texture is used at each point
+    const textures = textureIds.map((id) => ({
+      id,
+      blendMap: textureIndices, // Same blendMap shared by all textures (indices point into textureIds array)
+    }));
+
+    const cliffLevels = W3EParser.getCliffLevels(w3e);
+
     return {
       width: w3e.width,
       height: w3e.height,
       heightmap,
-      textures: [
-        {
-          id: w3e.tileset,
-          blendMap: textureIndices,
-        },
-      ],
+      textures,
       water,
+      cliffLevels,
     };
   }
 
@@ -277,6 +358,15 @@ export class W3XMapLoader implements IMapLoader {
    * Convert W3O doodads to generic DoodadPlacement
    */
   private convertDoodads(w3oDoodads: W3ODoodad[]): DoodadPlacement[] {
+    // DEBUG: Log first 3 doodad positions to verify coordinate system
+    if (w3oDoodads.length > 0) {
+      for (let i = 0; i < Math.min(3, w3oDoodads.length); i++) {
+        const d = w3oDoodads[i];
+        if (d) {
+        }
+      }
+    }
+
     return w3oDoodads.map((doodad) => ({
       id: `doodad_${doodad.editorId}`,
       typeId: doodad.typeId,
@@ -290,11 +380,61 @@ export class W3XMapLoader implements IMapLoader {
   }
 
   /**
-   * Convert W3U units to generic UnitPlacement
+   * Convert wc3maptranslator JSON units to generic UnitPlacement
+   */
+  private convertUnitsFromWc3MapTranslator(
+    jsonUnits: Array<{
+      type: string;
+      variation: number;
+      position: number[];
+      rotation: number;
+      scale: number[];
+      hero: { level: number; str: number; agi: number; int: number };
+      inventory: Array<{ slot: number; type: string }>;
+      abilities: Array<{ ability: string; active: boolean; level: number }>;
+      player: number;
+      hitpoints: number;
+      mana: number;
+      gold: number;
+      targetAcquisition: number;
+      color: number;
+      id: number;
+    }>
+  ): UnitPlacement[] {
+    return jsonUnits.map((unit) => ({
+      id: `unit_${unit.id}`,
+      typeId: unit.type,
+      owner: unit.player,
+      position: {
+        x: unit.position[0] ?? 0,
+        y: unit.position[1] ?? 0,
+        z: unit.position[2] ?? 0,
+      },
+      rotation: unit.rotation,
+      scale: {
+        x: unit.scale[0] ?? 1,
+        y: unit.scale[1] ?? 1,
+        z: unit.scale[2] ?? 1,
+      },
+      health: unit.hitpoints === -1 ? 100 : unit.hitpoints,
+      mana: unit.mana === -1 ? 100 : unit.mana,
+      customProperties: {
+        heroLevel: unit.hero.level,
+        heroStrength: unit.hero.str,
+        heroAgility: unit.hero.agi,
+        heroIntelligence: unit.hero.int,
+        goldAmount: unit.gold,
+        targetAcquisition: unit.targetAcquisition,
+      },
+    }));
+  }
+
+  /**
+   * Convert W3U units to generic UnitPlacement (custom parser fallback)
    */
   private convertUnits(w3uUnits: W3UUnit[]): UnitPlacement[] {
     return w3uUnits.map((unit) => ({
-      id: `unit_${unit.editorId}`,
+      id: `unit_${unit.creationNumber}`,
       typeId: unit.typeId,
       owner: unit.owner,
       position: unit.position,
@@ -318,11 +458,9 @@ export class W3XMapLoader implements IMapLoader {
    * This allows preview generation to work even when multi-compression is not supported
    */
   private createPlaceholderMapData(availableFiles: string[]): RawMapData {
-    console.log('[W3XMapLoader] Creating placeholder map data with default 256x256 terrain');
-
     // Determine map size from filename hints if possible
     let mapSize = 256;
-    const fileName = availableFiles.find((f) => f.includes('war3map')) || '';
+    const fileName = availableFiles.find((f) => f.includes('war3map')) ?? '';
     if (fileName.toLowerCase().includes('small')) {
       mapSize = 128;
     } else if (fileName.toLowerCase().includes('large')) {

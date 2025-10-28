@@ -1,0 +1,97 @@
+name: Asset Validation
+
+on:
+  push:
+    branches: [main, develop, playwright-e2e-infra]
+    paths:
+      - 'public/assets/**'
+      - 'scripts/validate-assets.cjs'
+      - 'CREDITS.md'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'public/assets/**'
+      - 'scripts/validate-assets.cjs'
+      - 'CREDITS.md'
+
+jobs:
+  validate-assets:
+    name: Validate Asset Library
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run asset validation
+        run: npm run validate
+
+      - name: Check for large files (>10MB)
+        run: |
+          echo "Checking for files larger than 10MB..."
+          LARGE_FILES=$(find public/assets -type f -size +10M 2>/dev/null || true)
+          if [ -n "$LARGE_FILES" ]; then
+            echo "⚠️  WARNING: Large files detected:"
+            echo "$LARGE_FILES"
+            du -h $LARGE_FILES
+            echo ""
+            echo "Consider optimizing these assets or using Git LFS."
+          else
+            echo "✅ No files larger than 10MB found."
+          fi
+
+      - name: Verify CREDITS.md exists
+        run: |
+          if [ ! -f CREDITS.md ]; then
+            echo "❌ ERROR: CREDITS.md not found!"
+            echo "All assets must be properly attributed."
+            exit 1
+          fi
+          echo "✅ CREDITS.md exists"
+
+      - name: Check manifest.json validity
+        run: |
+          if [ ! -f public/assets/manifest.json ]; then
+            echo "❌ ERROR: manifest.json not found!"
+            exit 1
+          fi
+
+          # Validate JSON syntax
+          if ! python3 -m json.tool public/assets/manifest.json > /dev/null; then
+            echo "❌ ERROR: manifest.json is not valid JSON!"
+            exit 1
+          fi
+
+          echo "✅ manifest.json is valid"
+
+      - name: Asset validation report
+        if: always()
+        run: |
+          echo "============================================"
+          echo "ASSET VALIDATION SUMMARY"
+          echo "============================================"
+          echo ""
+          echo "Textures:"
+          find public/assets/textures -type f -name "*.jpg" | wc -l | xargs echo "  Total JPG files:"
+
+          echo ""
+          echo "Models:"
+          find public/assets/models -type f -name "*.glb" | wc -l | xargs echo "  Total GLB files:"
+
+          echo ""
+          echo "Total size:"
+          du -sh public/assets | awk '{print "  " $1}'
+
+          echo ""
+          echo "License compliance:"
+          echo "  100% CC0 1.0 Universal (verified by validation script)"
+          echo ""

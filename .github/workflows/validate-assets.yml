@@ -1,19 +1,21 @@
 name: Asset Copyright Validation
 
+# TEMPORARILY DISABLED: Copyright validation scripts not yet implemented (future work)
+# Re-enable after implementing: test:copyright, test:asset-replacement, test:visual-similarity scripts
 on:
-  push:
-    branches: [ main, develop, 'feat/**', 'fix/**' ]
-    paths:
-      - 'assets/**'
-      - 'src/assets/**'
-      - 'tests/assets/**'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'assets/**'
-      - 'src/assets/**'
-      - 'tests/assets/**'
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger only
+  # push:
+  #   branches: [ main, develop, 'feat/**', 'fix/**' ]
+  #   paths:
+  #     - 'assets/**'
+  #     - 'src/assets/**'
+  #     - 'tests/assets/**'
+  # pull_request:
+  #   branches: [ main, develop ]
+  #   paths:
+  #     - 'assets/**'
+  #     - 'src/assets/**'
+  #     - 'tests/assets/**'
 
 jobs:
   copyright-check:

@@ -1,327 +1,162 @@
 # Edge Craft - AI Development Guidelines
 
-## 🚨 **CRITICAL: THE THREE-FILE RULE** (MOST IMPORTANT)
+## 🎯 Project Awareness & Context
+**Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with TypeScript, React, and Babylon.js.
+- **Mondatory** identify on what PRP (Product Requirement Proposal) we are working now first, clarify user if you lost track.
+- **Always read `PRPs/*.md`** at the start of a new conversation to understand the current task goal and status.
+- **Use consistent naming conventions, file structure, and architecture patterns** as described in `CONTRIBUTING.md`.
+- for small changes or patches as exception we can user commit and branch prefixes hotfix-* and trivial-* and TRIVIAL: * and HOTFIX: *. **ONLY IF WAS ASKED FOR!**
+- **UPDATE PRP DURING WORK** After EVERY significant change, add row to Progress Tracking table, check off DoD items as completed, update "Current Blockers" or "Next Steps"
+- PRP should contain list of affected files
 
-**⚠️ READ THIS FIRST - THIS RULE OVERRIDES EVERYTHING ELSE ⚠️**
+## 🧱 Development
 
-### 🔴 ABSOLUTE RULE: ONLY 3 DOCUMENTATION TYPES ALLOWED
+### Rules
+- *always* use chrome devtools mcp to validate client logic
+- *never* creating tmp pages or script to test hypothesis
+- add only neccesary for debug logs, after they give info - clear them!
+- avoid early faulty generalization. split first utility layer, then dont hesistate to copy-paste, only on third case with re-use start generalization
+- index.js files are *FORBIDDEN*. always import with whole path from src.'
+- **NEVER use `git checkout` or `git revert` to undo changes** - Always fix issues by making forward progress with proper edits
+- File issues through the templates in `.github/ISSUE_TEMPLATE/`; blank issues are disabled.
+- Complete the PR checklist in `.github/pull_request_template.md` before asking for review.
 
-**NO EXCEPTIONS. NO COMPROMISES. NO VIOLATIONS.**
+**Rules for self-documenting code instead of comments:**
+- Use descriptive variable names: `userAssessmentRun` not `run`
+- Use descriptive function names: `validateUserAccessToAssessment()` not `validate()`
+- Use descriptive test names: `'should return 404 when user lacks assessment access'`
+- Extract complex conditions to well-named functions
+- Use enums and constants with clear names
 
-**ONLY 3 types of documentation are allowed in this repository:**
-
-1. **`CLAUDE.md`** - This file. AI development guidelines and workflow rules.
-2. **`README.md`** - Project overview, setup instructions, current status.
-3. **`PRPs/`** - Phase Requirement Proposals. The ONLY format for all project requirements.
-
-### ❌ **ABSOLUTELY FORBIDDEN** (Delete Immediately)
-
-**Documentation Files:**
-- ❌ No `docs/` directory
-- ❌ No scattered `.md` files anywhere except root (CLAUDE.md, README.md) and PRPs/
-- ❌ No `ARCHITECTURE.md`, `TECHNICAL-SPEC.md`, `PLAN.md`
-- ❌ No `tests/**/*.md` (test documentation goes in PRPs)
-- ❌ No `src/**/*.md` (implementation docs go in PRPs)
-- ❌ No "summary", "findings", "specification", "guide" files outside PRPs/
-- ❌ No duplicate documentation
-
-**❗ EXAMPLES OF VIOLATIONS (Delete These If Found):**
-```
-tests/MAP_PREVIEW_TEST_SUMMARY.md          ← DELETE
-tests/engine/rendering/VISUAL_VALIDATION_FINDINGS.md  ← DELETE
-tests/engine/rendering/README_MAP_PREVIEW_TESTS.md    ← DELETE
-tests/engine/rendering/MAP_PREVIEW_TEST_SPECIFICATION.md ← DELETE
-docs/                                       ← DELETE ENTIRE DIRECTORY
-ARCHITECTURE.md                             ← DELETE
-TECHNICAL_SPEC.md                           ← DELETE
-```
-
-**✅ CORRECT LOCATIONS:**
-```
-CLAUDE.md                                   ← Testing guidelines, workflows
-README.md                                   ← Current status, setup instructions
-PRPs/map-preview-visual-regression-testing.md  ← Test specifications, standards
-```
-
-### ✅ **IF IT'S NOT IN A PRP, IT DOESN'T EXIST.**
-
-**Why This Rule Exists:**
-- Prevents documentation drift and conflicts
-- Single source of truth per phase
-- Forces executable, actionable requirements
-- Enables automation and clear gates
-- Makes progress measurable
-- **Eliminates confusion about where to find information**
-
-**When You See Violations:**
-1. **STOP** - Do not continue work
-2. **Extract** valuable content from forbidden files
-3. **Move** content to appropriate PRP or CLAUDE.md
-4. **DELETE** all forbidden documentation files
-5. **Commit** with message: "Enforce Three-File Rule: consolidate documentation"
-
----
-
-## 🎯 Project Context
-**Edge Craft** is a WebGL-based RTS game engine supporting Blizzard file formats with legal safety through clean-room implementation. Built with **TypeScript, React, and Babylon.js**.
-
----
-
-## 📋 PRP-ONLY WORKFLOW
-
-### What is a PRP?
-
-**PRP = Phase Requirement Proposal**
-
-A PRP is the ONLY allowed format for documenting:
-- Phase objectives and scope
-- Technical requirements
-- Implementation steps
-- Success criteria
-- Testing & validation
-- Exit conditions
-
-### PRP Structure (MANDATORY)
-
-Every PRP MUST contain these sections:
-
-```markdown
-# PRP {N}: Phase {N} - {Phase Name}
-
-**Phase Name**: {Name}
-**Duration**: {X} weeks | **Team**: {N} developers | **Budget**: ${X}
-**Status**: 📋 Planned | 🟡 In Progress | ✅ Complete
-
-## 🎯 Phase Overview
-{Strategic context, why this phase matters}
-
-## 📋 Definition of Ready (DoR)
-{Checklist of prerequisites to START this phase}
-- [ ] Prerequisite 1
-- [ ] Prerequisite 2
-...
-
-## ✅ Definition of Done (DoD)
-{Checklist of deliverables to COMPLETE this phase}
-- [ ] Deliverable 1
-- [ ] Deliverable 2
-...
-
-## 🏗️ Implementation Breakdown
-{Detailed architecture, code examples, sub-tasks}
-
-## 📅 Implementation Timeline
-{Week-by-week rollout plan}
-
-## 🧪 Testing & Validation
-{Benchmarks, test commands, success metrics}
-
-## 📊 Success Metrics
-{Quantifiable targets}
-
-## 📈 Phase Exit Criteria
-{Final checklist to close phase}
-```
-
-### PRP Naming Convention
-
-```
-PRPs/
-├── phase1-foundation/
-│   └── 1-mvp-launch-functions.md          # Consolidated Phase 1 PRP
-├── phase2-rendering/
-│   └── 2-advanced-rendering-visual-effects.md  # Consolidated Phase 2 PRP
-├── phase3-gameplay/
-│   └── 3-gameplay-mechanics.md            # Consolidated Phase 3 PRP
-└── phase{N}-{slug}/
-    └── {N}-{slug}.md                      # Consolidated Phase N PRP
-```
-
-**Rules:**
-- **One PRP per phase** (consolidated)
-- **PRP number = Phase number**
-- **Filename = phase number + slug**
-- **No sub-PRPs** - use "Implementation Breakdown" sections within main PRP
-
----
-
-## 🔄 PHASE EXECUTION WORKFLOW
-
-### The 4-Gate Iteration Cycle
-
-Every phase follows this cycle:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 1: DoR VALIDATION                                      │
-│ ✅ All prerequisites from previous phase complete           │
-│ ✅ Infrastructure ready                                      │
-│ ✅ Team assigned and available                              │
-│ └──> AUTOMATION: CI/CD checks DoR checklist                 │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 2: IMPLEMENTATION                                       │
-│ 📝 Follow PRP Implementation Breakdown section              │
-│ 🧪 Run tests continuously (>80% coverage)                   │
-│ ⚡ Meet performance targets (benchmarks pass)               │
-│ 📊 Update DoD checklist items as completed                  │
-│ └──> AUTOMATION: CI/CD runs tests, benchmarks on each PR    │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 3: DOD VALIDATION                                       │
-│ ✅ All DoD checklist items checked                          │
-│ ✅ All success metrics met                                   │
-│ ✅ All tests passing (>80% coverage)                        │
-│ ✅ All benchmarks passing                                    │
-│ └──> AUTOMATION: CI/CD blocks merge if DoD incomplete       │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ GATE 4: PHASE CLOSURE                                        │
-│ 📝 Update PRP status to ✅ Complete                         │
-│ 📝 Update README.md with phase completion                   │
-│ 📝 Merge to main branch                                      │
-│ 📝 Next phase DoR automatically becomes ready               │
-│ └──> AUTOMATION: GitHub Actions updates project board       │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Gate Automation Rules
-
-**GATE 1 (DoR) - Automated Checks:**
-```yaml
-# .github/workflows/gate-1-dor.yml
-- Check all previous phase PRPs marked ✅ Complete
-- Verify performance baselines documented
-- Ensure no failing tests in main branch
-- Validate team assignment in PRP
-```
-
-**GATE 2 (Implementation) - Continuous Validation:**
-```yaml
-# .github/workflows/gate-2-implementation.yml
-on: [pull_request]
-steps:
-  - Run TypeScript type checking (strict mode)
-  - Run test suite (require >80% coverage)
-  - Run performance benchmarks (must meet targets)
-  - Run legal compliance validation (zero copyright violations)
-  - Check code < 500 lines per file
-```
-
-**GATE 3 (DoD) - Merge Blocker:**
-```yaml
-# .github/workflows/gate-3-dod.yml
-on: [pull_request]
-steps:
-  - Parse PRP DoD checklist
-  - Verify all [ ] items are [x] checked
-  - Run full benchmark suite
-  - Validate success metrics met
-  - Block merge if ANY item incomplete
-```
-
-**GATE 4 (Closure) - Phase Transition:**
-```yaml
-# .github/workflows/gate-4-closure.yml
-on: [push to main]
-steps:
-  - Update PRP status badge to ✅ Complete
-  - Generate phase completion report
-  - Update README.md progress tracking
-  - Create GitHub release for phase
-  - Notify team of next phase readiness
-```
-
----
-
-## 🚀 AI AGENT WORKFLOW
-
-### When Working on a Phase
-
-**1. ALWAYS Read the PRP First**
+### Pre-Commit Checks
 ```bash
-# Before ANY implementation work
-cat PRPs/phase{N}-{slug}/{N}-{slug}.md
+npm run typecheck  # TypeScript: 0 errors
+npm run lint       # ESLint: 0 errors
+npm run test       # Tests: All passing
+npm run validate   # Asset and packages Validation pipeline
 ```
 
-**2. Validate DoR (Gate 1)**
-- Check ALL DoR checklist items
-- If ANY item unchecked → STOP, complete prerequisites first
-- Never start implementation without passing Gate 1
+### Folder structure
+public/assets/manifest.json - list of all assets
+public/assets - all external resources (textures, 3d models)
+public/maps - game maps
+scripts/ - utility scripts for ci and development
+src/
+src/engine - all game engine here
+src/formats - maps to scene transformations
+src/types - typescript types
+src/utils - app utils
+src/config - app config files
+src/ui - react components to build interface (for pages only!)
+src/hooks - ui react hooks (for pages only!)
+src/pages - TMP! temporary folder for map list and scene pages
+src/**/*.unit.ts - all unit tests placed nearby code
+tests/ - ONLY playwrite tests here
+tests/**/*.test.ts - end-to-end tests
 
-**3. Follow Implementation Breakdown**
-- Use architecture from PRP
-- Use code examples from PRP
-- Follow timeline from PRP
-- Meet performance targets from PRP
+## 🧪 Testing & Reliability
 
-**4. Update DoD as You Go**
-- Check off [ ] items as completed
-- Never mark item complete unless fully validated
-- Keep PRP as single source of truth for progress
+- **Minimum: 80% unit test coverage** (enforced by CI/CD)
+- Unit test (jest) files: `*.unit.ts`, `*.unit.tsx`
+- E2E tests (Playwright) `*.test.ts`
+- Framework: Jest + React Testing Library
+- E2E: Playwright
 
-**5. Validate Success Metrics**
-- Run benchmarks from PRP
-- Ensure all metrics met
-- Document results in PR
+## ✅ Task Completion
 
-**6. Pass Gate 3 (DoD Validation)**
-- All DoD items checked ✅
-- All tests passing
-- All benchmarks passing
-- Ready for merge
+**Step 1: System Analyst** - Define Goal & DoR
+- Write clear goal/description
+- Define business value
+- List prerequisites (DoR)
+- Create initial DoD outline
 
-### When Starting New Work
+**Step 2: AQA (Automation QA Engineer)** - Add Quality Gates
+- Complete DoD with quality criteria
+- Define required test coverage
+- List validation checks
+- Specify performance benchmarks
 
-**ASK YOURSELF:**
-1. **"Which phase am I in?"** → Check README.md
-2. **"What's the current PRP?"** → Read `PRPs/phase{N}-{slug}/{N}-{slug}.md`
-3. **"Did Gate 1 pass?"** → Validate DoR checklist
-4. **"What's next to implement?"** → Check DoD, find unchecked items
-5. **"How do I implement it?"** → Follow "Implementation Breakdown" section
+**Step 3: Developer** - Technical Planning
+- Research technical approach
+- Document high-level design (ADR style)
+- List code references and dependencies
+- Create breakthrough plan
+- Add interface design
+- Link related documentation
 
-**NEVER:**
-- ❌ Create new documentation outside PRPs/
-- ❌ Start implementation without reading PRP
-- ❌ Skip DoR validation
-- ❌ Mark DoD items complete without validation
-- ❌ Merge without passing Gate 3
+**Step 4: Finalization preparaion**
+- All three roles review and finalize PRP
+- PRP status: 📋 Planned → 🔬 Research
+- PRP is now **executable**
 
----
+**Step 5: Developer Research**
+- Review all materials in PRP
+- Conduct additional research if needed
+- Update "Research / Related Materials" section
+- PRP status: 🔬 Research → 🟡 In Progress
 
-## 📏 CODE QUALITY RULES
+**Step 6: Implementation**
+- Write code following PRP design
+- **ALWAYS update Progress Tracking table** after each significant change
+- Run `npm run typecheck && npm run lint` continuously
+- Write unit tests as you code (TDD)
+- **All business logic changes MUST have tests**
+
+**Step 7: Developer Self-Check**
+- [ ] All DoD items checked
+- [ ] All tests passing (`npm run test`)
+- [ ] No TypeScript errors (`npm run typecheck`)
+- [ ] No ESLint errors (`npm run lint`)
+- [ ] Code documented (JSDoc for public APIs)
+
+**Step 8: Manual QA**
+- Create test matrix (scenarios, test cases, results)
+- Manually test all user stories
+- Document results in PRP "Testing Evidence"
+- Update Progress Tracking table
+- PRP status: 🟡 In Progress → 🧪 Testing
+
+**Step 9: AQA - Automated Tests**
+- Write E2E tests for critical paths (if needed)
+- Run full test suite
+- Verify quality gates (coverage, performance)
+- Mark "Quality Gates" section as complete
+- Update Progress Tracking table
+
+**Step 10: Create PR**
+- Push code to branch
+- Create Pull Request
+- Link PRP in PR description
+- Tag reviewers
+
+**Step 11: Code Review**
+- Address all review feedback
+- Update Progress Tracking table with changes
+- Get approval
+
+**Step 12: Merge & Close**
+- Merge PR to main
+- Update PRP status: 🧪 Testing → ✅ Complete
+- Fill "Review & Approval" section
+- Document final status in PRP
+
+## 📎 Style & Conventions
+
+### **ESLINT-DISABLE NO TOLERANCE**
+- eslint-disable forbidden by default
+- eslint-disable can be placed with explanation ONLY if user allow it and it's necessity
+
+### ZERO COMMENTS POLICY
+**CRITICAL: ZERO COMMENTS POLICY - ABSOLUTELY NO COMMENTS**
+
+Comments are ONLY allowed in THREE cases:
+  1. **Workarounds** - When code does something unusual to bypass a framework/library bug
+  2. **TODO/FIXME** - Temporary markers for incomplete work (must be removed before commit)
+  3. **Config Files** - Minimal explanatory comments in configuration files (jest.config.js, vite.config.ts, etc.) for clarity
 
 ### File Size Limit
 - **HARD LIMIT: 500 lines per file**
 - Split into modules when approaching limit
-- Use barrel exports (`index.ts`) for clean APIs
-
-### Code Organization
-```
-src/
-├── engine/       # Babylon.js game engine core
-│   ├── renderer/
-│   ├── camera/
-│   └── scene/
-├── formats/      # File format parsers
-│   ├── mpq/
-│   ├── casc/
-│   └── mdx/
-├── gameplay/     # Game mechanics
-│   ├── units/
-│   ├── pathfinding/
-│   └── combat/
-```
-
-**Each module should contain:**
-- `index.ts` - Public exports
-- `types.ts` - TypeScript interfaces
-- `Component.tsx` - React component (if UI)
-- `utils.ts` - Helper functions
-- `Component.test.tsx` - Tests
 
 ### TypeScript Standards
 ```typescript
@@ -334,341 +169,283 @@ interface UnitData {
 
 // ❌ DON'T: Use 'any'
 function processUnit(unit: any) { } // FORBIDDEN
-
-// ✅ DO: Use enums for constants
-enum UnitType {
-  WORKER = 'worker',
-  WARRIOR = 'warrior'
-}
-
-// ✅ DO: Use async/await
-async function loadMap(path: string): Promise<MapData> {
-  const data = await fetch(path);
-  return parse(data);
-}
 ```
 
-### React Patterns
-```typescript
-// ✅ DO: Functional components with hooks
-const MapEditor: React.FC<MapEditorProps> = ({ mapData }) => {
-  const [selectedTool, setSelectedTool] = useState<Tool>('terrain');
-  const { terrain, updateTerrain } = useTerrainEditor(mapData);
+**Every business logic change MUST have tests. No exceptions.**
 
-  return <div>{/* UI */}</div>;
-};
+## 📚 Documentation & Explainability
 
-// ❌ DON'T: Class components
-class MapEditor extends React.Component { } // Avoid
-```
-
-### Babylon.js Patterns
-```typescript
-// ✅ DO: Scene management with disposal
-class GameScene {
-  private scene: BABYLON.Scene;
-  private engine: BABYLON.Engine;
-
-  async initialize(): Promise<void> {
-    // Setup scene, lights, camera
-  }
-
-  dispose(): void {
-    this.scene.dispose();
-    this.engine.dispose();
-  }
-}
-```
+## 🧠 AI Behavior Rules
+- **Never assume missing context. Ask questions if uncertain.**
+- **Never hallucinate libraries or functions** – only use known, verified packages.
+- **Always confirm file paths and module names** exist before referencing them in code or tests.
+- **Never delete or overwrite existing code** unless explicitly instructed to or if part of a task from `PRPs/*.md`.
+- **The PRP-Centric Workflow:**
+  1. `CLAUDE.md` ← You are here (workflow rules)
+  2. `README.md` ← Project overview
+  3. `PRPs/` ← ALL work is defined here
 
 ---
 
-## 🧪 TESTING REQUIREMENTS
+## 🚨 Signals System
 
-### Test Coverage
-- **Minimum: 80% coverage** (enforced by CI/CD)
-- Test files: `*.test.ts`, `*.test.tsx`
-- Framework: Jest + React Testing Library
+**Purpose**: Track workflow violations, progress milestones, and attention-required events during agent execution.
 
-### Test Structure
-```typescript
-describe('FeatureName', () => {
-  it('should handle normal operation', () => {
-    // Arrange
-    const input = createTestData();
+**Signal Strength Scale**:
+- **0-2**: Informational (no action required)
+- **3-5**: Warning (review recommended)
+- **6-8**: Critical (immediate attention required)
+- **9-10**: Incident (human intervention mandatory)
 
-    // Act
-    const result = feature(input);
+### Active Signals (2025-10-28)
 
-    // Assert
-    expect(result).toBe(expected);
-  });
+**Summary**: 6 total signals (3 resolved, 3 info, 0 critical)
 
-  it('should handle edge cases', () => {
-    // Test boundary conditions
-  });
+#### Signal #1: Documentation Discipline Violation
+**Strength**: 9/10 🔴 INCIDENT
 
-  it('should handle errors gracefully', () => {
-    // Test error handling
-  });
-});
-```
+**WHY (Reason)**:
+Violated Three-File Rule from CLAUDE.md by creating `docs/` directory. This breaks project documentation discipline and creates fragmentation risk.
 
-### Performance Testing
-- **Babylon.js**: 60 FPS with 500 units
-- **Memory**: No leaks during 1-hour sessions
-- **Load times**: Maps < 10 seconds, models < 1 second
+**HOW (Plan)**:
+1. Move all `docs/research/*.md` files to `PRPs/`
+2. Update all references in PRPs to point to new locations
+3. Remove empty `docs/` directory
+4. Add this signal to CLAUDE.md to prevent recurrence
+5. Update .gitignore to prevent docs/ directory creation
 
-**Benchmark Commands:**
-```bash
-# From PRP success metrics
-npm run benchmark -- terrain-lod        # 60 FPS @ 256x256
-npm run benchmark -- unit-instancing    # 60 FPS @ 500 units
-npm run benchmark -- full-system        # All systems @ 60 FPS
-```
+**WHAT (Result)**:
+- ✅ Moved 5 files from `docs/research/` to `PRPs/`
+  - `mpq-library-comparison.md` (408 lines)
+  - `mpq-extraction-blueprint.md` (607 lines)
+  - `documentation-updates-required.md` (356 lines)
+  - `agent-instruction-manual.md` (750 lines)
+  - `edgecraft-pr-plan.md` (446 lines)
+- ✅ Updated all references in `mpq-compression-module-extraction.md`
+- ✅ Removed `docs/` directory
+- ✅ Updated .gitignore with comprehensive signal prevention patterns
+- ✅ Created `.claude/subagents.yml` with signal-aware agents
+- ✅ Created `.claude/skills.yml` with signal management skills
+- ✅ Updated CONTRIBUTING.md with Signals System documentation
+- ✅ Updated README.md with signals-aware workflow
+- ✅ Created signal-aware PR template (`.github/pull_request_template.md`)
+- ✅ Created 3 issue templates (bug, feature, signal report)
+- ✅ Updated CI/CD pipeline with signal-check job (blocks merge if strength >= 6)
 
----
-
-## 🛡️ LEGAL COMPLIANCE
-
-### Zero Tolerance Policy
-- **NEVER include copyrighted assets** from Blizzard games
-- **Use ONLY original or CC0/MIT licensed** content
-- **Run validation before EVERY commit**: `npm run validate-assets`
-
-### Asset Sources
-- ✅ Original creations
-- ✅ CC0 (Public Domain)
-- ✅ MIT licensed
-- ❌ Blizzard copyrighted content
-- ❌ Fan-made assets derivative of Blizzard IP
-
-### Automated Validation
-```yaml
-# .github/workflows/legal-compliance.yml
-on: [push, pull_request]
-steps:
-  - SHA-256 hash check (blacklist)
-  - Embedded metadata scan
-  - Visual similarity detection
-  - Block merge if violations found
-```
+**Resolution**: ✅ RESOLVED. Complete infrastructure in place to prevent recurrence. CI/CD will automatically block future violations.
 
 ---
 
-## 📊 PERFORMANCE TARGETS
+#### Signal #2: Uncommitted Backup Files
+**Strength**: 4/10 ⚠️ WARNING
 
-### Phase 1 Baseline
-- 60 FPS @ 256x256 terrain with 4 textures
-- 60 FPS @ 500 units with animations
-- <200 draw calls
-- <2GB memory usage
-- No memory leaks over 1hr
+**WHY (Reason)**:
+Development backup files (`.backup`, `.old`) left in repository. These files are technical debt and should not be committed.
 
-### Phase 2 Targets
-- 60 FPS @ MEDIUM preset (all effects active)
-- <16ms frame time
-- 5,000 GPU particles
-- 8 dynamic lights
-- Quality presets: LOW/MEDIUM/HIGH/ULTRA
+**HOW (Plan)**:
+1. Remove backup files: `git rm src/pages/*.backup src/pages/*.old`
+2. Add pattern to .gitignore: `*.backup`, `*.old`
+3. Commit cleanup with message: `chore: Remove backup files`
 
-### Phase 3 Targets
-- 60 FPS with 500 units in combat
-- <16ms pathfinding for 100 units
-- <5ms selection for 500 units
-- <10ms AI decision making
-- Deterministic simulation (100% reproducible)
+**WHAT (Result)**:
+- ✅ Files removed:
+  - `src/pages/BenchmarkPage.css.backup`
+  - `src/pages/BenchmarkPage.css.old`
+  - `src/pages/BenchmarkPage.tsx.backup`
+- ✅ Updated .gitignore with backup file patterns (`*.backup`, `*.old`, `*.bak`, `*~`)
+- ✅ CI/CD signal-check job will warn (but not block) on future backup files
+
+**Resolution**: ✅ RESOLVED. Backup files cleaned up, prevention in place.
 
 ---
 
-## 🎯 BABYLON.JS BEST PRACTICES
+#### Signal #3: PRP Research Phase Complete
+**Strength**: 2/10 ℹ️ INFO
 
-### Optimization Patterns
-```typescript
-// ✅ DO: Use thin instances for repeated objects
-mesh.thinInstanceEnablePicking = false;
-mesh.thinInstanceSetBuffer("matrix", matrixBuffer, 16);
+**WHY (Reason)**:
+MPQ Compression Module Extraction PRP research phase completed successfully. All Definition of Done items checked. Ready for implementation handoff.
 
-// ✅ DO: Freeze active meshes when static
-scene.freezeActiveMeshes();
+**HOW (Plan)**:
+Follow [Agent Instruction Manual](PRPs/agent-instruction-manual.md):
+1. Assign to follow-on agent
+2. Execute Phase 0: Capture baseline benchmarks
+3. Execute Phases 1-8: Bootstrap → Extract → Test → Publish → Integrate → Deploy
 
-// ✅ DO: Disable auto-clear for extra FPS
-scene.autoClear = false;
-scene.autoClearDepthAndStencil = false;
+**WHAT (Result)**:
+- ✅ Comparative analysis complete (9.4/10 score for Edge Craft)
+- ✅ Extraction blueprint documented (8 phases, 10 weeks)
+- ✅ Agent instruction manual created (750 lines, 75min read)
+- ✅ Edge Craft PR plan defined
+- ✅ Documentation updates cataloged
+- ✅ PRP status: 🔬 Research → ✅ Ready for Implementation
 
-// ✅ DO: Use cascaded shadows (NOT regular shadow maps)
-const shadowGen = new BABYLON.CascadedShadowGenerator(2048, light);
-
-// ✅ DO: Bake animations for instanced units
-const baker = new BABYLON.VertexAnimationBaker(scene, mesh);
-```
-
-### Anti-Patterns to Avoid
-```typescript
-// ❌ DON'T: Load entire maps into memory at once
-const allData = loadEntireMap(); // BAD
-
-// ✅ DO: Stream and chunk large data
-const chunk = loadMapChunk(x, z); // GOOD
-
-// ❌ DON'T: Use synchronous file operations
-const data = fs.readFileSync(path); // BAD
-
-// ✅ DO: Use async operations
-const data = await fs.promises.readFile(path); // GOOD
-
-// ❌ DON'T: Couple rendering to game logic
-function update() {
-  moveUnit();
-  renderUnit(); // BAD - tight coupling
-}
-
-// ✅ DO: Separate concerns
-function update() {
-  gameLogic.update();
-}
-function render() {
-  renderer.render();
-}
-```
+**Resolution**: Success milestone. Implementation phase ready.
 
 ---
 
-## 📝 JSOC DOCUMENTATION
+#### Signal #4: HeroScene Landing Animation Complete
+**Strength**: 2/10 ℹ️ INFO
 
-### Public APIs
-```typescript
-/**
- * Parses a Warcraft 3 map file (.w3x)
- *
- * @param buffer - The map file buffer
- * @returns Parsed map data with terrain, units, and triggers
- * @throws {InvalidFormatError} If map format is invalid
- * @throws {CorruptedDataError} If map data is corrupted
- *
- * @example
- * ```typescript
- * const mapData = await parseW3Map(buffer);
- * console.log(mapData.terrain.width); // 256
- * ```
- */
-async function parseW3Map(buffer: ArrayBuffer): Promise<MapData>
-```
+**WHY (Reason)**:
+Advanced landing page animation for MPQ toolkit completed with all requested features (deformable sphere, 3D text, frost shader, ice particles).
 
-### Complex Algorithms
-```typescript
-// A* pathfinding implementation
-// Uses binary heap for O(log n) priority queue operations
-// Grid-based navigation mesh with 8-directional movement
-function findPath(start: Vector3, goal: Vector3): Vector3[] {
-  // ... implementation with detailed comments
-}
-```
+**HOW (Plan)**:
+1. Test in browser (manual QA)
+2. Fine-tune animation parameters if needed
+3. Integrate with rest of landing page components
+4. Create PR with commit: `feat: Add HeroScene landing animation`
+
+**WHAT (Result)**:
+- ✅ Deformable red sphere with resin-balloon physics (128 segments)
+- ✅ Interactive hover/click compression with red intensity scaling
+- ✅ 3D MPQ text geometry (M, P, Q letters from boxes/torus)
+- ✅ Enhanced frost shader with voronoi crystal patterns
+- ✅ Small ice particles positioned along 3D text edges (180 particles)
+- ✅ Improved floating sphere clustering (stays within bounds)
+- ✅ All TypeScript/ESLint checks passing
+
+**Resolution**: Feature complete. Ready for browser testing.
 
 ---
 
-## 🚨 WORKFLOW VIOLATIONS & PENALTIES
+#### Signal #5: Implementation Phase Not Started
+**Strength**: 6/10 ⚠️ CRITICAL
 
-### ❌ VIOLATIONS
+**WHY (Reason)**:
+Research phase complete but Phase 0 (baseline capture) not executed. 10-week implementation plan ready but no action taken. Risk of plan staleness increases over time.
 
-**Documentation Violations:**
-- Creating `.md` files outside PRPs/ → **Delete immediately**
-- Creating `docs/` directory → **Delete immediately**
-- Duplicating PRP content elsewhere → **Delete duplicates**
-- Modifying requirements outside PRPs → **Revert changes**
+**HOW (Plan)**:
+**Option A**: Assign to follow-on agent
+- Create GitHub issue: "Execute MPQ Toolkit Extraction (Phase 0-8)"
+- Link Agent Instruction Manual
+- Assign owner and due date
 
-**Process Violations:**
-- Starting work without reading PRP → **Stop and read PRP**
-- Skipping DoR validation → **Go back to Gate 1**
-- Marking DoD items complete without validation → **Uncheck and validate**
-- Merging without passing Gate 3 → **Block merge, fix issues**
+**Option B**: Begin execution immediately
+- Execute Phase 0 tasks:
+  - Capture baseline benchmarks
+  - Create new GitHub repo (github.com/edgecraft/mpq-toolkit)
+  - Configure CI/CD pipelines
+  - Document API baseline
 
-### ✅ COMPLIANCE
+**WHAT (Result)**:
+- ⏳ Decision pending: Assign to follow-on agent vs. begin execution
+- ⏳ Phase 0 not started
+- ⏳ GitHub repo not created
+- ⏳ Baseline benchmarks not captured
 
-**When You See Violations:**
-1. **Immediately stop work**
-2. **Delete forbidden documentation**
-3. **Consolidate into PRPs/** if needed
-4. **Update PRP with new information**
-5. **Resume work following PRP**
-
-**Enforcement:**
-- CI/CD automatically rejects PRs with violations
-- Code review checklist includes workflow compliance
-- Automated scripts clean up violations weekly
+**Resolution**: Awaiting decision on next steps.
 
 ---
 
-## 🎯 QUICK REFERENCE
+#### Signal #6: Main Branch Merge Complete
+**Strength**: 2/10 ℹ️ INFO
 
-### Starting New Work
-```bash
-# 1. Check current phase
-cat README.md
+**WHY (Reason)**:
+Successfully merged `origin/main` into feature branch with 76 conflicts resolved. Demonstrates complete merge workflow pattern for future PRs requiring main synchronization.
 
-# 2. Read the PRP
-cat PRPs/phase{N}-{slug}/{N}-{slug}.md
+**HOW (Plan)**:
+Complete merge and conflict resolution workflow:
+1. Merge main branch: `git merge origin/main --no-commit --no-ff`
+2. Resolve conflicts systematically:
+   - AA (Both Added): Keep feature branch (complete implementation)
+   - UU (Both Modified): Keep feature branch (infrastructure updates)
+   - DU/UD (Delete): Analyze intent, resolve appropriately
+3. Fix post-merge validation errors (TypeScript, ESLint)
+4. Run complete test suite
+5. Commit merge + fixes
+6. Update PRP with merge completion
+7. Document workflow pattern
 
-# 3. Validate DoR
-grep "Definition of Ready" PRPs/phase{N}-{slug}/{N}-{slug}.md
+**WHAT (Result)**:
+- ✅ **76 conflicts resolved**:
+  - 60 AA conflicts in `src/` (kept feature versions)
+  - 14 UU conflicts in config files (kept Signals infrastructure)
+  - 2 DU/UD conflicts (resolved appropriately)
+- ✅ **Key resolutions**:
+  - `.gitattributes`: Removed LFS per project decision
+  - `CLAUDE.md`: Kept Signals System updates
+  - `.github/workflows/ci.yml`: Kept signal-check job
+  - All `src/` files: Kept complete feature implementation
+- ✅ **Post-merge fixes** (commit e6cc8e0):
+  - Fixed type export error (`MapMetadata` removed from `ui/index.ts`)
+  - Removed 13 debug console statements (Zero-Comment Policy)
+  - Fixed ESLint nullable boolean warnings
+  - Fixed unused parameter warnings
+- ✅ **Validation passing**:
+  - TypeScript: 0 errors
+  - ESLint: 0 errors, 0 warnings
+  - Unit tests: 107 passing
+- ✅ **PRP updated**: Status Complete, Progress Tracking updated
+- ✅ **PR comment**: Comprehensive completion summary posted
 
-# 4. Find next task
-grep "^\- \[ \]" PRPs/phase{N}-{slug}/{N}-{slug}.md
+**Resolution**: ✅ COMPLETE. Merge workflow pattern documented for future reference.
 
-# 5. Implement following PRP
-# ... write code ...
-
-# 6. Run tests
-npm test
-
-# 7. Run benchmarks
-npm run benchmark
-
-# 8. Update DoD
-# Mark items complete in PRP
-```
-
-### Daily Checklist
-- [ ] Read current PRP before coding
-- [ ] Follow Implementation Breakdown
-- [ ] Write tests (>80% coverage)
-- [ ] Run benchmarks (meet targets)
-- [ ] Update DoD checklist
-- [ ] No files >500 lines
-- [ ] No copyrighted assets
-- [ ] No documentation outside PRPs/
-
----
-
-## 📚 REMEMBER
-
-**The Three-File Rule:**
-1. `CLAUDE.md` ← You are here
-2. `README.md` ← Project overview
-3. `PRPs/` ← ONLY allowed requirements format
-
-**If it's not in a PRP, it doesn't exist.**
-
-**Every phase has:**
-- ✅ DoR (prerequisites)
-- ✅ DoD (deliverables)
-- ✅ Implementation Breakdown (how-to)
-- ✅ Success Metrics (validation)
-- ✅ Exit Criteria (done means done)
-
-**Every commit must:**
-- ✅ Pass automated gates
-- ✅ Meet PRP requirements
-- ✅ Advance DoD progress
-- ✅ Maintain quality standards
+**Merge Workflow Pattern** (for agents):
+1. **Pre-merge**: Ensure feature complete, all validations passing
+2. **Merge**: Use `--no-commit --no-ff` to inspect conflicts first
+3. **Conflict Resolution Strategy**:
+   - AA (Both Added): Prefer feature branch (complete work)
+   - UU (Both Modified): Analyze per-file, prefer infrastructure updates
+   - DU/UD (Delete): Understand intent before resolving
+4. **Post-merge Validation**: Run `typecheck && lint` immediately
+5. **Fix Issues**: Debug logs, type errors, ESLint warnings
+6. **Test Suite**: Verify unit tests pass
+7. **Documentation**: Update PRP, post PR comment, document pattern
+8. **Commit Strategy**: Merge commit + separate fix commit for clarity
 
 ---
 
-**This workflow ensures:**
-- 🎯 Clear objectives (PRPs define goals)
-- 📊 Measurable progress (DoD checklists)
-- 🚦 Transparent gates (automation enforces)
-- ✅ Quality assurance (tests + benchmarks)
-- 🔄 Iterative improvement (phase-by-phase)
-- 📝 Single source of truth (no doc drift)
+### Signal Management
 
-**Follow this workflow. Trust the process. Ship great code.** 🚀
+**Adding New Signals**:
+When agent detects workflow issue or milestone:
+1. Assign signal number (sequential)
+2. Determine strength (0-10 scale)
+3. Document WHY, HOW, WHAT
+4. Add to Active Signals section
+5. Update PRP progress tracking if applicable
+
+**Resolving Signals**:
+When signal addressed:
+1. Update WHAT section with actual results
+2. Change status: ⏳ TODO → ✅ Complete
+3. Add resolution notes
+4. Move to Historical Signals (optional, for high-strength signals)
+
+**Signal Strength Guidelines**:
+
+**9-10 (INCIDENT)** 🔴:
+- Documentation discipline violated
+- Security vulnerability introduced
+- Production outage caused
+- Legal/licensing violation
+- Data loss risk
+
+**6-8 (CRITICAL)** ⚠️:
+- Quality gate failure (tests failing)
+- Performance regression >10%
+- Missing critical prerequisite
+- Implementation phase stalled
+- Deadline at risk
+
+**3-5 (WARNING)** ⚠️:
+- Technical debt accumulating
+- Test coverage dropping <80%
+- Backup files uncommitted
+- Code review delayed
+- Minor policy violation
+
+**0-2 (INFO)** ℹ️:
+- Milestone reached
+- Phase complete
+- Feature implemented
+- Research complete
+- Informational update
+
+---
+
+### Historical Signals (Archive)
+
+_To be populated as signals are resolved_
+
+---

@@ -110,8 +110,6 @@ export class LegalCompliancePipeline {
       // Step 1: SHA-256 hash check
       const hashResult = await this.checkHash(asset);
       if (!hashResult.valid) {
-        console.warn(`Hash check failed: ${metadata.name} - ${hashResult.reason}`);
-
         if (this.config.autoReplace) {
           return await this.findReplacement(metadata, warnings);
         } else {
@@ -122,8 +120,6 @@ export class LegalCompliancePipeline {
       // Step 2: Embedded metadata check
       const metadataResult = await this.checkEmbeddedMetadata(asset);
       if (!metadataResult.valid) {
-        console.warn(`Metadata check failed: ${metadata.name} - ${metadataResult.reason}`);
-
         if (this.config.autoReplace) {
           return await this.findReplacement(metadata, warnings);
         } else {
@@ -139,9 +135,6 @@ export class LegalCompliancePipeline {
         const similarityResult = await this.checkVisualSimilarity(asset, metadata);
 
         if (similarityResult.isMatch) {
-          console.warn(
-            `Visual similarity detected: ${metadata.name} (${(similarityResult.similarity * 100).toFixed(1)}%)`
-          );
           warnings.push(
             `Visually similar to known copyrighted asset (${(similarityResult.similarity * 100).toFixed(1)}% match)`
           );
@@ -167,8 +160,6 @@ export class LegalCompliancePipeline {
           : typeof error === 'string'
             ? error
             : JSON.stringify(error);
-      // Only log the error message string to avoid serialization issues in CI
-      console.error(`Validation error for ${metadata.name}: ${errorMsg}`);
       throw new Error(`Validation failed for ${metadata.name}: ${errorMsg}`);
     }
   }
@@ -292,11 +283,7 @@ export class LegalCompliancePipeline {
         isMatch: result.matches.length > 0,
         similarity: result.similarity ?? 0,
       };
-    } catch (error) {
-      // If visual similarity check fails (e.g., invalid image format), log warning but don't block
-      console.debug(
-        `Visual similarity check skipped: ${error instanceof Error ? error.message : String(error)}`
-      );
+    } catch {
       return { isMatch: false, similarity: 0 };
     }
   }
@@ -352,10 +339,9 @@ export class LegalCompliancePipeline {
    * Load replacement asset from path
    * In production, this would read from filesystem or CDN
    */
-  private loadReplacementAsset(path: string): ArrayBuffer {
+  private loadReplacementAsset(_path: string): ArrayBuffer {
     // Mock implementation - returns empty buffer
     // In production, would use fetch() or fs.readFile()
-    console.log(`Loading replacement asset: ${path}`);
     return new ArrayBuffer(0);
   }
 

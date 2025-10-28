@@ -8,10 +8,9 @@
 // Polyfill Buffer for browser environment (seek-bzip requires it)
 // seek-bzip calls 'new Buffer()' so we need a constructor-compatible polyfill
 if (typeof Buffer === 'undefined') {
-  // Create a function that can be called as a constructor
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const BufferPolyfill = function (arg: any): Uint8Array {
-    // Handle constructor calls: new Buffer(size), new Buffer(array), etc.
+  type BufferArg = number | ArrayBuffer | Uint8Array | number[];
+
+  const BufferPolyfill = function (arg: BufferArg): Uint8Array {
     if (typeof arg === 'number') {
       return new Uint8Array(arg);
     }
@@ -27,9 +26,7 @@ if (typeof Buffer === 'undefined') {
     return new Uint8Array(0);
   };
 
-  // Add static methods
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  BufferPolyfill.from = (data: any): Uint8Array => {
+  BufferPolyfill.from = (data: BufferArg): Uint8Array => {
     if (data instanceof Uint8Array) return data;
     if (data instanceof ArrayBuffer) return new Uint8Array(data);
     if (Array.isArray(data)) return new Uint8Array(data);
@@ -38,16 +35,13 @@ if (typeof Buffer === 'undefined') {
 
   BufferPolyfill.alloc = (size: number): Uint8Array => new Uint8Array(size);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  BufferPolyfill.isBuffer = (obj: any): boolean => obj instanceof Uint8Array;
+  BufferPolyfill.isBuffer = (obj: unknown): boolean => obj instanceof Uint8Array;
 
-  // Install the polyfill globally
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-  (globalThis as any).Buffer = BufferPolyfill;
+  interface GlobalWithBuffer {
+    Buffer: typeof BufferPolyfill;
+  }
 
-  console.log(
-    '[Bzip2Decompressor] Buffer polyfill installed for browser environment (with constructor support)'
-  );
+  (globalThis as unknown as GlobalWithBuffer).Buffer = BufferPolyfill;
 }
 
 import Bunzip from 'seek-bzip';
@@ -73,9 +67,6 @@ export class Bzip2Decompressor implements IDecompressor {
 
         // Verify decompressed size (warn on mismatch, don't throw)
         if (decompressedArray.byteLength !== uncompressedSize) {
-          console.warn(
-            `[Bzip2Decompressor] Size mismatch: expected ${uncompressedSize}, got ${decompressedArray.byteLength}`
-          );
         }
 
         // Convert result back to ArrayBuffer
@@ -85,7 +76,6 @@ export class Bzip2Decompressor implements IDecompressor {
         ) as ArrayBuffer;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error('[Bzip2Decompressor] Decompression failed:', errorMsg);
         throw new Error(`BZip2 decompression failed: ${errorMsg}`);
       }
     });

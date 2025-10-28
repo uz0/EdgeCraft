@@ -33,12 +33,30 @@ export class W3IParser {
    * Parse the entire w3i file
    */
   public parse(): W3IMapInfo {
+    // DEBUG: Log first 64 bytes of W3I buffer to diagnose StormJS extraction issue
+    const debugView = new Uint8Array(this.buffer, 0, Math.min(64, this.buffer.byteLength));
+    Array.from(debugView)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join(' ');
+
     this.offset = 0;
 
     // Read header
     const fileVersion = this.readUint32();
     const mapVersion = this.readUint32();
     const editorVersion = this.readUint32();
+
+    // CRITICAL FIX: Version 28+ has 4 additional game version fields after editorVersion
+    // Per HiveWE wiki: gameVersionMajor, gameVersionMinor, gameVersionPatch, gameVersionBuild
+    // These are MANDATORY for Reforged maps (version >= 28)
+    if (fileVersion >= 28) {
+      this.readUint32();
+      this.readUint32();
+      this.readUint32();
+      this.readUint32();
+    }
+
+    // Log version numbers for format detection debugging
 
     // Read strings
     const name = this.readString();
@@ -112,47 +130,94 @@ export class W3IParser {
     // Water tinting
     const waterTintingColor = this.readRGBA();
 
-    // Players
-    const playerCount = this.readUint32();
+    // Players (may be truncated in old/corrupted maps)
     const players: W3IPlayer[] = [];
-    for (let i = 0; i < playerCount; i++) {
-      players.push(this.readPlayer());
-    }
+    try {
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const playerCount = this.readUint32();
+        for (let i = 0; i < playerCount; i++) {
+          if (this.offset + 40 > this.buffer.byteLength) {
+            break;
+          }
+          players.push(this.readPlayer());
+        }
+      }
+    } catch {}
 
-    // Forces
-    const forceCount = this.readUint32();
+    // Forces (may be truncated in old/corrupted maps)
     const forces: W3IForce[] = [];
-    for (let i = 0; i < forceCount; i++) {
-      forces.push(this.readForce());
-    }
+    try {
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const forceCount = this.readUint32();
+        for (let i = 0; i < forceCount; i++) {
+          if (this.offset + 12 > this.buffer.byteLength) {
+            break;
+          }
+          forces.push(this.readForce());
+        }
+      }
+    } catch {}
 
-    // Upgrade availability
-    const upgradeCount = this.readUint32();
+    // All remaining fields are optional and may not be present
+    // Wrap in try-catch to handle truncated files gracefully
     const upgradeAvailability: W3IUpgrade[] = [];
-    for (let i = 0; i < upgradeCount; i++) {
-      upgradeAvailability.push({
-        playerFlags: this.readUint32(),
-        upgradeId: this.read4CC(),
-        levelAffected: this.readUint32(),
-        availability: this.readUint32(),
-      });
-    }
-
-    // Tech availability
-    const techCount = this.readUint32();
     const techAvailability: W3ITech[] = [];
-    for (let i = 0; i < techCount; i++) {
-      techAvailability.push({
-        playerFlags: this.readUint32(),
-        techId: this.read4CC(),
-      });
+    let unitTable: W3IRandomUnitTable | undefined;
+    let itemTable: W3IRandomItemTable | undefined;
+
+    try {
+      // Upgrade availability (optional - may not be present in some maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const upgradeCount = this.readUint32();
+        for (let i = 0; i < upgradeCount; i++) {
+          // Check if we have enough buffer for this upgrade entry (4 + 4 + 4 + 4 = 16 bytes)
+          if (this.offset + 16 > this.buffer.byteLength) {
+            break;
+          }
+          upgradeAvailability.push({
+            playerFlags: this.readUint32(),
+            upgradeId: this.read4CC(),
+            levelAffected: this.readUint32(),
+            availability: this.readUint32(),
+          });
+        }
+      }
+
+      // Tech availability (optional - may not be present in some maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        const techCount = this.readUint32();
+        for (let i = 0; i < techCount; i++) {
+          // Check if we have enough buffer for this tech entry (4 + 4 = 8 bytes)
+          if (this.offset + 8 > this.buffer.byteLength) {
+            break;
+          }
+          techAvailability.push({
+            playerFlags: this.readUint32(),
+            techId: this.read4CC(),
+          });
+        }
+      }
+
+      // Random unit tables (optional - may not be present in older maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        try {
+          unitTable = this.readRandomUnitTable();
+        } catch {
+          unitTable = undefined;
+        }
+      }
+
+      // Random item tables (optional - may not be present in older maps)
+      if (this.offset + 4 <= this.buffer.byteLength) {
+        try {
+          itemTable = this.readRandomItemTable();
+        } catch {
+          itemTable = undefined;
+        }
+      }
+    } catch {
+      // If any error occurs reading optional fields, log but continue
     }
-
-    // Random unit tables
-    const unitTable = this.readRandomUnitTable();
-
-    // Random item tables
-    const itemTable = this.readRandomItemTable();
 
     return {
       fileVersion,
@@ -299,11 +364,23 @@ export class W3IParser {
   }
 
   /**
+   * Helper: Check if we can read 'size' bytes from current offset
+   */
+  private checkBounds(size: number): void {
+    if (this.offset + size > this.buffer.byteLength) {
+      throw new Error(
+        `W3I read would exceed buffer bounds: offset=${this.offset}, size=${size}, bufferLength=${this.buffer.byteLength}`
+      );
+    }
+  }
+
+  /**
    * Helper: Read null-terminated string
    */
   private readString(): string {
     const bytes = [];
     while (this.offset < this.buffer.byteLength) {
+      this.checkBounds(1);
       const byte = this.view.getUint8(this.offset);
       this.offset++;
       if (byte === 0) break;
@@ -316,6 +393,7 @@ export class W3IParser {
    * Helper: Read 4-character code
    */
   private read4CC(): string {
+    this.checkBounds(4);
     const chars = String.fromCharCode(
       this.view.getUint8(this.offset),
       this.view.getUint8(this.offset + 1),
@@ -330,6 +408,7 @@ export class W3IParser {
    * Helper: Read RGBA color
    */
   private readRGBA(): RGBA {
+    this.checkBounds(4);
     const r = this.view.getUint8(this.offset);
     const g = this.view.getUint8(this.offset + 1);
     const b = this.view.getUint8(this.offset + 2);
@@ -342,6 +421,7 @@ export class W3IParser {
    * Helper: Read uint32
    */
   private readUint32(): number {
+    this.checkBounds(4);
     const value = this.view.getUint32(this.offset, true);
     this.offset += 4;
     return value;
@@ -351,6 +431,7 @@ export class W3IParser {
    * Helper: Read float32
    */
   private readFloat32(): number {
+    this.checkBounds(4);
     const value = this.view.getFloat32(this.offset, true);
     this.offset += 4;
     return value;

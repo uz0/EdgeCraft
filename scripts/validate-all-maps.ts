@@ -60,7 +60,7 @@ async function validateAllMaps(): Promise<void> {
 
         // Parse map
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const mapData = await loader.parse(buffer.buffer as ArrayBuffer);
+        const mapData = await loader.parse(buffer.buffer);
 
         const loadTimeMs = performance.now() - startTime;
 

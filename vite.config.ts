@@ -2,32 +2,46 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import checker from 'vite-plugin-checker';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from 'path';
 
 /**
- * Rolldown-Vite Configuration
+ * Vite Configuration
  *
- * This configuration uses Rolldown-Vite, a Rust-powered bundler that's 3-16x faster
- * than standard Vite. It provides unified dev/production pipeline with significantly
- * better performance and lower memory usage.
- *
- * Key Benefits:
- * - 3-16x faster production builds
- * - <100ms HMR (vs 1s with standard Vite)
- * - 100x lower memory usage
- * - Unified Rust bundler for dev and production
+ * Build configuration for Edge Craft using Vite.
  */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+
+  const shouldAutoOpen = (env.VITE_OPEN_BROWSER ?? 'true') !== 'false';
+  const isCI = process.env.CI === 'true';
 
   return {
     // Base configuration
     base: '/',
     publicDir: 'public',
 
-    // Plugins - Rolldown-compatible
+    // Plugins
     plugins: [
-      // React with Fast Refresh (fully supported by Rolldown)
+      // Node.js polyfills for browser
+      nodePolyfills({
+        // Enable specific polyfills needed by decompression libraries
+        include: ['stream', 'buffer', 'util', 'path'],
+        // Exclude fs - not available in browser
+        exclude: ['fs'],
+        globals: {
+          Buffer: true, // Inject Buffer global
+          process: true // Inject process global
+        }
+      }),
+
+      // WASM support (MUST be before other plugins)
+      wasm(),
+      topLevelAwait(),
+
+      // React with Fast Refresh
       react({
         fastRefresh: true,
         jsxRuntime: 'automatic'
@@ -36,10 +50,16 @@ export default defineConfig(({ mode }) => {
       // TypeScript path resolution
       tsconfigPaths(),
 
-      // Type checking disabled temporarily to test MPQ parser fixes
-      // checker({
-      //   typescript: true
-      // })
+      // Type checking in separate process
+      checker({
+        typescript: true,
+        eslint: {
+          lintCommand: 'eslint . --ext ts,tsx',
+          useFlatConfig: true, // ESLint 9 flat config
+          dev: { logLevel: ['error'], overlay: false } // Disable overlay in tests
+        },
+        overlay: false // Disable error overlay (prevents blocking canvas in tests)
+      })
     ],
 
     // Path resolution
@@ -58,13 +78,21 @@ export default defineConfig(({ mode }) => {
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
     },
 
-    // Development server (optimized by Rolldown)
+    // Development server
     server: {
-      port: parseInt(env.PORT) || 3000,
+      port: env.PORT ? parseInt(env.PORT) : 3000, // Use PORT env var or default to 3000
       host: true,
-      open: true,
+      open: shouldAutoOpen && !isCI,
 
-      // Hot Module Replacement (super fast with Rolldown)
+      // Disable caching in development to prevent stale code issues
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      },
+
+      // Hot Module Replacement
       hmr: {
         overlay: true,
         protocol: 'ws'
@@ -73,27 +101,13 @@ export default defineConfig(({ mode }) => {
       // CORS configuration
       cors: true,
 
-      // Proxy configuration for backend
-      proxy: {
-        '/api': {
-          target: 'http://localhost:2567',
-          changeOrigin: true,
-          secure: false
-        },
-        '/colyseus': {
-          target: 'ws://localhost:2567',
-          ws: true,
-          changeOrigin: true
-        }
-      },
-
       // File watching
       watch: {
         ignored: ['**/node_modules/**', '**/dist/**']
       }
     },
 
-    // Build configuration (powered by Rolldown - 3-16x faster!)
+    // Build configuration
     build: {
       // Output directory
       outDir: 'dist',
@@ -102,7 +116,7 @@ export default defineConfig(({ mode }) => {
       // Source maps
       sourcemap: mode === 'development' ? 'inline' : true,
 
-      // Rolldown handles minification natively (faster than terser)
+      // Minification
       minify: mode === 'production',
 
       // Target browsers
@@ -111,7 +125,7 @@ export default defineConfig(({ mode }) => {
       // Chunk size warnings
       chunkSizeWarningLimit: 1000, // KB
 
-      // Rolldown options (replaces both esbuild and rollup)
+      // Rollup options
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html')
@@ -128,11 +142,6 @@ export default defineConfig(({ mode }) => {
             // React in separate chunk
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react';
-            }
-
-            // Networking libraries
-            if (id.includes('colyseus') || id.includes('socket')) {
-              return 'networking';
             }
 
             // Node modules vendor chunk
@@ -161,7 +170,7 @@ export default defineConfig(({ mode }) => {
           entryFileNames: 'js/[name]-[hash].js'
         },
 
-        // Tree shaking (optimized by Rolldown)
+        // Tree shaking
         treeshake: {
           moduleSideEffects: false,
           propertyReadSideEffects: false
@@ -184,21 +193,30 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true
     },
 
-    // Optimization (Rolldown pre-bundles dependencies faster)
+    // Optimization
     optimizeDeps: {
       // Pre-bundle heavy dependencies
       include: [
         '@babylonjs/core',
         '@babylonjs/loaders',
-        '@babylonjs/materials',
-        '@babylonjs/gui',
         'react',
-        'react-dom',
-        'colyseus.js'
+        'react-dom'
       ],
 
-      // Exclude from pre-bundling
-      exclude: ['@babylonjs/inspector']
+      // Exclude from pre-bundling (special modules only)
+      exclude: [
+        '@babylonjs/inspector'
+      ],
+
+      // ESBuild options for dependency optimization
+      esbuildOptions: {
+        // Handle both CommonJS and ESM
+        mainFields: ['module', 'main'],
+        // Inject shims for Node.js globals
+        inject: [],
+        // Target modern browsers
+        target: 'es2020'
+      }
     },
 
     // Environment variables
@@ -206,7 +224,8 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '0.1.0'),
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
       __DEV__: mode === 'development',
-      __ROLLDOWN__: true
+      // Polyfill process.env.NODE_ENV for compatibility
+      'process.env.NODE_ENV': JSON.stringify(mode)
     },
 
     // CSS configuration
@@ -240,14 +259,18 @@ export default defineConfig(({ mode }) => {
     // Worker configuration
     worker: {
       format: 'es',
-      plugins: () => [tsconfigPaths()]
+      plugins: () => [
+        wasm(),
+        topLevelAwait(),
+        tsconfigPaths()
+      ]
     },
 
     // Preview server (for production testing)
     preview: {
       port: 4173,
       strictPort: false,
-      open: true
+      open: shouldAutoOpen && !isCI
     },
 
     // Logging

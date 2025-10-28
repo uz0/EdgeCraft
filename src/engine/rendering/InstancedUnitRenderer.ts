@@ -72,11 +72,8 @@ export class InstancedUnitRenderer {
     animations: AnimationClip[]
   ): Promise<void> {
     if (this.unitTypes.has(unitType)) {
-      console.warn(`Unit type already registered: ${unitType}`);
       return;
     }
-
-    console.log(`Registering unit type: ${unitType}`);
 
     // Load mesh
     const result = await BABYLON.SceneLoader.ImportMeshAsync('', meshUrl, '', this.scene);
@@ -93,8 +90,6 @@ export class InstancedUnitRenderer {
       const animSystem = new BakedAnimationSystem(this.scene);
       bakedAnimationData = await animSystem.bakeAnimations(mesh, animations);
       this.animationSystems.set(unitType, animSystem);
-
-      console.log(`Baked ${animations.length} animations for ${unitType}`);
     }
 
     // Store unit type data
@@ -128,8 +123,6 @@ export class InstancedUnitRenderer {
         autoGrow: true,
       })
     );
-
-    console.log(`Unit type registered successfully: ${unitType}`);
   }
 
   /**
@@ -148,7 +141,6 @@ export class InstancedUnitRenderer {
   ): string | null {
     const manager = this.unitManagers.get(unitType);
     if (!manager) {
-      console.error(`Unknown unit type: ${unitType}`);
       return null;
     }
 
@@ -163,7 +155,6 @@ export class InstancedUnitRenderer {
     });
 
     if (!instance) {
-      console.error(`Failed to acquire unit from pool: ${unitType}`);
       return null;
     }
 
@@ -188,7 +179,6 @@ export class InstancedUnitRenderer {
   despawnUnit(unitId: string): void {
     const ref = this.unitReferences.get(unitId);
     if (!ref) {
-      console.warn(`Unit not found: ${unitId}`);
       return;
     }
 
@@ -213,7 +203,6 @@ export class InstancedUnitRenderer {
   updateUnit(unitId: string, updates: Partial<UnitInstance>): void {
     const ref = this.unitReferences.get(unitId);
     if (!ref) {
-      console.warn(`Unit not found: ${unitId}`);
       return;
     }
 
@@ -261,7 +250,6 @@ export class InstancedUnitRenderer {
       animSystem === null ||
       !animSystem.hasAnimation(animationName)
     ) {
-      console.warn(`Animation not found: ${animationName} for ${ref.unitType}`);
       return;
     }
 

@@ -138,7 +138,6 @@ export class UnitAnimationController {
    */
   play(animationName: string, blend: boolean = true, restart: boolean = false): void {
     if (!this.animationSystem.hasAnimation(animationName)) {
-      console.warn(`Animation not found: ${animationName}`);
       return;
     }
 

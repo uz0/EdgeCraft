@@ -7,7 +7,8 @@
 
 import * as BABYLON from '@babylonjs/core';
 import type { EngineOptions, EngineState, IEngineCore } from './types';
-import { OptimizedRenderPipeline, QualityPreset } from '../rendering';
+import { OptimizedRenderPipeline } from '../rendering/RenderPipeline';
+import { QualityPreset } from '../rendering/types';
 
 /**
  * Main Edge Craft engine class
@@ -78,7 +79,6 @@ export class EdgeCraftEngine implements IEngineCore {
    */
   public initializeRenderPipeline(): void {
     if (this._renderPipeline != null) {
-      console.warn('Render pipeline already initialized');
       return;
     }
 
@@ -91,8 +91,6 @@ export class EdgeCraftEngine implements IEngineCore {
       targetFPS: 60,
       initialQuality: QualityPreset.HIGH,
     });
-
-    console.log('Optimized render pipeline initialized');
   }
 
   /**
@@ -113,12 +111,10 @@ export class EdgeCraftEngine implements IEngineCore {
     // Handle WebGL context loss
     this._canvas.addEventListener('webglcontextlost', (event) => {
       event.preventDefault();
-      console.warn('WebGL context lost');
       this.stopRenderLoop();
     });
 
     this._canvas.addEventListener('webglcontextrestored', () => {
-      console.log('WebGL context restored');
       if (this._state.isRunning) {
         this.startRenderLoop();
       }
@@ -130,7 +126,6 @@ export class EdgeCraftEngine implements IEngineCore {
    */
   public startRenderLoop(): void {
     if (this._isRunning) {
-      console.warn('Render loop already running');
       return;
     }
 
@@ -207,7 +202,5 @@ export class EdgeCraftEngine implements IEngineCore {
 
     // Dispose engine
     this._engine.dispose();
-
-    console.log('Edge Craft engine disposed');
   }
 }

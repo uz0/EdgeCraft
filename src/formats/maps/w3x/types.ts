@@ -32,8 +32,8 @@ export interface W3IMapInfo {
   forces: W3IForce[];
   upgradeAvailability: W3IUpgrade[];
   techAvailability: W3ITech[];
-  unitTable: W3IRandomUnitTable;
-  itemTable: W3IRandomItemTable;
+  unitTable?: W3IRandomUnitTable; // Optional - not present in older maps
+  itemTable?: W3IRandomItemTable; // Optional - not present in older maps
 }
 
 /**
@@ -165,6 +165,7 @@ export interface W3ETerrain {
   version: number;
   tileset: string;
   customTileset: boolean;
+  groundTextureIds?: string[]; // v11+ texture list
   width: number;
   height: number;
   groundTiles: W3EGroundTile[];
@@ -286,7 +287,8 @@ export interface W3UUnit {
   customColor: number;
   waygateDestination: number;
   creationNumber: number;
-  editorId: number;
+  // Reforged v1.32+ fields
+  skinId?: string; // Skin override (e.g., "hfoo" for Footman)
 }
 
 /**

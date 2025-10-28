@@ -57,7 +57,6 @@ export const SHADOW_QUALITY_PRESETS: Record<ShadowQuality, QualityPresetConfig> 
  * @example
  * ```typescript
  * const preset = getQualityPreset(ShadowQuality.MEDIUM);
- * console.log(preset.shadowMapSize); // 2048
  * ```
  */
 export function getQualityPreset(quality: ShadowQuality): QualityPresetConfig {

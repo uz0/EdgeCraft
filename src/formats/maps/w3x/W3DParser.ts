@@ -116,11 +116,49 @@ export class W3DParser {
     const itemSetCount = this.readUint32();
     const itemSets: W3OItemSet[] = [];
 
+    // REFORGED FIX: Validate itemSetCount to prevent crashes
+    // Unreasonable values indicate corrupted data or unsupported format
+    if (itemSetCount > 1000) {
+      // Skip to next expected field (editorId) - estimate remaining bytes
+      // REFORGED might have different structure, so we'll skip safely
+      const remainingBytes = this.buffer.byteLength - this.offset;
+      if (remainingBytes >= 4) {
+        // Try to find the editorId (last field) by reading next uint32
+        const editorId = this.readUint32();
+        return {
+          typeId,
+          variation,
+          position,
+          rotation,
+          scale,
+          flags,
+          life,
+          itemTable,
+          itemSets: [], // Empty - couldn't parse
+          editorId,
+        };
+      } else {
+        throw new Error(
+          `[W3DParser] Insufficient data to continue parsing doodad at offset ${this.offset}`
+        );
+      }
+    }
+
     for (let i = 0; i < itemSetCount; i++) {
       const items: W3ODroppedItem[] = [];
       const itemCount = this.readUint32();
 
+      // REFORGED FIX: Validate itemCount as well
+      if (itemCount > 100) {
+        break; // Stop reading item sets
+      }
+
       for (let j = 0; j < itemCount; j++) {
+        // BOUNDS CHECK: Ensure we have enough bytes for itemId (4) + chance (4) = 8 bytes
+        if (this.offset + 8 > this.buffer.byteLength) {
+          break;
+        }
+
         items.push({
           itemId: this.read4CC(),
           chance: this.readUint32(),
@@ -130,7 +168,22 @@ export class W3DParser {
       itemSets.push({ items });
     }
 
-    // Editor ID
+    // Editor ID - BOUNDS CHECK
+    if (this.offset + 4 > this.buffer.byteLength) {
+      return {
+        typeId,
+        variation,
+        position,
+        rotation,
+        scale,
+        flags,
+        life,
+        itemTable,
+        itemSets,
+        editorId: 0,
+      };
+    }
+
     const editorId = this.readUint32();
 
     return {

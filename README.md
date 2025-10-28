@@ -1,297 +1,120 @@
-# 🏗️ Edge Craft: WebGL-Based RTS Game Engine
+# 🏗️ Edge Craft
 
-## 🔗 CRITICAL: External Dependencies
+WebGL-based RTS game engine supporting classic map formats (Warcraft 3, StarCraft 2) with clean-room implementation.
 
-Edge Craft requires **TWO external repositories** for full functionality:
-
-### 1. 🌐 Multiplayer Server: [core-edge](https://github.com/uz0/core-edge)
-- **Purpose**: Authoritative multiplayer server implementation
-- **Required For**: Online gameplay, lobbies, matchmaking
-- **Development**: Uses included mock server until integration
-
-### 2. 🎮 Default Launcher: [index.edgecraft](https://github.com/uz0/index.edgecraft)
-- **Purpose**: Main menu and launcher map
-- **Required For**: **EVERY game session** (loads `/maps/index.edgecraft` on startup)
-- **Development**: Uses included mock launcher until integration
-
-> ⚠️ **IMPORTANT**: The game **ALWAYS** loads `/maps/index.edgecraft` on startup. This is not configurable.
-
-## 🎯 Project Vision
-Edge Craft is a modern, browser-based RTS game engine that enables users to import, play, and modify maps from classic RTS games while maintaining legal compliance through clean-room implementation and original assets. Built with TypeScript, React, and Babylon.js, it provides a complete ecosystem for RTS game development in the browser.
-
-## 📋 Core Features
-
-### 🎮 Game Engine
-- **WebGL Rendering**: Powered by Babylon.js for high-performance 3D graphics
-- **Map Compatibility**: Support for StarCraft (*.scm, *.scx, *.SC2Map) and Warcraft 3 (*.w3m, *.w3x) maps
-- **Copyright-Free Assets**: Complete replacement with original CC0/MIT licensed models, textures, and sounds
-- **Real-Time Multiplayer**: WebSocket-based networking with deterministic lockstep simulation
-- **Cross-Platform**: Runs on any device with WebGL support
-
-### 🛠️ Development Tools
-- **Visual Map Editor**: Terrain sculpting, unit placement, trigger system
-- **Script Transpilers**: JASS → TypeScript, GalaxyScript → TypeScript
-- **Asset Pipeline**: glTF 2.0 support with conversion from MDX/M3 formats
-- **Visual Scripting**: Blockly-based trigger GUI system
+**Built with:** TypeScript • React • Babylon.js
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 20+ and npm
-- TypeScript 5.3+
-- Git
-
-### Installation
-
-#### Option 1: Basic Setup (with mocks)
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/edge-craft.git
-cd edge-craft
-
-# Install dependencies
+# Install
 npm install
 
-# Start development server (uses mock server & launcher)
-npm run dev
+# Development
+npm run dev              # Start dev server (http://localhost:5173)
 
-# Open browser to http://localhost:3000
+# Validation
+npm run typecheck        # TypeScript strict mode
+npm run lint             # ESLint (0 errors policy)
+npm run test:unit        # Jest unit tests
+npm run validate         # License & asset validation
+
+# Production
+npm run build            # Production build
 ```
 
-#### Verify Your Setup
-```bash
-# 1. Verify Node version (should be 20+)
-node --version
-
-# 2. Run TypeScript type checking
-npm run typecheck
-
-# 3. Test production build
-npm run build
-
-# 4. Test hot reload
-# Start dev server with: npm run dev
-# Edit src/App.tsx - changes should auto-refresh in browser
-```
-
-#### Option 2: Full Setup (with external repositories)
-```bash
-# 1. Clone main repository
-git clone https://github.com/your-org/edge-craft.git
-cd edge-craft
-
-# 2. Run setup script for external dependencies
-./scripts/setup-external.sh
-# This will prompt to clone:
-# - https://github.com/uz0/core-edge
-# - https://github.com/uz0/index.edgecraft
-
-# 3. Start core-edge server (Terminal 1)
-cd ../core-edge
-npm run dev
-
-# 4. Start Edge Craft (Terminal 2)
-cd ../edge-craft
-npm run dev
-```
-
-### Development with Context Engineering
-```bash
-# Generate a PRP for a new feature
-/generate-prp INITIAL.md
-
-# Execute the PRP to implement the feature
-/execute-prp PRPs/feature-name.md
-
-# Run specific agents for specialized tasks
-/agent babylon-renderer
-/agent format-parser
-/agent multiplayer-architect
-```
+**Requirements:** Node.js 20+ • npm 10+
 
 ## 📁 Project Structure
+
 ```
-edge-craft/
-├── .claude/
-│   ├── agents/         # Specialized AI agents for development
-│   └── commands/       # Custom commands for common tasks
-├── src/
-│   ├── engine/         # Core game engine (Babylon.js integration)
-│   ├── editor/         # Map editor components
-│   ├── formats/        # File format parsers (MPQ, CASC, etc.)
-│   ├── gameplay/       # RTS mechanics (pathfinding, combat, etc.)
-│   ├── networking/     # Multiplayer infrastructure
-│   ├── assets/         # Asset management and loading
-│   └── ui/            # React UI components
-├── tools/
-│   ├── converter/      # Map conversion tools
-│   ├── transpiler/     # Script language transpilers
-│   └── validator/      # Content validation tools
-├── PRPs/              # Project Requirement Proposals (ONLY place for requirements docs)
-└── tests/             # Test suites
-```
+src/
+├── engine/              # Babylon.js game engine
+│   ├── rendering/       # Advanced lighting, shadows, post-processing
+│   ├── terrain/         # Terrain rendering & LOD
+│   ├── camera/          # RTS camera system
+│   ├── core/            # Scene & engine core
+│   └── assets/          # Asset loading & management
+├── formats/             # File format parsers
+│   ├── mpq/             # MPQ archive parser
+│   ├── maps/            # W3X, W3M, W3N, SC2Map loaders
+│   └── compression/     # ZLIB, BZip2, LZMA decompression
+├── ui/                  # React components
+├── pages/               # Page components (Index, MapViewer)
+├── hooks/               # React hooks
+├── config/              # Configuration
+├── types/               # TypeScript types
+└── utils/               # Utilities
 
-## 🧪 Testing
+public/
+├── maps/                # Sample maps (W3X, SC2Map)
+└── assets/              # Static assets & manifest
 
-**Test Coverage**: 170+ test cases, > 95% code coverage
-
-### Test Suites
-```bash
-# Run all tests
-npm test
-
-# Run tests with coverage
-npm test -- --coverage
-
-# Run specific test suites
-npm test -- MapPreviewExtractor.comprehensive
-npm test -- MapPreviewGenerator.comprehensive
-npm test -- TGADecoder.comprehensive
-npm test -- AllMapsPreviewValidation
-
-# Run map preview tests
-npm test -- --testPathPattern="MapPreview|AllMapsPreview|TGADecoder"
+PRPs/                    # Phase Requirement Proposals
+CLAUDE.md                # AI development guidelines
 ```
 
-### Test Coverage by Component
-- **MapPreviewExtractor**: 100% (40+ tests) - Embedded/generated preview extraction
-- **MapPreviewGenerator**: 100% (30+ tests) - Babylon.js terrain rendering
-- **TGADecoder**: 100% (25+ tests) - TGA format decoding
-- **Integration**: 72+ tests across all 24 maps (11 W3X, 4 W3N, 2 SC2)
-- **Visual Validation**: Browser-based Chrome DevTools tests
+## 📚 Documentation
 
-See [PRPs/map-preview-visual-regression-testing.md](PRPs/map-preview-visual-regression-testing.md) for detailed test specifications.
-
-## 🔧 Context Engineering Methodology
-
-This project uses Context Engineering to ensure efficient AI-assisted development:
-
-- **CLAUDE.md**: Project-specific instructions for AI assistants
-- **INITIAL.md**: Initial context loaded for new conversations
-- **PRPs/**: Detailed requirement proposals for each feature
-- **.claude/**: Commands and agents for specialized tasks
-
-### Available Commands
-- `/generate-prp` - Create comprehensive implementation plans
-- `/execute-prp` - Execute implementation from PRP
-- `/validate-assets` - Check asset copyright compliance
-- `/test-conversion` - Test map format conversion
-- `/benchmark-performance` - Run performance tests
-
-### Specialist Agents
-- `babylon-renderer` - Babylon.js rendering expert
-- `format-parser` - File format specialist (MPQ, CASC, MDX)
-- `multiplayer-architect` - Networking and multiplayer systems
-- `legal-compliance` - Copyright and DMCA compliance
-- `asset-creator` - Original asset generation guidance
-- `ui-designer` - React/TypeScript UI components
-
-## 📚 Development Roadmap
-
-Edge Craft follows a phased development roadmap with detailed PRPs (Phase Requirement Proposals). See [PRPs/README.md](./PRPs/README.md) for the complete development plan.
-
-### Current Phase: Phase 2 - Advanced Rendering & Visual Effects
-**Status**: 🎨 Map Gallery Ready | ⏳ Browser Validation Pending
-**Implementation**: 100% Complete
-**Next Steps**: Browser testing and performance validation
-
-Phase 2 delivered:
-- ✅ Post-Processing Pipeline (FXAA, Bloom, Color Grading, Tone Mapping)
-- ✅ Advanced Lighting System (8 lights @ MEDIUM, distance culling)
-- ✅ GPU Particle System (5,000 particles @ 60 FPS)
-- ✅ Weather Effects (Rain, Snow, Fog with smooth transitions)
-- ✅ PBR Material System (glTF 2.0 compatible)
-- ✅ Custom Shader Framework (Water, Force Field, Hologram, Dissolve)
-- ✅ Decal System (50 texture decals @ MEDIUM)
-- ✅ Minimap RTT (256x256 @ 30fps)
-- ✅ Quality Preset System (LOW/MEDIUM/HIGH/ULTRA)
-- ✅ Map Gallery UI (Browse and load 24 maps)
-- ✅ Map Viewer App (Integrated rendering with Phase 2 effects)
-
-**Previous Phase: Phase 1 - Foundation (COMPLETE ✅)**
-Completion Date: 2025-10-10
-Performance: 187 draw calls, 58 FPS, 1842 MB memory
-
-### Phase Overview
-| Phase | Name | PRPs | Status |
-|-------|------|------|--------|
-| **1** | Foundation - MVP Launch | 7 | ✅ **COMPLETE** |
-| **2** | Advanced Rendering & Visual Effects | 10 | 🎨 **MAP GALLERY READY** - Browser Validation Pending |
-| **3** | Gameplay Mechanics | 11 | ⏳ Pending |
-| **5** | File Format Support (Extended) | 4 | ⏳ Pending |
-| **9** | Multiplayer Infrastructure | 8 | ⏳ Pending |
-
-### Getting Started with Development
-1. Review [PRPs/README.md](./PRPs/README.md) for detailed phase information
-2. Check Phase 1 completion: [PRPs/phase1-foundation/README.md](./PRPs/phase1-foundation/README.md)
-3. Review Phase 2 planning: [PRPs/phase2-rendering/](./PRPs/phase2-rendering/)
-4. Execute PRPs that can run in parallel within the same phase
-5. Use specialist agents for domain-specific work
-
-### Phase 1 Achievements
-- **Performance**: 60 FPS with 500 animated units + terrain + shadows
-- **Draw Calls**: 81.7% reduction (1024 → 187)
-- **Memory**: 90% of budget (1842 MB / 2048 MB)
-- **Test Coverage**: >80% with 120+ unit tests
-- **Legal Compliance**: 100% automated copyright detection
+- **[CLAUDE.md](./CLAUDE.md)** - AI development workflow & rules
+- **[PRPs/](./PRPs/)** - Product requirements
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Human contributor workflow
+- **[SECURITY.md](./SECURITY.md)** - Responsible disclosure policy
 
 ## 🛡️ Legal Compliance
 
-### Clean-Room Implementation
-- Zero copyrighted assets in codebase
-- All code written from scratch
-- Interoperability focus under DMCA Section 1201(f)
-- Original assets under CC0/MIT licenses
+**Zero Tolerance Policy:**
+- ❌ No copyrighted assets
+- ✅ Only CC0/MIT licensed content
+- ✅ Clean-room implementation
+- ✅ Automated validation: `npm run validate`
 
-### Content Policy
-- No Blizzard assets included
-- Automatic copyright scanning
-- DMCA takedown process
-- User-generated content moderation
+## 🧪 Testing & Quality
+
+- **Unit Tests:** Jest (>80% coverage required)
+- **E2E Tests:** Playwright
+- **Linting:** ESLint strict mode (0 errors, 0 warnings)
+- **Type Safety:** TypeScript strict mode
+- **File Size:** 500 lines max per file
+
+```bash
+npm run test:unit              # Unit tests
+npm run test:unit:coverage     # With coverage report
+npm run test:e2e               # E2E tests (Playwright)
+npm run lint:fix               # Auto-fix linting issues
+```
+
+## 🤖 Automation & Workflows
+
+- **CI/CD Pipeline:** `.github/workflows/ci.yml` for lint, typecheck, unit, e2e, build, and report comments.
+- **Asset Validation:** `.github/workflows/asset-validation.yml` verifies licenses, attribution, and manifest integrity.
+- **Stale Issue Locking:** `.github/workflows/lock-closed-issues.yml` locks closed issues after 14 days to focus triage on new reports.
+- **Claude Code Integrations:** `.github/workflows/claude.yml` and `.github/workflows/claude-code-review.yml` enable AI assistance on PRs and reviews.
+- **E2E Snapshot Refresh:** `.github/workflows/update-e2e-snapshots.yml` regenerates Playwright artifacts on demand.
 
 ## 🤝 Contributing
 
-Please follow our Context Engineering workflow:
+1. Read **[CLAUDE.md](./CLAUDE.md)** for workflow
+2. Review **[CONTRIBUTING.md](./CONTRIBUTING.md)** for human workflow details
+3. Find current PRP in **PRPs/** directory
+4. File issues using the templates in `.github/ISSUE_TEMPLATE/`
+5. Follow **Definition of Done (DoD)** checklist and complete the PR template
+6. Ensure all tests pass (`npm test`)
+7. Run validation (`npm run validate`)
 
-1. **Check PRPs/** for detailed requirements
-2. **Use .claude/commands** for common tasks
-3. **Run validation gates** before committing
-4. **Update documentation** with code changes
 
-### Development Workflow
-```bash
-# Start a new feature
-/generate-prp features/your-feature.md
+## 📜 License
 
-# Implement with AI assistance
-/execute-prp PRPs/your-feature.md
+**GNU Affero General Public License v3.0 (AGPL-3.0)**
 
-# Validate implementation
-npm test
-npm run lint
-npm run typecheck
+Copyright (C) 2024 Vasilisa Versus
 
-# Update documentation
-/agent documentation-manager
-```
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
 
-## 📄 License
+**Key Requirements:**
+- ✅ Must preserve copyright and author attribution
+- ✅ Must provide source code to network users
+- ✅ Must release modifications under AGPL-3.0
+- ✅ Cannot use in proprietary software
 
-This project is licensed under the MIT License - see [LICENSE](./LICENSE) file for details.
-
-## 🔗 Resources
-
-- [Babylon.js Documentation](https://doc.babylonjs.com/)
-- [StormLib Repository](https://github.com/ladislav-zezula/StormLib)
-- [CascLib Repository](https://github.com/ladislav-zezula/CascLib)
-- [MDX Viewer Reference](https://github.com/flowtsohg/mdx-m3-viewer)
-
-## 🙏 Acknowledgments
-
-- Babylon.js team for the excellent WebGL framework
-- StormLib and CascLib contributors
-- RTS modding community for inspiration
-
----
-
-**Edge Craft** - Building the future of browser-based RTS gaming while respecting the legacy of classics.
+See [LICENSE](./LICENSE) for full text.

@@ -1,14 +1,8 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
-
-// Development environment info
-if (import.meta.env.DEV) {
-  console.log('🎮 Edge Craft Development Mode');
-  console.log(`Version: ${import.meta.env.VITE_APP_VERSION || '0.1.0'}`);
-  console.log(`Environment: ${import.meta.env.MODE}`);
-}
+import './benchmarks';
 
 // React 18 root creation
 const rootElement = document.getElementById('root');
@@ -18,8 +12,10 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 
+// Disable StrictMode to prevent double-mounting issues with Babylon.js
+// StrictMode causes mount -> cleanup -> remount which disposes the WebGL engine
 root.render(
-  <React.StrictMode>
+  <BrowserRouter>
     <App />
-  </React.StrictMode>
+  </BrowserRouter>
 );

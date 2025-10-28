@@ -17,7 +17,6 @@ import type { MaterialCacheConfig, MaterialCacheEntry } from './types';
  * ```typescript
  * const cache = new MaterialCache(scene);
  * cache.optimizeMeshMaterials();
- * console.log(cache.getStats()); // { originalCount: 100, sharedCount: 30, reductionPercent: 70 }
  * ```
  */
 export class MaterialCache {

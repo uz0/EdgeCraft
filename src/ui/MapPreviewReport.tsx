@@ -1,5 +1,5 @@
 import React from 'react';
-import type { MapMetadata } from './MapGallery';
+import type { MapMetadata } from '../pages/IndexPage';
 import './MapPreviewReport.css';
 
 export interface MapPreviewReportProps {
@@ -27,7 +27,7 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
 
   const formatLabel: Record<string, string> = {
     w3x: 'Warcraft 3 Map',
-    w3n: 'Warcraft 3 Campaign',
+    w3m: 'Warcraft 3 Reforged',
     sc2map: 'StarCraft 2 Map',
   };
 
@@ -36,7 +36,7 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
     const grouped: Record<string, MapMetadata[]> = {
       sc2map: [],
       w3x: [],
-      w3n: [],
+      w3m: [],
     };
     maps.forEach((map) => {
       const formatGroup = grouped[map.format];
@@ -52,9 +52,11 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
   // Calculate statistics
   const stats = React.useMemo(() => {
     const total = maps.length;
-    const withPreviews = maps.filter((m) => m.thumbnailUrl).length;
+    const withPreviews = maps.filter((m) => m.thumbnailUrl != null && m.thumbnailUrl !== '').length;
     const pending = maps.filter(
-      (m) => !m.thumbnailUrl && previewProgress?.get(m.id)?.status === 'pending'
+      (m) =>
+        (m.thumbnailUrl == null || m.thumbnailUrl === '') &&
+        previewProgress?.get(m.id)?.status === 'pending'
     ).length;
     const generating = maps.filter(
       (m) => previewProgress?.get(m.id)?.status === 'generating'
@@ -64,7 +66,7 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
     return { total, withPreviews, pending, generating, errors };
   }, [maps, previewProgress]);
 
-  const renderMapRow = (map: MapMetadata, index: number) => {
+  const renderMapRow = (map: MapMetadata, index: number): React.ReactElement => {
     const progress = previewProgress?.get(map.id);
     const hasPreview =
       map.thumbnailUrl !== undefined && map.thumbnailUrl !== null && map.thumbnailUrl !== '';
@@ -96,13 +98,13 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
           <div className="map-preview-name">{map.name}</div>
           <div className="map-preview-meta">
             <span className="meta-format">
-              {formatLabel[map.format] || map.format.toUpperCase()}
+              {formatLabel[map.format] ?? map.format.toUpperCase()}
             </span>
             <span className="meta-size">{formatSize(map.sizeBytes)}</span>
             {hasPreview && <span className="meta-status">✅ Preview Ready</span>}
             {progress?.status === 'error' && (
               <span className="meta-error" title={progress.error}>
-                ⚠️ {progress.error || 'Preview generation failed'}
+                ⚠️ {progress.error ?? 'Preview generation failed'}
               </span>
             )}
           </div>
@@ -171,13 +173,14 @@ export const MapPreviewReport: React.FC<MapPreviewReportProps> = ({ maps, previe
 
         const formatStats = {
           total: formatMaps.length,
-          withPreviews: formatMaps.filter((m) => m.thumbnailUrl).length,
+          withPreviews: formatMaps.filter((m) => m.thumbnailUrl != null && m.thumbnailUrl !== '')
+            .length,
         };
 
         return (
           <div key={format} className="format-section">
             <div className="format-header">
-              <h2>{formatLabel[format] || format.toUpperCase()}s</h2>
+              <h2>{formatLabel[format] ?? format.toUpperCase()}s</h2>
               <span className="format-count">
                 {formatStats.withPreviews} / {formatStats.total} previews
               </span>
