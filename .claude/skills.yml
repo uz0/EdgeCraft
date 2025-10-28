@@ -1,0 +1,448 @@
+# Edge Craft AI Skills Configuration
+# Reusable skills for signal management and workflow enforcement
+
+version: "1.0"
+
+skills:
+  # ============================================================================
+  # SIGNAL MANAGEMENT SKILLS
+  # ============================================================================
+
+  scan_for_signals:
+    name: "Scan Repository for Active Signals"
+    description: "Scans codebase and git history for workflow violations and generates signal report"
+    category: "signal_management"
+    usage: "/skill scan_for_signals"
+    steps:
+      - name: "Check documentation structure"
+        command: "find . -type d \\( -name 'docs' -o -name 'documentation' -o -name 'guides' \\) -not -path './node_modules/*'"
+        severity_if_found: 9
+
+      - name: "Check for backup files"
+        command: "find . -type f \\( -name '*.backup' -o -name '*.old' -o -name '*.bak' \\) -not -path './node_modules/*'"
+        severity_if_found: 4
+
+      - name: "Check for outdated PRPs"
+        command: "find PRPs/ -name '*.md' -mtime +7"
+        severity_if_found: 5
+
+      - name: "Check for uncommitted changes in PRPs"
+        command: "git status --porcelain PRPs/"
+        severity_if_found: 3
+
+      - name: "Verify PRP progress tracking"
+        script: |
+          for prp in PRPs/*.md; do
+            if grep -q "🟡 In Progress" "$prp"; then
+              if ! grep -q "## Progress Tracking" "$prp"; then
+                echo "Missing Progress Tracking: $prp"
+              fi
+            fi
+          done
+        severity_if_found: 6
+
+    outputs:
+      - signal_report
+      - violation_count
+      - recommended_actions
+
+  generate_signal_report:
+    name: "Generate Signal Report"
+    description: "Creates comprehensive signal report with WHY/HOW/WHAT structure"
+    category: "signal_management"
+    usage: "/skill generate_signal_report [signal_name]"
+    parameters:
+      - name: signal_name
+        required: true
+        type: string
+      - name: severity
+        required: true
+        type: integer
+        range: [0, 10]
+      - name: category
+        required: true
+        type: string
+        options: ["workflow", "quality", "performance", "legal", "project_status"]
+    template: |
+      #### Signal #{signal_number}: {signal_name}
+      **Strength**: {severity}/10 {severity_emoji} {severity_level}
+
+      **WHY (Reason)**:
+      {reason_description}
+
+      **HOW (Plan)**:
+      {remediation_steps}
+
+      **WHAT (Result)**:
+      {current_status}
+
+      **Detected**: {timestamp}
+      **Category**: {category}
+      **Auto-Resolution**: {auto_resolve_possible}
+
+  update_signal_status:
+    name: "Update Signal Status"
+    description: "Updates existing signal in CLAUDE.md with new status"
+    category: "signal_management"
+    usage: "/skill update_signal_status [signal_number] [status]"
+    parameters:
+      - name: signal_number
+        required: true
+        type: integer
+      - name: status
+        required: true
+        type: string
+        options: ["active", "investigating", "resolved", "monitoring"]
+      - name: resolution_notes
+        required: false
+        type: string
+    steps:
+      - "Read CLAUDE.md"
+      - "Find signal section by number"
+      - "Update WHAT (Result) section with new status"
+      - "Add resolution notes if provided"
+      - "Update timestamp"
+      - "Save CLAUDE.md"
+
+  clear_resolved_signals:
+    name: "Clear Resolved Signals"
+    description: "Archives resolved signals and clears active signal list"
+    category: "signal_management"
+    usage: "/skill clear_resolved_signals"
+    steps:
+      - "Read CLAUDE.md Signals section"
+      - "Identify signals marked as resolved"
+      - "Move to Signal History section"
+      - "Update Active Signals count"
+      - "Generate cleanup report"
+
+  # ============================================================================
+  # DOCUMENTATION WORKFLOW SKILLS
+  # ============================================================================
+
+  enforce_three_file_rule:
+    name: "Enforce Three-File Rule"
+    description: "Validates and enforces documentation discipline (CLAUDE.md, README.md, PRPs/)"
+    category: "documentation"
+    usage: "/skill enforce_three_file_rule"
+    steps:
+      - name: "Scan for forbidden directories"
+        directories_forbidden:
+          - "docs/"
+          - "documentation/"
+          - "guides/"
+          - "specs/"
+          - "planning/"
+        action: "Generate Signal #1 (9/10 INCIDENT)"
+
+      - name: "Scan for forbidden files"
+        files_forbidden:
+          - "ARCHITECTURE.md"
+          - "TECHNICAL-SPEC.md"
+          - "PLAN.md"
+          - "TODO.md"
+          - "NOTES.md"
+        action: "Generate Signal (7/10 CRITICAL)"
+
+      - name: "Validate allowed documentation"
+        files_allowed:
+          - "CLAUDE.md"
+          - "README.md"
+          - "PRPs/*.md"
+        action: "Verify content not duplicated"
+
+      - name: "Check for stale content"
+        check: "Compare last modified dates"
+        threshold: "7 days"
+        action: "Generate warning if PRPs outdated"
+
+    remediation:
+      - "Move content to appropriate location"
+      - "Update all references"
+      - "Remove forbidden files"
+      - "Update .gitignore"
+
+  validate_prp_structure:
+    name: "Validate PRP Structure"
+    description: "Ensures PRP has all required sections and proper format"
+    category: "documentation"
+    usage: "/skill validate_prp_structure [prp_path]"
+    required_sections:
+      - "# PRP"
+      - "**Status**:"
+      - "## 🎯 Phase Overview"
+      - "## 📋 Definition of Ready (DoR)"
+      - "## ✅ Definition of Done (DoD)"
+      - "## 🏗️ Implementation Breakdown"
+      - "## 🧪 Testing & Validation"
+      - "## 📊 Success Metrics"
+    optional_sections:
+      - "## 📅 Implementation Timeline"
+      - "## 📈 Phase Exit Criteria"
+      - "## 🔬 Research / Related Materials"
+      - "## Progress Tracking"
+      - "## Affected Files"
+    checks:
+      - "Verify checklist syntax (- [ ] or - [x])"
+      - "Ensure DoR items present before DoD"
+      - "Check status badge matches content"
+      - "Validate markdown formatting"
+    signal_if_invalid: 8
+
+  update_prp_progress:
+    name: "Update PRP Progress Tracking"
+    description: "Adds entry to Progress Tracking table in active PRP"
+    category: "documentation"
+    usage: "/skill update_prp_progress [prp_path] [description]"
+    parameters:
+      - name: prp_path
+        required: true
+        type: path
+      - name: description
+        required: true
+        type: string
+      - name: files_changed
+        required: false
+        type: array
+    template: |
+      | {timestamp} | {description} | {files_changed} | {commit_sha} |
+    steps:
+      - "Find Progress Tracking table in PRP"
+      - "Add new row with timestamp and description"
+      - "List modified files"
+      - "Include git commit SHA if committed"
+      - "Save PRP"
+
+  # ============================================================================
+  # CODE QUALITY SKILLS
+  # ============================================================================
+
+  validate_commit:
+    name: "Validate Commit"
+    description: "Pre-commit validation including signals, tests, and formatting"
+    category: "quality"
+    usage: "/skill validate_commit"
+    checks:
+      - name: "Run signal scan"
+        command: "npm run signal-scan"
+        blocking: true
+        signal_threshold: 6
+
+      - name: "TypeScript type check"
+        command: "npm run typecheck"
+        blocking: true
+        signal_if_fail: 8
+
+      - name: "ESLint check"
+        command: "npm run lint"
+        blocking: true
+        signal_if_fail: 7
+
+      - name: "Prettier format check"
+        command: "npm run format:check"
+        blocking: true
+        signal_if_fail: 5
+
+      - name: "Unit tests"
+        command: "npm run test:unit"
+        blocking: true
+        signal_if_fail: 8
+
+      - name: "Asset validation"
+        command: "npm run validate-assets"
+        blocking: true
+        signal_if_fail: 10
+
+    failure_action: "Block commit and generate signal"
+
+  validate_pr:
+    name: "Validate Pull Request"
+    description: "Comprehensive PR validation including DoD completion"
+    category: "quality"
+    usage: "/skill validate_pr"
+    checks:
+      - name: "Find associated PRP"
+        action: "Parse PR description for PRP link"
+
+      - name: "Validate PRP DoD"
+        action: "Ensure all DoD items checked"
+        blocking: true
+        signal_if_incomplete: 9
+
+      - name: "Check test coverage"
+        action: "Verify coverage meets phase requirements"
+        blocking: true
+
+      - name: "Validate affected files"
+        action: "Ensure PRP Affected Files matches PR changes"
+        blocking: false
+        signal_if_mismatch: 4
+
+      - name: "Check for signals"
+        action: "Scan for active signals strength >= 6"
+        blocking: true
+
+      - name: "Run full CI pipeline"
+        action: "All CI checks must pass"
+        blocking: true
+
+    success_criteria:
+      - "All DoD items checked"
+      - "All tests passing"
+      - "Coverage meets threshold"
+      - "No critical signals (>=6)"
+      - "CI pipeline green"
+
+  # ============================================================================
+  # LEGAL COMPLIANCE SKILLS
+  # ============================================================================
+
+  validate_assets:
+    name: "Validate Asset Copyright"
+    description: "Comprehensive asset validation for legal compliance"
+    category: "legal"
+    usage: "/skill validate_assets [asset_path]"
+    checks:
+      - name: "SHA-256 hash blacklist"
+        action: "Compare against known Blizzard asset hashes"
+        signal_if_match: 10
+
+      - name: "Metadata scan"
+        action: "Check EXIF/metadata for Blizzard signatures"
+        signal_if_match: 10
+
+      - name: "Visual similarity"
+        action: "Compare with reference images"
+        threshold: 0.95
+        signal_if_similar: 9
+
+      - name: "License verification"
+        action: "Ensure CC0/MIT license documented"
+        signal_if_missing: 6
+
+      - name: "Attribution check"
+        action: "Verify attribution in assets/LICENSES.md"
+        signal_if_missing: 5
+
+    failure_action: "Block commit and generate INCIDENT signal"
+
+  generate_notice_file:
+    name: "Generate NOTICE File"
+    description: "Creates/updates NOTICE file with all attributions"
+    category: "legal"
+    usage: "/skill generate_notice_file"
+    sources:
+      - "assets/LICENSES.md"
+      - "package.json dependencies"
+      - "PRPs/ research references"
+    format: |
+      Edge Craft - NOTICE
+
+      This project contains software developed by the Edge Craft team.
+
+      Third-Party Components:
+      {list_of_components}
+
+      Asset Attributions:
+      {list_of_assets}
+
+      Research References:
+      {list_of_references}
+
+  # ============================================================================
+  # PERFORMANCE MONITORING SKILLS
+  # ============================================================================
+
+  run_benchmarks:
+    name: "Run Performance Benchmarks"
+    description: "Executes performance benchmarks and compares to targets"
+    category: "performance"
+    usage: "/skill run_benchmarks [suite]"
+    suites:
+      terrain:
+        command: "npm run benchmark -- terrain-lod"
+        target: "60 FPS @ 256x256"
+        signal_if_below: 7
+
+      units:
+        command: "npm run benchmark -- unit-instancing"
+        target: "60 FPS @ 500 units"
+        signal_if_below: 7
+
+      full_system:
+        command: "npm run benchmark -- full-system"
+        target: "60 FPS all systems"
+        signal_if_below: 8
+
+      memory:
+        command: "npm run benchmark -- memory-leak"
+        target: "No leaks over 1 hour"
+        signal_if_fail: 9
+
+    outputs:
+      - benchmark_report
+      - comparison_to_baseline
+      - signal_if_regression
+
+  # ============================================================================
+  # UTILITY SKILLS
+  # ============================================================================
+
+  cleanup_repository:
+    name: "Cleanup Repository"
+    description: "Removes backup files, temp files, and other clutter"
+    category: "utility"
+    usage: "/skill cleanup_repository"
+    targets:
+      - "*.backup"
+      - "*.old"
+      - "*.bak"
+      - "*.tmp"
+      - "*.temp"
+      - ".DS_Store"
+      - "Thumbs.db"
+    dry_run: true
+    confirm_before_delete: true
+
+  generate_phase_report:
+    name: "Generate Phase Completion Report"
+    description: "Creates comprehensive report when phase completes"
+    category: "reporting"
+    usage: "/skill generate_phase_report [prp_path]"
+    includes:
+      - "DoD completion status"
+      - "Test coverage achieved"
+      - "Performance benchmarks"
+      - "Files modified count"
+      - "Commits count"
+      - "Duration (days)"
+      - "Signals generated/resolved"
+    output: "PRPs/{phase}-completion-report.md"
+
+# ============================================================================
+# SKILL CHAINING
+# ============================================================================
+
+skill_chains:
+  pre_commit_validation:
+    description: "Complete pre-commit validation chain"
+    skills:
+      - scan_for_signals
+      - validate_commit
+      - validate_assets
+
+  prp_workflow:
+    description: "Complete PRP creation to completion workflow"
+    skills:
+      - validate_prp_structure
+      - update_prp_progress
+      - validate_pr
+      - generate_phase_report
+
+  signal_lifecycle:
+    description: "Signal detection, tracking, and resolution"
+    skills:
+      - scan_for_signals
+      - generate_signal_report
+      - update_signal_status
+      - clear_resolved_signals

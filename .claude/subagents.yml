@@ -1,0 +1,362 @@
+# Edge Craft AI Subagents Configuration
+# These specialized agents are signal-aware and enforce project workflow
+
+version: "1.0"
+
+subagents:
+  # ============================================================================
+  # WORKFLOW ENFORCEMENT AGENTS
+  # ============================================================================
+
+  signal-monitor:
+    name: "Signal Monitor"
+    description: "Monitors workflow violations and generates signals"
+    capabilities:
+      - scan_documentation_structure
+      - detect_violations
+      - calculate_signal_strength
+      - generate_signal_reports
+    triggers:
+      - on_file_create
+      - on_file_delete
+      - on_commit
+      - on_pr_open
+    rules:
+      - "Scan for docs/ directory (Signal #1: 9/10 INCIDENT)"
+      - "Check for backup files *.backup, *.old (Signal #2: 4/10 WARNING)"
+      - "Verify all documentation in PRPs/ or CLAUDE.md or README.md"
+      - "Block commits containing forbidden documentation structures"
+    outputs:
+      - signal_report_markdown
+      - violation_list
+      - remediation_steps
+
+  documentation-guardian:
+    name: "Documentation Guardian"
+    description: "Enforces Three-File Rule (CLAUDE.md, README.md, PRPs/)"
+    capabilities:
+      - validate_documentation_structure
+      - detect_documentation_drift
+      - enforce_prp_updates
+      - verify_single_source_of_truth
+    triggers:
+      - on_documentation_change
+      - before_commit
+      - before_pr
+    rules:
+      - "ONLY allow CLAUDE.md, README.md, PRPs/*.md"
+      - "Block creation of docs/, documentation/, guides/ directories"
+      - "Verify PRP updates include Progress Tracking table changes"
+      - "Ensure no duplicate content across files"
+    signal_thresholds:
+      - "docs/ directory created: 9/10 INCIDENT"
+      - "Duplicate content detected: 7/10 CRITICAL"
+      - "Outdated PRP (>7 days no update): 5/10 WARNING"
+
+  prp-compliance-checker:
+    name: "PRP Compliance Checker"
+    description: "Validates PRP structure, DoR/DoD tracking, and progress updates"
+    capabilities:
+      - validate_prp_structure
+      - check_dor_completion
+      - verify_dod_progress
+      - ensure_progress_tracking
+    triggers:
+      - on_prp_update
+      - before_pr
+      - on_implementation_start
+    rules:
+      - "Verify PRP has all required sections"
+      - "Check DoR items before allowing phase start"
+      - "Verify DoD items checked as work completes"
+      - "Ensure Progress Tracking table updated"
+      - "Validate Affected Files section lists all modified files"
+    signal_thresholds:
+      - "Missing required PRP section: 8/10 CRITICAL"
+      - "DoR not complete at phase start: 9/10 INCIDENT"
+      - "DoD not updated in >2 commits: 6/10 CRITICAL"
+      - "Progress Tracking not updated: 5/10 WARNING"
+
+  # ============================================================================
+  # DEVELOPMENT AGENTS
+  # ============================================================================
+
+  system-analyst:
+    name: "System Analyst"
+    description: "Defines requirements, DoR, DoD, and business value"
+    capabilities:
+      - define_requirements
+      - create_dor_checklist
+      - create_dod_checklist
+      - assess_business_value
+      - map_dependencies
+    triggers:
+      - on_prp_create
+      - on_feature_request
+    rules:
+      - "Every PRP must have clear goal and business value"
+      - "DoR must list all prerequisites"
+      - "DoD must be specific and measurable"
+      - "All dependencies must be mapped"
+    outputs:
+      - requirements_document
+      - dor_checklist
+      - dod_outline
+      - dependency_map
+
+  aqa-engineer:
+    name: "AQA Engineer (Automation QA)"
+    description: "Defines quality gates, test coverage, and validation"
+    capabilities:
+      - define_quality_gates
+      - specify_test_coverage
+      - create_validation_checks
+      - define_performance_benchmarks
+    triggers:
+      - on_prp_planning
+      - before_implementation
+    rules:
+      - "Every PRP must have quality gates"
+      - "Test coverage requirements must be specified"
+      - "Performance benchmarks required for engine changes"
+      - "Validation checks for all user stories"
+    outputs:
+      - quality_gates_checklist
+      - test_coverage_requirements
+      - benchmark_specifications
+      - validation_matrix
+
+  developer:
+    name: "Developer"
+    description: "Technical implementation, research, and code writing"
+    capabilities:
+      - research_technical_approaches
+      - design_architecture
+      - write_code
+      - write_tests
+      - update_documentation
+    triggers:
+      - on_implementation_phase
+      - on_bug_fix
+      - on_refactor
+    rules:
+      - "Always read PRP before starting"
+      - "Update Progress Tracking after significant changes"
+      - "Write tests alongside code (TDD)"
+      - "No files >500 lines"
+      - "Zero eslint-disable without approval"
+      - "Zero comments (except workarounds and TODO/FIXME)"
+    outputs:
+      - implementation_code
+      - unit_tests
+      - progress_updates
+      - technical_documentation
+
+  # ============================================================================
+  # SPECIALIZED TECHNICAL AGENTS
+  # ============================================================================
+
+  babylon-renderer:
+    name: "Babylon.js Renderer Expert"
+    description: "WebGL optimization, 3D scene management, shader development"
+    capabilities:
+      - optimize_rendering
+      - design_shaders
+      - manage_scenes
+      - implement_instancing
+      - optimize_draw_calls
+    triggers:
+      - on_rendering_work
+      - on_performance_issue
+    rules:
+      - "Target 60 FPS for all scenes"
+      - "Use GPU instancing for repeated objects"
+      - "Minimize draw calls (<200)"
+      - "Proper resource disposal"
+    signal_thresholds:
+      - "FPS drop below 30: 8/10 CRITICAL"
+      - "Draw calls >300: 6/10 CRITICAL"
+      - "Memory leak detected: 9/10 INCIDENT"
+
+  format-parser:
+    name: "File Format Parser Specialist"
+    description: "MPQ, CASC, W3X, MDX, M3 format parsing and extraction"
+    capabilities:
+      - parse_binary_formats
+      - implement_compression
+      - extract_archives
+      - convert_formats
+    triggers:
+      - on_format_work
+      - on_compatibility_issue
+    rules:
+      - "Clean-room implementation only"
+      - "No copyrighted code"
+      - "Comprehensive error handling"
+      - "Format compatibility tests"
+    signal_thresholds:
+      - "Copyright violation detected: 10/10 INCIDENT"
+      - "Format incompatibility: 7/10 CRITICAL"
+
+  multiplayer-architect:
+    name: "Multiplayer Systems Architect"
+    description: "Networking, deterministic simulation, server infrastructure"
+    capabilities:
+      - design_networking
+      - implement_lockstep
+      - optimize_bandwidth
+      - design_server_architecture
+    triggers:
+      - on_multiplayer_work
+      - on_networking_issue
+    rules:
+      - "Deterministic simulation required"
+      - "Rollback netcode for <100ms latency"
+      - "Bandwidth optimization (<50KB/s per player)"
+    signal_thresholds:
+      - "Desync detected: 9/10 INCIDENT"
+      - "Latency >200ms: 7/10 CRITICAL"
+
+  legal-compliance:
+    name: "Legal & Copyright Compliance"
+    description: "Ensures clean-room implementation and copyright safety"
+    capabilities:
+      - validate_assets
+      - check_copyright
+      - review_licensing
+      - generate_notices
+    triggers:
+      - before_commit
+      - on_asset_add
+      - before_pr
+    rules:
+      - "Zero tolerance for copyrighted assets"
+      - "Automatic SHA-256 hash blacklist check"
+      - "Metadata scan for Blizzard signatures"
+      - "Visual similarity detection"
+    signal_thresholds:
+      - "Copyrighted asset detected: 10/10 INCIDENT"
+      - "Suspicious metadata: 8/10 CRITICAL"
+      - "Missing license attribution: 6/10 CRITICAL"
+
+# ============================================================================
+# SIGNAL ESCALATION MATRIX
+# ============================================================================
+
+signal_escalation:
+  levels:
+    info:
+      range: [0, 2]
+      color: "blue"
+      emoji: "ℹ️"
+      action: "Log and monitor"
+      notification: false
+
+    warning:
+      range: [3, 5]
+      color: "yellow"
+      emoji: "⚠️"
+      action: "Review recommended"
+      notification: true
+      recipients:
+        - developer
+
+    critical:
+      range: [6, 8]
+      color: "orange"
+      emoji: "🔶"
+      action: "Immediate attention required"
+      notification: true
+      recipients:
+        - developer
+        - team_lead
+      block_merge: true
+
+    incident:
+      range: [9, 10]
+      color: "red"
+      emoji: "🔴"
+      action: "Human intervention mandatory"
+      notification: true
+      recipients:
+        - developer
+        - team_lead
+        - project_manager
+      block_merge: true
+      require_approval: true
+
+# ============================================================================
+# AUTOMATION RULES
+# ============================================================================
+
+automation:
+  pre_commit:
+    - agent: signal-monitor
+      action: scan_violations
+    - agent: documentation-guardian
+      action: validate_structure
+    - agent: legal-compliance
+      action: check_assets
+
+  pre_pr:
+    - agent: signal-monitor
+      action: generate_report
+    - agent: prp-compliance-checker
+      action: validate_prp
+    - agent: documentation-guardian
+      action: check_updates
+
+  on_merge:
+    - agent: signal-monitor
+      action: clear_resolved_signals
+    - agent: prp-compliance-checker
+      action: update_phase_status
+
+# ============================================================================
+# SIGNAL RESPONSE TEMPLATES
+# ============================================================================
+
+signal_templates:
+  documentation_violation:
+    title: "Documentation Discipline Violation"
+    severity: 9
+    category: "workflow"
+    template: |
+      **Violation**: {violation_type}
+      **Location**: {file_path}
+
+      **Required Actions**:
+      1. Move content to appropriate location (PRPs/ or CLAUDE.md)
+      2. Update all references
+      3. Remove forbidden files/directories
+      4. Update .gitignore if needed
+
+      **Prevention**: Document structure is enforced by pre-commit hooks.
+
+  uncommitted_backup:
+    title: "Uncommitted Backup Files"
+    severity: 4
+    category: "cleanup"
+    template: |
+      **Files**: {file_list}
+
+      **Required Actions**:
+      1. Remove all *.backup, *.old files
+      2. Update .gitignore to block these patterns
+      3. Use git for version control instead of backup files
+
+  implementation_not_started:
+    title: "Implementation Phase Not Started"
+    severity: 6
+    category: "project_status"
+    template: |
+      **Phase**: {phase_name}
+      **PRP**: {prp_path}
+
+      **Required Actions**:
+      1. Review PRP DoR checklist
+      2. Assign implementation agent/developer
+      3. Create implementation timeline
+      4. Begin Phase 0 tasks
+
+      **Blocker**: Research phase complete but implementation delayed.
