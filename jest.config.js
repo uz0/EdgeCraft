@@ -6,18 +6,16 @@ export default {
 
   roots: ['<rootDir>/src'],
 
-  // Exclude EVERYTHING in tests/ - those are Playwright E2E tests
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/tests/',           // All Playwright E2E tests
-    '/__tests__/',       // No __tests__ directories allowed (FORBIDDEN)
+    '/tests/',
+    '/__tests__/',
   ],
 
   transformIgnorePatterns: [
     'node_modules/(?!@babylonjs|node-pkware)',
   ],
 
-  // ONLY match unit tests (*.unit.ts) - co-located with source files
   testMatch: [
     '**/*.unit.ts',
     '**/*.unit.tsx',
@@ -48,10 +46,8 @@ export default {
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@types/(.*)$': '<rootDir>/src/types/$1',
 
-    // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|svg)$': 'identity-obj-proxy',
-    // Mock shader files
     '\\.fx\\?raw$': 'identity-obj-proxy',
   },
 
@@ -74,11 +70,11 @@ export default {
   coverageDirectory: '<rootDir>/coverage',
 
   coverageReporters: [
-    'text',           // Console output
-    'text-summary',   // Summary in console
-    'lcov',           // For Codecov
-    'html',           // HTML report for viewing in browser
-    'json',           // JSON for parsing
+    'text',
+    'text-summary',
+    'lcov',
+    'html',
+    'json',
   ],
 
   testTimeout: 10000,

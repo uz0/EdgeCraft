@@ -126,7 +126,7 @@ Annual storage estimate (10 k sessions): ~185 TB raw capture, 32 TB packag
 - AR guidance overlays can leverage WebXR (ARKit via WebXR Viewer, Chrome Dev tools) or fallback to device IMU with Canvas overlays; progress visualization similar to Polycam/Luma interactions.
 - Offline-first capture flows observed in Polycam, Luma AI, Record3D: capture locally, batch upload over Wi-Fi, show cloud processing progress via WebSockets.
 - `MediaRecorder` provides segmented uploads but struggles with high-bitrate 4K; `WebCodecs` + `WritableStream` enabling adaptive bitrate chunking is experimental (Chrome 115+).
-- Depth-assisted capture: ARCore Raw Depth API (Android Chrome 121 via WebXR Depth API) improves reconstruction; iOS requires ARKit LiDAR via native wrappers (not accessible in browser today).
+- Depth-assisted capture: ARCore Raw Depth API (Android Chrome 121 via WebXR Depth API) improves reconstruction; iOS requires ARKit LiDAR via native wrappers (inaccessible in browsers today).
 
 ### Reconstruction Pipeline
 
@@ -134,7 +134,7 @@ Annual storage estimate (10 k sessions): ~185 TB raw capture, 32 TB packag
 - Open-source toolchains: [GraphDECO gaussian-splatting](https://github.com/graphdeco-inria/gaussian-splatting), [gsplat](https://github.com/nerfstudio-project/gsplat), [nerfstudio](https://github.com/nerfstudio-project/nerfstudio) with Gaussian pipeline and Web viewer exporters, NVIDIA [Instant-NGP](https://github.com/NVlabs/instant-ngp) for NeRF baseline.
 - Mobile capture compatibility: Luma AI public API, Polycam API provide photogrammetry-to-NeRF pipelines, though licensing must be reviewed.
 - Training requirements: Multi-frame capture with wide baseline, static lighting for best results; typical 24–60 camera positions, 5–15 minutes cloud GPU time (RTX 3090/A100).
-- Need for privacy-preserving filters: Automatic face/object detection using [MediaPipe](https://developers.google.com/mediapipe) or [OpenMMLab](https://github.com/open-mmlab/mmdetection) prior to reconstruction.
+- Need for privacy-preserving filters: Automatic face/object detection using [MediaPipe](https://developers.google.com/mediapipe) or [OpenMMLab](https://github.com/open-mmlab/mmdetection) before reconstruction.
 - Output optimization: Convert `.ply` / `.splat` outputs to compressed binary with quantized positions, radii, SH coefficients for Babylon runtime; evaluate streaming using [splatapult](https://github.com/mkkellogg/splatapult) chunk format.
 
 ### Runtime Rendering & Engine Integration

@@ -45,9 +45,13 @@ body:
     attributes:
       label: Validation plan
       description: How will we verify this change? List tests, dry-runs, or CI jobs to run.
+    validations:
+      required: true
 
   - type: textarea
     id: risks
     attributes:
       label: Risks & mitigation
       description: Note potential regressions or operational overhead.
+    validations:
+      required: true

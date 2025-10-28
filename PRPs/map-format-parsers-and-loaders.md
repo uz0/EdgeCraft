@@ -109,8 +109,7 @@ Implement complete support for parsing Warcraft 3 (.w3x, .w3m) and StarCraft 2 (
 **So that** I can view and play custom maps
 
 **Acceptance Criteria:**
-- [x] All W3X maps parse correctly
-- [x] All W3M maps parse correctly (using W3X parser)
+- [x] All W3X and W3M maps parse correctly (W3M uses W3X parser)
 - [x] All SC2Map maps parse terrain
 - [x] Compression algorithms handle all variants
 - [x] Parsing errors logged clearly
