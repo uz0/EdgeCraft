@@ -1,18 +1,9 @@
-/**
- * Jest Setup File
- *
- * Configures global test environment with:
- * - Node.js polyfills (TextEncoder, crypto, etc.)
- * - WebGL/Canvas mocks for Babylon.js
- * - Visual regression testing (jest-image-snapshot)
- */
-
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
+import { TextEncoder, TextDecoder } from 'util';
+import { webcrypto } from 'crypto';
 
-// Extend Jest matchers with image snapshot functionality
 expect.extend({ toMatchImageSnapshot });
 
-// Configure global image snapshot types
 declare global {
   namespace jest {
     interface Matchers<R> {
@@ -27,19 +18,11 @@ declare global {
   }
 }
 
-// ============================================================================
-// GLOBAL POLYFILLS & ENVIRONMENT SETUP
-// ============================================================================
+globalThis.IS_CI_ENVIRONMENT = Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
 
-// Set global flag for CI environment (used to skip WebGL-dependent tests)
-(global as any).IS_CI_ENVIRONMENT = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+globalThis.TextEncoder = TextEncoder;
+globalThis.TextDecoder = TextDecoder;
 
-// Add TextEncoder/TextDecoder for Node.js environment
-const { TextEncoder, TextDecoder } = require('util');
-(global as any).TextEncoder = TextEncoder;
-(global as any).TextDecoder = TextDecoder;
-
-// Polyfill Blob.arrayBuffer() for jsdom (not available in older versions)
 if (typeof Blob !== 'undefined' && !Blob.prototype.arrayBuffer) {
   Blob.prototype.arrayBuffer = async function () {
     const reader = new FileReader();
@@ -51,32 +34,22 @@ if (typeof Blob !== 'undefined' && !Blob.prototype.arrayBuffer) {
   };
 }
 
-// Add crypto.subtle for hash computations
-const { webcrypto } = require('crypto');
-Object.defineProperty(global, 'crypto', {
+Object.defineProperty(globalThis, 'crypto', {
   value: webcrypto,
   writable: true,
   configurable: true,
 });
 
-// ============================================================================
-// WEBGL & CANVAS MOCKS FOR BABYLON.JS
-// ============================================================================
+globalThis.WebGLRenderingContext = class WebGLRenderingContext {};
+globalThis.WebGL2RenderingContext = class WebGL2RenderingContext {};
 
-// Mock WebGL2RenderingContext and WebGLRenderingContext for Babylon.js
-(global as any).WebGLRenderingContext = class WebGLRenderingContext {};
-(global as any).WebGL2RenderingContext = class WebGL2RenderingContext {};
-
-// Helper to create a mock function with bind support
 const createMockFn = () => {
   const fn = jest.fn();
   (fn as any).bind = function() { return fn; };
   return fn;
 };
 
-// Mock HTMLCanvasElement for both 2D and WebGL contexts
 HTMLCanvasElement.prototype.getContext = jest.fn((contextType: string) => {
-  // Mock 2D context for canvas image generation
   if (contextType === '2d') {
     return {
       fillStyle: '',
@@ -127,23 +100,26 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType: string) => {
     } as any;
   }
 
-  // Mock WebGL context for Babylon.js
   if (contextType === 'webgl' || contextType === 'webgl2' || contextType === 'experimental-webgl') {
+    const WEBGL_VERSION = 7938;
+    const WEBGL_RENDERER = 7937;
+    const MAX_TEXTURE_SIZE = 3379;
+    const MAX_VERTEX_ATTRIBS = 35661;
+    const VIEWPORT = 3386;
+
     const ctx = {
       canvas: document.createElement('canvas'),
       drawingBufferWidth: 800,
       drawingBufferHeight: 600,
       getParameter: createMockFn().mockImplementation((param: number) => {
-        // Return appropriate values for different parameters
-        if (param === 7938) return 'WebGL 1.0';  // VERSION
-        if (param === 7937) return 'WebGL Vendor';  // RENDERER
-        if (param === 3379) return 16384;  // MAX_TEXTURE_SIZE
-        if (param === 35661) return 32;  // MAX_VERTEX_ATTRIBS
-        if (param === 3386) return [0, 0, 800, 600];  // VIEWPORT
+        if (param === WEBGL_VERSION) return 'WebGL 1.0';
+        if (param === WEBGL_RENDERER) return 'WebGL Vendor';
+        if (param === MAX_TEXTURE_SIZE) return 16384;
+        if (param === MAX_VERTEX_ATTRIBS) return 32;
+        if (param === VIEWPORT) return [0, 0, 800, 600];
         return null;
       }),
       getExtension: createMockFn().mockImplementation((name: string) => {
-        // Return mock objects for all extensions
         if (name === 'WEBGL_draw_buffers') {
           return { drawBuffersWEBGL: jest.fn() };
         }
@@ -240,13 +216,11 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType: string) => {
       STENCIL_ATTACHMENT: 36128,
     };
 
-    // Wrap in Proxy to provide fallback for any unmocked methods
     return new Proxy(ctx, {
       get(target: any, prop: string | symbol) {
         if (prop in target) {
           return target[prop];
         }
-        // For any undefined property, return a mock function with bind
         const mockFn = createMockFn();
         target[prop] = mockFn;
         return mockFn;
@@ -256,10 +230,8 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextType: string) => {
   return null;
 }) as any;
 
-// Mock HTMLCanvasElement.prototype.toDataURL for image generation
+const MINIMAL_TRANSPARENT_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
 HTMLCanvasElement.prototype.toDataURL = jest.fn(function(type?: string) {
-  // Generate a minimal valid data URL for testing
-  // This is a 1x1 transparent PNG
-  const minimalPNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-  return `data:${type || 'image/png'};base64,${minimalPNG}`;
+  return `data:${type || 'image/png'};base64,${MINIMAL_TRANSPARENT_PNG}`;
 }) as any;
