@@ -37,13 +37,10 @@ export class StormJSAdapter {
     }
 
     try {
-      console.log('[StormJSAdapter] Loading StormJS WASM module...');
       StormJS = await import('@wowserhq/stormjs');
       isInitialized = true;
-      console.log('[StormJSAdapter] ✅ StormJS loaded successfully');
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('[StormJSAdapter] ❌ Failed to load StormJS:', errorMsg);
       throw new Error(`Failed to initialize StormJS: ${errorMsg}`);
     }
   }
@@ -81,8 +78,6 @@ export class StormJSAdapter {
         };
       }
 
-      console.log(`[StormJSAdapter] Extracting "${fileName}" using StormLib...`);
-
       const { FS, MPQ } = StormJS;
 
       // Setup virtual filesystem (MEMFS)
@@ -98,8 +93,6 @@ export class StormJSAdapter {
         const uint8Array = new Uint8Array(mpqBuffer);
         FS.writeFile(this.VIRTUAL_ARCHIVE_PATH, uint8Array);
 
-        console.log(`[StormJSAdapter] MPQ file written to MEMFS: ${mpqBuffer.byteLength} bytes`);
-
         // Open MPQ archive
         const mpq = await MPQ.open(this.VIRTUAL_ARCHIVE_PATH, 'r');
 
@@ -109,9 +102,6 @@ export class StormJSAdapter {
 
           try {
             const fileData = file.read();
-            console.log(
-              `[StormJSAdapter] ✅ Successfully extracted "${fileName}": ${fileData.length} bytes`
-            );
 
             // Convert Uint8Array to ArrayBuffer
             const arrayBuffer = fileData.buffer.slice(
@@ -139,7 +129,6 @@ export class StormJSAdapter {
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(`[StormJSAdapter] ❌ Extraction failed:`, errorMsg);
 
       return {
         success: false,

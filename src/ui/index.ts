@@ -7,4 +7,4 @@ export type { GameCanvasProps } from './GameCanvas';
 export { DebugOverlay } from './DebugOverlay';
 export type { DebugOverlayProps } from './DebugOverlay';
 export { MapGallery } from './MapGallery';
-export type { MapGalleryProps, MapMetadata } from './MapGallery';
+export type { MapGalleryProps } from './MapGallery';
