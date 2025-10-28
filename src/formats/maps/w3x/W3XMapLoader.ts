@@ -114,7 +114,7 @@ export class W3XMapLoader implements IMapLoader {
     }
 
     // List all files in archive
-    const allFiles = mpqParser.listFiles();
+    const allFiles = await mpqParser.listFiles();
 
     // Try to extract files, but catch errors (multi-compression, encryption, etc.)
     let w3iData: Awaited<ReturnType<typeof mpqParser.extractFile>> | null = null;

@@ -1,0 +1,263 @@
+.ArchiveInfoModal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ArchiveInfoModal__content {
+  background: white;
+  border-radius: 1.5rem;
+  max-width: 700px;
+  width: 90%;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ArchiveInfoModal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.ArchiveInfoModal__header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.ArchiveInfoModal__close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ArchiveInfoModal__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.ArchiveInfoModal__body {
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: calc(85vh - 180px);
+}
+
+.ArchiveInfoModal__section {
+  margin-bottom: 2rem;
+}
+
+.ArchiveInfoModal__section:last-child {
+  margin-bottom: 0;
+}
+
+.ArchiveInfoModal__section h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.ArchiveInfoModal__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.ArchiveInfoModal__row:last-child {
+  border-bottom: none;
+}
+
+.ArchiveInfoModal__label {
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+.ArchiveInfoModal__value {
+  font-family: 'Monaco', 'Menlo', monospace;
+  color: #2d3748;
+  font-size: 0.9rem;
+  text-align: right;
+  word-break: break-all;
+}
+
+.ArchiveInfoModal__badge {
+  padding: 0.4rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.ArchiveInfoModal__badge--success {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.ArchiveInfoModal__badge--warning {
+  background: #feebc8;
+  color: #7c2d12;
+}
+
+.ArchiveInfoModal__badge--info {
+  background: #bee3f8;
+  color: #2c5282;
+}
+
+.ArchiveInfoModal__badge--neutral {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.ArchiveInfoModal__compression-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #f7fafc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.ArchiveInfoModal__compression-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.ArchiveInfoModal__compression-name {
+  font-weight: 500;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.ArchiveInfoModal__compression-count {
+  font-family: 'Monaco', 'Menlo', monospace;
+  color: #718096;
+  font-size: 0.85rem;
+  background: #edf2f7;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.ArchiveInfoModal__footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background: #f7fafc;
+}
+
+.ArchiveInfoModal__button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ArchiveInfoModal__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.ArchiveInfoModal__button--secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.ArchiveInfoModal__button--secondary:hover {
+  background: #f7fafc;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+@media (max-width: 768px) {
+  .ArchiveInfoModal__content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .ArchiveInfoModal__header {
+    padding: 1.5rem;
+  }
+
+  .ArchiveInfoModal__header h2 {
+    font-size: 1.5rem;
+  }
+
+  .ArchiveInfoModal__body {
+    padding: 1.5rem;
+  }
+
+  .ArchiveInfoModal__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .ArchiveInfoModal__value {
+    text-align: left;
+  }
+
+  .ArchiveInfoModal__compression-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

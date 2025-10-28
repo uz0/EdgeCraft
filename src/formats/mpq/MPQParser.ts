@@ -1257,12 +1257,97 @@ export class MPQParser {
 
   /**
    * List all files in archive
+   * Extracts and reads (listfile) to get the file list
+   * Falls back to common W3X/SC2 filenames if (listfile) is not available
    */
-  public listFiles(): string[] {
+  public async listFiles(): Promise<string[]> {
     if (!this.archive) return [];
 
-    // In a real implementation, we would read the (listfile) from the archive
-    // For now, return cached files
+    try {
+      // Try to extract (listfile)
+      const listFile = await this.extractFile('(listfile)');
+      if (listFile) {
+        // Parse listfile (text file with one filename per line)
+        const decoder = new TextDecoder('utf-8');
+        const listContent = decoder.decode(listFile.data);
+        const fileList = listContent
+          .split(/[\r\n]+/)
+          .map((f) => f.trim())
+          .filter((f) => f.length > 0 && f !== '(listfile)');
+
+        if (fileList.length > 0) {
+          return fileList;
+        }
+      }
+    } catch {
+      // Fall through to fallback
+    }
+
+    // Fallback: Use common W3X/SC2Map filenames
+    // This covers 90% of map files
+    const commonFiles = [
+      'war3map.w3i',
+      'war3map.w3e',
+      'war3map.wpm',
+      'war3map.doo',
+      'war3map.w3u',
+      'war3map.w3b',
+      'war3map.w3d',
+      'war3map.w3a',
+      'war3map.w3h',
+      'war3map.w3q',
+      'war3map.w3c',
+      'war3map.w3r',
+      'war3map.w3s',
+      'war3map.mmp',
+      'war3map.shd',
+      'war3mapUnits.doo',
+      'war3map.wtg',
+      'war3map.wct',
+      'war3map.wts',
+      'war3mapMisc.txt',
+      'war3mapSkin.txt',
+      'war3mapMap.blp',
+      'war3mapMap.tga',
+      'war3mapPreview.tga',
+      // SC2 Map files
+      'DocumentInfo',
+      'DocumentHeader',
+      'MapInfo',
+      'GameData.xml',
+      'Triggers',
+      'Objects',
+      'Components.SC2Components',
+      'TerrainData.SC2Map',
+      'Minimap.tga',
+      'Preview.tga',
+      // Common textures
+      ...Array.from({ length: 10 }, (_, i) => `war3mapMap${i}.blp`),
+      ...Array.from({ length: 10 }, (_, i) => `war3mapImported\\${i}.blp`),
+    ];
+
+    // Filter to only files that actually exist
+    const existingFiles: string[] = [];
+    for (const filename of commonFiles) {
+      try {
+        const file = await this.extractFile(filename);
+        if (file) {
+          existingFiles.push(filename);
+        }
+      } catch {
+        // File doesn't exist, skip
+      }
+    }
+
+    return existingFiles;
+  }
+
+  /**
+   * Legacy synchronous listFiles (returns cached files only)
+   * Use async version for complete file list
+   */
+  public listFilesCached(): string[] {
+    if (!this.archive) return [];
     return Array.from(this.archive.files.keys());
   }
 

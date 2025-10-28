@@ -1,0 +1,70 @@
+.BenchmarkGraph {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: var(--space-5);
+  transition: all var(--transition-base);
+}
+
+.BenchmarkGraph:hover {
+  border-color: var(--border-moderate);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.BenchmarkGraph__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.BenchmarkGraph__title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.BenchmarkGraph__stats {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.BenchmarkGraph__stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.BenchmarkGraph__stat strong {
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+}
+
+.BenchmarkGraph__canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .BenchmarkGraph {
+    padding: var(--space-4);
+  }
+
+  .BenchmarkGraph__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .BenchmarkGraph__stats {
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+}

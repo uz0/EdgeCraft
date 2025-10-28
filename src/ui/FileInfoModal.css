@@ -1,0 +1,213 @@
+.FileInfoModal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.FileInfoModal__content {
+  background: white;
+  border-radius: 1.5rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.FileInfoModal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+  color: white;
+}
+
+.FileInfoModal__header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.FileInfoModal__close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.FileInfoModal__close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.FileInfoModal__body {
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: calc(80vh - 180px);
+}
+
+.FileInfoModal__section {
+  margin-bottom: 2rem;
+}
+
+.FileInfoModal__section:last-child {
+  margin-bottom: 0;
+}
+
+.FileInfoModal__section h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.FileInfoModal__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.FileInfoModal__row:last-child {
+  border-bottom: none;
+}
+
+.FileInfoModal__label {
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+.FileInfoModal__value {
+  font-family: 'Monaco', 'Menlo', monospace;
+  color: #2d3748;
+  font-size: 0.9rem;
+  text-align: right;
+  word-break: break-all;
+}
+
+.FileInfoModal__badge {
+  padding: 0.4rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.FileInfoModal__badge--yes {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.FileInfoModal__badge--no {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.FileInfoModal__path {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.9rem;
+  color: #2d3748;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+.FileInfoModal__footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  background: #f7fafc;
+}
+
+.FileInfoModal__button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.FileInfoModal__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+@media (max-width: 768px) {
+  .FileInfoModal__content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .FileInfoModal__header {
+    padding: 1.5rem;
+  }
+
+  .FileInfoModal__header h2 {
+    font-size: 1.5rem;
+  }
+
+  .FileInfoModal__body {
+    padding: 1.5rem;
+  }
+
+  .FileInfoModal__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .FileInfoModal__value {
+    text-align: left;
+  }
+}
