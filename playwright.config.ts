@@ -74,6 +74,7 @@ export default defineConfig({
     stderr: 'pipe',
     env: {
       VITE_OPEN_BROWSER: 'false',
+      PORT: '3000', // Force port 3000 for E2E tests (prevents auto-increment)
     },
   },
 
