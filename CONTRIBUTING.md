@@ -22,7 +22,7 @@ Edge Craft is a clean-room RTS engine built with TypeScript, React, and Babylon.
 
 ## Coding Standards
 
-- **Zero Comments Policy:** code comments are disallowed unless they document a temporary workaround or a TODO/FIXME that must be resolved before merging.
+- **Zero Comments Policy:** code comments are disallowed unless they document a temporary workaround or a TODO/FIXME that must be resolved before merging. Exception: minimal explanatory comments in configuration files (jest.config.js, vite.config.ts, etc.) where brief context improves maintainability. Prefer moving rationale to documentation.
 - Prefer descriptive names over comments (e.g., `loadTerrainManifest`).
 - Avoid premature abstractions; duplicate thoughtfully until a pattern is established.
 - Files must remain under 500 lines. Split modules when approaching the limit.
