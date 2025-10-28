@@ -138,4 +138,4 @@ body:
     id: extras
     attributes:
       label: Additional context
-      description: Link related issues, PRPs, or attach small code snippets that help diagnose the bug.
+      description: Link related issues/PRPs and attach minimal code or redacted logs. Do not include secrets, access tokens, or proprietary assets.

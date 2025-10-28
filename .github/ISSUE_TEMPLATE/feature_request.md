@@ -84,7 +84,7 @@ assignees: ''
 <!-- Mark with [x] -->
 - [ ] 🔴 Critical - Blocks major use cases
 - [ ] 🟠 High - Significantly improves user experience
-- [ ] 🟡 Medium - Nice to have improvement
+- [ ] 🟡 Medium - Nice-to-have improvement
 - [ ] 🟢 Low - Minor enhancement
 
 ### Success Metrics

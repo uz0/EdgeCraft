@@ -181,8 +181,8 @@ Assets are mirrored in the project’s research drive for design reference.
 
 ### Trigger System Data Requirements
 
-- Localised rich text (bold/colour/icon) with dynamic variables.
-- Countdown/progress widgets with fractional seconds and colour thresholds.
+- Localized rich text (bold/color/icon) with dynamic variables.
+- Countdown/progress widgets with fractional seconds and color thresholds.
 - Choice dialogs (2–4 options) with keyboard/controller focus APIs.
 - Objective tracker feed with priority, expiry, and trigger-specified iconography.
 - Floating world overlays referencing scene entity IDs for event pings.
@@ -190,18 +190,18 @@ Assets are mirrored in the project’s research drive for design reference.
 - Schema-to-Babylon GUI compilation path for trigger-authored layouts.
 
 ### Reference Links
-[1] https://doc.babylonjs.com/features/featuresDeepDive/gui/gui  
-[2] https://doc.babylonjs.com/features/featuresDeepDive/gui/gui#optimizing-performance  
-[3] https://doc.babylonjs.com/features/featuresDeepDive/gui/xmlLoader  
-[4] https://doc.babylonjs.com/toolsAndResources/tools/guiEditor  
-[5] https://forum.babylonjs.com/tag/gui  
-[6] https://playground.babylonjs.com/#1D37AR#12  
-[7] https://wowpedia.fandom.com/wiki/User_interface_(Warcraft_III)  
-[8] https://www.youtube.com/watch?v=KM8ZtGAZfNM  
-[9] https://news.blizzard.com/en-us/article/20325539/ui-overhaul  
-[10] https://news.blizzard.com/en-us/article/23154563/warcraft-iii-reforged-visual-update  
-[11] https://warcraft.fandom.com/wiki/World_Editor_(Warcraft_III)  
-[12] https://starcraft.fandom.com/wiki/Galaxy_Map_Editor  
+[1]: https://doc.babylonjs.com/features/featuresDeepDive/gui/gui
+[2]: https://doc.babylonjs.com/features/featuresDeepDive/gui/gui#optimizing-performance
+[3]: https://doc.babylonjs.com/features/featuresDeepDive/gui/xmlLoader
+[4]: https://doc.babylonjs.com/toolsAndResources/tools/guiEditor
+[5]: https://forum.babylonjs.com/tag/gui
+[6]: https://playground.babylonjs.com/#1D37AR#12
+[7]: https://wowpedia.fandom.com/wiki/User_interface_(Warcraft_III)
+[8]: https://www.youtube.com/watch?v=KM8ZtGAZfNM
+[9]: https://news.blizzard.com/en-us/article/20325539/ui-overhaul
+[10]: https://news.blizzard.com/en-us/article/23154563/warcraft-iii-reforged-visual-update
+[11]: https://warcraft.fandom.com/wiki/World_Editor_(Warcraft_III)
+[12]: https://starcraft.fandom.com/wiki/Galaxy_Map_Editor  
 
 ---
 
@@ -253,36 +253,27 @@ Current scoring confirms Babylon GUI as the unified renderer; delivery risk now 
 
 ## 🧪 Quality Gates (Updated)
 
- - Automated HUD benchmark added to CI (scene replay with instrumentation for Babylon GUI frame cost).  
- - Visual regression suite for HUD states (before/after ability activation, minimap updates) running against Babylon GUI components.  
- - UI state store contract tests verifying trigger-defined panel schemas compile correctly to Babylon GUI control factories.  
-- Accessibility & input audit for settings/editor flows (keyboard-only navigation, controller mapping, audio cues).  
+- Automated HUD benchmark added to CI (scene replay with instrumentation for Babylon GUI frame cost).
+- Visual regression suite for HUD states (before/after ability activation, minimap updates) running against Babylon GUI components.
+- UI state store contract tests verifying trigger-defined panel schemas compile correctly to Babylon GUI control factories.
+- Accessibility & input audit for settings/editor flows (keyboard-only navigation, controller mapping, audio cues).
 - Lint/typecheck/test pipelines extended to cover renderer-specific utilities, control factories, and serialization tooling.  
 
 ---
 
 ## 📚 Research / Related Materials
 
-- Babylon GUI overview — https://doc.babylonjs.com/features/featuresDeepDive/gui/gui  
-- Babylon GUI optimization tips — https://doc.babylonjs.com/features/featuresDeepDive/gui/gui#optimizing-performance  
-- Babylon GUI XML loader — https://doc.babylonjs.com/features/featuresDeepDive/gui/xmlLoader  
-- Babylon GUI Editor tool — https://doc.babylonjs.com/toolsAndResources/tools/guiEditor  
-- Babylon GUI control reference (Grids, StackPanel, ScrollViewer) — https://doc.babylonjs.com/features/featuresDeepDive/gui/advanced  
-- Babylon forum GUI tag (community patterns and Q&A) — https://forum.babylonjs.com/tag/gui  
-- Warcraft III Frame Definition (FDF) reference — https://wc3modding.info/pages/frame-definitions/  
-- Warcraft III UI breakdown — https://wowpedia.fandom.com/wiki/User_interface_(Warcraft_III)  
-- Warcraft III Reforged UI panel (BlizzCon) — https://www.youtube.com/watch?v=KM8ZtGAZfNM  
-- StarCraft II UI overhaul overview — https://news.blizzard.com/en-us/article/20325539/ui-overhaul  
-- Warcraft III Reforged visual/UI update — https://news.blizzard.com/en-us/article/23154563/warcraft-iii-reforged-visual-update  
-- Warcraft III World Editor reference — https://warcraft.fandom.com/wiki/World_Editor_(Warcraft_III)  
-- StarCraft II Galaxy Editor reference — https://starcraft.fandom.com/wiki/Galaxy_Map_Editor  
-- WinterCardinal UI library — https://github.com/winter-cardinal/winter-cardinal-ui  
-- GLWidget WebGL UI engine — https://github.com/newbeea/gl-widget  
-- RmlUi HTML/CSS UI library — https://github.com/mikke89/RmlUi  
-- imgui-js (Dear ImGui WebAssembly bindings) — https://github.com/flyover/imgui-js  
-- egui immediate-mode GUI (Rust) — https://github.com/emilk/egui  
-- bGUI Babylon.js extension (archived) — https://github.com/Temechon/bGUI  
-- HudJS HUD library — https://github.com/noahcoetsee/HudJS  
+See [1]–[12] above and additional:
+
+[13]: https://doc.babylonjs.com/features/featuresDeepDive/gui/advanced
+[14]: https://wc3modding.info/pages/frame-definitions/
+[15]: https://github.com/winter-cardinal/winter-cardinal-ui
+[16]: https://github.com/newbeea/gl-widget
+[17]: https://github.com/mikke89/RmlUi
+[18]: https://github.com/flyover/imgui-js
+[19]: https://github.com/emilk/egui
+[20]: https://github.com/Temechon/bGUI
+[21]: https://github.com/noahcoetsee/HudJS  
 
 ---
 
